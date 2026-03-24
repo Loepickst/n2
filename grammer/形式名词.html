@@ -1,0 +1,954 @@
+    <style>
+        :root {
+            --primary: #d35400; /* 橙色系 */
+            --accent: #e67e22;
+            --bg: #fdfaf5;
+            --text: #2d3436;
+            --white: #ffffff;
+            --border: #fae5d3;
+            --success: #27ae60;
+            --error: #c0392b;
+            --n1-color: #e57373;
+            --n2-color: #ff8a65;
+            --n3-color: #ffd54f;
+            --n4-color: #81c784;
+            --n5-color: #64b5f6;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+
+        ruby { font-family: "Hiragino Sans", sans-serif; }
+        rt { font-size: 0.6em; color: #888; user-select: none; }
+
+        /* --- 导航栏 --- */
+        .nav-bar {
+            background: var(--white);
+            padding: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            z-index: 100;
+            flex-shrink: 0;
+            position: relative;
+        }
+
+        .back-btn {
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            width: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            color: #666;
+            font-size: 1.2rem;
+            z-index: 101;
+        }
+
+        .nav-item {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: #999;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: 0.3s;
+            padding: 10px 0;
+        }
+
+        .nav-item.active {
+            color: var(--primary);
+            border-bottom-color: var(--primary);
+            background-color: #fff8f0;
+        }
+
+        /* --- 内容容器 --- */
+        .content-container {
+            flex: 1;
+            overflow: hidden; 
+            position: relative;
+        }
+
+        .tab-view {
+            display: none;
+            height: 100%;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .tab-view.active { display: block; }
+
+        /* --- 学习板块 (Index View) --- */
+        .intro-box {
+            background: var(--white);
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            margin-bottom: 20px;
+            border-left: 5px solid var(--primary);
+        }
+        .intro-title { font-size: 1.2rem; font-weight: bold; margin-bottom: 10px; color: var(--primary); }
+        .intro-text { font-size: 0.95rem; color: #555; line-height: 1.6; }
+
+        .noun-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 15px;
+        }
+
+        .noun-card {
+            background: var(--white);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            border: 1px solid var(--border);
+        }
+
+        .noun-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            border-color: var(--primary);
+        }
+
+        .noun-main { font-size: 1.5rem; font-weight: bold; color: var(--text); margin-bottom: 5px; }
+        .noun-sub { font-size: 0.85rem; color: #888; }
+
+        /* --- 详情视图 (Detail View) --- */
+        .detail-view {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: var(--bg);
+            z-index: 50;
+            overflow-y: auto;
+            transform: translateX(100%);
+            transition: transform 0.3s ease-in-out;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .detail-view.show { transform: translateX(0); }
+
+        .detail-header { display: flex; align-items: center; margin-bottom: 20px; }
+        .detail-back { font-size: 1.5rem; margin-right: 15px; cursor: pointer; color: var(--primary); }
+        .detail-title { font-size: 1.8rem; font-weight: bold; }
+
+        .grammar-list { display: flex; flex-direction: column; gap: 15px; }
+        .grammar-item { background: var(--white); border-radius: 10px; padding: 15px; border: 1px solid #eee; }
+        .grammar-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+        .grammar-pt { font-size: 1.1rem; font-weight: bold; color: #333; }
+        
+        .level-tag { font-size: 0.75rem; color: white; padding: 2px 6px; border-radius: 4px; font-weight: bold; }
+        .tag-N1 { background-color: var(--n1-color); }
+        .tag-N2 { background-color: var(--n2-color); }
+        .tag-N3 { background-color: var(--n3-color); }
+        .tag-N4 { background-color: var(--n4-color); }
+        .tag-N5 { background-color: var(--n5-color); }
+
+        .grammar-mean { font-size: 0.95rem; color: #555; margin-bottom: 8px; }
+        .grammar-ex { background: #f9f9f9; padding: 8px; border-radius: 6px; font-size: 0.9rem; color: #444; border-left: 3px solid #ddd; }
+
+        /* --- 练习区样式 --- */
+        .quiz-wrapper { max-width: 500px; margin: 0 auto; }
+        .settings-panel { background: var(--white); padding: 15px; border-radius: 12px; margin-bottom: 20px; border: 1px solid var(--border); }
+        .section-label { font-size: 0.9rem; font-weight: bold; color: #888; margin-bottom: 8px; display: block; }
+        .checkbox-group { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 15px; }
+        .checkbox-btn {
+            display: inline-block;
+        }
+        .checkbox-btn input { display: none; }
+        .checkbox-btn span {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 20px;
+            background: #eee;
+            color: #666;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: 0.2s;
+            border: 1px solid transparent;
+        }
+        .checkbox-btn input:checked + span {
+            background: var(--primary);
+            color: white;
+            box-shadow: 0 2px 5px rgba(211, 84, 0, 0.2);
+        }
+
+        .card { background: var(--white); padding: 30px 20px; border-radius: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.05); margin-bottom: 20px; text-align: center; border: 1px solid var(--border); }
+        .question-text { font-size: 1.3rem; color: var(--text); margin: 20px 0; line-height: 1.6; font-weight: bold; }
+        .hint-text { font-size: 0.9rem; color: #888; margin-bottom: 25px; background: #f8f9fa; padding: 5px 10px; border-radius: 15px; display: inline-block; }
+        
+        input[type="text"] { width: 100%; padding: 15px; font-size: 1.3rem; border: 2px solid #e9ecef; border-radius: 10px; text-align: center; box-sizing: border-box; outline: none; background: #f8f9fa; transition: all 0.3s; }
+        input:focus { border-color: var(--primary); background: var(--white); }
+        .correct { border-color: var(--success) !important; background: #e8f8f0 !important; }
+        .wrong { border-color: var(--error) !important; background: #fceceb !important; }
+        
+        /* --- 选择题样式 --- */
+        .options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 20px; }
+        .option-btn {
+            padding: 15px;
+            background: #f8f9fa;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: var(--text);
+            font-weight: bold;
+            text-align: center;
+        }
+        .option-btn:hover { border-color: var(--primary); background: #fff; transform: translateY(-2px); box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .option-btn.correct { background: var(--success) !important; color: white !important; border-color: var(--success) !important; }
+        .option-btn.wrong { background: var(--error) !important; color: white !important; border-color: var(--error) !important; }
+        .option-btn.disabled { pointer-events: none; opacity: 0.6; }
+
+        .btn-main { width: 100%; padding: 16px; background: var(--primary); color: white; border: none; border-radius: 12px; font-size: 1.1rem; font-weight: bold; cursor: pointer; box-shadow: 0 4px 12px rgba(211, 84, 0, 0.3); margin-top: 20px; }
+        .btn-secondary { width: 100%; padding: 12px; background: transparent; color: #999; border: none; font-size: 0.9rem; font-weight: bold; cursor: pointer; margin-top: 10px; }
+        .result-score { font-size: 4rem; color: var(--primary); font-weight: bold; margin: 10px 0; }
+        .hidden { display: none !important; }
+        
+    </style>
+</head>
+<body>
+
+<div class="nav-bar">
+    <a href="../practice.html" class="back-btn">←</a>
+    <div class="nav-item active" onclick="switchTab('study')">📖 概念学习</div>
+    <div class="nav-item" onclick="switchTab('practice')">⚔️ 实战演练</div>
+    <div class="nav-item" onclick="switchTab('mistakes')">📓 错题本</div>
+</div>
+
+<div class="content-container">
+
+    <!-- 学习板块 -->
+    <div id="tab-study" class="tab-view active">
+        
+        <!-- 索引视图 -->
+        <div id="study-index">
+            <div class="intro-box">
+                <div class="intro-title">什么是形式名词？</div>
+                <div class="intro-text">
+                    形式名词（形式名詞）是指那些失去了原本具体的实意，主要用于语法功能的名词。例如「こと」原本指具体的“事情”，但在语法中常用来将动词名词化，或者构成特定的句型（如表示经验、决定等）。掌握它们是日语进阶的关键。
+                </div>
+            </div>
+
+            <div class="noun-grid" id="nounGrid">
+                <!-- JS 生成 -->
+            </div>
+        </div>
+
+        <!-- 详情视图 -->
+        <div id="study-detail" class="detail-view">
+            <div class="detail-header">
+                <div class="detail-back" onclick="closeDetail()">←</div>
+                <div class="detail-title" id="detailTitle">...</div>
+            </div>
+            <div class="intro-text" id="detailDesc" style="margin-bottom: 20px;"></div>
+            <div class="grammar-list" id="grammarList">
+                <!-- JS 生成 -->
+            </div>
+        </div>
+
+    </div>
+
+    <!-- 练习板块 -->
+    <div id="tab-practice" class="tab-view">
+        <div class="quiz-wrapper">
+            
+            <div class="settings-panel" id="settingsPanel">
+                <div style="font-weight:bold; display:flex; justify-content:space-between; cursor:pointer; margin-bottom:15px;" onclick="toggleSettings()">
+                    <span>⚙️ 练习设置</span><span id="settingIcon">▼</span>
+                </div>
+                
+                <div id="settingContent">
+                    <span class="section-label">选择名词</span>
+                    <div class="checkbox-group" id="nounFilter">
+                        <!-- JS 生成 -->
+                    </div>
+
+                    <span class="section-label">选择级别</span>
+                    <div class="checkbox-group" id="levelFilter">
+                        <label class="checkbox-btn"><input type="checkbox" value="N5" checked><span>N5</span></label>
+                        <label class="checkbox-btn"><input type="checkbox" value="N4" checked><span>N4</span></label>
+                        <label class="checkbox-btn"><input type="checkbox" value="N3" checked><span>N3</span></label>
+                        <label class="checkbox-btn"><input type="checkbox" value="N2" checked><span>N2</span></label>
+                        <label class="checkbox-btn"><input type="checkbox" value="N1" checked><span>N1</span></label>
+                    </div>
+
+                    <button style="width:100%; margin-top:10px; padding:10px; background:#f1f3f5; border:1px solid #ddd; border-radius:8px; cursor:pointer;" onclick="restartGame()">🔄 更新设置并开始</button>
+                </div>
+            </div>
+
+            <div class="card hidden" id="quizCard">
+                <div style="display:flex; justify-content:space-between; align-items:center; color:#aaa; font-size:0.8rem; margin-bottom:10px;">
+                    <span>连对: <b id="streakVal" style="color:var(--primary)">0</b></span>
+                    <span id="qTag" class="level-tag tag-N3">N3</span>
+                </div>
+                
+                <div class="question-text" id="qDisplay">...</div>
+                <div class="hint-text" id="qHint">...</div>
+                
+                <div class="options-grid" id="optionsGrid">
+                    <!-- JS 生成选项 -->
+                </div>
+                <div class="msg" id="feedback" style="min-height:24px; margin-top:15px; font-weight:bold;"></div>
+            </div>
+
+            <div class="card hidden" id="resultCard">
+                <h2 style="margin:0; color:#444;">练习结束</h2>
+                <div style="font-size:1rem; color:#888; margin-top:10px;">本次得分</div>
+                <div class="result-score" id="finalScore">0</div>
+                <div id="finalComment" style="color:#666; margin-bottom:20px;"></div>
+            </div>
+            
+            <button class="btn-main hidden" id="actionBtn" onclick="nextQuestion()">下一题 →</button>
+            <button class="btn-main" id="startBtn" onclick="startGame()">开始练习</button>
+            <button class="btn-secondary hidden" id="endBtn" onclick="finishGame()">⏹ 结束</button>
+        </div>
+    </div>
+    <!-- 错题本板块 -->
+    <div id="tab-mistakes" class="tab-view">
+        <div class="intro-box" style="border-color:#e74c3c;">
+            <div class="intro-title" style="color:#e74c3c;">错题本</div>
+            <div class="intro-text">
+                这里记录了你在练习中答错的语法点。经常复习可以巩固记忆。<br>
+                <span style="font-size:0.85rem; color:#888;">(数据保存在本地浏览器中)</span>
+            </div>
+            <button class="btn-secondary" onclick="clearMistakes()" style="width:auto; margin-top:10px; color:#e74c3c; border:1px solid #e74c3c; padding:5px 15px; border-radius:20px;">🗑 清空错题</button>
+        </div>
+
+        <div id="mistakeList" class="grammar-list">
+            <!-- JS 生成 -->
+            <div style="text-align:center; color:#999; margin-top:50px;">暂无错题，继续加油！</div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // ================= 数据定义 =================
+    const formalNouns = [
+        {
+            id: "koto",
+            label: "こと",
+            sub: "事",
+            desc: "表示抽象的“事情”、“内容”或“情况”。常用于名物化（将动词变为名词）。",
+            grammars: [
+                { 
+                    id: "koto_naru", 
+                    pt: "～ことになる", 
+                    mean: "决定/结果（客观）", 
+                    ex: "来年、転勤することになりました。", 
+                    lv: "N3",
+                    questions: [
+                        { q: "来年、転勤する____になりました。", a: "こと" },
+                        { q: "法律で、ここでタバコを吸ってはいけない____になっている。", a: "こと" }
+                    ]
+                },
+                { 
+                    id: "koto_suru", 
+                    pt: "～ことにする", 
+                    mean: "决定（主观）", 
+                    ex: "健康のために、毎日走ることにしました。", 
+                    lv: "N3",
+                    questions: [
+                        { q: "健康のために、毎日走る____にしました。", a: "こと" },
+                        { q: "明日からダイエットをする____にします。", a: "こと" }
+                    ]
+                },
+                { 
+                    id: "koto_aru", 
+                    pt: "～ことがある", 
+                    mean: "有某种经验（Vた）/ 偶尔发生（Vる）", 
+                    ex: "日本へ行ったことがありますか。", 
+                    lv: "N4",
+                    questions: [
+                        { q: "日本へ行った____がありますか。", a: "こと" },
+                        { q: "時々、朝ごはんを食べない____があります。", a: "こと" }
+                    ]
+                },
+                { 
+                    id: "koto_da", 
+                    pt: "～ことだ", 
+                    mean: "建议/忠告（应该...）", 
+                    ex: "合格したければ、もっと勉強することだ。", 
+                    lv: "N2",
+                    questions: [
+                        { q: "合格したければ、もっと勉強する____だ。", a: "こと" },
+                        { q: "文句があるなら、直接本人に言う____だ。", a: "こと" }
+                    ]
+                },
+                { 
+                    id: "koto_ka", 
+                    pt: "～ことか", 
+                    mean: "多么...啊（感叹）", 
+                    ex: "合格して、どんなに嬉しいことか。", 
+                    lv: "N2",
+                    questions: [
+                        { q: "合格して、どんなに嬉しい____か。", a: "こと" },
+                        { q: "この日をどれほど待っていた____。", a: "こと" }
+                    ]
+                },
+                { 
+                    id: "koto_kara", 
+                    pt: "～ことから", 
+                    mean: "因为...（来源/根据）", 
+                    ex: "顔が似ていることから、兄弟だとわかった。", 
+                    lv: "N2",
+                    questions: [
+                        { q: "顔が似ている____、兄弟だとわかった。", a: "こと" },
+                        { q: "道が曲がっている____、このあたりは「曲がり角」と呼ばれている。", a: "こと" }
+                    ]
+                }
+            ]
+        },
+        {
+            id: "mono",
+            label: "もの",
+            sub: "物",
+            desc: "表示具象的“东西”，也常指代社会常理、真理、倾向或回忆。",
+            grammars: [
+                { 
+                    id: "mono_da", 
+                    pt: "～ものだ", 
+                    mean: "理应如此（常理）/ 回忆过去 / 感叹", 
+                    ex: "子供は元気に遊ぶものだ。", 
+                    lv: "N3",
+                    questions: [
+                        { q: "子供は元気に遊ぶ____だ。", a: "もの" },
+                        { q: "昔はよくこの川で泳いだ____だ。", a: "もの" },
+                        { q: "時間が経つのは早い____ですね。", a: "もの" }
+                    ]
+                },
+                { 
+                    id: "mono_ka", 
+                    pt: "～ものか", 
+                    mean: "绝不...（强烈否定）", 
+                    ex: "あんな店、二度と行くものか。", 
+                    lv: "N2",
+                    questions: [
+                        { q: "あんな店、二度と行く____か。", a: "もの" },
+                        { q: "彼になんか頼む____。", a: "もの" }
+                    ]
+                },
+                { 
+                    id: "mono_ga_aru", 
+                    pt: "～ものがある", 
+                    mean: "有某种特征/让人感觉到...", 
+                    ex: "彼の歌には心を打つものがある。", 
+                    lv: "N2",
+                    questions: [
+                        { q: "彼の歌には心を打つ____がある。", a: "もの" },
+                        { q: "この小説には考えさせられる____がある。", a: "もの" }
+                    ]
+                },
+                { 
+                    id: "mono_nara", 
+                    pt: "～ものなら", 
+                    mean: "如果能...的话（多接可能态）", 
+                    ex: "戻れるものなら、子供の頃に戻りたい。", 
+                    lv: "N2",
+                    questions: [
+                        { q: "戻れる____、子供の頃に戻りたい。", a: "もの" },
+                        { q: "やり直せる____、やり直したい。", a: "もの" }
+                    ]
+                },
+                { 
+                    id: "mono_o", 
+                    pt: "～ものを", 
+                    mean: "明明...却...（遗憾/抱怨）", 
+                    ex: "連絡してくれれば迎えに行ったものを。", 
+                    lv: "N1",
+                    questions: [
+                        { q: "連絡してくれれば迎えに行った____。", a: "もの" },
+                        { q: "黙っていればいい____、余計なことを言った。", a: "もの" }
+                    ]
+                }
+            ]
+        },
+        {
+            id: "tokoro",
+            label: "ところ",
+            sub: "所",
+            desc: "表示“场所”、“时刻”或“局面”。",
+            grammars: [
+                { 
+                    id: "tokoro_da", 
+                    pt: "～ところだ", 
+                    mean: "正要/正在/刚刚", 
+                    ex: "今、出かけるところです。", 
+                    lv: "N4",
+                    questions: [
+                        { q: "今、出かける____です。", a: "ところ" },
+                        { q: "ちょうど昼ごはんを食べている____です。", a: "ところ" },
+                        { q: "たった今、バスが出た____です。", a: "ところ" }
+                    ]
+                },
+                { 
+                    id: "ta_tokoro", 
+                    pt: "～たところ", 
+                    mean: "试着做了一下...结果...", 
+                    ex: "先生に頼んだところ、断られた。", 
+                    lv: "N3",
+                    questions: [
+                        { q: "先生に頼んだ____、断られた。", a: "ところ" },
+                        { q: "電話してみた____、留守だった。", a: "ところ" }
+                    ]
+                },
+                { 
+                    id: "tokoro_de", 
+                    pt: "～たところで", 
+                    mean: "即使...也（白费力气）", 
+                    ex: "今から走ったところで、間に合わない。", 
+                    lv: "N3",
+                    questions: [
+                        { q: "今から走った____、間に合わない。", a: "ところ" },
+                        { q: "いくら謝った____、許してくれないだろう。", a: "ところ" }
+                    ]
+                },
+                { 
+                    id: "tokoro_o", 
+                    pt: "～ところを", 
+                    mean: "在...的时候（给您添麻烦了）", 
+                    ex: "お忙しいところをすみません。", 
+                    lv: "N2",
+                    questions: [
+                        { q: "お忙しい____をすみません。", a: "ところ" },
+                        { q: "休んでいる____を邪魔してごめん。", a: "ところ" }
+                    ]
+                }
+            ]
+        },
+        {
+            id: "wake",
+            label: "わけ",
+            sub: "訳",
+            desc: "表示“理由”、“道理”或“结论”。",
+            grammars: [
+                { 
+                    id: "wake_da", 
+                    pt: "～わけだ", 
+                    mean: "难怪/理所当然", 
+                    ex: "寒いわけだ。窓が開いている。", 
+                    lv: "N3",
+                    questions: [
+                        { q: "寒い____だ。窓が開いている。", a: "わけ" },
+                        { q: "毎日練習したのだから、上手な____だ。", a: "わけ" }
+                    ]
+                },
+                { 
+                    id: "wake_ga_nai", 
+                    pt: "～わけがない", 
+                    mean: "绝不可能", 
+                    ex: "彼が嘘をつくわけがない。", 
+                    lv: "N3",
+                    questions: [
+                        { q: "彼が嘘をつく____がない。", a: "わけ" },
+                        { q: "そんな簡単な問題、解けない____がない。", a: "わけ" }
+                    ]
+                },
+                { 
+                    id: "wake_niwa", 
+                    pt: "～わけにはいかない", 
+                    mean: "不能（受限于情理/义务）", 
+                    ex: "今日は大事な会議があるから、休むわけにはいかない。", 
+                    lv: "N3",
+                    questions: [
+                        { q: "今日は大事な会議があるから、休む____にはいかない。", a: "わけ" },
+                        { q: "上司の命令だから、断る____にはいかない。", a: "わけ" }
+                    ]
+                }
+            ]
+        },
+        {
+            id: "hazu",
+            label: "はず",
+            sub: "筈",
+            desc: "表示基于根据的“推测”或“理应如此”。",
+            grammars: [
+                { 
+                    id: "hazu_da", 
+                    pt: "～はずだ", 
+                    mean: "应该是/理应是", 
+                    ex: "彼は3時に来ると言ったから、もうすぐ着くはずだ。", 
+                    lv: "N3",
+                    questions: [
+                        { q: "彼は3時に来ると言ったから、もうすぐ着く____だ。", a: "はず" },
+                        { q: "この本は面白かったから、彼も気に入る____だ。", a: "はず" }
+                    ]
+                },
+                { 
+                    id: "hazu_ga_nai", 
+                    pt: "～はずがない", 
+                    mean: "不可能", 
+                    ex: "そんなはずがない。", 
+                    lv: "N3",
+                    questions: [
+                        { q: "そんな____がない。", a: "はず" },
+                        { q: "彼が約束を破る____がない。", a: "はず" }
+                    ]
+                }
+            ]
+        },
+        {
+            id: "tsumori",
+            label: "つもり",
+            sub: "打算",
+            desc: "表示意图、打算或某种心态。",
+            grammars: [
+                { 
+                    id: "tsumori_da", 
+                    pt: "～つもりだ", 
+                    mean: "打算/计划", 
+                    ex: "夏休みに旅行に行くつもりです。", 
+                    lv: "N4",
+                    questions: [
+                        { q: "夏休みに旅行に行く____です。", a: "つもり" },
+                        { q: "大学院に進学する____です。", a: "つもり" }
+                    ]
+                },
+                { 
+                    id: "tsumori_de", 
+                    pt: "～つもりで", 
+                    mean: "当作/抱着...的心态", 
+                    ex: "死んだつもりで頑張ります。", 
+                    lv: "N3",
+                    questions: [
+                        { q: "死んだ____で頑張ります。", a: "つもり" },
+                        { q: "旅行に行った____で、貯金する。", a: "つもり" }
+                    ]
+                }
+            ]
+        }
+    ];
+
+    // ================= 逻辑控制 =================
+    
+    // 1. 初始化
+    function init() {
+        renderNounGrid();
+        renderPracticeSettings();
+    }
+
+    // 渲染名词网格
+    function renderNounGrid() {
+        const grid = document.getElementById('nounGrid');
+        grid.innerHTML = '';
+        formalNouns.forEach(item => {
+            const card = document.createElement('div');
+            card.className = 'noun-card';
+            card.innerHTML = `
+                <div class="noun-main">${item.label}</div>
+                <div class="noun-sub">${item.sub}</div>
+            `;
+            card.onclick = () => showDetail(item);
+            grid.appendChild(card);
+        });
+    }
+
+    // 显示详情
+    function showDetail(item) {
+        document.getElementById('detailTitle').innerText = `${item.label} (${item.sub})`;
+        document.getElementById('detailDesc').innerText = item.desc;
+        
+        const list = document.getElementById('grammarList');
+        list.innerHTML = '';
+        
+        item.grammars.forEach(g => {
+            const div = document.createElement('div');
+            div.className = 'grammar-item';
+            div.innerHTML = `
+                <div class="grammar-head">
+                    <span class="grammar-pt">${g.pt}</span>
+                    <span class="level-tag tag-${g.lv}">${g.lv}</span>
+                </div>
+                <div class="grammar-mean">${g.mean}</div>
+                <div class="grammar-ex">${g.ex}</div>
+            `;
+            list.appendChild(div);
+        });
+
+        document.getElementById('study-detail').classList.add('show');
+    }
+
+    function closeDetail() {
+        document.getElementById('study-detail').classList.remove('show');
+    }
+
+    // 渲染练习设置
+    function renderPracticeSettings() {
+        const box = document.getElementById('nounFilter');
+        box.innerHTML = '';
+        formalNouns.forEach(item => {
+            const label = document.createElement('label');
+            label.className = 'checkbox-btn';
+            label.innerHTML = `
+                <input type="checkbox" value="${item.id}" checked>
+                <span>${item.label}</span>
+            `;
+            box.appendChild(label);
+        });
+    }
+
+    // Tab 切换
+    function switchTab(tabId) {
+        document.querySelectorAll('.tab-view').forEach(el => el.classList.remove('active'));
+        document.getElementById('tab-' + tabId).classList.add('active');
+        
+        document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+        event.target.classList.add('active'); // 注意：这里的event是全局的，可能需要优化
+    }
+    // 修复 Tab 切换的 event 问题
+    window.switchTab = function(tabId) {
+        document.querySelectorAll('.tab-view').forEach(el => el.classList.remove('active'));
+        document.getElementById('tab-' + tabId).classList.add('active');
+        
+        document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+        // 查找对应的nav-item
+        const items = document.querySelectorAll('.nav-item');
+        if (tabId === 'study') items[0].classList.add('active');
+        if (tabId === 'practice') items[1].classList.add('active');
+        if (tabId === 'mistakes') {
+            items[2].classList.add('active');
+            renderMistakes();
+        }
+    };
+
+    // ================= 错题本逻辑 =================
+    function saveMistake(grammarId) {
+        let mistakes = JSON.parse(localStorage.getItem('noun_mistakes') || '[]');
+        if (!mistakes.includes(grammarId)) {
+            mistakes.push(grammarId);
+            localStorage.setItem('noun_mistakes', JSON.stringify(mistakes));
+        }
+    }
+
+    function renderMistakes() {
+        const mistakes = JSON.parse(localStorage.getItem('noun_mistakes') || '[]');
+        const list = document.getElementById('mistakeList');
+        
+        if (mistakes.length === 0) {
+            list.innerHTML = '<div style="text-align:center; color:#999; margin-top:50px;">暂无错题，继续加油！</div>';
+            return;
+        }
+
+        list.innerHTML = '';
+        
+        // 遍历所有数据查找对应的语法点
+        formalNouns.forEach(noun => {
+            noun.grammars.forEach(g => {
+                if (mistakes.includes(g.id)) {
+                    const div = document.createElement('div');
+                    div.className = 'grammar-item';
+                    div.style.borderLeft = "4px solid #e74c3c";
+                    div.innerHTML = `
+                        <div class="grammar-head">
+                            <span class="grammar-pt">${g.pt}</span>
+                            <span class="level-tag tag-${g.lv}">${g.lv}</span>
+                        </div>
+                        <div class="grammar-mean">${g.mean}</div>
+                        <div class="grammar-ex">${g.ex}</div>
+                        <div style="text-align:right; margin-top:10px;">
+                            <button onclick="removeMistake('${g.id}')" style="font-size:0.8rem; color:#999; background:none; border:none; cursor:pointer;">已掌握，移除 ✕</button>
+                        </div>
+                    `;
+                    list.appendChild(div);
+                }
+            });
+        });
+    }
+
+    function removeMistake(grammarId) {
+        let mistakes = JSON.parse(localStorage.getItem('noun_mistakes') || '[]');
+        mistakes = mistakes.filter(id => id !== grammarId);
+        localStorage.setItem('noun_mistakes', JSON.stringify(mistakes));
+        renderMistakes(); // 重新渲染
+    }
+
+    function clearMistakes() {
+        if(confirm('确定要清空所有错题记录吗？')) {
+            localStorage.removeItem('noun_mistakes');
+            renderMistakes();
+        }
+    }
+
+    function toggleSettings() {
+        const content = document.getElementById('settingContent');
+        const icon = document.getElementById('settingIcon');
+        if (content.style.display === 'none') {
+            content.style.display = 'block';
+            icon.innerText = '▼';
+        } else {
+            content.style.display = 'none';
+            icon.innerText = '▲';
+        }
+    }
+
+    // ================= 练习逻辑 =================
+    let streak = 0;
+    let state = 'idle';
+    let currentQ = {};
+    let validQuestions = [];
+
+    function restartGame() {
+        toggleSettings();
+        streak = 0;
+        document.getElementById('streakVal').innerText = streak;
+        startGame();
+    }
+
+    function startGame() {
+        // 1. 获取名词筛选
+        const nounChecks = document.querySelectorAll('#nounFilter input:checked');
+        const selectedNouns = Array.from(nounChecks).map(cb => cb.value);
+
+        // 2. 获取级别筛选
+        const levelChecks = document.querySelectorAll('#levelFilter input:checked');
+        const selectedLevels = Array.from(levelChecks).map(cb => cb.value);
+
+        if (selectedNouns.length === 0 || selectedLevels.length === 0) {
+            alert("请至少选择一个名词和一个级别！");
+            return;
+        }
+
+        // 3. 构建题库
+        validQuestions = [];
+        formalNouns.forEach(noun => {
+            if (selectedNouns.includes(noun.id)) {
+                noun.grammars.forEach(g => {
+                    if (selectedLevels.includes(g.lv) && g.questions) {
+                        g.questions.forEach(q => {
+                            validQuestions.push({
+                                q: q.q,
+                                a: q.a,
+                                hint: g.mean,
+                                lv: g.lv,
+                                fullEx: g.ex, // 仍保留原例句作为解析参考
+                                grammarId: g.id,
+                                nounId: noun.id
+                            });
+                        });
+                    }
+                });
+            }
+        });
+
+        if (validQuestions.length === 0) {
+            alert("没有符合条件的题目，请调整筛选设置。");
+            return;
+        }
+
+        // UI 切换
+        document.getElementById('quizCard').classList.remove('hidden');
+        document.getElementById('resultCard').classList.add('hidden');
+        document.getElementById('startBtn').classList.add('hidden'); // 隐藏开始按钮
+        document.getElementById('endBtn').classList.remove('hidden');
+        
+        nextQuestion();
+    }
+
+    function nextQuestion() {
+        state = 'answering';
+        const idx = Math.floor(Math.random() * validQuestions.length);
+        currentQ = validQuestions[idx];
+
+        document.getElementById('qDisplay').innerHTML = currentQ.q.replace('____', '<span style="border-bottom:2px solid var(--primary); color:var(--primary); padding:0 5px;">____</span>');
+        document.getElementById('qHint').innerText = "含义: " + currentQ.hint;
+        
+        const tag = document.getElementById('qTag');
+        tag.className = `level-tag tag-${currentQ.lv}`;
+        tag.innerText = currentQ.lv;
+
+        // 生成选项
+        const grid = document.getElementById('optionsGrid');
+        grid.innerHTML = '';
+        
+        // 准备选项：正确答案 + 3个干扰项
+        const distractors = formalNouns
+            .filter(n => n.label !== currentQ.a) // 排除正确答案
+            .sort(() => 0.5 - Math.random()) // 随机打乱
+            .slice(0, 3) // 取前3个
+            .map(n => n.label);
+        
+        const options = [currentQ.a, ...distractors].sort(() => 0.5 - Math.random()); // 混合并打乱
+
+        options.forEach(opt => {
+            const btn = document.createElement('div');
+            btn.className = 'option-btn';
+            btn.innerText = opt;
+            btn.onclick = () => checkAnswer(btn, opt);
+            grid.appendChild(btn);
+        });
+
+        document.getElementById('feedback').innerText = '';
+        document.getElementById('actionBtn').classList.add('hidden'); // 隐藏下一题按钮，直到作答
+    }
+
+    function checkAnswer(btn, userVal) {
+        if (state !== 'answering') return;
+        state = 'result';
+
+        // 禁用所有按钮
+        const allBtns = document.querySelectorAll('.option-btn');
+        allBtns.forEach(b => b.classList.add('disabled'));
+
+        const isCorrect = userVal === currentQ.a;
+
+        if (isCorrect) {
+            streak++;
+            btn.classList.add('correct');
+            document.getElementById('feedback').innerHTML = `<span style='color:var(--success)'>⭕️ 正确！</span>`;
+        } else {
+            streak = 0;
+            btn.classList.add('wrong');
+            // 找出正确按钮并高亮
+            allBtns.forEach(b => {
+                if (b.innerText === currentQ.a) b.classList.add('correct');
+            });
+            document.getElementById('feedback').innerHTML = `<span style='color:var(--error)'>❌ 应该是: ${currentQ.a}<br><span style="font-size:0.8em;color:#666">${currentQ.fullEx}</span></span>`;
+            
+            // 记录错题
+            saveMistake(currentQ.grammarId);
+        }
+
+        document.getElementById('streakVal').innerText = streak;
+        document.getElementById('actionBtn').classList.remove('hidden'); // 显示下一题按钮
+    }
+
+    function finishGame() {
+        document.getElementById('quizCard').classList.add('hidden');
+        document.getElementById('resultCard').classList.remove('hidden');
+        document.getElementById('endBtn').classList.add('hidden');
+        document.getElementById('startBtn').classList.remove('hidden');
+        document.getElementById('startBtn').innerText = "再练一次";
+        document.getElementById('actionBtn').classList.add('hidden');
+        
+        document.getElementById('finalScore').innerText = streak;
+        
+        let comment = streak > 10 ? "太棒了！" : "继续加油！";
+        document.getElementById('finalComment').innerText = comment;
+    }
+
+    // 启动
+    init();
+
+</script>
+
+</body>
+</html>

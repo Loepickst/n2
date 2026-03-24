@@ -1,0 +1,743 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>每日运势抽奖 & 图鉴</title>
+    <style>
+        :root {
+            --bg-color: #fdfaf5;
+            --text-color: #2c2c2c;
+            --accent-color: #b33e3e;
+            --card-bg: #ffffff;
+            --shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+
+        body {
+            font-family: "Hiragino Kaku Gothic ProN", "Hiragino Sans", "Meiryo", sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            overflow-x: hidden;
+        }
+
+        header {
+            width: 100%;
+            padding: 15px 20px;
+            box-sizing: border-box;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background-color: rgba(253, 250, 245, 0.95);
+            backdrop-filter: blur(8px);
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+        }
+
+        .back-btn {
+            position: absolute;
+            left: 20px;
+            text-decoration: none;
+            color: var(--text-color);
+            font-size: 16px;
+            font-weight: bold;
+            opacity: 0.7;
+            transition: opacity 0.3s;
+            cursor: pointer;
+        }
+        .back-btn:hover { opacity: 1; }
+
+        .collection-btn {
+            position: absolute;
+            right: 20px;
+            background: none;
+            border: 2px solid var(--accent-color);
+            color: var(--accent-color);
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-weight: bold;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .collection-btn:hover {
+            background: var(--accent-color);
+            color: white;
+        }
+
+        h1 { margin: 0; font-size: 18px; font-weight: 700; }
+
+        .container {
+            max-width: 600px;
+            width: 100%;
+            padding: 40px 20px;
+            box-sizing: border-box;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            flex-grow: 1;
+        }
+
+        /* =========================================
+           修改重点 1：抽签容器与图片样式 (放大并增加边框质感)
+           ========================================= */
+        .omikuji-container {
+            position: relative;
+            margin-bottom: 40px; /* 增加底部间距以适应扩大的图片和阴影 */
+            cursor: pointer;
+            /* 刚进入页面时的浮现特效 */
+            animation: floatIn 0.8s ease-out forwards;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .omikuji-img {
+            width: 280px; /* 【放大】从200px增加到280px，让细节更清晰 */
+            max-width: 80vw; /* 防止在极小屏幕下溢出 */
+            height: auto;
+            object-fit: contain;
+            background-color: #fff; /* 给图片加上白色的实体底板 */
+            padding: 12px; /* 图片与内边框留白，营造画框感 */
+            border: 2px solid rgba(179, 62, 62, 0.25); /* 【边框特效】和风红色的细线内框 */
+            border-radius: 12px; /* 轻微圆角 */
+            /* 【边框特效】利用多重阴影制作出“厚纸板”实体感 */
+            box-shadow: 
+                0 0 0 10px #fff, /* 白色粗外缘相框 */
+                0 0 0 11px rgba(0,0,0,0.05), /* 极细边缘分割线 */
+                0 20px 40px rgba(0,0,0,0.18); /* 底部厚重悬浮阴影 */
+            transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.2s;
+            z-index: 2;
+        }
+
+        .omikuji-container:active .omikuji-img { 
+            transform: scale(0.96) translateY(5px); /* 点击时产生真实下压感 */
+            box-shadow: 
+                0 0 0 10px #fff,
+                0 0 0 11px rgba(0,0,0,0.05),
+                0 10px 20px rgba(0,0,0,0.1); /* 阴影变小，贴近桌面 */
+        }
+
+        /* =========================================
+           修改重点 2：沉浸式抽签光效与摇晃动画
+           ========================================= */
+        /* 背后的神秘发光层 */
+        .magic-glow {
+            position: absolute;
+            top: 50%; 
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 400px; /* 配合大图片将光晕范围调大 */
+            height: 400px;
+            background: radial-gradient(circle, rgba(255, 215, 0, 0.5) 0%, rgba(255, 255, 255, 0) 65%);
+            opacity: 0;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        /* 触发抽签时的状态 */
+        .shake .omikuji-img { 
+            animation: hardShake 0.8s cubic-bezier(.36,.07,.19,.97) both; 
+        }
+        .shake .magic-glow {
+            animation: glowPulse 0.8s ease-in-out;
+        }
+
+        @keyframes floatIn {
+            from { opacity: 0; transform: translateY(40px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes hardShake {
+            0%, 100% { transform: translate3d(0, 0, 0) rotate(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translate3d(-6px, -4px, 0) rotate(-4deg); }
+            20%, 40%, 60%, 80% { transform: translate3d(6px, 4px, 0) rotate(4deg); }
+        }
+
+        @keyframes glowPulse {
+            0% { opacity: 0; transform: translate(-50%, -50%) scale(0.5); }
+            50% { opacity: 1; transform: translate(-50%, -50%) scale(1.5); }
+            100% { opacity: 0; transform: translate(-50%, -50%) scale(2.2); }
+        }
+
+        /* =========================================
+           修改重点 3：结果卡片出场特效升级
+           ========================================= */
+        .result-card {
+            display: none;
+            width: 300px;
+            background: white;
+            border-radius: 16px;
+            border: 8px solid #333; 
+            box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            /* 更具有爆发感的出场 */
+            animation: epicEnter 0.7s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+            padding: 0;
+            margin-bottom: 30px;
+        }
+
+        @keyframes epicEnter {
+            0% { opacity: 0; transform: scale(0.6) translateY(60px); filter: brightness(1.5); }
+            100% { opacity: 1; transform: scale(1) translateY(0); filter: brightness(1); }
+        }
+
+        .rarity-badge {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: #e6b422;
+            color: #fff;
+            padding: 4px 10px;
+            font-weight: bold;
+            font-size: 14px;
+            border-radius: 4px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            z-index: 10;
+        }
+
+        .new-badge {
+            position: absolute;
+            top: 50px;
+            left: 5px;
+            background: #ff1744;
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 900;
+            font-size: 12px;
+            box-shadow: 0 4px 10px rgba(255, 23, 68, 0.5);
+            animation: popBounce 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) backwards;
+            animation-delay: 0.3s;
+            display: none;
+            z-index: 12;
+            transform: rotate(-15deg);
+        }
+
+        @keyframes popBounce {
+            0% { transform: scale(0); }
+            100% { transform: scale(1) rotate(15deg); }
+        }
+
+        .result-inner {
+            width: 100%;
+            position: relative;
+        }
+
+        .result-title {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+            z-index: 10;
+            font-family: "Yu Mincho", serif;
+            border: 2px solid currentColor;
+        }
+
+        .result-icon {
+            width: 100%;
+            height: 320px;
+            background-color: #fafafa;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+        .icon-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .result-desc-container { 
+            padding: 15px 20px; 
+            background: white; 
+            border-top: 1px solid #eee;
+            display: block; 
+        }
+        .result-desc { font-size: 15px; color: #555; line-height: 1.6; margin: 0; }
+
+        .count-info { margin-top: 40px; font-size: 14px; color: #888; background: rgba(0,0,0,0.03); padding: 8px 16px; border-radius: 20px; }
+        
+        button.action-btn { background-color: var(--accent-color); color: white; border: none; padding: 12px 30px; border-radius: 25px; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 20px; box-shadow: 0 4px 10px rgba(179, 62, 62, 0.3); transition: transform 0.2s;}
+        button.action-btn:active { transform: scale(0.95); }
+        button.action-btn:disabled { background-color: #ccc; cursor: not-allowed; box-shadow: none; transform: scale(1); }
+
+        /* 图鉴 Modal 等样式保持不变 */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(5px);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .modal-overlay.active { display: flex; opacity: 1; }
+        
+        .modal-content {
+            background: var(--bg-color);
+            width: 90%;
+            max-width: 500px;
+            max-height: 80vh;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+            overflow-y: auto;
+            position: relative;
+            transform: translateY(20px);
+            transition: transform 0.3s;
+        }
+        .modal-overlay.active .modal-content { transform: translateY(0); }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            border-bottom: 2px solid rgba(0,0,0,0.05);
+            padding-bottom: 10px;
+        }
+        .modal-header h2 { margin: 0; font-size: 18px; color: var(--text-color); }
+        .close-btn { font-size: 24px; cursor: pointer; color: #888; }
+        .close-btn:hover { color: var(--accent-color); }
+        .collection-stats { font-size: 14px; color: #666; margin-bottom: 15px; text-align: right; }
+        .collection-grid { display: block; }
+        .rarity-section { margin-bottom: 25px; }
+        .rarity-title { font-size: 16px; font-weight: bold; color: #555; border-bottom: 2px solid #eee; padding-bottom: 5px; margin-bottom: 15px; display: flex; align-items: center; }
+        .rarity-badge-small { display: inline-block; padding: 2px 8px; border-radius: 4px; color: white; font-size: 12px; margin-right: 8px; min-width: 30px; text-align: center; }
+        .rarity-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; }
+        .collection-item { background: white; border-radius: 10px; padding: 15px 5px; display: flex; flex-direction: column; align-items: center; box-shadow: var(--shadow); border: 2px solid transparent; position: relative; transition: transform 0.2s; }
+        .collection-item:hover { transform: translateY(-3px); }
+        .collection-item .item-icon { width: 40px; height: 40px; margin-bottom: 5px; display: flex; align-items: center; justify-content: center; }
+        .collection-icon-img { max-width: 100%; max-height: 100%; object-fit: contain; transition: filter 0.3s, opacity 0.3s; }
+        .collection-item .item-title { font-weight: bold; font-size: 16px; font-family: "Yu Mincho", serif;}
+        .collection-item .item-rarity { font-size: 12px; font-weight: bold; margin-top: 5px; padding: 2px 6px; border-radius: 4px;}
+        .collection-item.locked { background: #f0f0f0; border-color: #ddd !important; }
+        .collection-item.locked .collection-icon-img { filter: grayscale(100%); opacity: 0.3; }
+        .collection-item.locked .item-title { color: #aaa; }
+        .collection-item.locked .item-rarity { background: #ccc !important; color: #666 !important; }
+        .collection-item.unlocked { cursor: pointer; }
+
+        .preview-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.75); display: none; justify-content: center; align-items: center; z-index: 1200; padding: 20px; box-sizing: border-box; }
+        .preview-overlay.active { display: flex; }
+        .preview-card { background: #fdfaf5; border-radius: 16px; max-width: 340px; width: 90%; border: 6px solid #333; box-shadow: 0 25px 50px rgba(0,0,0,0.5); position: relative; padding: 20px; box-sizing: border-box; animation: cardPop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        @keyframes cardPop { 0% { transform: scale(0.8) translateY(20px); opacity: 0; } 100% { transform: scale(1) translateY(0); opacity: 1; } }
+        .preview-close { position: absolute; right: -12px; top: -12px; width: 32px; height: 32px; border: 2px solid #fff; border-radius: 50%; background: #333; color: #fff; font-size: 20px; line-height: 28px; text-align: center; cursor: pointer; z-index: 10; box-shadow: 0 4px 8px rgba(0,0,0,0.2); padding: 0; transition: transform 0.2s; }
+        .preview-close:hover { transform: scale(1.1); }
+        .preview-rarity-badge { position: absolute; top: -15px; left: -15px; color: #fff; padding: 6px 16px; font-weight: 900; font-size: 16px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); border: 2px solid #fff; z-index: 10; transform: rotate(-5deg); letter-spacing: 1px; }
+        .preview-image-container { width: 100%; height: 280px; background: #fff; border: 2px solid #eee; border-radius: 8px; display: flex; align-items: center; justify-content: center; margin-bottom: 15px; box-shadow: inset 0 0 10px rgba(0,0,0,0.05); padding: 10px; box-sizing: border-box; }
+        .preview-image { max-width: 100%; max-height: 100%; object-fit: contain; filter: drop-shadow(0 5px 15px rgba(0,0,0,0.1)); }
+        .preview-title { text-align: center; font-family: "Yu Mincho", serif; font-size: 22px; font-weight: bold; margin: 0 0 15px 0; letter-spacing: 2px; }
+        .preview-desc-container { background: #fff; border: 1px solid #eee; border-radius: 8px; padding: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.02); position: relative; }
+        .preview-desc-container::before { content: "✦"; position: absolute; top: -10px; left: 50%; transform: translateX(-50%); background: #fdfaf5; padding: 0 10px; color: #ccc; font-size: 12px; }
+        .preview-desc { font-size: 14px; color: #555; line-height: 1.6; margin: 0; text-align: justify; }
+
+        /* =========================================
+           修改重点 4：针对手机端(小屏幕)的响应式缩放
+           ========================================= */
+        @media (max-width: 480px) {
+            .omikuji-img {
+                width: 220px; /* 手机端缩小基础宽度 */
+                padding: 8px; /* 缩小边框内留白 */
+                border-radius: 8px;
+                /* 按比例缩减阴影和边框粗细，保持一致的质感 */
+                box-shadow: 
+                    0 0 0 8px #fff, 
+                    0 0 0 9px rgba(0,0,0,0.05), 
+                    0 15px 30px rgba(0,0,0,0.15); 
+            }
+
+            .omikuji-container:active .omikuji-img {
+                transform: scale(0.96) translateY(3px); /* 手机端下压幅度适度减小 */
+                box-shadow: 
+                    0 0 0 8px #fff,
+                    0 0 0 9px rgba(0,0,0,0.05),
+                    0 8px 15px rgba(0,0,0,0.1);
+            }
+
+            .magic-glow {
+                width: 300px; /* 手机端同步缩小魔法光环 */
+                height: 300px;
+            }
+            
+            /* 同时稍微缩小一下开出的卡片大小，防止溢出屏幕 */
+            .result-card {
+                width: 280px; 
+            }
+        }
+
+    </style>
+</head>
+<body>
+
+    <header>
+        <a href="index.html" class="back-btn">← Home</a>
+        <h1>每日运势</h1>
+        <button class="collection-btn" id="openCollectionBtn">📖 图鉴</button>
+    </header>
+
+    <div class="container">
+        <!-- 重点修改区：替换为 CDN 图片和魔法光圈 -->
+        <div class="omikuji-container" id="omikujiContainer">
+            <!-- 本地测试：将 src 替换为你本地图片的路径 -->
+            <img src="https://cdn.jsdelivr.net/gh/Loepickst/kiki@main/chouqian.png"
+                 onerror="this.src='https://images.unsplash.com/photo-1601362694738-f947e4eb1bc0?ixlib=rb-1.2.1&auto=format&fit=crop&w=400&q=80'; this.style.borderRadius='15px';" 
+                 alt="点击抽签" class="omikuji-img" id="omikujiImg">
+            <!-- 抽签时的金色魔法光环 -->
+            <div class="magic-glow" id="magicGlow"></div>
+        </div>
+
+        <div class="result-card" id="resultCard">
+            <div class="rarity-badge" id="rarityBadge">SSR</div>
+            <div class="new-badge" id="newBadge">NEW!</div>
+            <div class="result-inner" id="resultInner">
+                <div class="result-icon" id="resultIcon"></div>
+                <div class="result-title" id="resultTitle">大吉</div>
+            </div>
+            <div class="result-desc-container" id="resultDescBox">
+                <div class="result-desc" id="resultDesc">今天的学习效率会非常高！</div>
+            </div>
+        </div>
+
+        <div class="count-info">
+            今日剩余次数：<span id="remainCount">3</span> / 3
+        </div>
+        
+        <button class="action-btn" id="drawBtn">抽签 (Start)</button>
+    </div>
+
+    <!-- 图鉴等 HTML 代码保持原样 -->
+    <div class="modal-overlay" id="collectionModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>御神签图鉴 (コレクション)</h2>
+                <span class="close-btn" id="closeCollectionBtn">&times;</span>
+            </div>
+            <div class="collection-stats" id="collectionStats">收集进度：0 / 11</div>
+            <div class="collection-grid" id="collectionGrid"></div>
+        </div>
+    </div>
+
+    <div class="preview-overlay" id="previewOverlay">
+        <div class="preview-card" id="previewCard">
+            <button class="preview-close" id="previewClose">×</button>
+            <div class="preview-rarity-badge" id="previewRarityBadge">SSR</div>
+            <div class="preview-image-container">
+                <img id="previewImage" class="preview-image" src="" alt="图鉴大图">
+            </div>
+            <div class="preview-title" id="previewTitle"></div>
+            <div class="preview-desc-container">
+                <div class="preview-desc" id="previewDesc"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const MAX_DAILY_COUNT = 3;
+        
+        const fortunes = [
+            { id: "f1", rarity: "KR", title: "旺吉", desc: "🎉你就是最帅（美）的气运之子🎉！kiki祝福你，旺！", weight: 2, color: "#000000", icon: "takarakuji/wangji.png" },
+            { id: "f19", rarity: "KR", title: "乐吉", desc: "喝上一口肥宅水，快乐一整天！", weight: 7, color: "#000000", icon: "takarakuji/keleji.png" },
+            { id: "f21", rarity: "KR", title: "桃吉", desc: "学习上的不如意，说不定会带来其他方面的好运哦～", weight: 3, color: "#000000", icon: "takarakuji/taoji.png" },
+            { id: "f8", rarity: "UR", title: "神吉", desc: "⛩️考神附体！今天直觉准得可怕，做阅读题一抓一个准，就算蒙的也全对！", weight: 1, color: "#d4af37", icon: "takarakuji/shenji.png" },
+            { id: "f7", rarity: "UR", title: "玉吉", desc: "一尾便是一重境界。熬过漫长的沉淀与枯燥的练习，终能修得灵动的语感。", weight: 3, color: "#F44336", icon: "takarakuji/huji.png" },
+            { id: "f16", rarity: "UR", title: "鹿吉", desc: "步履从容，一步一印，语感自然如影随形。", weight: 1, color: "#e6b422", icon: "takarakuji/luji2.png" },
+            { id: "f22", rarity: "UR", title: "友吉", desc: "切磋琢磨之友，乃求学路上的不灭之光。", weight: 1, color: "#d4af37", icon: "takarakuji/xueji.png" },
+            { id: "f2", rarity: "SSR", title: "虎吉", desc: "运气爆棚！干什么都是如虎添翼，チョロいもんだぜ！", weight: 5, color: "#d32f2f", icon: "takarakuji/huyan.png" },
+            { id: "f9", rarity: "SSR", title: "猫吉", desc: "明确内心，不被外界所迷惑，直取自己的“目标”，走最优雅的“猫步”。", weight: 5, color: "#ec407a", icon: "takarakuji/maoji2.png" },
+            { id: "f12", rarity: "SSR", title: "鸽吉", desc: "咕咕咕，咕咕咕咕咕咕咕，咕咕？咕！", weight: 3, color: "#d32f2f", icon: "takarakuji/geji.png" },
+            { id: "f13", rarity: "SSR", title: "蛇吉", desc: "褪下“舒适”的旧壳，灵动的语感方能重获新生。", weight: 5, color: "#ec407a", icon: "takarakuji/sheji.png" },
+            { id: "f20", rarity: "SSR", title: "憨吉", desc: "狗狗我啊，今天，指定是不行了。（不行！）", weight: 4, color: "#1976d2", icon: "takarakuji/cheemsji.png" },
+            { id: "f23", rarity: "SSR", title: "猪吉", desc: "猪突猛进，猪突猛进，猪突猛劲！冲！", weight: 4, color: "#ec407a", icon: "takarakuji/zhuji.png" },
+            { id: "f10", rarity: "SR", title: "蝴吉", desc: "飞舞的思绪！如蝶一般，“漂亮”的拿下今天的知识吧。", weight: 10, color: "#00897b", icon: "takarakuji/chongji.png" },
+            { id: "f3", rarity: "SR", title: "猴吉", desc: "做不了真“大圣”，也能拥有“大圣”心，先得敢想，才能真成！", weight: 10, color: "#388e3c", icon: "takarakuji/houji.png" },
+            { id: "f6", rarity: "SR", title: "熊吉", desc: "学饿了就吃点，吃饱了就休息，那学习呢？学习就明天再说吧。", weight: 10, color: "#7b1fa2", icon: "takarakuji/xiongji.png" },
+            { id: "f14", rarity: "SR", title: "燕吉", desc: "每天只衔一个词，日积月累，也能筑起坚不可摧的语言之巢。", weight: 10, color: "#7b1fa2", icon: "takarakuji/yanji.png" },
+            { id: "f17", rarity: "SR", title: "牛吉", desc: "纵使当下如对牛弹琴般不得要领，耐下性子温故知新，笨功夫自有回响。", weight: 10, color: "#546e7a", icon: "takarakuji/niuji.png" },
+            { id: "f24", rarity: "SR", title: "兔吉", desc: "兔起鹘落般的进步，恰恰蕴藏在从一到十、踏踏实实的研磨之中。", weight: 10, color: "#00897b", icon: "takarakuji/tuji.png" },
+            { id: "f5", rarity: "R", title: "犬吉", desc: "温故而知新。比起新内容，今天更适合把之前的错题翻出来‘叙叙旧’哦！", weight: 30, color: "#f57c00", icon: "takarakuji/quanji.png" },
+            { id: "f4", rarity: "R", title: "鼠吉", desc: "一点一滴地搬运，终能囤满语言的粮仓。", weight: 30, color: "#1976d2", icon: "takarakuji/shuji.png" },
+            { id: "f11", rarity: "R", title: "狐吉", desc: "🍵普普通通、平平淡淡的一天。按部就班地背单词吧，没有波澜也是一种幸福。", weight: 30, color: "#8d6e63", icon: "takarakuji/pingji.png" },
+            { id: "f15", rarity: "R", title: "龟吉", desc: "要想“快”，先得“慢”，只有学会了放平心态去细细打磨，“快”便会自然出现。", weight: 30, color: "#8d6e63", icon: "takarakuji/guiji.png" },
+            { id: "f18", rarity: "R", title: "鼬吉", desc: "思维若如鼬般柔软，再凶狠的学习障碍，也能轻盈越过。", weight: 30, color: "#8d6e63", icon: "takarakuji/youji.png" },
+            { id: "f25", rarity: "R", title: "鵺吉", desc: "困难，即是机遇，不要畏惧不要害怕，解题之法就在其中！", weight: 30, color: "#8d6e63", icon: "takarakuji/nueji.png" }
+        ];
+
+        // 绑定新的 DOM
+        const omikujiContainer = document.getElementById('omikujiContainer');
+        const resultCard = document.getElementById('resultCard');
+        const resultInner = document.getElementById('resultInner');
+        const resultTitle = document.getElementById('resultTitle');
+        const resultIcon = document.getElementById('resultIcon');
+        const rarityBadge = document.getElementById('rarityBadge');
+        const newBadge = document.getElementById('newBadge');
+        const resultDescBox = document.getElementById('resultDescBox');
+        const resultDesc = document.getElementById('resultDesc');
+        const drawBtn = document.getElementById('drawBtn');
+        const remainCountSpan = document.getElementById('remainCount');
+        
+        const collectionModal = document.getElementById('collectionModal');
+        const openCollectionBtn = document.getElementById('openCollectionBtn');
+        const closeCollectionBtn = document.getElementById('closeCollectionBtn');
+        const collectionGrid = document.getElementById('collectionGrid');
+        const collectionStats = document.getElementById('collectionStats');
+        const previewOverlay = document.getElementById('previewOverlay');
+        const previewClose = document.getElementById('previewClose');
+        const previewImage = document.getElementById('previewImage');
+        const previewTitle = document.getElementById('previewTitle');
+        const previewDesc = document.getElementById('previewDesc');
+        const previewCard = document.getElementById('previewCard');
+        const previewRarityBadge = document.getElementById('previewRarityBadge');
+
+        function getTodayString() {
+            const d = new Date();
+            return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+        }
+
+        function getDailyState() {
+            const today = getTodayString();
+            const stored = localStorage.getItem('lotteryState_v2');
+            if (stored) {
+                const state = JSON.parse(stored);
+                if (state.date === today) return state;
+            }
+            return { date: today, count: 0 };
+        }
+
+        function saveDailyState(count) {
+            localStorage.setItem('lotteryState_v2', JSON.stringify({ date: getTodayString(), count: count }));
+        }
+
+        function getCollection() {
+            return JSON.parse(localStorage.getItem('omikujiCollection')) || [];
+        }
+
+        function saveToCollection(id) {
+            let col = getCollection();
+            if (!col.includes(id)) {
+                col.push(id);
+                localStorage.setItem('omikujiCollection', JSON.stringify(col));
+                return true; 
+            }
+            return false; 
+        }
+
+        function renderCollection() {
+            const col = getCollection();
+            collectionGrid.innerHTML = '';
+            
+            const rarityOrder = ['KR', 'UR', 'SSR', 'SR', 'R'];
+            const rarityColors = {
+                'KR': '#000000',
+                'UR': '#d4af37',
+                'SSR': '#d32f2f',
+                'SR': '#00897b',
+                'R': '#f57c00'
+            };
+
+            rarityOrder.forEach(rarity => {
+                const items = fortunes.filter(f => f.rarity === rarity);
+                if (items.length === 0) return;
+
+                const section = document.createElement('div');
+                section.className = 'rarity-section';
+
+                const title = document.createElement('div');
+                title.className = 'rarity-title';
+                const unlockedInRarity = items.filter(i => col.includes(i.id)).length;
+                title.innerHTML = `<span class="rarity-badge-small" style="background:${rarityColors[rarity] || '#ccc'}">${rarity}</span> 收集进度: ${unlockedInRarity}/${items.length}`;
+                section.appendChild(title);
+
+                const grid = document.createElement('div');
+                grid.className = 'rarity-grid';
+
+                items.forEach(f => {
+                    const isUnlocked = col.includes(f.id);
+                    const div = document.createElement('div');
+                    div.className = `collection-item ${isUnlocked ? 'unlocked' : 'locked'}`;
+                    if(isUnlocked) div.style.borderColor = f.color;
+                    
+                    div.innerHTML = `
+                        <div class="item-icon">
+                            <img src="${f.icon}" alt="${f.title}" class="collection-icon-img" onerror="this.src='https://via.placeholder.com/40';">
+                        </div>
+                        <div class="item-title">${isUnlocked ? f.title : '???'}</div>
+                        <div class="item-rarity" style="background: ${f.color}; color: white;">${f.rarity}</div>
+                    `;
+                    if (isUnlocked) {
+                        div.addEventListener('click', () => {
+                            previewImage.src = f.icon;
+                            previewImage.alt = f.title;
+                            previewTitle.textContent = f.title;
+                            previewTitle.style.color = f.color;
+                            previewCard.style.borderColor = f.color;
+                            previewRarityBadge.textContent = f.rarity;
+                            previewRarityBadge.style.background = f.color;
+                            previewDesc.textContent = f.desc;
+                            previewOverlay.classList.add('active');
+                        });
+                    }
+                    grid.appendChild(div);
+                });
+
+                section.appendChild(grid);
+                collectionGrid.appendChild(section);
+            });
+
+            collectionStats.textContent = `总收集进度：${col.length} / ${fortunes.length}`;
+        }
+
+        openCollectionBtn.addEventListener('click', () => {
+            renderCollection();
+            collectionModal.classList.add('active');
+        });
+        closeCollectionBtn.addEventListener('click', () => collectionModal.classList.remove('active'));
+        collectionModal.addEventListener('click', (e) => {
+            if(e.target === collectionModal) collectionModal.classList.remove('active');
+        });
+        previewClose.addEventListener('click', () => previewOverlay.classList.remove('active'));
+        previewOverlay.addEventListener('click', (e) => {
+            if (e.target === previewOverlay) previewOverlay.classList.remove('active');
+        });
+
+        function drawFortune() {
+            const rarityRates = {
+                "KR": 2,   // 2%
+                "UR": 4,   // 4%
+                "SSR": 15, // 15%
+                "SR": 35,  // 35%
+                "R": 44    // 45%
+            };
+
+            const rand = Math.random() * 100;
+            let cumulative = 0;
+            let selectedRarity = "N"; 
+            
+            for (const rarity in rarityRates) {
+                cumulative += rarityRates[rarity];
+                if (rand < cumulative) {
+                    selectedRarity = rarity;
+                    break;
+                }
+            }
+
+            const pool = fortunes.filter(f => f.rarity === selectedRarity);
+            
+            if (pool.length === 0) {
+                return fortunes[Math.floor(Math.random() * fortunes.length)];
+            }
+
+            const totalWeight = pool.reduce((sum, item) => sum + (item.weight || 1), 0);
+            let randomWeight = Math.random() * totalWeight;
+
+            for (const fortune of pool) {
+                const w = fortune.weight || 1;
+                if (randomWeight < w) {
+                    return fortune;
+                }
+                randomWeight -= w;
+            }
+
+            return pool[0];
+        }
+
+        let currentState = getDailyState();
+        let remain = MAX_DAILY_COUNT - currentState.count;
+        remainCountSpan.textContent = remain;
+        if (remain <= 0) {
+            drawBtn.disabled = true;
+            drawBtn.textContent = "明日再来";
+            drawBtn.style.backgroundColor = "#ccc";
+        }
+
+        drawBtn.addEventListener('click', () => {
+            if (remain <= 0) return;
+
+            resultCard.style.display = 'none';
+            if (resultDescBox) resultDescBox.style.display = 'none';
+            newBadge.style.display = 'none'; 
+            
+            // 显示图片容器并添加魔法动画
+            omikujiContainer.style.display = 'flex'; 
+            omikujiContainer.classList.add('shake');
+            drawBtn.disabled = true;
+
+            // 配合 0.8s 的硬核摇晃与发光特效
+            setTimeout(() => {
+                omikujiContainer.classList.remove('shake');
+                omikujiContainer.style.display = 'none'; 
+                
+                const randomFortune = drawFortune();
+                const isNew = saveToCollection(randomFortune.id);
+
+                resultCard.style.borderColor = randomFortune.color;
+                
+                resultTitle.style.color = randomFortune.color;
+                resultTitle.style.borderColor = randomFortune.color;
+                
+                rarityBadge.textContent = randomFortune.rarity;
+                rarityBadge.style.background = randomFortune.color;
+
+                resultTitle.textContent = randomFortune.title;
+
+                if (resultIcon) {
+                    resultIcon.innerHTML = `<img src="${randomFortune.icon}" alt="${randomFortune.title}" class="icon-img" onerror="this.src='https://via.placeholder.com/300x320?text=Card+Missing';">`;
+                }
+
+                resultDesc.textContent = randomFortune.desc;
+                
+                currentState.count++;
+                saveDailyState(currentState.count);
+                remain = MAX_DAILY_COUNT - currentState.count;
+                remainCountSpan.textContent = remain;
+
+                resultCard.style.display = 'block';
+                if (resultDescBox) resultDescBox.style.display = 'block';
+                
+                if(isNew) {
+                    newBadge.style.display = 'flex';
+                }
+
+                if (remain > 0) {
+                    drawBtn.disabled = false;
+                } else {
+                    drawBtn.textContent = "明日再来";
+                    drawBtn.style.backgroundColor = "#ccc";
+                }
+
+            }, 800); 
+        });
+
+        // 绑定点击图片也可以抽签
+        omikujiContainer.addEventListener('click', () => {
+            if (!drawBtn.disabled) drawBtn.click();
+        });
+
+    </script>
+</body>
+</html>

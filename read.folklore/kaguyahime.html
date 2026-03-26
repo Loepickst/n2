@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>日本語読解 - 輝夜姫</title>
+    <style>
+        /* 引入毛笔字体 Yuji Syuku 和 常规衬线体 Noto Serif JP */
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;600&family=Yuji+Syuku&display=swap');
+
+        :root {
+            /* 传统和色（日本の伝統色） */
+            --bg-color: #e8e4d9; /* 稍暗的和纸背景底色 */
+            --paper-color: #f6f3eb; /* 主内容区的和纸色 */
+            --text-color: #2b2b2b; /* 墨色 (Sumi) */
+            --accent-color: #c13224; /* 朱色 (Shu) - 传统印章红 */
+            --sub-color: #787878; /* 灰墨 */
+            --popup-bg: #3a3838; /* 深墨色 */
+            --chinese-font: "Microsoft YaHei", "PingFang SC", sans-serif;
+            --japanese-font: 'Noto Serif JP', serif;
+            --brush-font: 'Yuji Syuku', serif; /* 毛笔字体 */
+        }
+
+        body {
+            background-color: var(--bg-color);
+            /* 和纸噪点纹理 (Washi Paper Texture) */
+            background-image: url("data:image/svg+xml,%3Csvg width='200' height='200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.04' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.08'/%3E%3C/svg%3E");
+            color: var(--text-color);
+            font-family: var(--japanese-font);
+            margin: 0;
+            padding: 100px 15px 120px; 
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* 顶部控制栏 - 宣纸磨砂质感 */
+        .top-bar {
+            position: fixed; top: 0; left: 0; right: 0;
+            height: 60px; 
+            background: rgba(246, 243, 235, 0.85);
+            backdrop-filter: blur(8px);
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 0 25px; z-index: 1000;
+            border-bottom: 1px solid rgba(43, 43, 43, 0.1);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.03);
+        }
+
+        #today-date { 
+            font-family: var(--brush-font); /* 日期使用毛笔字 */
+            font-size: 1.1rem; 
+            color: var(--text-color); 
+        }
+
+        .toggle-btn {
+            background: transparent; 
+            color: var(--text-color); 
+            border: 1px solid var(--text-color);
+            padding: 4px 16px; 
+            border-radius: 2px;
+            font-size: 0.9rem;
+            font-family: var(--brush-font); 
+            cursor: pointer; 
+            transition: 0.3s;
+            box-shadow: 2px 2px 0 rgba(43,43,43,0.1); /* 传统立体阴影 */
+        }
+        @media (hover: hover) {
+            .toggle-btn:hover { background: var(--text-color); color: var(--paper-color); }
+        }
+        .toggle-btn.active { 
+            background: var(--text-color); 
+            color: var(--paper-color); 
+            box-shadow: 0 0 0 rgba(43,43,43,0);
+            transform: translate(2px, 2px);
+        }
+
+        /* 主容器 - 书卷质感 */
+        .container {
+            max-width: 720px; width: 100%;
+            background: var(--paper-color); 
+            padding: 60px 40px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+            border-radius: 4px;
+            position: relative;
+            background-image: url("data:image/svg+xml,%3Csvg width='200' height='200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.04' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.05'/%3E%3C/svg%3E");
+        }
+
+        .container::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 4px;
+            background: var(--accent-color);
+            border-radius: 4px 4px 0 0;
+        }
+
+        .header-title { 
+            text-align: center; 
+            margin-bottom: 50px; 
+            position: relative;
+            padding: 30px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .title-bg {
+            position: absolute;
+            top: 50%;
+            left: -20px; 
+            transform: translateY(-50%);
+            width: clamp(120px, 25vw, 260px); 
+            height: auto; 
+            max-height: 280px; 
+            object-fit: contain;
+            z-index: 0;
+            pointer-events: none;
+            opacity: 0.85; 
+        }
+
+        .title-content {
+            position: relative;
+            z-index: 1; 
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .stamp-mark {
+            display: inline-block;
+            border: 2px solid var(--accent-color);
+            color: var(--accent-color);
+            font-family: var(--brush-font);
+            font-size: 0.9rem;
+            padding: 2px 6px;
+            border-radius: 4px;
+            margin-bottom: 15px;
+            transform: rotate(-3deg); 
+            letter-spacing: 2px;
+        }
+
+        .header-title h2 {
+            font-family: var(--brush-font); 
+            font-size: 2.2rem;
+            color: var(--text-color);
+            font-weight: normal;
+            letter-spacing: 0.15em;
+            margin: 0 0 10px 0;
+            text-shadow: 0 2px 5px rgba(246, 243, 235, 0.9);
+        }
+
+        /* 句子群组（原文+译文） */
+        .sentence-group {
+            margin-bottom: 15px;
+            position: relative;
+        }
+        
+        .reading-block {
+            margin-bottom: 40px; /* 段落间距 */
+        }
+
+        p.japanese {
+            font-size: clamp(1.05rem, 3vw, 1.25rem); 
+            line-height: 2.2; 
+            text-align: justify; 
+            margin: 0;
+            letter-spacing: 0.05em;
+            font-weight: 400;
+        }
+
+        ruby rt { 
+            font-size: 0.5em; 
+            color: var(--sub-color); 
+            letter-spacing: 0; 
+            font-family: var(--japanese-font);
+        }
+
+        /* 逐句译文的优化样式 */
+        .translation {
+            display: none; 
+            margin-top: 6px; 
+            font-size: clamp(0.85rem, 2.5vw, 0.95rem);
+            color: #5a5a5a; 
+            line-height: 1.8; 
+            padding: 8px 12px;
+            background: linear-gradient(to right, rgba(193, 50, 36, 0.04), transparent); 
+            font-family: var(--chinese-font);
+            border-left: 3px solid rgba(193, 50, 36, 0.4); 
+            border-radius: 0 4px 4px 0;
+            text-align: justify;
+        }
+
+        .vocab-word {
+            color: var(--text-color);
+            text-decoration: underline;
+            text-decoration-style: dotted;
+            text-decoration-color: var(--accent-color);
+            text-underline-offset: 4px;
+            text-decoration-thickness: 2px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: color 0.2s;
+        }
+        .vocab-word:hover {
+            color: var(--accent-color);
+        }
+
+        #smart-tooltip {
+            position: absolute; z-index: 2000;
+            background: var(--popup-bg); color: #f6f3eb;
+            padding: 12px 18px; border-radius: 4px; 
+            font-size: 0.9rem; font-family: var(--chinese-font);
+            line-height: 1.6; max-width: 280px; min-width: 140px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.4);
+            border-top: 2px solid var(--accent-color);
+            display: none; opacity: 0; pointer-events: none;
+            transition: opacity 0.2s;
+        }
+        
+        #smart-tooltip::after {
+            content: ""; position: absolute; top: 100%;
+            border: 8px solid transparent; border-top-color: var(--popup-bg);
+            /* 使用 CSS 变量动态调整小箭头位置 */
+            left: var(--arrow-left, 50%);
+            transform: translateX(-50%);
+            transition: left 0.15s ease;
+        }
+
+        /* Audio Player */
+        .audio-wrapper {
+            position: fixed; bottom: 0; left: 0; right: 0;
+            z-index: 2000;
+            background: rgba(246, 243, 235, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 15px 20px 25px 20px;
+            display: flex; justify-content: center;
+            border-top: 1px solid rgba(43, 43, 43, 0.1);
+            box-shadow: 0 -4px 20px rgba(0,0,0,0.05);
+        }
+        .audio-player {
+            display: flex; align-items: center;
+            width: 100%; max-width: 600px;
+        }
+        .play-btn {
+            width: 40px; height: 40px; border-radius: 50%;
+            background-color: var(--accent-color); color: var(--paper-color);
+            border: none; display: flex; align-items: center; justify-content: center;
+            cursor: pointer; margin-right: 15px; flex-shrink: 0;
+            transition: transform 0.2s; box-shadow: 0 4px 10px rgba(193, 50, 36, 0.3);
+        }
+        .play-btn:active { transform: scale(0.95); }
+        .play-btn svg { width: 16px; height: 16px; fill: currentColor; margin-left: 2px; }
+        .play-btn.playing svg { margin-left: 0; }
+        .progress-container {
+            flex-grow: 1; height: 24px; display: flex; align-items: center;
+            margin-right: 15px; cursor: pointer; position: relative;
+        }
+        .progress-bg { width: 100%; height: 4px; background-color: rgba(43, 43, 43, 0.15); border-radius: 2px; position: relative; }
+        .progress-bar { height: 100%; background-color: var(--text-color); width: 0%; border-radius: 2px; position: relative; }
+        .progress-bar::after {
+            content: ""; position: absolute; right: -6px; top: 50%; transform: translateY(-50%);
+            width: 12px; height: 12px; background-color: var(--accent-color);
+            border-radius: 50%; box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        .time-display {
+            font-size: 0.75rem; color: var(--sub-color); width: 75px; 
+            text-align: right; font-family: monospace; font-variant-numeric: tabular-nums;
+        }
+        .loop-btn {
+            background: none; border: none; cursor: pointer; padding: 8px; margin-left: 8px;
+            color: var(--text-color); opacity: 0.4; transition: all 0.2s;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .loop-btn.active { opacity: 1; color: var(--accent-color); }
+        .loop-btn svg { width: 20px; height: 20px; fill: currentColor; }
+
+        .footer { 
+            margin-top: 60px; color: #b0a8a6; font-size: 0.85rem; 
+            letter-spacing: 4px; font-family: var(--brush-font);
+        }
+
+        @media (max-width: 768px) {
+            .container { padding: 50px 30px; }
+            .header-title h2 { font-size: 1.8rem; }
+        }
+
+        @media (max-width: 600px) {
+            .title-bg { display: none; }
+        }
+
+        @media (max-width: 480px) {
+            body { padding: 80px 10px 100px; }
+            .container { padding: 30px 15px; }
+            .header-title { padding: 10px; margin-bottom: 30px; }
+            .header-title h2 { font-size: 1.5rem; letter-spacing: 0.1em; }
+            .stamp-mark { font-size: 0.8rem; padding: 2px 4px; }
+            p.japanese { line-height: 2; letter-spacing: 0.02em; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="top-bar">
+    <a href="read_folklore.html" class="toggle-btn" style="text-decoration: none; margin-right: 15px;">← 戻る</a>
+    <div id="today-date" style="flex-grow: 1; text-align: center;">日本昔話</div>
+    <button id="trans-btn" class="toggle-btn" onclick="toggleTranslation()">訳文</button>
+</div>
+
+<div class="container">
+   <div class="header-title">
+    <img class="title-bg" src="image/1.png" alt="标题背景" onerror="this.style.display='none';">
+    <div class="title-content">
+        <span class="stamp-mark">昔話</span>
+        <!-- 标题已修正为辉夜姬 -->
+        <h2><ruby>輝<rt>かぐ</rt></ruby><ruby>夜<rt>や</rt></ruby><ruby>姫<rt>ひめ</rt></ruby></h2>
+        <span style="color: var(--sub-color); font-size: 0.85rem; font-family: var(--chinese-font); text-shadow: 0 1px 3px rgba(246, 243, 235, 0.9);">竹取物語</span>
+    </div>
+</div>
+
+<!-- 第1段落 -->
+<div class="reading-block">
+    <div class="sentence-group">
+        <p class="japanese"><ruby>昔<rt>むかし</rt></ruby>々、<ruby>竹<rt>たけ</rt></ruby>を<ruby>取<rt>と</rt></ruby>って<ruby>暮<rt>く</rt></ruby>らしている、お<ruby>爺<rt>じい</rt></ruby>さんがいました。</p>
+        <div class="translation">很久很久以前，有一位靠砍竹子为生的老爷爷。</div>
+    </div>
+    <div class="sentence-group">
+        <p class="japanese">ある<ruby>日<rt>ひ</rt></ruby>のこと。お<ruby>爺<rt>じい</rt></ruby>さんが<span class="vocab-word" data-info="竹藪（たけやぶ）：竹林。"><ruby>竹<rt>たけ</rt></ruby><ruby>藪<rt>やぶ</rt></ruby></span>に<ruby>行<rt>い</rt></ruby>くと、<ruby>根<rt>ね</rt></ruby><ruby>元<rt>もと</rt></ruby>が<ruby>光<rt>ひか</rt></ruby>っている、<ruby>不<rt>ふ</rt></ruby><ruby>思<rt>し</rt></ruby><ruby>議<rt>ぎ</rt></ruby>な<ruby>竹<rt>たけ</rt></ruby>を<ruby>見<rt>み</rt></ruby>つけました。</p>
+        <div class="translation">有一天，老爷爷去竹林时，发现了一棵根部发光的奇异竹子。</div>
+    </div>
+    <div class="sentence-group">
+        <p class="japanese">「ほほお、これは<ruby>珍<rt>めずら</rt></ruby>しい。どれ、<ruby>切<rt>き</rt></ruby>ってみようか。えいっ。」</p>
+        <div class="translation">“哦呵，这可真罕见。让我来砍开看看吧。嘿！”</div>
+    </div>
+    <div class="sentence-group">
+        <p class="japanese">「おお、これは！」</p>
+        <div class="translation">“噢，这是！”</div>
+    </div>
+    <div class="sentence-group">
+        <p class="japanese">お<ruby>爺<rt>じい</rt></ruby>さんがその<ruby>竹<rt>たけ</rt></ruby>を<ruby>切<rt>き</rt></ruby>ってみると、なんと<ruby>中<rt>なか</rt></ruby>には、<ruby>小<rt>ちい</rt></ruby>さな<ruby>女<rt>おんな</rt></ruby>の<ruby>子<rt>こ</rt></ruby>がいたのです。</p>
+        <div class="translation">老爷爷试着砍开那棵竹子，没想到里面竟然有一个小女孩。</div>
+    </div>
+</div>
+
+<!-- 第2段落 -->
+<div class="reading-block">
+    <div class="sentence-group">
+        <p class="japanese"><ruby>子<rt>こ</rt></ruby>どものいないお<ruby>爺<rt>じい</rt></ruby>さんとお<ruby>婆<rt>ばあ</rt></ruby>さんは、とても<ruby>喜<rt>よろこ</rt></ruby>びました。</p>
+        <div class="translation">没有孩子的老爷爷和老奶奶非常高兴。</div>
+    </div>
+    <div class="sentence-group">
+        <p class="japanese">そしてその<ruby>子<rt>こ</rt></ruby>を「かぐや<ruby>姫<rt>ひめ</rt></ruby>」と<span class="vocab-word" data-info="名付けて（なづけて）：（原型：名付ける，て形）命名，起名。"><ruby>名<rt>な</rt></ruby><ruby>付<rt>づ</rt></ruby>けて</span>、<ruby>大<rt>たい</rt></ruby><ruby>切<rt>せつ</rt></ruby>に<ruby>育<rt>そだ</rt></ruby>てたのです。</p>
+        <div class="translation">于是他们给这个孩子起名叫“辉夜姬”，并把她悉心抚养长大。</div>
+    </div>
+    <div class="sentence-group">
+        <p class="japanese">かぐや<ruby>姫<rt>ひめ</rt></ruby>は<ruby>大<rt>おお</rt></ruby>きくなるにしたがって、とても<ruby>美<rt>うつく</rt></ruby>しくなりました。</p>
+        <div class="translation">辉夜姬随着年龄的增长，变得越来越美丽。</div>
+    </div>
+    <div class="sentence-group">
+        <p class="japanese">そして<ruby>年<rt>とし</rt></ruby><ruby>頃<rt>ごろ</rt></ruby>になると、「どうかかぐや<ruby>姫<rt>ひめ</rt></ruby>をお<ruby>嫁<rt>よめ</rt></ruby>にください」と、<ruby>若<rt>わか</rt></ruby><ruby>者<rt>もの</rt></ruby>がたくさんやってきました。</p>
+        <div class="translation">到了适婚年龄时，许多年轻人纷纷前来求婚：“请务必将辉夜姬嫁给我。”</div>
+    </div>
+    <div class="sentence-group">
+        <p class="japanese"><ruby>中<rt>なか</rt></ruby>でも、<ruby>特<rt>とく</rt></ruby>に<ruby>熱<rt>ねっ</rt></ruby><ruby>心<rt>しん</rt></ruby>な<ruby>若<rt>わか</rt></ruby><ruby>者<rt>もの</rt></ruby>が<ruby>五<rt>ご</rt></ruby><ruby>人<rt>にん</rt></ruby>いました。みんな<ruby>立<rt>りっ</rt></ruby><ruby>派<rt>ぱ</rt></ruby>な<ruby>若<rt>わか</rt></ruby><ruby>者<rt>もの</rt></ruby>です。</p>
+        <div class="translation">其中，有五个特别热心的年轻人。他们都是非常优秀的青年。</div>
+    </div>
+</div>
+
+<!-- 第3段落 -->
+<div class="reading-block">
+    <div class="sentence-group">
+        <p class="japanese">でも、かぐや<ruby>姫<rt>ひめ</rt></ruby>はお<ruby>嫁<rt>よめ</rt></ruby>に<ruby>行<rt>い</rt></ruby>くつもりはありません。</p>
+        <div class="translation">但是，辉夜姬并没有出嫁的打算。</div>
+    </div>
+    <div class="sentence-group">
+        <p class="japanese">そこでかぐや<ruby>姫<rt>ひめ</rt></ruby>は<ruby>困<rt>こま</rt></ruby>ってしまい、</p>
+        <div class="translation">于是辉夜姬感到很苦恼，</div>
+    </div>
+    <div class="sentence-group">
+        <p class="japanese">「では、<ruby>私<rt>わたし</rt></ruby>が<ruby>言<rt>い</rt></ruby>う<span class="vocab-word" data-info="品物（しなもの）：物品，东西。"><ruby>品<rt>しな</rt></ruby><ruby>物<rt>もの</rt></ruby></span>を<ruby>持<rt>も</rt></ruby>ってきてくださった<ruby>方<rt>かた</rt></ruby>のところへ、お<ruby>嫁<rt>よめ</rt></ruby>に<ruby>行<rt>い</rt></ruby>きましょう」と<ruby>言<rt>い</rt></ruby>って、<ruby>世<rt>よ</rt></ruby>にも<ruby>珍<rt>めずら</rt></ruby>しいと<ruby>言<rt>い</rt></ruby>われる<span class="vocab-word" data-info="品物（しなもの）：物品，东西。"><ruby>品<rt>しな</rt></ruby><ruby>物<rt>もの</rt></ruby></span>を、<ruby>一<rt>ひと</rt></ruby><ruby>人<rt>り</rt></ruby><ruby>一<rt>ひと</rt></ruby><ruby>人<rt>り</rt></ruby>に<ruby>頼<rt>たの</rt></ruby>みました。</p>
+        <div class="translation">便说道：“那么，谁能把我所说的物品带来，我就嫁给谁吧。”她向每个人分别要了一件世间罕见的稀世珍宝。</div>
+    </div>
+    <div class="sentence-group">
+        <p class="japanese"><ruby>五<rt>ご</rt></ruby><ruby>人<rt>にん</rt></ruby>の<ruby>若<rt>わか</rt></ruby><ruby>者<rt>もの</rt></ruby>は、それぞれに<ruby>大<rt>だい</rt></ruby><ruby>冒<rt>ぼう</rt></ruby><ruby>険<rt>けん</rt></ruby>をしましたが、かぐや<ruby>姫<rt>ひめ</rt></ruby>の<ruby>望<rt>のぞ</rt></ruby>んだ<span class="vocab-word" data-info="品物（しなもの）：物品，东西。"><ruby>品<rt>しな</rt></ruby><ruby>物<rt>もの</rt></ruby></span>を<ruby>手<rt>て</rt></ruby>に<ruby>入<rt>い</rt></ruby>れた<ruby>者<rt>もの</rt></ruby>は、<ruby>一<rt>ひと</rt></ruby><ruby>人<rt>り</rt></ruby>もいませんでした。</p>
+        <div class="translation">这五个年轻人各自展开了大冒险，但没有一个人能得到辉夜姬想要的物品。</div>
+    </div>
+</div>
+
+<!-- 第4段落 -->
+<div class="reading-block">
+    <div class="sentence-group">
+        <p class="japanese">なんとか<ruby>五<rt>ご</rt></ruby><ruby>人<rt>にん</rt></ruby>の<ruby>若<rt>わか</rt></ruby><ruby>者<rt>もの</rt></ruby>を<span class="vocab-word" data-info="追い返した（おいかえした）：（原型：追い返す，た形）赶回，打发走，拒绝。"><ruby>追<rt>お</rt></ruby>い<ruby>返<rt>かえ</rt></ruby>した</span>かぐや<ruby>姫<rt>ひめ</rt></ruby>ですが、かぐや<ruby>姫<rt>ひめ</rt></ruby>の<ruby>噂<rt>うわさ</rt></ruby>は、<span class="vocab-word" data-info="とうとう：终于，到底，终究。">とうとう</span><ruby>帝<rt>みかど</rt></ruby>の<span class="vocab-word" data-info="耳にも入りました（みみにもはいりました）：（原型：耳に入る，た形＋丁寧語ます的过去式）传到耳朵里，被听到。"><ruby>耳<rt>みみ</rt></ruby>にも<ruby>入<rt>はい</rt></ruby>りました</span>。</p>
+        <div class="translation">辉夜姬总算把这五个年轻人打发走了，但辉夜姬的传闻，终于也传到了皇帝的耳朵里。</div>
+    </div>
+    <div class="sentence-group">
+        <p class="japanese">「ぜひ、かぐや<ruby>姫<rt>ひめ</rt></ruby>を<ruby>妃<rt>きさき</rt></ruby>に<ruby>欲<rt>ほ</rt></ruby>しい」</p>
+        <div class="translation">“务必让辉夜姬做我的妃子。”</div>
+    </div>
+    <div class="sentence-group">
+        <p class="japanese"><ruby>帝<rt>みかど</rt></ruby>の<ruby>言<rt>こと</rt></ruby><ruby>葉<rt>ば</rt></ruby>を<ruby>聞<rt>き</rt></ruby>いたお<ruby>爺<rt>じい</rt></ruby>さんとお<ruby>婆<rt>ばあ</rt></ruby>さんは、<ruby>大<rt>おお</rt></ruby><ruby>喜<rt>よろこ</rt></ruby>びです。</p>
+        <div class="translation">听到皇帝的话，老爷爷和老奶奶喜出望外。</div>
+    </div>
+    <div class="sentence-group">
+        <p class="japanese">「<ruby>素<rt>す</rt></ruby><ruby>晴<rt>ば</rt></ruby>らしい<ruby>婿<rt>むこ</rt></ruby>さん<span class="vocab-word" data-info="じゃ：等于「だ」或「である」，是。（老人等使用的语气词，表示断定）。">じゃ</span>。これ<ruby>以<rt>い</rt></ruby><ruby>上<rt>じょう</rt></ruby>の<ruby>婿<rt>むこ</rt></ruby>さんはない」</p>
+        <div class="translation">“真是极好的女婿啊。再没有比这更好的女婿了。”</div>
+    </div>
+</div>
+
+<!-- 第5段落 -->
+<div class="reading-block">
+    <div class="sentence-group">
+        <p class="japanese">お<ruby>嫁<rt>よめ</rt></ruby>に<ruby>行<rt>い</rt></ruby>くつもりのないかぐや<ruby>姫<rt>ひめ</rt></ruby>は、なんとか<ruby>断<rt>ことわ</rt></ruby>ろうと<ruby>思<rt>おも</rt></ruby>いましたが、<ruby>帝<rt>みかど</rt></ruby>に<ruby>逆<rt>さか</rt></ruby>らえば、どうなるかわかりません。</p>
+        <div class="translation">不打算出嫁的辉夜姬想方设法要拒绝，但如果违抗皇帝，不知道会有什么后果。</div>
+    </div>
+    <div class="sentence-group">
+        <p class="japanese">それ<ruby>以<rt>い</rt></ruby><ruby>来<rt>らい</rt></ruby>、かぐや<ruby>姫<rt>ひめ</rt></ruby>は<ruby>毎<rt>まい</rt></ruby><ruby>晩<rt>ばん</rt></ruby><ruby>毎<rt>まい</rt></ruby><ruby>晩<rt>ばん</rt></ruby>、<ruby>悲<rt>かな</rt></ruby>しそうに<ruby>月<rt>つき</rt></ruby>を<ruby>見<rt>み</rt></ruby><ruby>上<rt>あ</rt></ruby>げては<ruby>泣<rt>な</rt></ruby>いていました。</p>
+        <div class="translation">从那以后，辉夜姬每天晚上都悲伤地仰望月亮，暗自垂泪。</div>
+    </div>
+    <div class="sentence-group">
+        <p class="japanese">ある<ruby>日<rt>ひ</rt></ruby>、お<ruby>爺<rt>じい</rt></ruby>さんとお<ruby>婆<rt>ばあ</rt></ruby>さんが<ruby>心<rt>しん</rt></ruby><ruby>配<rt>ぱい</rt></ruby>して<span class="vocab-word" data-info="わけ：原因，理由，缘故。">わけ</span>を<ruby>尋<rt>たず</rt></ruby>ねると、かぐや<ruby>姫<rt>ひめ</rt></ruby>は<ruby>泣<rt>な</rt></ruby>きながら<ruby>言<rt>い</rt></ruby>いました。</p>
+        <div class="translation">有一天，老爷爷和老奶奶担心地询问缘由，辉夜姬边哭边说：</div>
+    </div>
+    <div class="sentence-group">
+        <p class="japanese">「<ruby>実<rt>じつ</rt></ruby>は、<ruby>私<rt>わたし</rt></ruby>は<ruby>月<rt>つき</rt></ruby>の<ruby>世<rt>せ</rt></ruby><ruby>界<rt>かい</rt></ruby>の<ruby>者<rt>もの</rt></ruby>です。<ruby>今<rt>いま</rt></ruby>まで<ruby>育<rt>そだ</rt></ruby>てていただきましたが、<ruby>今<rt>こん</rt></ruby><ruby>度<rt>ど</rt></ruby>の<ruby>満<rt>まん</rt></ruby><ruby>月<rt>げつ</rt></ruby>の<ruby>夜<rt>よる</rt></ruby>には、<ruby>月<rt>つき</rt></ruby>へ<ruby>帰<rt>かえ</rt></ruby>らなくてはなりません」</p>
+        <div class="translation">“其实，我是月亮世界的人。承蒙您们一直以来的养育之恩，但在下一次满月之夜，我必须得回月亮上去了。”</div>
+    </div>
+</div>
+
+<!-- 第6段落 -->
+<div class="reading-block">
+    <div class="sentence-group">
+        <p class="japanese">それを<ruby>知<rt>し</rt></ruby>った<ruby>帝<rt>みかど</rt></ruby>は、<ruby>満<rt>まん</rt></ruby><ruby>月<rt>げつ</rt></ruby>の<ruby>夜<rt>よる</rt></ruby>、<ruby>何<rt>なん</rt></ruby><ruby>千<rt>ぜん</rt></ruby><ruby>人<rt>にん</rt></ruby>もの<ruby>兵<rt>へい</rt></ruby><ruby>士<rt>し</rt></ruby>を<ruby>送<rt>おく</rt></ruby>って、かぐや<ruby>姫<rt>ひめ</rt></ruby>の<ruby>家<rt>いえ</rt></ruby>の<ruby>周<rt>まわ</rt></ruby>りを<ruby>守<rt>まも</rt></ruby>らせました。</p>
+        <div class="translation">得知此事的皇帝，在满月之夜派出了成千上万的士兵，把辉夜姬家的周围守卫起来。</div>
+    </div>
+    <div class="sentence-group">
+        <p class="japanese">なんとかして、かぐや<ruby>姫<rt>ひめ</rt></ruby>を<ruby>引<rt>ひ</rt></ruby>き<ruby>止<rt>と</rt></ruby>めようとしたのです。</p>
+        <div class="translation">他想尽办法想要留住辉夜姬。</div>
+    </div>
+    <div class="sentence-group">
+        <p class="japanese">けれど<ruby>真<rt>ま</rt></ruby><ruby>夜<rt>よ</rt></ruby><ruby>中<rt>なか</rt></ruby>になって、<ruby>月<rt>つき</rt></ruby>が<ruby>高<rt>たか</rt></ruby>く<ruby>昇<rt>のぼ</rt></ruby>ると、<ruby>兵<rt>へい</rt></ruby><ruby>士<rt>し</rt></ruby>たちは<ruby>突<rt>とつ</rt></ruby><ruby>然<rt>ぜん</rt></ruby><ruby>眠<rt>ねむ</rt></ruby>ってしまいました。</p>
+        <div class="translation">但是到了半夜，当月亮高高升起时，士兵们突然都睡着了。</div>
+    </div>
+    <div class="sentence-group">
+        <p class="japanese">かぐや<ruby>姫<rt>ひめ</rt></ruby>はその<ruby>間<rt>あいだ</rt></ruby>に、<ruby>月<rt>つき</rt></ruby>の<ruby>使<rt>つか</rt></ruby>いの<ruby>車<rt>くるま</rt></ruby>に<ruby>乗<rt>の</rt></ruby>って、<ruby>月<rt>つき</rt></ruby>に<ruby>帰<rt>かえ</rt></ruby>ってしまいました。</p>
+        <div class="translation">辉夜姬趁着这个时候，坐上月亮使者的车，回到了月亮上。</div>
+    </div>
+    <div class="sentence-group">
+        <p class="japanese">そのことを<ruby>知<rt>し</rt></ruby>ったお<ruby>爺<rt>じい</rt></ruby>さんもお<ruby>婆<rt>ばあ</rt></ruby>さんも<ruby>帝<rt>みかど</rt></ruby>も、とても<ruby>悲<rt>かな</rt></ruby>しんだ<span class="vocab-word" data-info="ということです：听说，据说（表示传闻）。">ということです</span>。</p>
+        <div class="translation">据说得知此事的老爷爷、老奶奶和皇帝，都感到非常悲伤。</div>
+    </div>
+</div>
+
+</div>
+
+<div id="smart-tooltip"></div>
+
+<!-- Fixed Bottom Audio Player -->
+<div class="audio-wrapper">
+    <div class="audio-player">
+        <button id="play-btn" class="play-btn" onclick="togglePlay()">
+            <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+        </button>
+        <div class="progress-container" id="progress-container">
+            <div class="progress-bg">
+                <div class="progress-bar" id="progress-bar"></div>
+            </div>
+        </div>
+        <div class="time-display">
+            <span id="current-time">00:00</span> / <span id="duration">00:00</span>
+        </div>
+        <button id="loop-btn" class="loop-btn" onclick="toggleLoop()" title="ループ再生">
+            <svg viewBox="0 0 24 24"><path d="M12 4V1L8 5l4 4V6c3.31 0 6 2.69 6 6 0 1.01-.25 1.97-.7 2.8l1.46 1.46C19.54 15.03 20 13.57 20 12c0-4.42-3.58-8-8-8zm0 14c-3.31 0-6-2.69-6-6 0-1.01.25-1.97.7-2.8L5.24 7.74C4.46 8.97 4 10.43 4 12c0 4.42 3.58 8 8 8v3l4-4-4-4v3z"/></svg>
+        </button>
+        <audio id="audio-element" src="audio/kaguya.mp3"></audio>
+    </div>
+</div>
+
+<div class="footer">語り継がれる物語</div>
+
+<script>
+    // 译文切换
+    function toggleTranslation() {
+        const btn = document.getElementById('trans-btn');
+        const isActive = btn.classList.toggle('active');
+        
+        document.querySelectorAll('.translation').forEach(el => {
+            el.style.display = isActive ? 'block' : 'none';
+        });
+    }
+
+    // 智能自适应气泡逻辑
+    const tooltip = document.getElementById('smart-tooltip');
+    let activeWord = null;
+
+    // --- Audio Player Logic ---
+    const audio = document.getElementById('audio-element');
+    const playBtn = document.getElementById('play-btn');
+    const progressBar = document.getElementById('progress-bar');
+    const progressContainer = document.getElementById('progress-container');
+    const currentTimeEl = document.getElementById('current-time');
+    const durationEl = document.getElementById('duration');
+    const loopBtn = document.getElementById('loop-btn');
+
+    let isLooping = false;
+
+    function toggleLoop() {
+        isLooping = !isLooping;
+        audio.loop = isLooping;
+        loopBtn.classList.toggle('active', isLooping);
+    }
+
+    function togglePlay() {
+        if (audio.paused) {
+            audio.play().catch(e => console.log("Audio play error (no source set):", e));
+            playBtn.classList.add('playing');
+            playBtn.innerHTML = '<svg viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>';
+        } else {
+            audio.pause();
+            playBtn.classList.remove('playing');
+            playBtn.innerHTML = '<svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>';
+        }
+    }
+
+    audio.addEventListener('timeupdate', () => {
+        if (audio.duration) {
+            const percent = (audio.currentTime / audio.duration) * 100;
+            progressBar.style.width = percent + '%';
+            currentTimeEl.textContent = formatTime(audio.currentTime);
+        }
+    });
+
+    audio.addEventListener('loadedmetadata', () => {
+        durationEl.textContent = formatTime(audio.duration);
+    });
+
+    audio.addEventListener('ended', () => {
+        playBtn.classList.remove('playing');
+        playBtn.innerHTML = '<svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>';
+        progressBar.style.width = '0%';
+        currentTimeEl.textContent = "00:00";
+    });
+
+    function seek(e) {
+        if (!audio.duration) return;
+        const rect = progressContainer.getBoundingClientRect();
+        const width = rect.width;
+        const clientX = e.type.startsWith('touch') ? e.touches[0].clientX : e.clientX;
+        let clickX = clientX - rect.left;
+        clickX = Math.max(0, Math.min(clickX, width));
+        audio.currentTime = (clickX / width) * audio.duration;
+    }
+
+    let isDragging = false;
+
+    progressContainer.addEventListener('mousedown', (e) => {
+        isDragging = true;
+        seek(e);
+    });
+
+    window.addEventListener('mousemove', (e) => {
+        if (isDragging) {
+            seek(e);
+        }
+    });
+
+    window.addEventListener('mouseup', () => {
+        isDragging = false;
+    });
+
+    progressContainer.addEventListener('touchstart', (e) => {
+        isDragging = true;
+        seek(e);
+    });
+
+    window.addEventListener('touchmove', (e) => {
+        if (isDragging) {
+            e.preventDefault(); 
+            seek(e);
+        }
+    }, { passive: false });
+
+    window.addEventListener('touchend', () => {
+        isDragging = false;
+    });
+
+    function formatTime(seconds) {
+        if (isNaN(seconds)) return "00:00";
+        const m = Math.floor(seconds / 60);
+        const s = Math.floor(seconds % 60);
+        return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+    }
+
+    // --- 词汇气泡逻辑 ---
+    document.querySelectorAll('.vocab-word').forEach(word => {
+        word.addEventListener('click', function(e) {
+            e.stopPropagation();
+            if (activeWord === this) { hideTooltip(); return; }
+
+            activeWord = this;
+            tooltip.innerText = this.getAttribute('data-info');
+            tooltip.style.display = 'block';
+
+            const rect = this.getBoundingClientRect();
+            const tipRect = tooltip.getBoundingClientRect();
+            const screenWidth = window.innerWidth;
+            
+            let left = rect.left + (rect.width / 2) - (tipRect.width / 2);
+            let top = rect.top + window.scrollY - tipRect.height - 12;
+
+            const margin = 15;
+            let arrowOffset = '50%';
+
+            if (left < margin) {
+                left = margin;
+                arrowOffset = (rect.left + rect.width/2 - margin) + 'px';
+            } else if (left + tipRect.width > screenWidth - margin) {
+                left = screenWidth - tipRect.width - margin;
+                arrowOffset = (rect.left + rect.width/2 - left) + 'px';
+            }
+
+            tooltip.style.left = left + 'px';
+            tooltip.style.top = top + 'px';
+            tooltip.style.opacity = '1';
+            
+            // 使用 CSS 变量更优雅地控制伪元素的箭头位置
+            tooltip.style.setProperty('--arrow-left', arrowOffset);
+        });
+    });
+
+    function hideTooltip() {
+        tooltip.style.opacity = '0';
+        setTimeout(() => { tooltip.style.display = 'none'; }, 200);
+        activeWord = null;
+    }
+
+    document.addEventListener('click', hideTooltip);
+    window.addEventListener('resize', hideTooltip);
+
+</script>
+
+</body>
+</html>

@@ -1,0 +1,1615 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>日语动词全能助手</title>
+    <style>
+        :root {
+            --primary: #5e60ce; 
+            --accent: #48bfe3;
+            --bg: #f8f9fa;
+            --text: #2b2d42;
+            --sticky-bg: #fff;
+            --border: #e9ecef;
+            --success: #2ecc71;
+            --error: #e74c3c;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+
+        ruby { font-family: "Hiragino Sans", sans-serif; }
+        rt { font-size: 0.6em; color: #888; user-select: none; }
+
+        /* --- 导航栏 --- */
+        .nav-bar {
+            background: #fff;
+            padding: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            z-index: 100;
+            flex-shrink: 0;
+        }
+
+        .nav-btn {
+            flex: 1;
+            padding: 10px 5px;
+            border: none;
+            border-radius: 8px;
+            background: #f1f3f5;
+            color: #868e96;
+            font-weight: bold;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: 0.2s;
+            white-space: nowrap;
+        }
+
+        .nav-btn.active {
+            background: var(--primary);
+            color: #fff;
+            box-shadow: 0 2px 5px rgba(94, 96, 206, 0.3);
+        }
+
+        /* --- 内容容器 --- */
+        .content-container {
+            flex: 1;
+            overflow: hidden; 
+            position: relative;
+        }
+
+        .tab-view {
+            display: none;
+            height: 100%;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .tab-view.active { display: block; }
+
+        /* --- 规则板块样式 --- */
+        .rules-wrapper { padding: 20px; max-width: 600px; margin: 0 auto; }
+        .rule-group { background: #fff; border-radius: 12px; margin-bottom: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.03); border: 1px solid var(--border); overflow: hidden; }
+        details { width: 100%; }
+        summary { padding: 15px; font-weight: bold; cursor: pointer; list-style: none; display: flex; justify-content: space-between; align-items: center; background-color: #fff; }
+        summary::after { content: "▼"; font-size: 0.8rem; color: #ccc; transition: transform 0.2s; }
+        details[open] summary::after { transform: rotate(180deg); }
+        .rule-content { padding: 15px; font-size: 0.95rem; line-height: 1.6; color: #555; background: #fdfdfd; }
+        .usage-section { margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px dashed #eee; }
+        .section-tag { font-size: 0.75rem; font-weight: bold; color: #fff; padding: 2px 6px; border-radius: 4px; margin-right: 5px; vertical-align: middle; }
+        .usage-section .section-tag { background-color: #48bfe3; }
+        .rule-table-box .section-tag { background-color: #a29bfe; }
+        .example-box-new .section-tag { background-color: #2ecc71; }
+        .sm-table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.9rem; }
+        .sm-table th, .sm-table td { border: 1px solid #eee; padding: 8px; text-align: left; }
+        .sm-table th { background: #f8f9fa; color: #666; }
+        .example-box-new { background: #f1f8f6; padding: 10px; border-radius: 6px; border: 1px solid #e1f0e6; }
+        .example-box-new ul { margin: 5px 0 0 0; padding-left: 20px; color: #333; }
+        .example-box-new li { margin-bottom: 4px; }
+
+        /* --- 变形表样式 (核心修复) --- */
+        .table-wrapper { position: relative; overflow: auto; height: 100%; background: #fff; }
+        
+        table.conjugation-table { 
+            border-collapse: separate; 
+            border-spacing: 0; 
+            white-space: nowrap; 
+            font-size: 0.95rem; 
+        }
+
+        .conjugation-table th, .conjugation-table td { 
+            padding: 12px 15px; 
+            border-bottom: 1px solid var(--border); 
+            border-right: 1px solid var(--border); 
+            vertical-align: middle; 
+            text-align: center; /* 让文字居中更好看 */
+        }
+        
+        /* 表头固定 */
+        .conjugation-table th { background: #f8f9fa; position: sticky; top: 0; z-index: 20; font-weight: bold; color: var(--primary); border-bottom: 2px solid #dee2e6; }
+        
+        /* 首列固定 */
+        .conjugation-table th:first-child, .conjugation-table td:first-child { position: sticky; left: 0; z-index: 10; background-color: var(--sticky-bg); border-right: 2px solid #dee2e6; font-weight: bold; }
+        .conjugation-table th:first-child { z-index: 30; }
+
+        /* --- 🖥️ 电脑端样式 --- */
+        .desktop-only { display: block; }
+        .desktop-only table { 
+            width: 100%; /* 关键修复：强制撑满屏幕宽度 */
+        }
+
+        /* --- 📱 手机端样式 (转置后) --- */
+        .mobile-only { display: none; }
+
+        @media screen and (max-width: 600px) {
+            .desktop-only { display: none; }
+            .mobile-only { display: block; }
+            
+            /* 手机端不强制100%，允许横向滚动 */
+            .mobile-only table { width: auto; }
+            
+            /* 手机端第一列(变形名)样式微调 */
+            .mobile-only .conjugation-table td:first-child { 
+                color: #888; 
+                background: #fafafa; 
+                font-size: 0.85rem; 
+                min-width: 80px;
+                text-align: left;
+            }
+            .mobile-only .conjugation-table th { color: #333; }
+        }
+
+        /* --- 练习区样式 --- */
+        .quiz-wrapper { padding: 20px; max-width: 500px; margin: 0 auto; box-sizing: border-box; }
+        .settings-panel { background: #fff; padding: 15px; border-radius: 12px; margin-bottom: 20px; border: 1px solid var(--border); }
+        .checkbox-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 15px; padding-top: 10px; border-top: 1px solid #eee; }
+        .card { background: #fff; padding: 30px 20px; border-radius: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.05); margin-bottom: 20px; text-align: center; border: 1px solid var(--border); }
+        .big-word { font-size: 2.8rem; color: var(--text); margin: 15px 0; line-height: 1.2; }
+        .target-badge { display: inline-block; background: var(--accent); color: #fff; padding: 6px 15px; border-radius: 20px; font-size: 0.9rem; margin-bottom: 25px; font-weight: bold; }
+        input[type="text"] { width: 100%; padding: 15px; font-size: 1.3rem; border: 2px solid #e9ecef; border-radius: 10px; text-align: center; box-sizing: border-box; outline: none; background: #f8f9fa; transition: all 0.3s; }
+        input:focus { border-color: var(--primary); background: #fff; }
+        .correct { border-color: var(--success) !important; background: #e8f8f0 !important; }
+        .wrong { border-color: var(--error) !important; background: #fceceb !important; }
+        .btn-main { width: 100%; padding: 16px; background: var(--primary); color: white; border: none; border-radius: 12px; font-size: 1.1rem; font-weight: bold; cursor: pointer; box-shadow: 0 4px 12px rgba(94, 96, 206, 0.3); }
+        .btn-secondary { width: 100%; padding: 12px; background: transparent; color: #999; border: none; font-size: 0.9rem; font-weight: bold; cursor: pointer; margin-top: 10px; }
+        .result-score { font-size: 4rem; color: var(--primary); font-weight: bold; margin: 10px 0; }
+        .hidden { display: none !important; }
+        
+    </style>
+</head>
+<body>
+
+<div class="nav-bar" style="position: relative; justify-content: center; align-items: center;">
+    <a href="../practice.html" style="position: absolute; left: 15px; color: #868e96; text-decoration: none; font-size: 0.9rem; font-weight: bold; display: flex; align-items: center; gap: 4px;">
+        ← <span style="display: none; @media(min-width: 400px){ display: inline; }">Home</span>
+    </a>
+    <div style="display: flex; gap: 8px; width: 100%; max-width: 400px; margin-left: 40px;">
+        <button class="nav-btn active" onclick="switchTab('rules')">📜 变形规则</button>
+        <button class="nav-btn" onclick="switchTab('study')">📚 变形表</button>
+        <button class="nav-btn" onclick="switchTab('practice')">⚔️ 假名特训</button>
+    </div>
+</div>
+
+<div class="content-container">
+
+    <div id="tab-rules" class="tab-view active">
+        <div class="rules-wrapper">
+            <div class="rule-group">
+                <details open>
+                    <summary>💡 0. 动词的三大分类 (基础)</summary>
+                    <div class="rule-content">
+                        <p style="margin-top:0; color:#666; font-size:0.9em;">一切变形的前提。拿到一个动词，先看它属于哪一类。</p>
+                        
+                        <div class="cat-box" style="border-left: 4px solid #4a90e2; background:#f0f7ff; padding:10px; margin-bottom:8px;">
+                            <strong>第一类：五段动词</strong>
+                            <div style="font-size:0.85em; color:#555; margin-top:4px;">
+                                <b>特征：</b>非「る」结尾，或「る」前是 a/u/o 段。<br>
+                                <b>例子：</b><ruby>行<rt>い</rt></ruby>く、<ruby>飲<rt>の</rt></ruby>む、<ruby>作<rt>つく</rt></ruby>る
+                            </div>
+                        </div>
+
+                        <div class="cat-box" style="border-left: 4px solid #9b59b6; background:#f8f0ff; padding:10px; margin-bottom:8px;">
+                            <strong>第二类：一段动词</strong>
+                            <div style="font-size:0.85em; color:#555; margin-top:4px;">
+                                <b>特征：</b>以「る」结尾，且「る」前是 i/e 段。<br>
+                                <b>例子：</b><ruby>食<rt>た</rt></ruby>べる、<ruby>見<rt>み</rt></ruby>る
+                            </div>
+                        </div>
+
+                        <div class="cat-box" style="border-left: 4px solid #e67e22; background:#fff8f0; padding:10px; margin-bottom:8px;">
+                            <strong>第三类：不规则动词</strong>
+                            <div style="font-size:0.85em; color:#555; margin-top:4px;">
+                                <b>特征：</b>仅此两个。<br>
+                                <b>例子：</b><ruby>来<rt>く</rt></ruby>る (来)、する (做)
+                            </div>
+                        </div>
+
+                        <div class="cat-box" style="border-left: 4px solid #f1c40f; background:#fffcf0; padding:10px; margin-top:12px;">
+                            <strong>⚠️ 特殊的一类动词 (陷阱!)</strong>
+                            <div style="font-size:0.85em; color:#555; margin-top:6px;">
+                                <p style="margin:0 0 8px 0; line-height:1.5;">
+                                    <b>特征：</b>虽然以「iruh / eru」结尾（长得像二类），但其实是<b>一类动词</b>！<br>
+                                    <b>变形：</b>必须按一类动词变形 (发生促音变)。
+                                </p>
+                                
+                                <b>🔥 高频陷阱词表：</b>
+                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px 10px; margin-top: 8px;">
+                                    <div>• <ruby>帰<rt>かえ</rt></ruby>る (回) → <ruby>帰<rt>かえ</rt></ruby><strong>って</strong></div>
+                                    <div>• <ruby>切<rt>き</rt></ruby>る (切) → <ruby>切<rt>き</rt></ruby><strong>って</strong></div>
+                                    <div>• <ruby>知<rt>し</rt></ruby>る (知) → <ruby>知<rt>し</rt></ruby><strong>って</strong></div>
+                                    <div>• <ruby>入<rt>はい</rt></ruby>る (进) → <ruby>入<rt>はい</rt></ruby><strong>って</strong></div>
+                                    <div>• <ruby>走<rt>はし</rt></ruby>る (跑) → <ruby>走<rt>はし</rt></ruby><strong>って</strong></div>
+                                    <div>• <ruby>要<rt>い</rt></ruby>る (需) → <ruby>要<rt>い</rt></ruby><strong>って</strong></div>
+                                    <div>• <ruby>減<rt>へ</rt></ruby>る (减) → <ruby>減<rt>へ</rt></ruby><strong>って</strong></div>
+                                    <div>• <ruby>滑<rt>すべ</rt></ruby>る (滑) → <ruby>滑<rt>すべ</rt></ruby><strong>って</strong></div>
+                                    
+                                    <div>• <ruby>焦<rt>あせ</rt></ruby>る (急) → <ruby>焦<rt>あせ</rt></ruby><strong>って</strong></div>
+                                    <div>• <ruby>蹴<rt>け</rt></ruby>る (踢) → <ruby>蹴<rt>け</rt></ruby><strong>って</strong></div>
+                                    <div>• <ruby>喋<rt>しゃべ</rt></ruby>る (聊) → <ruby>喋<rt>しゃべ</rt></ruby><strong>って</strong></div>
+                                    <div>• <ruby>握<rt>にぎ</rt></ruby>る (握) → <ruby>握<rt>にぎ</rt></ruby><strong>って</strong></div>
+                                    <div>• <ruby>練<rt>ね</rt></ruby>る (练) → <ruby>練<rt>ね</rt></ruby><strong>って</strong></div>
+                                    <div>• <ruby>交<rt>まじ</rt></ruby>る (混) → <ruby>交<rt>まじ</rt></ruby><strong>って</strong></div>
+                                    <div>• <ruby>限<rt>かぎ</rt></ruby>る (限) → <ruby>限<rt>かぎ</rt></ruby><strong>って</strong></div>
+                                    <div>• <ruby>散<rt>ち</rt></ruby>る (散) → <ruby>散<rt>ち</rt></ruby><strong>って</strong></div>
+                                </div>
+                            </div>
+                        </div>
+                </details>
+            </div>
+             <div class="rule-group">
+                <details>
+                    <summary>1. ます形</summary>
+                    <div class="rule-content">
+                        <div class="usage-section">
+                            <span class="section-tag">🔰 用法</span>
+                            <p><strong>敬体（礼貌语）。</strong><br>用于对长辈、上级、陌生人说话，或者在课堂、职场等正式场合使用。表示“做...”。</p>
+                        </div>
+
+                        <div class="rule-table-box">
+                            <span class="section-tag">🔧 规则</span>
+                            <table class="sm-table">
+                                <thead>
+                                    <tr>
+                                        <th>类型</th>
+                                        <th>变形规则</th>
+                                        <th>例子</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>五段</td>
+                                        <td>词尾 u 段 → <strong>i 段</strong> + ます</td>
+                                        <td><ruby>行<rt>い</rt></ruby>く → <ruby>行<rt>い</rt></ruby><strong>き</strong>ます</td>
+                                    </tr>
+                                    <tr>
+                                        <td>一段</td>
+                                        <td>去掉 る + ます</td>
+                                        <td><ruby>食<rt>た</rt></ruby>べる → <ruby>食<rt>た</rt></ruby>べます</td>
+                                    </tr>
+                                    <tr>
+                                        <td rowspan="2">不规则</td>
+                                        <td>来る (kuru)</td>
+                                        <td>→ <strong><ruby>来<rt>き</rt></ruby></strong>ます (kimasu)</td>
+                                    </tr>
+                                    <tr>
+                                        <td>する (suru)</td>
+                                        <td>→ します (shimasu)</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div class="cat-box" style="border-left: 4px solid #a29bfe; background:#f4f3ff; padding:10px; margin-top:12px;">
+                            <strong>💡 知识点：第一连用形 (Masu形词干)</strong>
+                            <div style="font-size:0.9em; color:#555; margin-top:5px; line-height:1.6;">
+                                <p style="margin:0 0 8px 0;">
+                                    动词变成「ます形」后，<b>去掉「ます」剩下的部分</b>，在语法上称为“第一连用形” (或称ます形词干)。<br>
+                                    它是很多重要语法接续的基础：
+                                </p>
+                                <ul style="margin:0; padding-left:20px;">
+                                    <li><ruby>行<rt>い</rt></ruby>き<span style="color:#ccc;text-decoration:line-through">ます</span> + たい → <b><ruby>行<rt>い</rt></ruby>きたい</b> (想去)</li>
+                                    <li><ruby>読<rt>よ</rt></ruby>み<span style="color:#ccc;text-decoration:line-through">ます</span> + ながら → <b><ruby>読<rt>よ</rt></ruby>みながら</b> (一边读一边...)</li>
+                                    <li><ruby>食<rt>た</rt></ruby>べ<span style="color:#ccc;text-decoration:line-through">ます</span> + やすい → <b><ruby>食<rt>た</rt></ruby>べやすい</b> (容易吃)</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                    </div>
+                </details>
+            </div>
+           <div class="rule-group">
+                <details>
+                    <summary>2. て形 </summary>
+                    <div class="rule-content">
+                        <div class="usage-section">
+                            <span class="section-tag">🔰 用法</span>
+                            <p><strong>中顿 / 请求 / 进行时。</strong><br>
+                            ① <b>连接动作</b>：去超市，<b>然后</b>回家。<br>
+                            ② <b>请求</b>：请做某事 (～てください)。<br>
+                            ③ <b>状态</b>：正在做某事 (～ています)。</p>
+                        </div>
+                        
+                        <div class="rule-table-box">
+                            <span class="section-tag">🔧 变形规则表</span>
+                            <table class="sm-table">
+                                <thead>
+                                    <tr>
+                                        <th>类型</th>
+                                        <th>规则</th>
+                                        <th>例子</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>五段 (う/つ/る)</td>
+                                        <td>促音变 → <strong>って</strong></td>
+                                        <td><ruby>待<rt>ま</rt></ruby>つ → <ruby>待<rt>ま</rt></ruby><strong>って</strong></td>
+                                    </tr>
+                                    <tr>
+                                        <td>五段 (む/ぶ/ぬ)</td>
+                                        <td>拨音变 → <strong>んで</strong></td>
+                                        <td><ruby>飲<rt>の</rt></ruby>む → <ruby>飲<rt>の</rt></ruby><strong>んで</strong></td>
+                                    </tr>
+                                    <tr>
+                                        <td>五段 (く)</td>
+                                        <td>イ音变 → <strong>いて</strong></td>
+                                        <td><ruby>書<rt>か</rt></ruby>く → <ruby>書<rt>か</rt></ruby><strong>いて</strong></td>
+                                    </tr>
+                                    <tr>
+                                        <td>五段 (ぐ)</td>
+                                        <td>イ音变+浊 → <strong>いで</strong></td>
+                                        <td><ruby>泳<rt>およ</rt></ruby>ぐ → <ruby>泳<rt>およ</rt></ruby><strong>いで</strong></td>
+                                    </tr>
+                                    <tr>
+                                        <td>五段 (す)</td>
+                                        <td>无音变 → <strong>して</strong></td>
+                                        <td><ruby>話<rt>はな</rt></ruby>す → <ruby>話<rt>はな</rt></ruby><strong>して</strong></td>
+                                    </tr>
+                                    <tr style="background:#fff3cd;">
+                                        <td>五段 (特例)</td>
+                                        <td>行く (iku) → <strong>って</strong></td>
+                                        <td><ruby>行<rt>い</rt></ruby>く → <ruby>行<rt>い</rt></ruby><strong>って</strong></td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td>一段</td>
+                                        <td>去掉 る + <strong>て</strong></td>
+                                        <td><ruby>見<rt>み</rt></ruby>る → <ruby>見<rt>み</rt></ruby>て</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td rowspan="2">不规则</td>
+                                        <td>来る (kuru)</td>
+                                        <td>→ <strong><ruby>来<rt>き</rt></ruby>て</strong> (kite)</td>
+                                    </tr>
+                                    <tr>
+                                        <td>する (suru)</td>
+                                        <td>→ <strong>して</strong> (shite)</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </details>
+            </div>
+            <div class="rule-group">
+                <details>
+                    <summary>3. た形</summary>
+                    <div class="rule-content">
+                        <div class="usage-section">
+                            <span class="section-tag">🔰 用法</span>
+                            <p><strong>简体过去式。</strong><br>
+                            表示动作已经完成。<br>
+                           </p>
+                        </div>
+
+                        <div class="rule-table-box">
+                            <span class="section-tag">🔧 简体规则 (た形)</span>
+                            <div style="background:#e8f8f0; padding:10px; border-radius:6px; text-align:center; margin-bottom:12px; border:1px solid #d1e7dd; color:#0f5132;">
+                                <strong>⚡️ 变形秒懂技巧</strong><br>
+                                变形规则与「て形」完全一致！<br>
+                                把 <b style="color:#d63031">て</b> 换成 <b style="color:#d63031">た</b>，<b style="color:#d63031">で</b> 换成 <b style="color:#d63031">だ</b>。
+                            </div>
+                            
+                            <table class="sm-table">
+                                <thead>
+                                    <tr><th>类型</th><th>对照 (て → た)</th><th>例子</th></tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>五段 (促音)</td>
+                                        <td>って → <strong>った</strong></td>
+                                        <td><ruby>買<rt>か</rt></ruby>う → <ruby>買<rt>か</rt></ruby><strong>った</strong></td>
+                                    </tr>
+                                    <tr>
+                                        <td>五段 (拨音)</td>
+                                        <td>んで → <strong>んだ</strong></td>
+                                        <td><ruby>飲<rt>の</rt></ruby>む → <ruby>飲<rt>の</rt></ruby><strong>んだ</strong></td>
+                                    </tr>
+                                    <tr>
+                                        <td>五段 (イ音)</td>
+                                        <td>いて → <strong>いた</strong></td>
+                                        <td><ruby>書<rt>か</rt></ruby>く → <ruby>書<rt>か</rt></ruby><strong>いた</strong></td>
+                                    </tr>
+                                    <tr>
+                                        <td>一段</td>
+                                        <td>て → <strong>た</strong></td>
+                                        <td><ruby>見<rt>み</rt></ruby>る → <ruby>見<rt>み</rt></ruby><strong>た</strong></td>
+                                    </tr>
+                                    <tr>
+                                        <td rowspan="2">不规则</td>
+                                        <td><ruby>来<rt>き</rt></ruby>て → <strong><ruby>来<rt>き</rt></ruby>た</strong></td>
+                                        <td>(读音不变)</td>
+                                    </tr>
+                                    <tr>
+                                        <td>して → <strong>した</strong></td>
+                                        <td>(做过)</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div class="cat-box" style="border-left: 4px solid #4a90e2; background:#f0f7ff; padding:10px; margin-top:12px;">
+                            <strong>💡 补充：敬体过去式 (ました)</strong>
+                            <div style="font-size:0.9em; color:#555; margin-top:5px; line-height:1.6;">
+                                <p style="margin:0 0 8px 0;">
+                                    上面的「た形」是<b>简体</b>。在正式场合必须使用<b>敬体过去式</b>。<br>
+                                    <b>规则：</b>将「ます」换成「<strong>ました</strong>」。
+                                </p>
+                                <ul style="margin:0; padding-left:20px;">
+                                    <li><ruby>行<rt>い</rt></ruby>く → <ruby>行<rt>い</rt></ruby>き<b>ました</b> (去了)</li>
+                                    <li><ruby>来<rt>く</rt></ruby>る → <ruby>来<rt>き</rt></ruby><b>ました</b> (来了)</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </details>
+            </div>
+
+            <div class="rule-group">
+                <details>
+                    <summary>4. ない形</summary>
+                    <div class="rule-content">
+                        <div class="usage-section">
+                            <span class="section-tag">🔰 用法</span>
+                            <p><strong>简体否定。</strong><br>
+                            1. 表示“不做...” (行かない！不去！)。<br>
+                        </div>
+
+                        <div class="rule-table-box">
+                            <span class="section-tag">🔧 规则</span>
+                            <table class="sm-table">
+                                <thead>
+                                    <tr><th>类型</th><th>规则</th><th>例子</th></tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>五段 (一般)</td>
+                                        <td>u 段 → <strong>a 段</strong> + ない</td>
+                                        <td><ruby>書<rt>か</rt></ruby>く → <ruby>書<rt>か</rt></ruby><strong>か</strong>ない</td>
+                                    </tr>
+                                    <tr style="background:#fff3cd;">
+                                        <td>五段 (特例)</td>
+                                        <td>词尾为う → <strong>わ</strong> + ない</td>
+                                        <td><ruby>会<rt>あ</rt></ruby>う → <ruby>会<rt>あ</rt></ruby><strong>わ</strong>ない</td>
+                                    </tr>
+                                    <tr>
+                                        <td>一段</td>
+                                        <td>去掉 る + ない</td>
+                                        <td><ruby>見<rt>み</rt></ruby>る → <ruby>見<rt>み</rt></ruby>ない</td>
+                                    </tr>
+                                    <tr>
+                                        <td rowspan="2">不规则</td>
+                                        <td>来る (kuru)</td>
+                                        <td>→ <strong><ruby>来<rt>こ</rt></ruby></strong>ない (konai)</td>
+                                    </tr>
+                                    <tr>
+                                        <td>する (suru)</td>
+                                        <td>→ <strong>し</strong>ない (shinai)</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div class="cat-box" style="border-left: 4px solid #4a90e2; background:#f0f7ff; padding:10px; margin-top:12px;">
+                            <strong>💡 补充：敬体否定 (ません)</strong>
+                            <div style="font-size:0.9em; color:#555; margin-top:5px; line-height:1.6;">
+                                <p style="margin:0 0 8px 0;">
+                                    上面的「ない形」是简体。在对长辈、上级说话时，要使用<b>敬体</b>。<br>
+                                    <b>否定：</b>将「ます」换成「<strong>ません</strong>」。<br>
+                                    <b>过去否定：</b>将「ます」换成「<strong>ませんでした</strong>」。
+                                </p>
+                                <ul style="margin:0; padding-left:20px;">
+                                    <li><ruby>行<rt>い</rt></ruby>きます → <ruby>行<rt>い</rt></ruby>き<b>ません</b> (不去)</li>
+                                    <li><ruby>食<rt>た</rt></ruby>べます → <ruby>食<rt>た</rt></ruby>べ<b>ませんでした</b> (没吃过/当时没吃)</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <div class="cat-box" style="border-left: 4px solid #a29bfe; background:#f4f3ff; padding:10px; margin-top:12px;">
+                            <strong>🎓 知识点：未然形 (Mizenkei)</strong>
+                            <div style="font-size:0.9em; color:#555; margin-top:5px; line-height:1.6;">
+                                <p style="margin:0 0 8px 0;">
+                                    变形规则中，接续「ない」之前的部分（如 a段音）被称为<b>“未然形”</b>。字面意思是“尚未发生的形式”。<br>
+                                    它是很多重要变形的基础：
+                                </p>
+                                <ul style="margin:0; padding-left:20px;">
+                                    <li><ruby>書<rt>か</rt></ruby>か + ない → <b><ruby>書<rt>か</rt></ruby>かない</b> (否定)</li>
+                                    <li><ruby>書<rt>か</rt></ruby>か + れる → <b><ruby>書<rt>か</rt></ruby>かれる</b> (被动)</li>
+                                    <li><ruby>書<rt>か</rt></ruby>か + せる → <b><ruby>書<rt>か</rt></ruby>かせる</b> (使役)</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                    </div>
+                </details>
+            </div>
+           <div class="rule-group">
+                <details>
+                    <summary>5. 能动形</summary>
+                    <div class="rule-content">
+                        <div class="usage-section">
+                            <span class="section-tag">🔰 用法</span>
+                            <p><strong>能力 / 可能。</strong><br>
+                            表示“具有某种能力”或“在某种条件下可行”。<br>
+                            <span style="color:#e74c3c; font-size:0.9em;">⚠️ 注意：对象语的助词「を」通常要变成「が」。</span></p>
+                            
+                            <div style="background:#f9f9f9; border-left:3px solid #ccc; padding:5px 10px; margin-top:8px; font-size:0.9em; color:#555;">
+                                <strong>🗣️ 例句：</strong><br>
+                                • 日本語<b>が</b><ruby>話<rt>はな</rt></ruby>せます。<br>
+                                &nbsp;&nbsp;(我<b>会</b>说日语。)<br>
+                                • <ruby>納豆<rt>なっとう</rt></ruby><b>が</b><ruby>食<rt>た</rt></ruby>べられます。<br>
+                                &nbsp;&nbsp;(我<b>能</b>吃纳豆。)
+                            </div>
+                        </div>
+
+                        <div class="rule-table-box">
+                            <span class="section-tag">🔧 规则</span>
+                            <table class="sm-table">
+                                <thead>
+                                    <tr><th>类型</th><th>规则</th><th>例子</th></tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>五段</td>
+                                        <td>u 段 → <strong>e 段</strong> + る</td>
+                                        <td><ruby>行<rt>い</rt></ruby>く → <ruby>行<rt>い</rt></ruby><strong>け</strong>る</td>
+                                    </tr>
+                                    <tr>
+                                        <td>一段</td>
+                                        <td>去掉 る + られる</td>
+                                        <td><ruby>見<rt>み</rt></ruby>る → <ruby>見<rt>み</rt></ruby>られる</td>
+                                    </tr>
+                                    <tr>
+                                        <td rowspan="2">不规则</td>
+                                        <td>来る (kuru)</td>
+                                        <td>→ <strong><ruby>来<rt>こ</rt></ruby>られる</strong> (korareru)</td>
+                                    </tr>
+                                    <tr>
+                                        <td>する (suru)</td>
+                                        <td>→ <strong>できる</strong> (dekiru) <span style="font-size:0.8em; color:red;">*特!</span></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div class="cat-box" style="border-left: 4px solid #a29bfe; background:#f4f3ff; padding:10px; margin-top:12px;">
+                            <strong>💡 知识点：口语中的“去ら”现象</strong>
+                            <div style="font-size:0.9em; color:#555; margin-top:5px; line-height:1.6;">
+                                <p style="margin:0;">
+                                    一段动词的标准能动形是「～られる」，但在口语中，日本人常会偷懒省掉「ら」，变成「～れる」。<br>
+                                    例如：<ruby>食<rt>た</rt></ruby>べ<b>ら</b>れる → <ruby>食<rt>た</rt></ruby>べれる (能吃)。<br>
+                                    <span style="color:#888; font-size:0.85em;">*注意：考试或正式写作请使用标准形式。</span>
+                                </p>
+                            </div>
+                        </div>
+
+                    </div>
+                </details>
+            </div>
+            <div class="rule-group">
+                <details>
+                    <summary>6. 意志形</summary>
+                    <div class="rule-content">
+                        <div class="usage-section">
+                            <span class="section-tag">🔰 用法</span>
+                            <p><strong>意向 / 提议。</strong><br>
+                            1. <b>独白</b>：表达决心，打算做某事 (......ようと思う)。<br>
+                            2. <b>劝诱</b>：邀请对方“一起做吧！”。</p>
+                        </div>
+                        
+                        <div class="rule-table-box">
+                            <span class="section-tag">🔧 规则</span>
+                            <table class="sm-table">
+                                <thead><tr><th>类型</th><th>规则</th><th>例子</th></tr></thead>
+                                <tbody>
+                                    <tr>
+                                        <td>五段</td>
+                                        <td>u 段 → <strong>o 段</strong> + う</td>
+                                        <td><ruby>行<rt>い</rt></ruby>く → <ruby>行<rt>い</rt></ruby><strong>こう</strong></td>
+                                    </tr>
+                                    <tr>
+                                        <td>一段</td>
+                                        <td>去掉 る + よう</td>
+                                        <td><ruby>始<rt>はじ</rt></ruby>める → <ruby>始<rt>はじ</rt></ruby>めよう</td>
+                                    </tr>
+                                    <tr>
+                                        <td rowspan="2">不规则</td>
+                                        <td>来る (kuru)</td>
+                                        <td>→ <strong><ruby>来<rt>こ</rt></ruby>よう</strong> (koyou)</td>
+                                    </tr>
+                                    <tr>
+                                        <td>する (suru)</td>
+                                        <td>→ <strong>しよう</strong> (shiyou)</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div class="cat-box" style="border-left: 4px solid #a29bfe; background:#f4f3ff; padding:10px; margin-top:12px;">
+                            <strong>💡 补充：敬体形式 (ましょう)</strong>
+                            <div style="font-size:0.9em; color:#555; margin-top:5px; line-height:1.6;">
+                                <p style="margin:0 0 8px 0;">
+                                    上面的「意志形」是简体。在对长辈或正式场合表达提议，请使用<b>「ましょう」</b>。
+                                </p>
+                                <ul style="margin:0; padding-left:20px;">
+                                    <li><ruby>行<rt>い</rt></ruby>こう → <ruby>行<rt>い</rt></ruby>き<b>ましょう</b> (走吧)</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </details>
+            </div>
+
+            <div class="rule-group">
+                <details>
+                    <summary>7. 被动形</summary>
+                    <div class="rule-content">
+                        <div class="usage-section">
+                            <span class="section-tag">🔰 用法</span>
+                            <p><strong>主语承受动作。</strong><br>主要分为以下三种情况：</p>
+                            <ul style="margin:8px 0 0 0; padding-left:20px; color:#555; line-height:1.6; font-size:0.95em;">
+                                <li style="margin-bottom:6px;">
+                                    <b>1. 直接被动：</b>被别人做了某事。<br>
+                                    <span style="color:#333;">母に<ruby>褒<rt>ほ</rt></ruby>められました。</span><br>
+                                    <span style="color:#888; font-size:0.9em;">(被妈妈表扬了。)</span>
+                                </li>
+                                <li style="margin-bottom:6px;">
+                                    <b>2. 受害被动：</b>遭受了麻烦 (含“受害”语感)。<br>
+                                    <span style="color:#333;">雨に<ruby>降<rt>ふ</rt></ruby>られました。</span><br>
+                                    <span style="color:#888; font-size:0.9em;">(被雨淋了 / 遭雨淋。)</span>
+                                </li>
+                                <li>
+                                    <b>3. 公共被动：</b>描述客观事实 (不强调施动者)。<br>
+                                    <span style="color:#333;">この<ruby>本<rt>ほん</rt></ruby>は<ruby>読<rt>よ</rt></ruby>まれています。</span><br>
+                                    <span style="color:#888; font-size:0.9em;">(这本书被(世人)阅读。)</span>
+                                </li>
+                            </ul>
+                        </div>
+
+                        <div class="rule-table-box">
+                            <span class="section-tag">🔧 规则</span>
+                            <table class="sm-table">
+                                <thead><tr><th>类型</th><th>规则</th><th>例子</th></tr></thead>
+                                <tbody>
+                                    <tr>
+                                        <td>五段</td>
+                                        <td>u 段 → <strong>a 段</strong> + れる</td>
+                                        <td><ruby>踏<rt>ふ</rt></ruby>む → <ruby>踏<rt>ふ</rt></ruby><strong>ま</strong>れる</td>
+                                    </tr>
+                                    <tr>
+                                        <td>一段</td>
+                                        <td>去掉 る + られる</td>
+                                        <td><ruby>褒<rt>ほ</rt></ruby>める → <ruby>褒<rt>ほ</rt></ruby>められる</td>
+                                    </tr>
+                                    <tr>
+                                        <td rowspan="2">不规则</td>
+                                        <td>来る (kuru)</td>
+                                        <td>→ <strong><ruby>来<rt>こ</rt></ruby>られる</strong> (korareru)</td>
+                                    </tr>
+                                    <tr>
+                                        <td>する (suru)</td>
+                                        <td>→ <strong>される</strong> (sareru)</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div class="cat-box" style="border-left: 4px solid #a29bfe; background:#f4f3ff; padding:10px; margin-top:12px;">
+                            <strong>💡 小贴士：撞车了！</strong>
+                            <div style="font-size:0.9em; color:#555; margin-top:5px; line-height:1.6;">
+                                <p style="margin:0;">
+                                    一段动词的<b>被动形</b>和<b>能动形</b>长得一模一样！<br>
+                                    例如：「<ruby>食<rt>た</rt></ruby>べられる」既可以是“能吃”，也可以是“被吃”。
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </details>
+            </div>
+
+            <div class="rule-group">
+                <details>
+                    <summary>8. 使役形</summary>
+                    <div class="rule-content">
+                        <div class="usage-section">
+                            <span class="section-tag">🔰 用法</span>
+                            <p><strong>强制 / 许可。</strong><br>
+                            表示“让某人做...”或者“允许某人做...”。</p>
+                            <ul style="margin:8px 0 0 0; padding-left:20px; color:#555; line-height:1.6; font-size:0.95em;">
+                                <li style="margin-bottom:6px;">
+                                    <b>1. 强制 ：</b>上级命令下级。<br>
+                                    <span style="color:#333;"><ruby>部下<rt>ぶか</rt></ruby>を<ruby>働<rt>はたら</rt></ruby>かせる。</span><br>
+                                    <span style="color:#888; font-size:0.9em;">(让部下去工作。)</span>
+                                </li>
+                                <li>
+                                    <b>2. 许可 ：</b>允许对方做某事。<br>
+                                    <span style="color:#333;"><ruby>子供<rt>こども</rt></ruby>にアイスを<ruby>食<rt>た</rt></ruby>べさせる。</span><br>
+                                    <span style="color:#888; font-size:0.9em;">(让/准许孩子吃冰淇淋。)</span>
+                                </li>
+                            </ul>
+                        </div>
+
+                        <div class="rule-table-box">
+                            <span class="section-tag">🔧 规则</span>
+                            <table class="sm-table">
+                                <thead><tr><th>类型</th><th>规则</th><th>例子</th></tr></thead>
+                                <tbody>
+                                    <tr>
+                                        <td>五段</td>
+                                        <td>u 段 → <strong>a 段</strong> + せる</td>
+                                        <td><ruby>待<rt>ま</rt></ruby>つ → <ruby>待<rt>ま</rt></ruby><strong>た</strong>せる</td>
+                                    </tr>
+                                    <tr>
+                                        <td>一段</td>
+                                        <td>去掉 る + させる</td>
+                                        <td><ruby>食<rt>た</rt></ruby>べる → <ruby>食<rt>た</rt></ruby>べさせる</td>
+                                    </tr>
+                                    <tr>
+                                        <td rowspan="2">不规则</td>
+                                        <td>来る (kuru)</td>
+                                        <td>→ <strong><ruby>来<rt>こ</rt></ruby>させる</strong> (kosaseru)</td>
+                                    </tr>
+                                    <tr>
+                                        <td>する (suru)</td>
+                                        <td>→ <strong>させる</strong> (saseru)</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </details>
+            </div>
+            <div class="rule-group">
+                <details>
+                    <summary>9. 使役被动形</summary>
+                    <div class="rule-content">
+                        <div class="usage-section">
+                            <span class="section-tag">🔰 用法</span>
+                            <p><strong>被迫... / 不得不...</strong><br>
+                            直译：“被（别人）强行让做了...”。<br>
+                            表达一种<b>“不情愿、被迫”</b>的心情。</p>
+                            <div style="background:#f9f9f9; border-left:3px solid #ccc; padding:5px 10px; margin-top:8px; font-size:0.9em; color:#555;">
+                                <strong>🗣️ 例句：</strong><br>
+                                • 母に野菜を<ruby>食<rt>た</rt></ruby>べ<b>させられました</b>。<br>
+                                &nbsp;&nbsp;(被妈妈逼着吃了蔬菜。)<br>
+                                • <ruby>待<rt>ま</rt></ruby>た<b>されました</b>。<br>
+                                &nbsp;&nbsp;(被迫等待 / 让人好等。)
+                            </div>
+                        </div>
+
+                        <div class="rule-table-box">
+                            <span class="section-tag">🔧 规则</span>
+                            <div style="background:#e8f8f0; padding:10px; border-radius:6px; margin-bottom:12px; border:1px solid #d1e7dd; color:#0f5132; font-size:0.9em;">
+                                <strong>⚡️ 组合技：</strong> 使役形 (させる) + 被动 (られる)<br>
+                                五段动词通常使用<b>缩略形</b> (～される)。
+                            </div>
+                            <table class="sm-table">
+                                <thead><tr><th>类型</th><th>规则</th><th>例子</th></tr></thead>
+                                <tbody>
+                                    <tr>
+                                        <td>五段 (缩略形)</td>
+                                        <td>u 段 → <strong>a 段</strong> + される</td>
+                                        <td><ruby>行<rt>い</rt></ruby>く → <ruby>行<rt>い</rt></ruby><strong>かされる</strong></td>
+                                    </tr>
+                                    <tr>
+                                        <td>一段</td>
+                                        <td>去掉 る + させられる</td>
+                                        <td><ruby>食<rt>た</rt></ruby>べる → <ruby>食<rt>た</rt></ruby>べさせられる</td>
+                                    </tr>
+                                    <tr>
+                                        <td rowspan="2">不规则</td>
+                                        <td>来る (kuru)</td>
+                                        <td>→ <strong><ruby>来<rt>こ</rt></ruby>させられる</strong></td>
+                                    </tr>
+                                    <tr>
+                                        <td>する (suru)</td>
+                                        <td>→ <strong>させられる</strong></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div class="cat-box" style="border-left: 4px solid #f1c40f; background:#fffcf0; padding:10px; margin-top:12px;">
+                            <strong>⚠️ 避坑：以「す」结尾的动词</strong>
+                            <div style="font-size:0.9em; color:#555; margin-top:5px; line-height:1.6;">
+                                <p style="margin:0;">
+                                    五段动词中，如果词尾是<b>「す」</b>(如：話す)，<b>不能</b>用缩略形！必须用完整形式。<br>
+                                    ❌ 話される (错！这是被动形)<br>
+                                    ⭕ <ruby>話<rt>はな</rt></ruby><b>させられる</b> (被迫说)
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </details>
+            </div>
+
+            <div class="rule-group">
+                <details>
+                    <summary>10. 命令形</summary>
+                    <div class="rule-content">
+                        <div class="usage-section">
+                            <span class="section-tag">🔰 用法</span>
+                            <p><strong>强行命令。</strong><br>
+                            表示“快做！”“给我做！”。<br>
+                            <span style="color:#e74c3c; font-size:0.9em;">⚠️ 语气非常粗鲁，仅用于紧急情况、军队、或者男性吵架等。请勿对长辈使用。</span></p>
+                        </div>
+
+                        <div class="rule-table-box">
+                            <span class="section-tag">🔧 规则</span>
+                            <table class="sm-table">
+                                <thead><tr><th>类型</th><th>规则</th><th>例子</th></tr></thead>
+                                <tbody>
+                                    <tr>
+                                        <td>五段</td>
+                                        <td>u 段 → <strong>e 段</strong></td>
+                                        <td><ruby>行<rt>い</rt></ruby>く → <ruby>行<rt>い</rt></ruby><strong>け</strong> (滚/去!)</td>
+                                    </tr>
+                                    <tr>
+                                        <td>一段</td>
+                                        <td>去掉 る + <strong>ろ</strong></td>
+                                        <td><ruby>見<rt>み</rt></ruby>る → <ruby>見<rt>み</rt></ruby><strong>ろ</strong> (看!)</td>
+                                    </tr>
+                                    <tr>
+                                        <td rowspan="2">不规则</td>
+                                        <td>来る (kuru)</td>
+                                        <td>→ <strong><ruby>来<rt>こ</rt></ruby>い</strong> (koi)</td>
+                                    </tr>
+                                    <tr>
+                                        <td>する (suru)</td>
+                                        <td>→ <strong>しろ</strong> (shiro)</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div class="cat-box" style="border-left: 4px solid #ff9f43; background:#fffbf0; padding:10px; margin-top:12px;">
+                            <strong>🛑 补充：禁止形 (不准做!)</strong>
+                            <div style="font-size:0.9em; color:#555; margin-top:5px; line-height:1.6;">
+                                <p style="margin:0 0 8px 0;">
+                                    与命令形对应的是“禁止形”。<br>
+                                    <b>规则：</b>辞书形 (原型) + <strong>な</strong>
+                                </p>
+                                <ul style="margin:0; padding-left:20px;">
+                                    <li><ruby>行<rt>い</rt></ruby>くな！ (别去！)</li>
+                                    <li><ruby>食<rt>た</rt></ruby>べるな！ (别吃！)</li>
+                                    <li><ruby>負<rt>ま</rt></ruby>けるな！ (别输！/ 加油)</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </details>
+            </div>
+            <div class="rule-group">
+                <details>
+                    <summary>11. 假定形 (ば形)</summary>
+                    <div class="rule-content">
+                        <div class="usage-section">
+                            <span class="section-tag">🔰 用法</span>
+                            <p><strong>如果...的话 (条件)。</strong><br>
+                            表示假设条件。常用于“如果发生A，就会发生B”。<br>
+                            <span style="color:#555; font-size:0.9em;">也可以用于提建议（...ばいい：...做就好）。</span></p>
+                        </div>
+
+                        <div class="rule-table-box">
+                            <span class="section-tag">🔧 规则</span>
+                            <table class="sm-table">
+                                <thead><tr><th>类型</th><th>规则</th><th>例子</th></tr></thead>
+                                <tbody>
+                                    <tr>
+                                        <td>五段</td>
+                                        <td>u 段 → <strong>e 段</strong> + ば</td>
+                                        <td><ruby>行<rt>い</rt></ruby>く → <ruby>行<rt>い</rt></ruby><strong>け</strong>ば</td>
+                                    </tr>
+                                    <tr>
+                                        <td>一段</td>
+                                        <td>去掉 る + れば</td>
+                                        <td><ruby>見<rt>み</rt></ruby>る → <ruby>見<rt>み</rt></ruby><strong>れば</strong></td>
+                                    </tr>
+                                    <tr>
+                                        <td rowspan="2">不规则</td>
+                                        <td>来る (kuru)</td>
+                                        <td>→ <strong><ruby>来<rt>く</rt></ruby>れば</strong> (kureba)</td>
+                                    </tr>
+                                    <tr>
+                                        <td>する (suru)</td>
+                                        <td>→ <strong>すれば</strong> (sureba)</td>
+                                    </tr>
+                                    <tr style="background:#fff3cd;">
+                                        <td>形容词 (特殊)</td>
+                                        <td>词尾 い → <strong>ければ</strong></td>
+                                        <td><ruby>高<rt>たか</rt></ruby>い → <ruby>高<rt>たか</rt></ruby><strong>ければ</strong></td>
+                                    </tr>
+                                    <tr style="background:#fff3cd;">
+                                        <td>否定形 (特殊)</td>
+                                        <td>词尾 ない → <strong>なければ</strong></td>
+                                        <td><ruby>行<rt>い</rt></ruby>かない → <ruby>行<rt>い</rt></ruby>か<strong>なければ</strong></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div class="cat-box" style="border-left: 4px solid #2ecc71; background:#f0fff4; padding:10px; margin-top:12px;">
+                            <strong>💡 常用句型：不得不...</strong>
+                            <div style="font-size:0.9em; color:#555; margin-top:5px; line-height:1.6;">
+                                <p style="margin:0;">
+                                    将否定形变成假定形，再加上「ならない」，就变成了必须做某事。<br>
+                                    <b>公式：</b>...なければ + なりません<br>
+                                    <ruby>勉強<rt>べんきょう</rt></ruby>しなければなりません。(必须学习 / 不学不行)
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </details>
+            </div>
+</div>
+    </div>
+
+    <div id="tab-study" class="tab-view">
+        <div class="table-wrapper">
+            
+            <div class="desktop-only">
+                <table class="conjugation-table" id="desktopTable">
+                    <thead>
+                        <tr>
+                            <th>辞书形</th><th>た形</th><th>て形</th><th>ます形</th><th>ない形</th>
+                            <th>能动形</th><th>意志形</th><th>被动形</th><th>使役形</th><th>使役被动</th><th>命令形</th><th>假定形(ば)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="desktopTbody"></tbody>
+                </table>
+            </div>
+
+            <div class="mobile-only">
+                <table class="conjugation-table" id="mobileTable">
+                    <thead id="mobileThead"></thead>
+                    <tbody id="mobileTbody"></tbody>
+                </table>
+            </div>
+
+        </div>
+    </div>
+
+   <div id="tab-practice" class="tab-view">
+        <div class="quiz-wrapper">
+            <div class="settings-panel" id="settingsPanel">
+                <div style="font-weight:bold; display:flex; justify-content:space-between; cursor:pointer;" onclick="toggleSettings()">
+                    <span>⚙️ 练习设置</span><span id="settingIcon">▼</span>
+                </div>
+                <div id="settingContent" style="display:none; margin-top:10px;">
+                    
+                    <div style="margin-bottom:15px; padding:12px; background:#fff4e6; border-radius:8px; border:1px solid #ffd8a8;">
+                        <label style="display:flex; align-items:center; justify-content:space-between; cursor:pointer;">
+                            <span style="font-weight:bold; color:#d35400;">🔥 开启“10秒生死时速”</span>
+                            <input type="checkbox" id="timerMode" style="width:20px; height:20px;">
+                        </label>
+                    </div>
+
+                    <div class="checkbox-grid"></div>
+                    <button style="width:100%; margin-top:10px; padding:10px; background:#f1f3f5; border:1px solid #ddd; border-radius:8px; cursor:pointer;" onclick="restartGame()">🔄 保存并重新开始</button>
+                </div>
+            </div>
+
+            <div class="card" id="quizCard">
+                <div style="display:flex; justify-content:space-between; align-items:center; color:#aaa; font-size:0.8rem; margin-bottom:10px;">
+                    <span>连对: <b id="streakVal" style="color:var(--primary)">0</b></span>
+                    <span id="timerDisplay" style="font-weight:bold; color:#ff9f43; font-size:1rem;">⏱ 10</span>
+                    <span id="typeTag">...</span>
+                </div>
+                <div class="big-word" id="qDisplay">准备好了吗？</div>
+                <div class="target-badge" id="qTarget" style="background:#ccc;">请点击开始</div>
+                <input type="text" id="userAns" placeholder="请输入平假名" autocomplete="off" disabled>
+                <div class="msg" id="feedback" style="min-height:24px; margin-top:15px; font-weight:bold;"></div>
+            </div>
+
+            <div class="card hidden" id="resultCard">
+                <h2 style="margin:0; color:#444;">练习结束</h2>
+                <div style="font-size:1rem; color:#888; margin-top:10px;">最高连对</div>
+                <div class="result-score" id="finalScore">0</div>
+                <div id="finalComment" style="color:#666; margin-bottom:20px;"></div>
+            </div>
+            
+            <button class="btn-main" id="actionBtn" onclick="startGame()">开始练习</button>
+            <button class="btn-secondary hidden" id="endBtn" onclick="finishGame()">⏹ 结束本次练习</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // ================= 数据 =================
+    // ================= 数据：支持多解的完整词库 =================
+    const verbs = [
+        // ----------------- [基础对照组] -----------------
+       { basic: { show: "<ruby>書<rt>か</rt></ruby>く", type: "五段" }, forms: { ta: { show: "<ruby>書<rt>か</rt></ruby>いた", kana: "かいた" }, te: { show: "<ruby>書<rt>か</rt></ruby>いて", kana: "かいて" }, masu: { show: "<ruby>書<rt>か</rt></ruby>きます", kana: "かきます" }, nai: { show: "<ruby>書<rt>か</rt></ruby>かない", kana: "かかない" }, pot: { show: "<ruby>書<rt>か</rt></ruby>ける", kana: "かける" }, vol: { show: "<ruby>書<rt>か</rt></ruby>こう", kana: "かこう" }, pas: { show: "<ruby>書<rt>か</rt></ruby>かれる", kana: "かかれる" }, cau: { show: "<ruby>書<rt>か</rt></ruby>かせる", kana: "かかせる" }, cpas: { show: "<ruby>書<rt>か</rt></ruby>かされる", kana: ["かかされる", "かかさせられる"] }, imp: { show: "<ruby>書<rt>か</rt></ruby>け", kana: "かけ" } } },
+        // 一段动词：只有一种形式
+        { basic: { show: "<ruby>食<rt>た</rt></ruby>べる", type: "一段" }, forms: { ta: { show: "<ruby>食<rt>た</rt></ruby>べた", kana: "たべた" }, te: { show: "<ruby>食<rt>た</rt></ruby>べて", kana: "たべて" }, masu: { show: "<ruby>食<rt>た</rt></ruby>べます", kana: "たべます" }, nai: { show: "<ruby>食<rt>た</rt></ruby>べない", kana: "たべない" }, pot: { show: "<ruby>食<rt>た</rt></ruby>べられる", kana: "たべられる" }, vol: { show: "<ruby>食<rt>た</rt></ruby>べよう", kana: "たべよう" }, pas: { show: "<ruby>食<rt>た</rt></ruby>べられる", kana: "たべられる" }, cau: { show: "<ruby>食<rt>た</rt></ruby>べさせる", kana: "たべさせる" }, cpas: { show: "<ruby>食<rt>た</rt></ruby>べさせられる", kana: "たべさせられる" }, imp: { show: "<ruby>食<rt>た</rt></ruby>べろ", kana: "たべろ" } } },
+        // 不规则动词
+        { basic: { show: "<ruby>来<rt>く</rt></ruby>る", type: "不规则" }, forms: { ta: { show: "<ruby>来<rt>き</rt></ruby>た", kana: "きた" }, te: { show: "<ruby>来<rt>き</rt></ruby>て", kana: "きて" }, masu: { show: "<ruby>来<rt>き</rt></ruby>ます", kana: "きます" }, nai: { show: "<ruby>来<rt>こ</rt></ruby>ない", kana: "こない" }, pot: { show: "<ruby>来<rt>こ</rt></ruby>られる", kana: "こられる" }, vol: { show: "<ruby>来<rt>こ</rt></ruby>よう", kana: "こよう" }, pas: { show: "<ruby>来<rt>こ</rt></ruby>られる", kana: "こられる" }, cau: { show: "<ruby>来<rt>こ</rt></ruby>させる", kana: "こさせる" }, cpas: { show: "<ruby>来<rt>こ</rt></ruby>させられる", kana: "こさせられる" }, imp: { show: "<ruby>来<rt>こ</rt></ruby>い", kana: "こい" } } },
+        { basic: { show: "する", type: "不规则" }, forms: { ta: { show: "した", kana: "した" }, te: { show: "して", kana: "して" }, masu: { show: "します", kana: "します" }, nai: { show: "しない", kana: "しない" }, pot: { show: "できる", kana: "できる" }, vol: { show: "しよう", kana: "しよう" }, pas: { show: "される", kana: "される" }, cau: { show: "させる", kana: "させる" }, cpas: { show: "させられる", kana: "させられる" }, imp: { show: "しろ", kana: "しろ" } } },
+
+        // ----------------- [⚠️ 特殊一类 (陷阱词)] -----------------
+        { basic: { show: "<ruby>帰<rt>かえ</rt></ruby>る", type: "五段(特)" }, forms: { ta: { show: "<ruby>帰<rt>かえ</rt></ruby>った", kana: "かえった" }, te: { show: "<ruby>帰<rt>かえ</rt></ruby>って", kana: "かえって" }, masu: { show: "<ruby>帰<rt>かえ</rt></ruby>ります", kana: "かえります" }, nai: { show: "<ruby>帰<rt>かえ</rt></ruby>らない", kana: "かえらない" }, pot: { show: "<ruby>帰<rt>かえ</rt></ruby>れる", kana: "かえれる" }, vol: { show: "<ruby>帰<rt>かえ</rt></ruby>ろう", kana: "かえろう" }, pas: { show: "<ruby>帰<rt>かえ</rt></ruby>られる", kana: "かえられる" }, cau: { show: "<ruby>帰<rt>かえ</rt></ruby>らせる", kana: "かえらせる" }, cpas: { show: "<ruby>帰<rt>かえ</rt></ruby>らされる", kana: ["かえらされる", "かえらせられる"] }, imp: { show: "<ruby>帰<rt>かえ</rt></ruby>れ", kana: "かえれ" } } },
+        { basic: { show: "<ruby>切<rt>き</rt></ruby>る", type: "五段(特)" }, forms: { ta: { show: "<ruby>切<rt>き</rt></ruby>った", kana: "きった" }, te: { show: "<ruby>切<rt>き</rt></ruby>って", kana: "きって" }, masu: { show: "<ruby>切<rt>き</rt></ruby>ります", kana: "きります" }, nai: { show: "<ruby>切<rt>き</rt></ruby>らない", kana: "きらない" }, pot: { show: "<ruby>切<rt>き</rt></ruby>れる", kana: "きれる" }, vol: { show: "<ruby>切<rt>き</rt></ruby>ろう", kana: "きろう" }, pas: { show: "<ruby>切<rt>き</rt></ruby>られる", kana: "きられる" }, cau: { show: "<ruby>切<rt>き</rt></ruby>らせる", kana: "きらせる" }, cpas: { show: "<ruby>切<rt>き</rt></ruby>らされる", kana: ["きらされる", "きらせられる"] }, imp: { show: "<ruby>切<rt>き</rt></ruby>れ", kana: "きれ" } } },
+        { basic: { show: "<ruby>知<rt>し</rt></ruby>る", type: "五段(特)" }, forms: { ta: { show: "<ruby>知<rt>し</rt></ruby>った", kana: "しった" }, te: { show: "<ruby>知<rt>し</rt></ruby>って", kana: "しって" }, masu: { show: "<ruby>知<rt>し</rt></ruby>ります", kana: "しります" }, nai: { show: "<ruby>知<rt>し</rt></ruby>らない", kana: "しらない" }, pot: { show: "<ruby>知<rt>し</rt></ruby>れる", kana: "しれる" }, vol: { show: "<ruby>知<rt>し</rt></ruby>ろう", kana: "しろう" }, pas: { show: "<ruby>知<rt>し</rt></ruby>られる", kana: "しられる" }, cau: { show: "<ruby>知<rt>し</rt></ruby>らせる", kana: "しらせる" }, cpas: { show: "<ruby>知<rt>し</rt></ruby>らされる", kana: ["しらされる", "しらせられる"] }, imp: { show: "<ruby>知<rt>し</rt></ruby>れ", kana: "しれ" } } },
+        { basic: { show: "<ruby>入<rt>はい</rt></ruby>る", type: "五段(特)" }, forms: { ta: { show: "<ruby>入<rt>はい</rt></ruby>った", kana: "はいった" }, te: { show: "<ruby>入<rt>はい</rt></ruby>って", kana: "はいって" }, masu: { show: "<ruby>入<rt>はい</rt></ruby>ります", kana: "はいります" }, nai: { show: "<ruby>入<rt>はい</rt></ruby>らない", kana: "はいらない" }, pot: { show: "<ruby>入<rt>はい</rt></ruby>れる", kana: "はいれる" }, vol: { show: "<ruby>入<rt>はい</rt></ruby>ろう", kana: "はいろう" }, pas: { show: "<ruby>入<rt>はい</rt></ruby>られる", kana: "はいられる" }, cau: { show: "<ruby>入<rt>はい</rt></ruby>らせる", kana: "はいらせる" }, cpas: { show: "<ruby>入<rt>はい</rt></ruby>らされる", kana: ["はいらされる", "はいらせられる"] }, imp: { show: "<ruby>入<rt>はい</rt></ruby>れ", kana: "はいれ" } } },
+        { basic: { show: "<ruby>走<rt>はし</rt></ruby>る", type: "五段(特)" }, forms: { ta: { show: "<ruby>走<rt>はし</rt></ruby>った", kana: "はしった" }, te: { show: "<ruby>走<rt>はし</rt></ruby>って", kana: "はしって" }, masu: { show: "<ruby>走<rt>はし</rt></ruby>ります", kana: "はしります" }, nai: { show: "<ruby>走<rt>はし</rt></ruby>らない", kana: "はしらない" }, pot: { show: "<ruby>走<rt>はし</rt></ruby>れる", kana: "はしれる" }, vol: { show: "<ruby>走<rt>はし</rt></ruby>ろう", kana: "はしろう" }, pas: { show: "<ruby>走<rt>はし</rt></ruby>られる", kana: "はしられる" }, cau: { show: "<ruby>走<rt>はし</rt></ruby>らせる", kana: "はしらせる" }, cpas: { show: "<ruby>走<rt>はし</rt></ruby>らされる", kana: ["はしらされる", "はしらせられる"] }, imp: { show: "<ruby>走<rt>はし</rt></ruby>れ", kana: "はしれ" } } },
+        { basic: { show: "<ruby>要<rt>い</rt></ruby>る", type: "五段(特)" }, forms: { ta: { show: "<ruby>要<rt>い</rt></ruby>った", kana: "いった" }, te: { show: "<ruby>要<rt>い</rt></ruby>って", kana: "いって" }, masu: { show: "<ruby>要<rt>い</rt></ruby>ります", kana: "いります" }, nai: { show: "<ruby>要<rt>い</rt></ruby>らない", kana: "いらない" }, pot: { show: "<ruby>要<rt>い</rt></ruby>れる", kana: "いれる" }, vol: { show: "<ruby>要<rt>い</rt></ruby>ろう", kana: "いろう" }, pas: { show: "<ruby>要<rt>い</rt></ruby>られる", kana: "いられる" }, cau: { show: "<ruby>要<rt>い</rt></ruby>らせる", kana: "いらせる" }, cpas: { show: "<ruby>要<rt>い</rt></ruby>らされる", kana: ["いらされる", "いらせられる"] }, imp: { show: "<ruby>要<rt>い</rt></ruby>れ", kana: "いれ" } } },
+        { basic: { show: "<ruby>滑<rt>すべ</rt></ruby>る", type: "五段(特)" }, forms: { ta: { show: "<ruby>滑<rt>すべ</rt></ruby>った", kana: "すべった" }, te: { show: "<ruby>滑<rt>すべ</rt></ruby>って", kana: "すべって" }, masu: { show: "<ruby>滑<rt>すべ</rt></ruby>ります", kana: "すべります" }, nai: { show: "<ruby>滑<rt>すべ</rt></ruby>らない", kana: "すべらない" }, pot: { show: "<ruby>滑<rt>すべ</rt></ruby>れる", kana: "すべれる" }, vol: { show: "<ruby>滑<rt>すべ</rt></ruby>ろう", kana: "すべろう" }, pas: { show: "<ruby>滑<rt>すべ</rt></ruby>られる", kana: "すべられる" }, cau: { show: "<ruby>滑<rt>すべ</rt></ruby>らせる", kana: "すべらせる" }, cpas: { show: "<ruby>滑<rt>すべ</rt></ruby>らされる", kana: ["すべらされる", "すべらせられる"] }, imp: { show: "<ruby>滑<rt>すべ</rt></ruby>れ", kana: "すべれ" } } },
+        { basic: { show: "<ruby>喋<rt>しゃべ</rt></ruby>る", type: "五段(特)" }, forms: { ta: { show: "<ruby>喋<rt>しゃべ</rt></ruby>った", kana: "しゃべった" }, te: { show: "<ruby>喋<rt>しゃべ</rt></ruby>って", kana: "しゃべって" }, masu: { show: "<ruby>喋<rt>しゃべ</rt></ruby>ります", kana: "しゃべります" }, nai: { show: "<ruby>喋<rt>しゃべ</rt></ruby>らない", kana: "しゃべらない" }, pot: { show: "<ruby>喋<rt>しゃべ</rt></ruby>れる", kana: "しゃべれる" }, vol: { show: "<ruby>喋<rt>しゃべ</rt></ruby>ろう", kana: "しゃべろう" }, pas: { show: "<ruby>喋<rt>しゃべ</rt></ruby>られる", kana: "しゃべられる" }, cau: { show: "<ruby>喋<rt>しゃべ</rt></ruby>らせる", kana: "しゃべらせる" }, cpas: { show: "<ruby>喋<rt>しゃべ</rt></ruby>らされる", kana: ["しゃべらされる", "しゃべらせられる"] }, imp: { show: "<ruby>喋<rt>しゃべ</rt></ruby>れ", kana: "しゃべれ" } } },
+
+        // ----------------- [🆕 新增扩充词库] -----------------
+  
+  { basic: { show: "<ruby>合<rt>あ</rt></ruby>う", type: "五段" }, forms: { ta: { show: "<ruby>合<rt>あ</rt></ruby>った", kana: "あった" }, te: { show: "<ruby>合<rt>あ</rt></ruby>って", kana: "あって" }, masu: { show: "<ruby>合<rt>あ</rt></ruby>います", kana: "あいます" }, nai: { show: "<ruby>合<rt>あ</rt></ruby>わない", kana: "あわない" }, pot: { show: "<ruby>合<rt>あ</rt></ruby>える", kana: "あえる" }, vol: { show: "<ruby>合<rt>あ</rt></ruby>おう", kana: "あおう" }, pas: { show: "<ruby>合<rt>あ</rt></ruby>われる", kana: "あわれる" }, cau: { show: "<ruby>合<rt>あ</rt></ruby>わせる", kana: "あわせる" }, cpas: { show: "<ruby>合<rt>あ</rt></ruby>わされる", kana: ["あわされる", "あわせられる"] }, imp: { show: "<ruby>合<rt>あ</rt></ruby>え", kana: "あえ" } } },
+  { basic: { show: "<ruby>上<rt>あ</rt></ruby>げる", type: "一段" }, forms: { ta: { show: "<ruby>上<rt>あ</rt></ruby>げた", kana: "あげた" }, te: { show: "<ruby>上<rt>あ</rt></ruby>げて", kana: "あげて" }, masu: { show: "<ruby>上<rt>あ</rt></ruby>げます", kana: "あげます" }, nai: { show: "<ruby>上<rt>あ</rt></ruby>げない", kana: "あげない" }, pot: { show: "<ruby>上<rt>あ</rt></ruby>げられる", kana: "あげられる" }, vol: { show: "<ruby>上<rt>あ</rt></ruby>げよう", kana: "あげよう" }, pas: { show: "<ruby>上<rt>あ</rt></ruby>げられる", kana: "あげられる" }, cau: { show: "<ruby>上<rt>あ</rt></ruby>げさせる", kana: "あげさせる" }, cpas: { show: "<ruby>上<rt>あ</rt></ruby>げさせられる", kana: "あげさせられる" }, imp: { show: "<ruby>上<rt>あ</rt></ruby>げろ", kana: "あげろ" } } },
+  { basic: { show: "<ruby>集<rt>あつ</rt></ruby>まる", type: "五段" }, forms: { ta: { show: "<ruby>集<rt>あつ</rt></ruby>まった", kana: "あつまった" }, te: { show: "<ruby>集<rt>あつ</rt></ruby>まって", kana: "あつまって" }, masu: { show: "<ruby>集<rt>あつ</rt></ruby>まります", kana: "あつまります" }, nai: { show: "<ruby>集<rt>あつ</rt></ruby>まらない", kana: "あつまらない" }, pot: { show: "<ruby>集<rt>あつ</rt></ruby>まれる", kana: "あつまれる" }, vol: { show: "<ruby>集<rt>あつ</rt></ruby>まろう", kana: "あつまろう" }, pas: { show: "<ruby>集<rt>あつ</rt></ruby>まられる", kana: "あつまられる" }, cau: { show: "<ruby>集<rt>あつ</rt></ruby>まらせる", kana: "あつまらせる" }, cpas: { show: "<ruby>集<rt>あつ</rt></ruby>まらされる", kana: ["あつまらされる", "あつまらせられる"] }, imp: { show: "<ruby>集<rt>あつ</rt></ruby>まれ", kana: "あつまれ" } } },
+  { basic: { show: "<ruby>謝<rt>あやま</rt></ruby>る", type: "五段" }, forms: { ta: { show: "<ruby>謝<rt>あやま</rt></ruby>った", kana: "あやまった" }, te: { show: "<ruby>謝<rt>あやま</rt></ruby>って", kana: "あやまって" }, masu: { show: "<ruby>謝<rt>あやま</rt></ruby>ります", kana: "あやまります" }, nai: { show: "<ruby>謝<rt>あやま</rt></ruby>らない", kana: "あやまらない" }, pot: { show: "<ruby>謝<rt>あやま</rt></ruby>れる", kana: "あやまれる" }, vol: { show: "<ruby>謝<rt>あやま</rt></ruby>ろう", kana: "あやまろう" }, pas: { show: "<ruby>謝<rt>あやま</rt></ruby>られる", kana: "あやまられる" }, cau: { show: "<ruby>謝<rt>あやま</rt></ruby>らせる", kana: "あやまらせる" }, cpas: { show: "<ruby>謝<rt>あやま</rt></ruby>らされる", kana: ["あやまらされる", "あやまらせられる"] }, imp: { show: "<ruby>謝<rt>あやま</rt></ruby>れ", kana: "あやまれ" } } },
+  { basic: { show: "<ruby>生<rt>い</rt></ruby>きる", type: "一段" }, forms: { ta: { show: "<ruby>生<rt>い</rt></ruby>きた", kana: "いきた" }, te: { show: "<ruby>生<rt>い</rt></ruby>きて", kana: "いきて" }, masu: { show: "<ruby>生<rt>い</rt></ruby>きます", kana: "いきます" }, nai: { show: "<ruby>生<rt>い</rt></ruby>きない", kana: "いきない" }, pot: { show: "<ruby>生<rt>い</rt></ruby>きられる", kana: "いきられる" }, vol: { show: "<ruby>生<rt>い</rt></ruby>きよう", kana: "いきよう" }, pas: { show: "<ruby>生<rt>い</rt></ruby>きられる", kana: "いきられる" }, cau: { show: "<ruby>生<rt>い</rt></ruby>きさせる", kana: "いきさせる" }, cpas: { show: "<ruby>生<rt>い</rt></ruby>きさせられる", kana: "いきさせられる" }, imp: { show: "<ruby>生<rt>い</rt></ruby>きろ", kana: "いきろ" } } },
+  { basic: { show: "<ruby>急<rt>いそ</rt></ruby>ぐ", type: "五段" }, forms: { ta: { show: "<ruby>急<rt>いそ</rt></ruby>いだ", kana: "いそいだ" }, te: { show: "<ruby>急<rt>いそ</rt></ruby>いで", kana: "いそいで" }, masu: { show: "<ruby>急<rt>いそ</rt></ruby>ぎます", kana: "いそぎます" }, nai: { show: "<ruby>急<rt>いそ</rt></ruby>がない", kana: "いそがない" }, pot: { show: "<ruby>急<rt>いそ</rt></ruby>げる", kana: "いそげる" }, vol: { show: "<ruby>急<rt>いそ</rt></ruby>ごう", kana: "いそごう" }, pas: { show: "<ruby>急<rt>いそ</rt></ruby>がれる", kana: "いそがれる" }, cau: { show: "<ruby>急<rt>いそ</rt></ruby>がせる", kana: "いそがせる" }, cpas: { show: "<ruby>急<rt>いそ</rt></ruby>がされる", kana: ["いそがされる", "いそがせられる"] }, imp: { show: "<ruby>急<rt>いそ</rt></ruby>げ", kana: "いそげ" } } },
+  { basic: { show: "<ruby>致<rt>いた</rt></ruby>す", type: "五段" }, forms: { ta: { show: "<ruby>致<rt>いた</rt></ruby>した", kana: "いたした" }, te: { show: "<ruby>致<rt>いた</rt></ruby>して", kana: "いたして" }, masu: { show: "<ruby>致<rt>いた</rt></ruby>します", kana: "いたします" }, nai: { show: "<ruby>致<rt>いた</rt></ruby>さない", kana: "いたさない" }, pot: { show: "<ruby>致<rt>いた</rt></ruby>せる", kana: "いたせる" }, vol: { show: "<ruby>致<rt>いた</rt></ruby>そう", kana: "いたそう" }, pas: { show: "<ruby>致<rt>いた</rt></ruby>される", kana: "いたされる" }, cau: { show: "<ruby>致<rt>いた</rt></ruby>させる", kana: "いたさせる" }, cpas: { show: "<ruby>致<rt>いた</rt></ruby>させられる", kana: "いたさせられる" }, imp: { show: "<ruby>致<rt>いた</rt></ruby>せ", kana: "いたせ" } } },
+  { basic: { show: "<ruby>植<rt>う</rt></ruby>える", type: "一段" }, forms: { ta: { show: "<ruby>植<rt>う</rt></ruby>えた", kana: "うえた" }, te: { show: "<ruby>植<rt>う</rt></ruby>えて", kana: "うえて" }, masu: { show: "<ruby>植<rt>う</rt></ruby>えます", kana: "うえます" }, nai: { show: "<ruby>植<rt>う</rt></ruby>えない", kana: "うえない" }, pot: { show: "<ruby>植<rt>う</rt></ruby>えられる", kana: "うえられる" }, vol: { show: "<ruby>植<rt>う</rt></ruby>えよう", kana: "うえよう" }, pas: { show: "<ruby>植<rt>う</rt></ruby>えられる", kana: "うえられる" }, cau: { show: "<ruby>植<rt>う</rt></ruby>えさせる", kana: "うえさせる" }, cpas: { show: "<ruby>植<rt>う</rt></ruby>えさせられる", kana: "うえさせられる" }, imp: { show: "<ruby>植<rt>う</rt></ruby>えろ", kana: "うえろ" } } },
+  { basic: { show: "<ruby>打<rt>う</rt></ruby>つ", type: "五段" }, forms: { ta: { show: "<ruby>打<rt>う</rt></ruby>った", kana: "うった" }, te: { show: "<ruby>打<rt>う</rt></ruby>って", kana: "うって" }, masu: { show: "<ruby>打<rt>う</rt></ruby>ちます", kana: "うちます" }, nai: { show: "<ruby>打<rt>う</rt></ruby>たない", kana: "うたない" }, pot: { show: "<ruby>打<rt>う</rt></ruby>てる", kana: "うてる" }, vol: { show: "<ruby>打<rt>う</rt></ruby>とう", kana: "うとう" }, pas: { show: "<ruby>打<rt>う</rt></ruby>たれる", kana: "うたれる" }, cau: { show: "<ruby>打<rt>う</rt></ruby>たせる", kana: "うたせる" }, cpas: { show: "<ruby>打<rt>う</rt></ruby>たされる", kana: ["うたされる", "うたせられる"] }, imp: { show: "<ruby>打<rt>う</rt></ruby>て", kana: "うて" } } },
+        // 注意：写す 以 す 结尾
+        { basic: { show: "<ruby>写<rt>うつ</rt></ruby>す", type: "五段" }, forms: { ta: { show: "<ruby>写<rt>うつ</rt></ruby>した", kana: "うつした" }, te: { show: "<ruby>写<rt>うつ</rt></ruby>して", kana: "うつして" }, masu: { show: "<ruby>写<rt>うつ</rt></ruby>します", kana: "うつします" }, nai: { show: "<ruby>写<rt>うつ</rt></ruby>さない", kana: "うつさない" }, pot: { show: "<ruby>写<rt>うつ</rt></ruby>せる", kana: "うつせる" }, vol: { show: "<ruby>写<rt>うつ</rt></ruby>そう", kana: "うつそう" }, pas: { show: "<ruby>写<rt>うつ</rt></ruby>される", kana: "うつされる" }, cau: { show: "<ruby>写<rt>うつ</rt></ruby>させる", kana: "うつさせる" }, cpas: { show: "<ruby>写<rt>うつ</rt></ruby>させられる", kana: "うつさせられる" }, imp: { show: "<ruby>写<rt>うつ</rt></ruby>せ", kana: "うつせ" } } },
+  { basic: { show: "<ruby>移<rt>うつ</rt></ruby>る", type: "五段" }, forms: { ta: { show: "<ruby>移<rt>うつ</rt></ruby>った", kana: "うつった" }, te: { show: "<ruby>移<rt>うつ</rt></ruby>って", kana: "うつって" }, masu: { show: "<ruby>移<rt>うつ</rt></ruby>ります", kana: "うつります" }, nai: { show: "<ruby>移<rt>うつ</rt></ruby>らない", kana: "うつらない" }, pot: { show: "<ruby>移<rt>うつ</rt></ruby>れる", kana: "うつれる" }, vol: { show: "<ruby>移<rt>うつ</rt></ruby>ろう", kana: "うつろう" }, pas: { show: "<ruby>移<rt>うつ</rt></ruby>られる", kana: "うつられる" }, cau: { show: "<ruby>移<rt>うつ</rt></ruby>らせる", kana: "うつらせる" }, cpas: { show: "<ruby>移<rt>うつ</rt></ruby>らされる", kana: ["うつらされる", "うつらせられる"] }, imp: { show: "<ruby>移<rt>うつ</rt></ruby>れ", kana: "うつれ" } } },
+  { basic: { show: "<ruby>送<rt>おく</rt></ruby>る", type: "五段" }, forms: { ta: { show: "<ruby>送<rt>おく</rt></ruby>った", kana: "おくった" }, te: { show: "<ruby>送<rt>おく</rt></ruby>って", kana: "おくって" }, masu: { show: "<ruby>送<rt>おく</rt></ruby>ります", kana: "おくります" }, nai: { show: "<ruby>送<rt>おく</rt></ruby>らない", kana: "おくらない" }, pot: { show: "<ruby>送<rt>おく</rt></ruby>れる", kana: "おくれる" }, vol: { show: "<ruby>送<rt>おく</rt></ruby>ろう", kana: "おくろう" }, pas: { show: "<ruby>送<rt>おく</rt></ruby>られる", kana: "おくられる" }, cau: { show: "<ruby>送<rt>おく</rt></ruby>らせる", kana: "おくらせる" }, cpas: { show: "<ruby>送<rt>おく</rt></ruby>らされる", kana: ["おくらされる", "おくらせられる"] }, imp: { show: "<ruby>送<rt>おく</rt></ruby>れ", kana: "おくれ" } } },
+  { basic: { show: "<ruby>選<rt>えら</rt></ruby>ぶ", type: "五段" }, forms: { ta: { show: "<ruby>選<rt>えら</rt></ruby>んだ", kana: "えらんだ" }, te: { show: "<ruby>選<rt>えら</rt></ruby>んで", kana: "えらんで" }, masu: { show: "<ruby>選<rt>えら</rt></ruby>びます", kana: "えらびます" }, nai: { show: "<ruby>選<rt>えら</rt></ruby>ばない", kana: "えらばない" }, pot: { show: "<ruby>選<rt>えら</rt></ruby>べる", kana: "えらべる" }, vol: { show: "<ruby>選<rt>えら</rt></ruby>ぼう", kana: "えらぼう" }, pas: { show: "<ruby>選<rt>えら</rt></ruby>ばれる", kana: "えらばれる" }, cau: { show: "<ruby>選<rt>えら</rt></ruby>ばせる", kana: "えらばせる" }, cpas: { show: "<ruby>選<rt>えら</rt></ruby>ばされる", kana: ["えらばされる", "えらばせられる"] }, imp: { show: "<ruby>選<rt>えら</rt></ruby>べ", kana: "えらべ" } } },
+  { basic: { show: "<ruby>行<rt>おこな</rt></ruby>う", type: "五段" }, forms: { ta: { show: "<ruby>行<rt>おこな</rt></ruby>った", kana: "おこなった" }, te: { show: "<ruby>行<rt>おこな</rt></ruby>って", kana: "おこなって" }, masu: { show: "<ruby>行<rt>おこな</rt></ruby>います", kana: "おこないます" }, nai: { show: "<ruby>行<rt>おこな</rt></ruby>わない", kana: "おこなわない" }, pot: { show: "<ruby>行<rt>おこな</rt></ruby>える", kana: "おこなえる" }, vol: { show: "<ruby>行<rt>おこな</rt></ruby>おう", kana: "おこなおう" }, pas: { show: "<ruby>行<rt>おこな</rt></ruby>われる", kana: "おこなわれる" }, cau: { show: "<ruby>行<rt>おこな</rt></ruby>わせる", kana: "おこなわせる" }, cpas: { show: "<ruby>行<rt>おこな</rt></ruby>わされる", kana: ["おこなわされる", "おこなわせられる"] }, imp: { show: "<ruby>行<rt>おこな</rt></ruby>え", kana: "おこなえ" } } },
+  { basic: { show: "<ruby>踊<rt>おど</rt></ruby>る", type: "五段" }, forms: { ta: { show: "<ruby>踊<rt>おど</rt></ruby>った", kana: "おどった" }, te: { show: "<ruby>踊<rt>おど</rt></ruby>って", kana: "おどって" }, masu: { show: "<ruby>踊<rt>おど</rt></ruby>ります", kana: "おどります" }, nai: { show: "<ruby>踊<rt>おど</rt></ruby>らない", kana: "おどらない" }, pot: { show: "<ruby>踊<rt>おど</rt></ruby>れる", kana: "おどれる" }, vol: { show: "<ruby>踊<rt>おど</rt></ruby>ろう", kana: "おどろう" }, pas: { show: "<ruby>踊<rt>おど</rt></ruby>られる", kana: "おどられる" }, cau: { show: "<ruby>踊<rt>おど</rt></ruby>らせる", kana: "おどらせる" }, cpas: { show: "<ruby>踊<rt>おど</rt></ruby>らされる", kana: ["おどらされる", "おどらせられる"] }, imp: { show: "<ruby>踊<rt>おど</rt></ruby>れ", kana: "おどれ" } } },
+  { basic: { show: "<ruby>落<rt>お</rt></ruby>ちる", type: "一段" }, forms: { ta: { show: "<ruby>落<rt>お</rt></ruby>ちた", kana: "おちた" }, te: { show: "<ruby>落<rt>お</rt></ruby>ちて", kana: "おちて" }, masu: { show: "<ruby>落<rt>お</rt></ruby>ちます", kana: "おちます" }, nai: { show: "<ruby>落<rt>お</rt></ruby>ちない", kana: "おちない" }, pot: { show: "<ruby>落<rt>お</rt></ruby>ちられる", kana: "おちられる" }, vol: { show: "<ruby>落<rt>お</rt></ruby>ちよう", kana: "おちよう" }, pas: { show: "<ruby>落<rt>お</rt></ruby>ちられる", kana: "おちられる" }, cau: { show: "<ruby>落<rt>お</rt></ruby>ちさせる", kana: "おちさせる" }, cpas: { show: "<ruby>落<rt>お</rt></ruby>ちさせられる", kana: "おちさせられる" }, imp: { show: "<ruby>落<rt>お</rt></ruby>ちろ", kana: "おちろ" } } },
+        // 注意：落とす 以 す 结尾
+        { basic: { show: "<ruby>落<rt>お</rt></ruby>とす", type: "五段" }, forms: { ta: { show: "<ruby>落<rt>お</rt></ruby>とした", kana: "おとした" }, te: { show: "<ruby>落<rt>お</rt></ruby>として", kana: "おとして" }, masu: { show: "<ruby>落<rt>お</rt></ruby>とします", kana: "おとします" }, nai: { show: "<ruby>落<rt>お</rt></ruby>とさない", kana: "おとさない" }, pot: { show: "<ruby>落<rt>お</rt></ruby>とせる", kana: "おとせる" }, vol: { show: "<ruby>落<rt>お</rt></ruby>とそう", kana: "おとそう" }, pas: { show: "<ruby>落<rt>お</rt></ruby>とされる", kana: "おとされる" }, cau: { show: "<ruby>落<rt>お</rt></ruby>とさせる", kana: "おとさせる" }, cpas: { show: "<ruby>落<rt>お</rt></ruby>とさせられる", kana: "おとさせられる" }, imp: { show: "<ruby>落<rt>お</rt></ruby>とせ", kana: "おとせ" } } },
+  { basic: { show: "<ruby>思<rt>おも</rt></ruby>う", type: "五段" }, forms: { ta: { show: "<ruby>思<rt>おも</rt></ruby>った", kana: "おもった" }, te: { show: "<ruby>思<rt>おも</rt></ruby>って", kana: "おもって" }, masu: { show: "<ruby>思<rt>おも</rt></ruby>います", kana: "おもいます" }, nai: { show: "<ruby>思<rt>おも</rt></ruby>わない", kana: "おもわない" }, pot: { show: "<ruby>思<rt>おも</rt></ruby>える", kana: "おもえる" }, vol: { show: "<ruby>思<rt>おも</rt></ruby>おう", kana: "おもおう" }, pas: { show: "<ruby>思<rt>おも</rt></ruby>われる", kana: "おもわれる" }, cau: { show: "<ruby>思<rt>おも</rt></ruby>わせる", kana: "おもわせる" }, cpas: { show: "<ruby>思<rt>おも</rt></ruby>わされる", kana: ["おもわされる", "おもわせられる"] }, imp: { show: "<ruby>思<rt>おも</rt></ruby>え", kana: "おもえ" } } },
+  { basic: { show: "<ruby>降<rt>お</rt></ruby>りる", type: "一段" }, forms: { ta: { show: "<ruby>降<rt>お</rt></ruby>りた", kana: "おりた" }, te: { show: "<ruby>降<rt>お</rt></ruby>りて", kana: "おりて" }, masu: { show: "<ruby>降<rt>お</rt></ruby>ります", kana: "おります" }, nai: { show: "<ruby>降<rt>お</rt></ruby>りない", kana: "おりない" }, pot: { show: "<ruby>降<rt>お</rt></ruby>りられる", kana: "おりられる" }, vol: { show: "<ruby>降<rt>お</rt></ruby>りよう", kana: "おりよう" }, pas: { show: "<ruby>降<rt>お</rt></ruby>りられる", kana: "おりられる" }, cau: { show: "<ruby>降<rt>お</rt></ruby>りさせる", kana: "おりさせる" }, cpas: { show: "<ruby>降<rt>お</rt></ruby>りさせられる", kana: "おりさせられる" }, imp: { show: "<ruby>降<rt>お</rt></ruby>りろ", kana: "おりろ" } } },
+  { basic: { show: "<ruby>変<rt>か</rt></ruby>える", type: "一段" }, forms: { ta: { show: "<ruby>変<rt>か</rt></ruby>えた", kana: "かえた" }, te: { show: "<ruby>変<rt>か</rt></ruby>えて", kana: "かえて" }, masu: { show: "<ruby>変<rt>か</rt></ruby>えます", kana: "かえます" }, nai: { show: "<ruby>変<rt>か</rt></ruby>えない", kana: "かえない" }, pot: { show: "<ruby>変<rt>か</rt></ruby>えられる", kana: "かえられる" }, vol: { show: "<ruby>変<rt>か</rt></ruby>えよう", kana: "かえよう" }, pas: { show: "<ruby>変<rt>か</rt></ruby>えられる", kana: "かえられる" }, cau: { show: "<ruby>変<rt>か</rt></ruby>えさせる", kana: "かえさせる" }, cpas: { show: "<ruby>変<rt>か</rt></ruby>えさせられる", kana: "かえさせられる" }, imp: { show: "<ruby>変<rt>か</rt></ruby>えろ", kana: "かえろ" } } },
+  { basic: { show: "<ruby>通<rt>かよ</rt></ruby>う", type: "五段" }, forms: { ta: { show: "<ruby>通<rt>かよ</rt></ruby>った", kana: "かよった" }, te: { show: "<ruby>通<rt>かよ</rt></ruby>って", kana: "かよって" }, masu: { show: "<ruby>通<rt>かよ</rt></ruby>います", kana: "かよいます" }, nai: { show: "<ruby>通<rt>かよ</rt></ruby>わない", kana: "かよわない" }, pot: { show: "<ruby>通<rt>かよ</rt></ruby>える", kana: "かよえる" }, vol: { show: "<ruby>通<rt>かよ</rt></ruby>おう", kana: "かよおう" }, pas: { show: "<ruby>通<rt>かよ</rt></ruby>われる", kana: "かよわれる" }, cau: { show: "<ruby>通<rt>かよ</rt></ruby>わせる", kana: "かよわせる" }, cpas: { show: "<ruby>通<rt>かよ</rt></ruby>わされる", kana: ["かよわされる", "かよわせられる"] }, imp: { show: "<ruby>通<rt>かよ</rt></ruby>え", kana: "かよえ" } } },
+  { basic: { show: "<ruby>勝<rt>か</rt></ruby>つ", type: "五段" }, forms: { ta: { show: "<ruby>勝<rt>か</rt></ruby>った", kana: "かった" }, te: { show: "<ruby>勝<rt>か</rt></ruby>って", kana: "かって" }, masu: { show: "<ruby>勝<rt>か</rt></ruby>ちます", kana: "かちます" }, nai: { show: "<ruby>勝<rt>か</rt></ruby>たない", kana: "かたない" }, pot: { show: "<ruby>勝<rt>か</rt></ruby>てる", kana: "かてる" }, vol: { show: "<ruby>勝<rt>か</rt></ruby>とう", kana: "かとう" }, pas: { show: "<ruby>勝<rt>か</rt></ruby>たれる", kana: "かたれる" }, cau: { show: "<ruby>勝<rt>か</rt></ruby>たせる", kana: "かたせる" }, cpas: { show: "<ruby>勝<rt>か</rt></ruby>たされる", kana: ["かたされる", "かたせられる"] }, imp: { show: "<ruby>勝<rt>か</rt></ruby>て", kana: "かて" } } },
+  { basic: { show: "<ruby>考<rt>かんが</rt></ruby>える", type: "一段" }, forms: { ta: { show: "<ruby>考<rt>かんが</rt></ruby>えた", kana: "かんがえた" }, te: { show: "<ruby>考<rt>かんが</rt></ruby>えて", kana: "かんがえて" }, masu: { show: "<ruby>考<rt>かんが</rt></ruby>えます", kana: "かんがえます" }, nai: { show: "<ruby>考<rt>かんが</rt></ruby>えない", kana: "かんがえない" }, pot: { show: "<ruby>考<rt>かんが</rt></ruby>えられる", kana: "かんがえられる" }, vol: { show: "<ruby>考<rt>かんが</rt></ruby>えよう", kana: "かんがえよう" }, pas: { show: "<ruby>考<rt>かんが</rt></ruby>えられる", kana: "かんがえられる" }, cau: { show: "<ruby>考<rt>かんが</rt></ruby>えさせる", kana: "かんがえさせる" }, cpas: { show: "<ruby>考<rt>かんが</rt></ruby>えさせられる", kana: "かんがえさせられる" }, imp: { show: "<ruby>考<rt>かんが</rt></ruby>えろ", kana: "かんがえろ" } } },
+  { basic: { show: "<ruby>聞<rt>き</rt></ruby>こえる", type: "一段" }, forms: { ta: { show: "<ruby>聞<rt>き</rt></ruby>こえた", kana: "きこえた" }, te: { show: "<ruby>聞<rt>き</rt></ruby>こえて", kana: "きこえて" }, masu: { show: "<ruby>聞<rt>き</rt></ruby>こえます", kana: "きこえます" }, nai: { show: "<ruby>聞<rt>き</rt></ruby>こえない", kana: "きこえない" }, pot: { show: "<ruby>聞<rt>き</rt></ruby>こえられる", kana: "きこえられる" }, vol: { show: "<ruby>聞<rt>き</rt></ruby>こえよう", kana: "きこえよう" }, pas: { show: "<ruby>聞<rt>き</rt></ruby>こえられる", kana: "きこえられる" }, cau: { show: "<ruby>聞<rt>き</rt></ruby>こえさせる", kana: "きこえさせる" }, cpas: { show: "<ruby>聞<rt>き</rt></ruby>こえさせられる", kana: "きこえさせられる" }, imp: { show: "<ruby>聞<rt>き</rt></ruby>こえろ", kana: "きこえろ" } } },
+  { basic: { show: "<ruby>比<rt>くら</rt></ruby>べる", type: "一段" }, forms: { ta: { show: "<ruby>比<rt>くら</rt></ruby>べた", kana: "くらべた" }, te: { show: "<ruby>比<rt>くら</rt></ruby>べて", kana: "くらべて" }, masu: { show: "<ruby>比<rt>くら</rt></ruby>べます", kana: "くらべます" }, nai: { show: "<ruby>比<rt>くら</rt></ruby>べない", kana: "くらべない" }, pot: { show: "<ruby>比<rt>くら</rt></ruby>べられる", kana: "くらべられる" }, vol: { show: "<ruby>比<rt>くら</rt></ruby>べよう", kana: "くらべよう" }, pas: { show: "<ruby>比<rt>くら</rt></ruby>べられる", kana: "くらべられる" }, cau: { show: "<ruby>比<rt>くら</rt></ruby>べさせる", kana: "くらべさせる" }, cpas: { show: "<ruby>比<rt>くら</rt></ruby>べさせられる", kana: "くらべさせられる" }, imp: { show: "<ruby>比<rt>くら</rt></ruby>べろ", kana: "くらべろ" } } },
+  { basic: { show: "<ruby>決<rt>き</rt></ruby>める", type: "一段" }, forms: { ta: { show: "<ruby>決<rt>き</rt></ruby>めた", kana: "きめた" }, te: { show: "<ruby>決<rt>き</rt></ruby>めて", kana: "きめて" }, masu: { show: "<ruby>決<rt>き</rt></ruby>めます", kana: "きめます" }, nai: { show: "<ruby>決<rt>き</rt></ruby>めない", kana: "きめない" }, pot: { show: "<ruby>決<rt>き</rt></ruby>められる", kana: "きめられる" }, vol: { show: "<ruby>決<rt>き</rt></ruby>めよう", kana: "きめよう" }, pas: { show: "<ruby>決<rt>き</rt></ruby>められる", kana: "きめられる" }, cau: { show: "<ruby>決<rt>き</rt></ruby>めさせる", kana: "きめさせる" }, cpas: { show: "<ruby>決<rt>き</rt></ruby>めさせられる", kana: "きめさせられる" }, imp: { show: "<ruby>決<rt>き</rt></ruby>めろ", kana: "きめろ" } } },
+        // 注意：消す 以 す 结尾
+        { basic: { show: "<ruby>消<rt>け</rt></ruby>す", type: "五段" }, forms: { ta: { show: "<ruby>消<rt>け</rt></ruby>した", kana: "けした" }, te: { show: "<ruby>消<rt>け</rt></ruby>して", kana: "けして" }, masu: { show: "<ruby>消<rt>け</rt></ruby>します", kana: "けします" }, nai: { show: "<ruby>消<rt>け</rt></ruby>さない", kana: "けさない" }, pot: { show: "<ruby>消<rt>け</rt></ruby>せる", kana: "けせる" }, vol: { show: "<ruby>消<rt>け</rt></ruby>そう", kana: "けそう" }, pas: { show: "<ruby>消<rt>け</rt></ruby>される", kana: "けされる" }, cau: { show: "<ruby>消<rt>け</rt></ruby>させる", kana: "けさせる" }, cpas: { show: "<ruby>消<rt>け</rt></ruby>させられる", kana: "けさせられる" }, imp: { show: "<ruby>消<rt>け</rt></ruby>せ", kana: "けせ" } } },
+        { basic: { show: "<ruby>答<rt>こた</rt></ruby>える", type: "一段" }, forms: { ta: { show: "<ruby>答<rt>こた</rt></ruby>えた", kana: "こたえた" }, te: { show: "<ruby>答<rt>こた</rt></ruby>えて", kana: "こたえて" }, masu: { show: "<ruby>答<rt>こた</rt></ruby>えます", kana: "こたえます" }, nai: { show: "<ruby>答<rt>こた</rt></ruby>えない", kana: "こたえない" }, pot: { show: "<ruby>答<rt>こた</rt></ruby>えられる", kana: "こたえられる" }, vol: { show: "<ruby>答<rt>こた</rt></ruby>えよう", kana: "こたえよう" }, pas: { show: "<ruby>答<rt>こた</rt></ruby>えられる", kana: "こたえられる" }, cau: { show: "<ruby>答<rt>こた</rt></ruby>えさせる", kana: "こたえさせる" }, cpas: { show: "<ruby>答<rt>こた</rt></ruby>えさせられる", kana: "こたえさせられる" }, imp: { show: "<ruby>答<rt>こた</rt></ruby>えろ", kana: "こたえろ" } } },
+        { basic: { show: "<ruby>困<rt>こま</rt></ruby>る", type: "五段" }, forms: { ta: { show: "<ruby>困<rt>こま</rt></ruby>った", kana: "こまった" }, te: { show: "<ruby>困<rt>こま</rt></ruby>って", kana: "こまって" }, masu: { show: "<ruby>困<rt>こま</rt></ruby>ります", kana: "こまります" }, nai: { show: "<ruby>困<rt>こま</rt></ruby>らない", kana: "こまらない" }, pot: { show: "<ruby>困<rt>こま</rt></ruby>れる", kana: "こまれる" }, vol: { show: "<ruby>困<rt>こま</rt></ruby>ろう", kana: "こまろう" }, pas: { show: "<ruby>困<rt>こま</rt></ruby>られる", kana: "こまられる" }, cau: { show: "<ruby>困<rt>こま</rt></ruby>らせる", kana: "こまらせる" }, cpas: { show: "<ruby>困<rt>こま</rt></ruby>らされる", kana: ["こまらされる", "こまらせられる"] }, imp: { show: "<ruby>困<rt>こま</rt></ruby>れ", kana: "こまれ" } } },
+        { basic: { show: "<ruby>愛<rt>あい</rt></ruby>する", type: "不规则" }, forms: { ta: { show: "<ruby>愛<rt>あい</rt></ruby>した", kana: "あいした" }, te: { show: "<ruby>愛<rt>あい</rt></ruby>して", kana: "あいして" }, masu: { show: "<ruby>愛<rt>あい</rt></ruby>します", kana: "あいします" }, nai: { show: "<ruby>愛<rt>あい</rt></ruby>さない", kana: "あいさない" }, pot: { show: "<ruby>愛<rt>あい</rt></ruby>せる", kana: "あいせる" }, vol: { show: "<ruby>愛<rt>あい</rt></ruby>そう", kana: "あいそう" }, pas: { show: "<ruby>愛<rt>あい</rt></ruby>される", kana: "あいされる" }, cau: { show: "<ruby>愛<rt>あい</rt></ruby>させる", kana: "あいさせる" }, cpas: { show: "<ruby>愛<rt>あい</rt></ruby>させられる", kana: "あいさせられる" }, imp: { show: "<ruby>愛<rt>あい</rt></ruby>せ", kana: "あいせ" } } },
+    // 1. 届ける (一段)
+        { basic: { show: "<ruby>届<rt>とど</rt></ruby>ける", type: "一段" }, forms: { ta: { show: "<ruby>届<rt>とど</rt></ruby>けた", kana: "とどけた" }, te: { show: "<ruby>届<rt>とど</rt></ruby>けて", kana: "とどけて" }, masu: { show: "<ruby>届<rt>とど</rt></ruby>けます", kana: "とどけます" }, nai: { show: "<ruby>届<rt>とど</rt></ruby>けない", kana: "とどけない" }, pot: { show: "<ruby>届<rt>とど</rt></ruby>けられる", kana: "とどけられる" }, vol: { show: "<ruby>届<rt>とど</rt></ruby>けよう", kana: "とどけよう" }, pas: { show: "<ruby>届<rt>とど</rt></ruby>けられる", kana: "とどけられる" }, cau: { show: "<ruby>届<rt>とど</rt></ruby>けさせる", kana: "とどけさせる" }, cpas: { show: "<ruby>届<rt>とど</rt></ruby>けさせられる", kana: "とどけさせられる" }, imp: { show: "<ruby>届<rt>とど</rt></ruby>けろ", kana: "とどけろ" } } },
+        // 2. 流れる (一段)
+        { basic: { show: "<ruby>流<rt>なが</rt></ruby>れる", type: "一段" }, forms: { ta: { show: "<ruby>流<rt>なが</rt></ruby>れた", kana: "ながれた" }, te: { show: "<ruby>流<rt>なが</rt></ruby>れて", kana: "ながれて" }, masu: { show: "<ruby>流<rt>なが</rt></ruby>れます", kana: "ながれます" }, nai: { show: "<ruby>流<rt>なが</rt></ruby>れない", kana: "ながれない" }, pot: { show: "<ruby>流<rt>なが</rt></ruby>れられる", kana: "ながれられる" }, vol: { show: "<ruby>流<rt>なが</rt></ruby>れよう", kana: "ながれよう" }, pas: { show: "<ruby>流<rt>なが</rt></ruby>れられる", kana: "ながれられる" }, cau: { show: "<ruby>流<rt>なが</rt></ruby>れさせる", kana: "ながれさせる" }, cpas: { show: "<ruby>流<rt>なが</rt></ruby>れさせられる", kana: "ながれさせられる" }, imp: { show: "<ruby>流<rt>なが</rt></ruby>れろ", kana: "ながれろ" } } },
+        // 3. 認める (一段)
+        { basic: { show: "<ruby>認<rt>みと</rt></ruby>める", type: "一段" }, forms: { ta: { show: "<ruby>認<rt>みと</rt></ruby>めた", kana: "みとめた" }, te: { show: "<ruby>認<rt>みと</rt></ruby>めて", kana: "みとめて" }, masu: { show: "<ruby>認<rt>みと</rt></ruby>めます", kana: "みとめます" }, nai: { show: "<ruby>認<rt>みと</rt></ruby>めない", kana: "みとめない" }, pot: { show: "<ruby>認<rt>みと</rt></ruby>められる", kana: "みとめられる" }, vol: { show: "<ruby>認<rt>みと</rt></ruby>めよう", kana: "みとめよう" }, pas: { show: "<ruby>認<rt>みと</rt></ruby>められる", kana: "みとめられる" }, cau: { show: "<ruby>認<rt>みと</rt></ruby>めさせる", kana: "みとめさせる" }, cpas: { show: "<ruby>認<rt>みと</rt></ruby>めさせられる", kana: "みとめさせられる" }, imp: { show: "<ruby>認<rt>みと</rt></ruby>めろ", kana: "みとめろ" } } },
+        // 23. 似合う (五段 - 有缩略)
+        { basic: { show: "<ruby>似<rt>に</rt></ruby><ruby>合<rt>あ</rt></ruby>う", type: "五段" }, forms: { ta: { show: "<ruby>似<rt>に</rt></ruby><ruby>合<rt>あ</rt></ruby>った", kana: "にあった" }, te: { show: "<ruby>似<rt>に</rt></ruby><ruby>合<rt>あ</rt></ruby>って", kana: "にあって" }, masu: { show: "<ruby>似<rt>に</rt></ruby><ruby>合<rt>あ</rt></ruby>います", kana: "にあいます" }, nai: { show: "<ruby>似<rt>に</rt></ruby><ruby>合<rt>あ</rt></ruby>わない", kana: "にあわない" }, pot: { show: "<ruby>似<rt>に</rt></ruby><ruby>合<rt>あ</rt></ruby>える", kana: "にあえる" }, vol: { show: "<ruby>似<rt>に</rt></ruby><ruby>合<rt>あ</rt></ruby>おう", kana: "にあおう" }, pas: { show: "<ruby>似<rt>に</rt></ruby><ruby>合<rt>あ</rt></ruby>われる", kana: "にあわれる" }, cau: { show: "<ruby>似<rt>に</rt></ruby><ruby>合<rt>あ</rt></ruby>わせる", kana: "にあわせる" }, cpas: { show: "<ruby>似<rt>に</rt></ruby><ruby>合<rt>あ</rt></ruby>わされる", kana: ["にあわされる", "にあわせられる"] }, imp: { show: "<ruby>似<rt>に</rt></ruby><ruby>合<rt>あ</rt></ruby>え", kana: "にあえ" } } },
+        // 24. 臭う (五段 - 有缩略)
+        { basic: { show: "<ruby>臭<rt>にお</rt></ruby>う", type: "五段" }, forms: { ta: { show: "<ruby>臭<rt>にお</rt></ruby>った", kana: "におった" }, te: { show: "<ruby>臭<rt>にお</rt></ruby>って", kana: "におって" }, masu: { show: "<ruby>臭<rt>にお</rt></ruby>います", kana: "においます" }, nai: { show: "<ruby>臭<rt>にお</rt></ruby>わない", kana: "におわない" }, pot: { show: "<ruby>臭<rt>にお</rt></ruby>える", kana: "におえる" }, vol: { show: "<ruby>臭<rt>にお</rt></ruby>おう", kana: "におおう" }, pas: { show: "<ruby>臭<rt>にお</rt></ruby>われる", kana: "におわれる" }, cau: { show: "<ruby>臭<rt>にお</rt></ruby>わせる", kana: "におわせる" }, cpas: { show: "<ruby>臭<rt>にお</rt></ruby>わされる", kana: ["におわされる", "におわせられる"] }, imp: { show: "<ruby>臭<rt>にお</rt></ruby>え", kana: "におえ" } } },
+        // 25. 願う (五段 - 有缩略)
+        { basic: { show: "<ruby>願<rt>ねが</rt></ruby>う", type: "五段" }, forms: { ta: { show: "<ruby>願<rt>ねが</rt></ruby>った", kana: "ねがった" }, te: { show: "<ruby>願<rt>ねが</rt></ruby>って", kana: "ねがって" }, masu: { show: "<ruby>願<rt>ねが</rt></ruby>います", kana: "ねがいます" }, nai: { show: "<ruby>願<rt>ねが</rt></ruby>わない", kana: "ねがわない" }, pot: { show: "<ruby>願<rt>ねが</rt></ruby>える", kana: "ねがえる" }, vol: { show: "<ruby>願<rt>ねが</rt></ruby>おう", kana: "ねがおう" }, pas: { show: "<ruby>願<rt>ねが</rt></ruby>われる", kana: "ねがわれる" }, cau: { show: "<ruby>願<rt>ねが</rt></ruby>わせる", kana: "ねがわせる" }, cpas: { show: "<ruby>願<rt>ねが</rt></ruby>わされる", kana: ["ねがわされる", "ねがわせられる"] }, imp: { show: "<ruby>願<rt>ねが</rt></ruby>え", kana: "ねがえ" } } },
+       // 26. 残る (五段 - 有缩略)
+        { basic: { show: "<ruby>残<rt>のこ</rt></ruby>る", type: "五段" }, forms: { ta: { show: "<ruby>残<rt>のこ</rt></ruby>った", kana: "のこった" }, te: { show: "<ruby>残<rt>のこ</rt></ruby>って", kana: "のこって" }, masu: { show: "<ruby>残<rt>のこ</rt></ruby>ります", kana: "のこります" }, nai: { show: "<ruby>残<rt>のこ</rt></ruby>らない", kana: "のこらない" }, pot: { show: "<ruby>残<rt>のこ</rt></ruby>れる", kana: "のこれる" }, vol: { show: "<ruby>残<rt>のこ</rt></ruby>ろう", kana: "のころう" }, pas: { show: "<ruby>残<rt>のこ</rt></ruby>られる", kana: "のこられる" }, cau: { show: "<ruby>残<rt>のこ</rt></ruby>らせる", kana: "のこらせる" }, cpas: { show: "<ruby>残<rt>のこ</rt></ruby>らされる", kana: ["のこらされる", "のこらせられる"] }, imp: { show: "<ruby>残<rt>のこ</rt></ruby>れ", kana: "のこれ" } } },
+        // 27. 外す (五段 - 苏结尾 - 无缩略)
+        { basic: { show: "<ruby>外<rt>はず</rt></ruby>す", type: "五段" }, forms: { ta: { show: "<ruby>外<rt>はず</rt></ruby>した", kana: "はずした" }, te: { show: "<ruby>外<rt>はず</rt></ruby>して", kana: "はずして" }, masu: { show: "<ruby>外<rt>はず</rt></ruby>します", kana: "はずします" }, nai: { show: "<ruby>外<rt>はず</rt></ruby>さない", kana: "はずさない" }, pot: { show: "<ruby>外<rt>はず</rt></ruby>せる", kana: "はずせる" }, vol: { show: "<ruby>外<rt>はず</rt></ruby>そう", kana: "はずそう" }, pas: { show: "<ruby>外<rt>はず</rt></ruby>される", kana: "はずされる" }, cau: { show: "<ruby>外<rt>はず</rt></ruby>させる", kana: "はずさせる" }, cpas: { show: "<ruby>外<rt>はず</rt></ruby>させられる", kana: "はずさせられる" }, imp: { show: "<ruby>外<rt>はず</rt></ruby>せ", kana: "はずせ" } } },
+        // 28. 引く (五段 - 有缩略)
+        { basic: { show: "<ruby>引<rt>ひ</rt></ruby>く", type: "五段" }, forms: { ta: { show: "<ruby>引<rt>ひ</rt></ruby>いた", kana: "ひいた" }, te: { show: "<ruby>引<rt>ひ</rt></ruby>いて", kana: "ひいて" }, masu: { show: "<ruby>引<rt>ひ</rt></ruby>きます", kana: "ひきます" }, nai: { show: "<ruby>引<rt>ひ</rt></ruby>かない", kana: "ひかない" }, pot: { show: "<ruby>引<rt>ひ</rt></ruby>ける", kana: "ひける" }, vol: { show: "<ruby>引<rt>ひ</rt></ruby>こう", kana: "ひこう" }, pas: { show: "<ruby>引<rt>ひ</rt></ruby>かれる", kana: "ひかれる" }, cau: { show: "<ruby>引<rt>ひ</rt></ruby>かせる", kana: "ひかせる" }, cpas: { show: "<ruby>引<rt>ひ</rt></ruby>かされる", kana: ["ひかされる", "ひかせられる"] }, imp: { show: "<ruby>引<rt>ひ</rt></ruby>け", kana: "ひけ" } } },
+        // 29. 目立つ (五段 - 有缩略)
+        { basic: { show: "<ruby>目<rt>め</rt></ruby><ruby>立<rt>だ</rt></ruby>つ", type: "五段" }, forms: { ta: { show: "<ruby>目<rt>め</rt></ruby><ruby>立<rt>だ</rt></ruby>った", kana: "めだった" }, te: { show: "<ruby>目<rt>め</rt></ruby><ruby>立<rt>だ</rt></ruby>って", kana: "めだって" }, masu: { show: "<ruby>目<rt>め</rt></ruby><ruby>立<rt>だ</rt></ruby>ちます", kana: "めだちます" }, nai: { show: "<ruby>目<rt>め</rt></ruby><ruby>立<rt>だ</rt></ruby>たない", kana: "めだたない" }, pot: { show: "<ruby>目<rt>め</rt></ruby><ruby>立<rt>だ</rt></ruby>てる", kana: "めだてる" }, vol: { show: "<ruby>目<rt>め</rt></ruby><ruby>立<rt>だ</rt></ruby>とう", kana: "めだとう" }, pas: { show: "<ruby>目<rt>め</rt></ruby><ruby>立<rt>だ</rt></ruby>たれる", kana: "めだたれる" }, cau: { show: "<ruby>目<rt>め</rt></ruby><ruby>立<rt>だ</rt></ruby>たせる", kana: "めだたせる" }, cpas: { show: "<ruby>目<rt>め</rt></ruby><ruby>立<rt>だ</rt></ruby>たされる", kana: ["めだたされる", "めだたせられる"] }, imp: { show: "<ruby>目<rt>め</rt></ruby><ruby>立<rt>だ</rt></ruby>て", kana: "めだて" } } },
+        // 30. 結ぶ (五段 - 有缩略)
+        { basic: { show: "<ruby>結<rt>むす</rt></ruby>ぶ", type: "五段" }, forms: { ta: { show: "<ruby>結<rt>むす</rt></ruby>んだ", kana: "むすんだ" }, te: { show: "<ruby>結<rt>むす</rt></ruby>んで", kana: "むすんで" }, masu: { show: "<ruby>結<rt>むす</rt></ruby>びます", kana: "むすびます" }, nai: { show: "<ruby>結<rt>むす</rt></ruby>ばない", kana: "むすばない" }, pot: { show: "<ruby>結<rt>むす</rt></ruby>べる", kana: "むすべる" }, vol: { show: "<ruby>結<rt>むす</rt></ruby>ぼう", kana: "むすぼう" }, pas: { show: "<ruby>結<rt>むす</rt></ruby>ばれる", kana: "むすばれる" }, cau: { show: "<ruby>結<rt>むす</rt></ruby>ばせる", kana: "むすばせる" }, cpas: { show: "<ruby>結<rt>むす</rt></ruby>ばされる", kana: ["むすばされる", "むすばせられる"] }, imp: { show: "<ruby>結<rt>むす</rt></ruby>べ", kana: "むすべ" } } },
+        // 31. 許す (五段 - 苏结尾 - 无缩略)
+        { basic: { show: "<ruby>許<rt>ゆる</rt></ruby>す", type: "五段" }, forms: { ta: { show: "<ruby>許<rt>ゆる</rt></ruby>した", kana: "ゆるした" }, te: { show: "<ruby>許<rt>ゆる</rt></ruby>して", kana: "ゆるして" }, masu: { show: "<ruby>許<rt>ゆる</rt></ruby>します", kana: "ゆるします" }, nai: { show: "<ruby>許<rt>ゆる</rt></ruby>さない", kana: "ゆるさない" }, pot: { show: "<ruby>許<rt>ゆる</rt></ruby>せる", kana: "ゆるせる" }, vol: { show: "<ruby>許<rt>ゆる</rt></ruby>そう", kana: "ゆるそう" }, pas: { show: "<ruby>許<rt>ゆる</rt></ruby>される", kana: "ゆるされる" }, cau: { show: "<ruby>許<rt>ゆる</rt></ruby>させる", kana: "ゆるさせる" }, cpas: { show: "<ruby>許<rt>ゆる</rt></ruby>させられる", kana: "ゆるさせられる" }, imp: { show: "<ruby>許<rt>ゆる</rt></ruby>せ", kana: "ゆるせ" } } },
+        // 32. 変える (一段)
+        { basic: { show: "<ruby>変<rt>か</rt></ruby>える", type: "一段" }, forms: { ta: { show: "<ruby>変<rt>か</rt></ruby>えた", kana: "かえた" }, te: { show: "<ruby>変<rt>か</rt></ruby>えて", kana: "かえて" }, masu: { show: "<ruby>変<rt>か</rt></ruby>えます", kana: "かえます" }, nai: { show: "<ruby>変<rt>か</rt></ruby>えない", kana: "かえない" }, pot: { show: "<ruby>変<rt>か</rt></ruby>えられる", kana: "かえられる" }, vol: { show: "<ruby>変<rt>か</rt></ruby>えよう", kana: "かえよう" }, pas: { show: "<ruby>変<rt>か</rt></ruby>えられる", kana: "かえられる" }, cau: { show: "<ruby>変<rt>か</rt></ruby>えさせる", kana: "かえさせる" }, cpas: { show: "<ruby>変<rt>か</rt></ruby>えさせられる", kana: "かえさせられる" }, imp: { show: "<ruby>変<rt>か</rt></ruby>えろ", kana: "かえろ" } } },
+        // 33. 重ねる (一段)
+        { basic: { show: "<ruby>重<rt>かさ</rt></ruby>ねる", type: "一段" }, forms: { ta: { show: "<ruby>重<rt>かさ</rt></ruby>ねた", kana: "かさねた" }, te: { show: "<ruby>重<rt>かさ</rt></ruby>ねて", kana: "かさねて" }, masu: { show: "<ruby>重<rt>かさ</rt></ruby>ねます", kana: "かさねます" }, nai: { show: "<ruby>重<rt>かさ</rt></ruby>ねない", kana: "かさねない" }, pot: { show: "<ruby>重<rt>かさ</rt></ruby>ねられる", kana: "かさねられる" }, vol: { show: "<ruby>重<rt>かさ</rt></ruby>ねよう", kana: "かさねよう" }, pas: { show: "<ruby>重<rt>かさ</rt></ruby>ねられる", kana: "かさねられる" }, cau: { show: "<ruby>重<rt>かさ</rt></ruby>ねさせる", kana: "かさねさせる" }, cpas: { show: "<ruby>重<rt>かさ</rt></ruby>ねさせられる", kana: "かさねさせられる" }, imp: { show: "<ruby>重<rt>かさ</rt></ruby>ねろ", kana: "かさねろ" } } },
+        // 34. 加える (一段)
+        { basic: { show: "<ruby>加<rt>くわ</rt></ruby>える", type: "一段" }, forms: { ta: { show: "<ruby>加<rt>くわ</rt></ruby>えた", kana: "くわえた" }, te: { show: "<ruby>加<rt>くわ</rt></ruby>えて", kana: "くわえて" }, masu: { show: "<ruby>加<rt>くわ</rt></ruby>えます", kana: "くわえます" }, nai: { show: "<ruby>加<rt>くわ</rt></ruby>えない", kana: "くわえない" }, pot: { show: "<ruby>加<rt>くわ</rt></ruby>えられる", kana: "くわえられる" }, vol: { show: "<ruby>加<rt>くわ</rt></ruby>えよう", kana: "くわえよう" }, pas: { show: "<ruby>加<rt>くわ</rt></ruby>えられる", kana: "くわえられる" }, cau: { show: "<ruby>加<rt>くわ</rt></ruby>えさせる", kana: "くわえさせる" }, cpas: { show: "<ruby>加<rt>くわ</rt></ruby>えさせられる", kana: "くわえさせられる" }, imp: { show: "<ruby>加<rt>くわ</rt></ruby>えろ", kana: "くわえろ" } } },
+        // 35. 憧れる (一段)
+        { basic: { show: "<ruby>憧<rt>あこが</rt></ruby>れる", type: "一段" }, forms: { ta: { show: "<ruby>憧<rt>あこが</rt></ruby>れた", kana: "あこがれた" }, te: { show: "<ruby>憧<rt>あこが</rt></ruby>れて", kana: "あこがれて" }, masu: { show: "<ruby>憧<rt>あこが</rt></ruby>れます", kana: "あこがれます" }, nai: { show: "<ruby>憧<rt>あこが</rt></ruby>れない", kana: "あこがれない" }, pot: { show: "<ruby>憧<rt>あこが</rt></ruby>れられる", kana: "あこがれられる" }, vol: { show: "<ruby>憧<rt>あこが</rt></ruby>れよう", kana: "あこがれよう" }, pas: { show: "<ruby>憧<rt>あこが</rt></ruby>れられる", kana: "あこがれられる" }, cau: { show: "<ruby>憧<rt>あこが</rt></ruby>れさせる", kana: "あこがれさせる" }, cpas: { show: "<ruby>憧<rt>あこが</rt></ruby>れさせられる", kana: "あこがれさせられる" }, imp: { show: "<ruby>憧<rt>あこが</rt></ruby>れろ", kana: "あこがれろ" } } },
+        // 36. 空く (五段 - 有缩略)
+        { basic: { show: "<ruby>空<rt>あ</rt></ruby>く", type: "五段" }, forms: { ta: { show: "<ruby>空<rt>あ</rt></ruby>いた", kana: "あいた" }, te: { show: "<ruby>空<rt>あ</rt></ruby>いて", kana: "あいて" }, masu: { show: "<ruby>空<rt>あ</rt></ruby>きます", kana: "あきます" }, nai: { show: "<ruby>空<rt>あ</rt></ruby>かない", kana: "あかない" }, pot: { show: "<ruby>空<rt>あ</rt></ruby>ける", kana: "あける" }, vol: { show: "<ruby>空<rt>あ</rt></ruby>こう", kana: "あこう" }, pas: { show: "<ruby>空<rt>あ</rt></ruby>かれる", kana: "あかれる" }, cau: { show: "<ruby>空<rt>あ</rt></ruby>かせる", kana: "あかせる" }, cpas: { show: "<ruby>空<rt>あ</rt></ruby>かされる", kana: ["あかされる", "あかせられる"] }, imp: { show: "<ruby>空<rt>あ</rt></ruby>け", kana: "あけ" } } },
+        // 37. いじめる (一段)
+        { basic: { show: "いじめる", type: "一段" }, forms: { ta: { show: "いじめた", kana: "いじめた" }, te: { show: "いじめて", kana: "いじめて" }, masu: { show: "いじめます", kana: "いじめます" }, nai: { show: "いじめない", kana: "いじめない" }, pot: { show: "いじめられる", kana: "いじめられる" }, vol: { show: "いじめよう", kana: "いじめよう" }, pas: { show: "いじめられる", kana: "いじめられる" }, cau: { show: "いじめさせる", kana: "いじめさせる" }, cpas: { show: "いじめさせられる", kana: "いじめさせられる" }, imp: { show: "いじめろ", kana: "いじめろ" } } },
+        // 38. 祈る (五段 - 有缩略)
+        { basic: { show: "<ruby>祈<rt>いの</rt></ruby>る", type: "五段" }, forms: { ta: { show: "<ruby>祈<rt>いの</rt></ruby>った", kana: "いのった" }, te: { show: "<ruby>祈<rt>いの</rt></ruby>って", kana: "いのって" }, masu: { show: "<ruby>祈<rt>いの</rt></ruby>ります", kana: "いのります" }, nai: { show: "<ruby>祈<rt>いの</rt></ruby>らない", kana: "いのらない" }, pot: { show: "<ruby>祈<rt>いの</rt></ruby>れる", kana: "いのれる" }, vol: { show: "<ruby>祈<rt>いの</rt></ruby>ろう", kana: "いのろう" }, pas: { show: "<ruby>祈<rt>いの</rt></ruby>られる", kana: "いのられる" }, cau: { show: "<ruby>祈<rt>いの</rt></ruby>らせる", kana: "いのらせる" }, cpas: { show: "<ruby>祈<rt>いの</rt></ruby>らされる", kana: ["いのらされる", "いのらせられる"] }, imp: { show: "<ruby>祈<rt>いの</rt></ruby>れ", kana: "いのれ" } } },
+        // 39. 動く (五段 - 有缩略)
+        { basic: { show: "<ruby>動<rt>うご</rt></ruby>く", type: "五段" }, forms: { ta: { show: "<ruby>動<rt>うご</rt></ruby>いた", kana: "うごいた" }, te: { show: "<ruby>動<rt>うご</rt></ruby>いて", kana: "うごいて" }, masu: { show: "<ruby>動<rt>うご</rt></ruby>きます", kana: "うごきます" }, nai: { show: "<ruby>動<rt>うご</rt></ruby>かない", kana: "うごかない" }, pot: { show: "<ruby>動<rt>うご</rt></ruby>ける", kana: "うごける" }, vol: { show: "<ruby>動<rt>うご</rt></ruby>こう", kana: "うごこう" }, pas: { show: "<ruby>動<rt>うご</rt></ruby>かれる", kana: "うごかれる" }, cau: { show: "<ruby>動<rt>うご</rt></ruby>かせる", kana: "うごかせる" }, cpas: { show: "<ruby>動<rt>うご</rt></ruby>かされる", kana: ["うごかされる", "うごかせられる"] }, imp: { show: "<ruby>動<rt>うご</rt></ruby>け", kana: "うごけ" } } },
+        // 40. 行う (五段 - 有缩略)
+        { basic: { show: "<ruby>行<rt>おこな</rt></ruby>う", type: "五段" }, forms: { ta: { show: "<ruby>行<rt>おこな</rt></ruby>った", kana: "おこなった" }, te: { show: "<ruby>行<rt>おこな</rt></ruby>って", kana: "おこなって" }, masu: { show: "<ruby>行<rt>おこな</rt></ruby>います", kana: "おこないます" }, nai: { show: "<ruby>行<rt>おこな</rt></ruby>わない", kana: "おこなわない" }, pot: { show: "<ruby>行<rt>おこな</rt></ruby>える", kana: "おこなえる" }, vol: { show: "<ruby>行<rt>おこな</rt></ruby>おう", kana: "おこなおう" }, pas: { show: "<ruby>行<rt>おこな</rt></ruby>われる", kana: "おこなわれる" }, cau: { show: "<ruby>行<rt>おこな</rt></ruby>わせる", kana: "おこなわせる" }, cpas: { show: "<ruby>行<rt>おこな</rt></ruby>わされる", kana: ["おこなわされる", "おこなわせられる"] }, imp: { show: "<ruby>行<rt>おこな</rt></ruby>え", kana: "おこなえ" } } },
+        // 41. 選ぶ (五段 - 有缩略)
+        { basic: { show: "<ruby>選<rt>えら</rt></ruby>ぶ", type: "五段" }, forms: { ta: { show: "<ruby>選<rt>えら</rt></ruby>んだ", kana: "えらんだ" }, te: { show: "<ruby>選<rt>えら</rt></ruby>んで", kana: "えらんで" }, masu: { show: "<ruby>選<rt>えら</rt></ruby>びます", kana: "えらびます" }, nai: { show: "<ruby>選<rt>えら</rt></ruby>ばない", kana: "えらばない" }, pot: { show: "<ruby>選<rt>えら</rt></ruby>べる", kana: "えらべる" }, vol: { show: "<ruby>選<rt>えら</rt></ruby>ぼう", kana: "えらぼう" }, pas: { show: "<ruby>選<rt>えら</rt></ruby>ばれる", kana: "えらばれる" }, cau: { show: "<ruby>選<rt>えら</rt></ruby>ばせる", kana: "えらばせる" }, cpas: { show: "<ruby>選<rt>えら</rt></ruby>ばされる", kana: ["えらばされる", "えらばせられる"] }, imp: { show: "<ruby>選<rt>えら</rt></ruby>べ", kana: "えらべ" } } },
+        // 42. 怒る (五段 - 有缩略)
+        { basic: { show: "<ruby>怒<rt>おこ</rt></ruby>る", type: "五段" }, forms: { ta: { show: "<ruby>怒<rt>おこ</rt></ruby>った", kana: "おこった" }, te: { show: "<ruby>怒<rt>おこ</rt></ruby>って", kana: "おこって" }, masu: { show: "<ruby>怒<rt>おこ</rt></ruby>ります", kana: "おこります" }, nai: { show: "<ruby>怒<rt>おこ</rt></ruby>らない", kana: "おこらない" }, pot: { show: "<ruby>怒<rt>おこ</rt></ruby>れる", kana: "おこれる" }, vol: { show: "<ruby>怒<rt>おこ</rt></ruby>ろう", kana: "おころう" }, pas: { show: "<ruby>怒<rt>おこ</rt></ruby>られる", kana: "おこられる" }, cau: { show: "<ruby>怒<rt>おこ</rt></ruby>らせる", kana: "おこらせる" }, cpas: { show: "<ruby>怒<rt>おこ</rt></ruby>らされる", kana: ["おこらされる", "おこらせられる"] }, imp: { show: "<ruby>怒<rt>おこ</rt></ruby>れ", kana: "おこれ" } } },
+        // 43. 驚く (五段 - 有缩略)
+        { basic: { show: "<ruby>驚<rt>おどろ</rt></ruby>く", type: "五段" }, forms: { ta: { show: "<ruby>驚<rt>おどろ</rt></ruby>いた", kana: "おどろいた" }, te: { show: "<ruby>驚<rt>おどろ</rt></ruby>いて", kana: "おどろいて" }, masu: { show: "<ruby>驚<rt>おどろ</rt></ruby>きます", kana: "おどろきます" }, nai: { show: "<ruby>驚<rt>おどろ</rt></ruby>かない", kana: "おどろかない" }, pot: { show: "<ruby>驚<rt>おどろ</rt></ruby>ける", kana: "おどろける" }, vol: { show: "<ruby>驚<rt>おどろ</rt></ruby>こう", kana: "おどろこう" }, pas: { show: "<ruby>驚<rt>おどろ</rt></ruby>かれる", kana: "おどろかれる" }, cau: { show: "<ruby>驚<rt>おどろ</rt></ruby>かせる", kana: "おどろかせる" }, cpas: { show: "<ruby>驚<rt>おどろ</rt></ruby>かされる", kana: ["おどろかされる", "おどろかせられる"] }, imp: { show: "<ruby>驚<rt>おどろ</rt></ruby>け", kana: "おどろけ" } } },
+        // 44. 勝つ (五段 - 有缩略)
+        { basic: { show: "<ruby>勝<rt>か</rt></ruby>つ", type: "五段" }, forms: { ta: { show: "<ruby>勝<rt>か</rt></ruby>った", kana: "かった" }, te: { show: "<ruby>勝<rt>か</rt></ruby>って", kana: "かって" }, masu: { show: "<ruby>勝<rt>か</rt></ruby>ちます", kana: "かちます" }, nai: { show: "<ruby>勝<rt>か</rt></ruby>たない", kana: "かたない" }, pot: { show: "<ruby>勝<rt>か</rt></ruby>てる", kana: "かてる" }, vol: { show: "<ruby>勝<rt>か</rt></ruby>とう", kana: "かとう" }, pas: { show: "<ruby>勝<rt>か</rt></ruby>たれる", kana: "かたれる" }, cau: { show: "<ruby>勝<rt>か</rt></ruby>たせる", kana: "かたせる" }, cpas: { show: "<ruby>勝<rt>か</rt></ruby>たされる", kana: ["かたされる", "かたせられる"] }, imp: { show: "<ruby>勝<rt>か</rt></ruby>て", kana: "かて" } } },
+        // 45. 噛む (五段 - 有缩略)
+        { basic: { show: "<ruby>噛<rt>か</rt></ruby>む", type: "五段" }, forms: { ta: { show: "<ruby>噛<rt>か</rt></ruby>んだ", kana: "かんだ" }, te: { show: "<ruby>噛<rt>か</rt></ruby>んで", kana: "かんで" }, masu: { show: "<ruby>噛<rt>か</rt></ruby>みます", kana: "かみます" }, nai: { show: "<ruby>噛<rt>か</rt></ruby>まない", kana: "かまない" }, pot: { show: "<ruby>噛<rt>か</rt></ruby>める", kana: "かめる" }, vol: { show: "<ruby>噛<rt>か</rt></ruby>もう", kana: "かもう" }, pas: { show: "<ruby>噛<rt>か</rt></ruby>まれる", kana: "かまれる" }, cau: { show: "<ruby>噛<rt>か</rt></ruby>ませる", kana: "かませる" }, cpas: { show: "<ruby>噛<rt>か</rt></ruby>まされる", kana: ["かまされる", "かませられる"] }, imp: { show: "<ruby>噛<rt>か</rt></ruby>め", kana: "かめ" } } },
+        // 46. 答える (一段)
+        { basic: { show: "<ruby>答<rt>こた</rt></ruby>える", type: "一段" }, forms: { ta: { show: "<ruby>答<rt>こた</rt></ruby>えた", kana: "こたえた" }, te: { show: "<ruby>答<rt>こた</rt></ruby>えて", kana: "こたえて" }, masu: { show: "<ruby>答<rt>こた</rt></ruby>えます", kana: "こたえます" }, nai: { show: "<ruby>答<rt>こた</rt></ruby>えない", kana: "こたえない" }, pot: { show: "<ruby>答<rt>こた</rt></ruby>えられる", kana: "こたえられる" }, vol: { show: "<ruby>答<rt>こた</rt></ruby>えよう", kana: "こたえよう" }, pas: { show: "<ruby>答<rt>こた</rt></ruby>えられる", kana: "こたえられる" }, cau: { show: "<ruby>答<rt>こた</rt></ruby>えさせる", kana: "こたえさせる" }, cpas: { show: "<ruby>答<rt>こた</rt></ruby>えさせられる", kana: "こたえさせられる" }, imp: { show: "<ruby>答<rt>こた</rt></ruby>えろ", kana: "こたえろ" } } },
+        // 47. 消す (五段 - 苏结尾 - 无缩略)
+        { basic: { show: "<ruby>消<rt>け</rt></ruby>す", type: "五段" }, forms: { ta: { show: "<ruby>消<rt>け</rt></ruby>した", kana: "けした" }, te: { show: "<ruby>消<rt>け</rt></ruby>して", kana: "けして" }, masu: { show: "<ruby>消<rt>け</rt></ruby>します", kana: "けします" }, nai: { show: "<ruby>消<rt>け</rt></ruby>さない", kana: "けさない" }, pot: { show: "<ruby>消<rt>け</rt></ruby>せる", kana: "けせる" }, vol: { show: "<ruby>消<rt>け</rt></ruby>そう", kana: "けそう" }, pas: { show: "<ruby>消<rt>け</rt></ruby>される", kana: "けされる" }, cau: { show: "<ruby>消<rt>け</rt></ruby>させる", kana: "けさせる" }, cpas: { show: "<ruby>消<rt>け</rt></ruby>させられる", kana: "けさせられる" }, imp: { show: "<ruby>消<rt>け</rt></ruby>せ", kana: "けせ" } } },
+        // 48. 咲く (五段 - 有缩略)
+        { basic: { show: "<ruby>咲<rt>さ</rt></ruby>く", type: "五段" }, forms: { ta: { show: "<ruby>咲<rt>さ</rt></ruby>いた", kana: "さいた" }, te: { show: "<ruby>咲<rt>さ</rt></ruby>いて", kana: "さいて" }, masu: { show: "<ruby>咲<rt>さ</rt></ruby>きます", kana: "さきます" }, nai: { show: "<ruby>咲<rt>さ</rt></ruby>かない", kana: "さかない" }, pot: { show: "<ruby>咲<rt>さ</rt></ruby>ける", kana: "さける" }, vol: { show: "<ruby>咲<rt>さ</rt></ruby>こう", kana: "さこう" }, pas: { show: "<ruby>咲<rt>さ</rt></ruby>かれる", kana: "さかれる" }, cau: { show: "<ruby>咲<rt>さ</rt></ruby>かせる", kana: "さかせる" }, cpas: { show: "<ruby>咲<rt>さ</rt></ruby>かされる", kana: ["さかされる", "さかせられる"] }, imp: { show: "<ruby>咲<rt>さ</rt></ruby>け", kana: "さけ" } } },
+        // 49. 叱る (五段 - 有缩略)
+        { basic: { show: "<ruby>叱<rt>しか</rt></ruby>る", type: "五段" }, forms: { ta: { show: "<ruby>叱<rt>しか</rt></ruby>った", kana: "しかった" }, te: { show: "<ruby>叱<rt>しか</rt></ruby>って", kana: "しかって" }, masu: { show: "<ruby>叱<rt>しか</rt></ruby>ります", kana: "しかります" }, nai: { show: "<ruby>叱<rt>しか</rt></ruby>らない", kana: "しからない" }, pot: { show: "<ruby>叱<rt>しか</rt></ruby>れる", kana: "しかれる" }, vol: { show: "<ruby>叱<rt>しか</rt></ruby>ろう", kana: "しかろう" }, pas: { show: "<ruby>叱<rt>しか</rt></ruby>られる", kana: "しかられる" }, cau: { show: "<ruby>叱<rt>しか</rt></ruby>らせる", kana: "しからせる" }, cpas: { show: "<ruby>叱<rt>しか</rt></ruby>らされる", kana: ["しからされる", "しからせられる"] }, imp: { show: "<ruby>叱<rt>しか</rt></ruby>れ", kana: "しかれ" } } },
+        // 50. 触る (五段 - 有缩略)
+        { basic: { show: "<ruby>触<rt>さわ</rt></ruby>る", type: "五段" }, forms: { ta: { show: "<ruby>触<rt>さわ</rt></ruby>った", kana: "さわった" }, te: { show: "<ruby>触<rt>さわ</rt></ruby>って", kana: "さわって" }, masu: { show: "<ruby>触<rt>さわ</rt></ruby>ります", kana: "さわります" }, nai: { show: "<ruby>触<rt>さわ</rt></ruby>らない", kana: "さわらない" }, pot: { show: "<ruby>触<rt>さわ</rt></ruby>れる", kana: "さわれる" }, vol: { show: "<ruby>触<rt>さわ</rt></ruby>ろう", kana: "さわろう" }, pas: { show: "<ruby>触<rt>さわ</rt></ruby>られる", kana: "さわられる" }, cau: { show: "<ruby>触<rt>さわ</rt></ruby>らせる", kana: "さわらせる" }, cpas: { show: "<ruby>触<rt>さわ</rt></ruby>らされる", kana: ["さわらされる", "さわらせられる"] }, imp: { show: "<ruby>触<rt>さわ</rt></ruby>れ", kana: "さわれ" } } },
+        // 51. 足す (五段 - 苏结尾 - 无缩略)
+        { basic: { show: "<ruby>足<rt>た</rt></ruby>す", type: "五段" }, forms: { ta: { show: "<ruby>足<rt>た</rt></ruby>した", kana: "たした" }, te: { show: "<ruby>足<rt>た</rt></ruby>して", kana: "たして" }, masu: { show: "<ruby>足<rt>た</rt></ruby>します", kana: "たします" }, nai: { show: "<ruby>足<rt>た</rt></ruby>さない", kana: "たさない" }, pot: { show: "<ruby>足<rt>た</rt></ruby>せる", kana: "たせる" }, vol: { show: "<ruby>足<rt>た</rt></ruby>そう", kana: "たそう" }, pas: { show: "<ruby>足<rt>た</rt></ruby>される", kana: "たされる" }, cau: { show: "<ruby>足<rt>た</rt></ruby>させる", kana: "たさせる" }, cpas: { show: "<ruby>足<rt>た</rt></ruby>させられる", kana: "たさせられる" }, imp: { show: "<ruby>足<rt>た</rt></ruby>せ", kana: "たせ" } } },
+        // 52. 頼む (五段 - 有缩略)
+        { basic: { show: "<ruby>頼<rt>たの</rt></ruby>む", type: "五段" }, forms: { ta: { show: "<ruby>頼<rt>たの</rt></ruby>んだ", kana: "たのんだ" }, te: { show: "<ruby>頼<rt>たの</rt></ruby>んで", kana: "たのんで" }, masu: { show: "<ruby>頼<rt>たの</rt></ruby>みます", kana: "たのみます" }, nai: { show: "<ruby>頼<rt>たの</rt></ruby>まない", kana: "たのまない" }, pot: { show: "<ruby>頼<rt>たの</rt></ruby>める", kana: "たのめる" }, vol: { show: "<ruby>頼<rt>たの</rt></ruby>もう", kana: "たのもう" }, pas: { show: "<ruby>頼<rt>たの</rt></ruby>まれる", kana: "たのまれる" }, cau: { show: "<ruby>頼<rt>たの</rt></ruby>ませる", kana: "たのませる" }, cpas: { show: "<ruby>頼<rt>たの</rt></ruby>まされる", kana: ["たのまされる", "たのませられる"] }, imp: { show: "<ruby>頼<rt>たの</rt></ruby>め", kana: "たのめ" } } },
+        // 53. 出す (五段 - 苏结尾 - 无缩略)
+        { basic: { show: "<ruby>出<rt>だ</rt></ruby>す", type: "五段" }, forms: { ta: { show: "<ruby>出<rt>だ</rt></ruby>した", kana: "だした" }, te: { show: "<ruby>出<rt>だ</rt></ruby>して", kana: "だして" }, masu: { show: "<ruby>出<rt>だ</rt></ruby>します", kana: "だします" }, nai: { show: "<ruby>出<rt>だ</rt></ruby>さない", kana: "ださない" }, pot: { show: "<ruby>出<rt>だ</rt></ruby>せる", kana: "だせる" }, vol: { show: "<ruby>出<rt>だ</rt></ruby>そう", kana: "だそう" }, pas: { show: "<ruby>出<rt>だ</rt></ruby>される", kana: "だされる" }, cau: { show: "<ruby>出<rt>だ</rt></ruby>させる", kana: "ださせる" }, cpas: { show: "<ruby>出<rt>だ</rt></ruby>させられる", kana: "ださせられる" }, imp: { show: "<ruby>出<rt>だ</rt></ruby>せ", kana: "だせ" } } },
+        // 54. 伝える (一段)
+        { basic: { show: "<ruby>伝<rt>つた</rt></ruby>える", type: "一段" }, forms: { ta: { show: "<ruby>伝<rt>つた</rt></ruby>えた", kana: "つたえた" }, te: { show: "<ruby>伝<rt>つた</rt></ruby>えて", kana: "つたえて" }, masu: { show: "<ruby>伝<rt>つた</rt></ruby>えます", kana: "つたえます" }, nai: { show: "<ruby>伝<rt>つた</rt></ruby>えない", kana: "つたえない" }, pot: { show: "<ruby>伝<rt>つた</rt></ruby>えられる", kana: "つたえられる" }, vol: { show: "<ruby>伝<rt>つた</rt></ruby>えよう", kana: "つたえよう" }, pas: { show: "<ruby>伝<rt>つた</rt></ruby>えられる", kana: "つたえられる" }, cau: { show: "<ruby>伝<rt>つた</rt></ruby>えさせる", kana: "つたえさせる" }, cpas: { show: "<ruby>伝<rt>つた</rt></ruby>えさせられる", kana: "つたえさせられる" }, imp: { show: "<ruby>伝<rt>つた</rt></ruby>えろ", kana: "つたえろ" } } },
+        // 55. 包む (五段 - 有缩略)
+        { basic: { show: "<ruby>包<rt>つつ</rt></ruby>む", type: "五段" }, forms: { ta: { show: "<ruby>包<rt>つつ</rt></ruby>んだ", kana: "つつんだ" }, te: { show: "<ruby>包<rt>つつ</rt></ruby>んで", kana: "つつんで" }, masu: { show: "<ruby>包<rt>つつ</rt></ruby>みます", kana: "つつみます" }, nai: { show: "<ruby>包<rt>つつ</rt></ruby>まない", kana: "つつまない" }, pot: { show: "<ruby>包<rt>つつ</rt></ruby>める", kana: "つつめる" }, vol: { show: "<ruby>包<rt>つつ</rt></ruby>もう", kana: "つつもう" }, pas: { show: "<ruby>包<rt>つつ</rt></ruby>まれる", kana: "つつまれる" }, cau: { show: "<ruby>包<rt>つつ</rt></ruby>ませる", kana: "つつませる" }, cpas: { show: "<ruby>包<rt>つつ</rt></ruby>まされる", kana: ["つつまされる", "つつませられる"] }, imp: { show: "<ruby>包<rt>つつ</rt></ruby>め", kana: "つつめ" } } },
+        // 56. 続く (五段 - 有缩略)
+        { basic: { show: "<ruby>続<rt>つづ</rt></ruby>く", type: "五段" }, forms: { ta: { show: "<ruby>続<rt>つづ</rt></ruby>いた", kana: "つづいた" }, te: { show: "<ruby>続<rt>つづ</rt></ruby>いて", kana: "つづいて" }, masu: { show: "<ruby>続<rt>つづ</rt></ruby>きます", kana: "つづきます" }, nai: { show: "<ruby>続<rt>つづ</rt></ruby>かない", kana: "つづかない" }, pot: { show: "<ruby>続<rt>つづ</rt></ruby>ける", kana: "つづける" }, vol: { show: "<ruby>続<rt>つづ</rt></ruby>こう", kana: "つづこう" }, pas: { show: "<ruby>続<rt>つづ</rt></ruby>かれる", kana: "つづかれる" }, cau: { show: "<ruby>続<rt>つづ</rt></ruby>かせる", kana: "つづかせる" }, cpas: { show: "<ruby>続<rt>つづ</rt></ruby>かされる", kana: ["つづかされる", "つづかせられる"] }, imp: { show: "<ruby>続<rt>つづ</rt></ruby>け", kana: "つづけ" } } },
+        // 57. 連れる (一段)
+        { basic: { show: "<ruby>連<rt>つ</rt></ruby>れる", type: "一段" }, forms: { ta: { show: "<ruby>連<rt>つ</rt></ruby>れた", kana: "つれた" }, te: { show: "<ruby>連<rt>つ</rt></ruby>れて", kana: "つれて" }, masu: { show: "<ruby>連<rt>つ</rt></ruby>れます", kana: "つれます" }, nai: { show: "<ruby>連<rt>つ</rt></ruby>れない", kana: "つれない" }, pot: { show: "<ruby>連<rt>つ</rt></ruby>れられる", kana: "つれられる" }, vol: { show: "<ruby>連<rt>つ</rt></ruby>れよう", kana: "つれよう" }, pas: { show: "<ruby>連<rt>つ</rt></ruby>れられる", kana: "つれられる" }, cau: { show: "<ruby>連<rt>つ</rt></ruby>れさせる", kana: "つれさせる" }, cpas: { show: "<ruby>連<rt>つ</rt></ruby>れさせられる", kana: "つれさせられる" }, imp: { show: "<ruby>連<rt>つ</rt></ruby>れろ", kana: "つれろ" } } },
+        // 58. 泊まる (五段 - 有缩略)
+        { basic: { show: "<ruby>泊<rt>と</rt></ruby>まる", type: "五段" }, forms: { ta: { show: "<ruby>泊<rt>と</rt></ruby>まった", kana: "とまった" }, te: { show: "<ruby>泊<rt>と</rt></ruby>まって", kana: "とまって" }, masu: { show: "<ruby>泊<rt>と</rt></ruby>まります", kana: "とまります" }, nai: { show: "<ruby>泊<rt>と</rt></ruby>まらない", kana: "とまらない" }, pot: { show: "<ruby>泊<rt>と</rt></ruby>まれる", kana: "とまれる" }, vol: { show: "<ruby>泊<rt>と</rt></ruby>まろう", kana: "とまろう" }, pas: { show: "<ruby>泊<rt>と</rt></ruby>まられる", kana: "とまられる" }, cau: { show: "<ruby>泊<rt>と</rt></ruby>まらせる", kana: "とまらせる" }, cpas: { show: "<ruby>泊<rt>と</rt></ruby>まらされる", kana: ["とまらされる", "とまらせられる"] }, imp: { show: "<ruby>泊<rt>と</rt></ruby>まれ", kana: "とまれ" } } },
+        // 59. 直す (五段 - 苏结尾 - 无缩略)
+        { basic: { show: "<ruby>直<rt>なお</rt></ruby>す", type: "五段" }, forms: { ta: { show: "<ruby>直<rt>なお</rt></ruby>した", kana: "なおした" }, te: { show: "<ruby>直<rt>なお</rt></ruby>して", kana: "なおして" }, masu: { show: "<ruby>直<rt>なお</rt></ruby>します", kana: "なおします" }, nai: { show: "<ruby>直<rt>なお</rt></ruby>さない", kana: "なおさない" }, pot: { show: "<ruby>直<rt>なお</rt></ruby>せる", kana: "なおせる" }, vol: { show: "<ruby>直<rt>なお</rt></ruby>そう", kana: "なおそう" }, pas: { show: "<ruby>直<rt>なお</rt></ruby>される", kana: "なおされる" }, cau: { show: "<ruby>直<rt>なお</rt></ruby>させる", kana: "なおさせる" }, cpas: { show: "<ruby>直<rt>なお</rt></ruby>させられる", kana: "なおさせられる" }, imp: { show: "<ruby>直<rt>なお</rt></ruby>せ", kana: "なおせ" } } },
+        // 60. 並ぶ (五段 - 有缩略)
+        { basic: { show: "<ruby>並<rt>なら</rt></ruby>ぶ", type: "五段" }, forms: { ta: { show: "<ruby>並<rt>なら</rt></ruby>んだ", kana: "ならんだ" }, te: { show: "<ruby>並<rt>なら</rt></ruby>んで", kana: "ならんで" }, masu: { show: "<ruby>並<rt>なら</rt></ruby>びます", kana: "ならびます" }, nai: { show: "<ruby>並<rt>なら</rt></ruby>ばない", kana: "ならばない" }, pot: { show: "<ruby>並<rt>なら</rt></ruby>べる", kana: "ならべる" }, vol: { show: "<ruby>並<rt>なら</rt></ruby>ぼう", kana: "ならぼう" }, pas: { show: "<ruby>並<rt>なら</rt></ruby>ばれる", kana: "ならばれる" }, cau: { show: "<ruby>並<rt>なら</rt></ruby>ばせる", kana: "ならばせる" }, cpas: { show: "<ruby>並<rt>なら</rt></ruby>ばされる", kana: ["ならばされる", "ならばせられる"] }, imp: { show: "<ruby>並<rt>なら</rt></ruby>べ", kana: "ならべ" } } },
+        // 61. 濡れる (一段)
+        { basic: { show: "<ruby>濡<rt>ぬ</rt></ruby>れる", type: "一段" }, forms: { ta: { show: "<ruby>濡<rt>ぬ</rt></ruby>れた", kana: "ぬれた" }, te: { show: "<ruby>濡<rt>ぬ</rt></ruby>れて", kana: "ぬれて" }, masu: { show: "<ruby>濡<rt>ぬ</rt></ruby>れます", kana: "ぬれます" }, nai: { show: "<ruby>濡<rt>ぬ</rt></ruby>れない", kana: "ぬれない" }, pot: { show: "<ruby>濡<rt>ぬ</rt></ruby>れられる", kana: "ぬれられる" }, vol: { show: "<ruby>濡<rt>ぬ</rt></ruby>れよう", kana: "ぬれよう" }, pas: { show: "<ruby>濡<rt>ぬ</rt></ruby>れられる", kana: "ぬれられる" }, cau: { show: "<ruby>濡<rt>ぬ</rt></ruby>れさせる", kana: "ぬれさせる" }, cpas: { show: "<ruby>濡<rt>ぬ</rt></ruby>れさせられる", kana: "ぬれさせられる" }, imp: { show: "<ruby>濡<rt>ぬ</rt></ruby>れろ", kana: "ぬれろ" } } },
+        // 62. 晴れる (一段)
+        { basic: { show: "<ruby>晴<rt>は</rt></ruby>れる", type: "一段" }, forms: { ta: { show: "<ruby>晴<rt>は</rt></ruby>れた", kana: "はれた" }, te: { show: "<ruby>晴<rt>は</rt></ruby>れて", kana: "はれて" }, masu: { show: "<ruby>晴<rt>は</rt></ruby>れます", kana: "はれます" }, nai: { show: "<ruby>晴<rt>は</rt></ruby>れない", kana: "はれない" }, pot: { show: "<ruby>晴<rt>は</rt></ruby>れられる", kana: "はれられる" }, vol: { show: "<ruby>晴<rt>は</rt></ruby>れよう", kana: "はれよう" }, pas: { show: "<ruby>晴<rt>は</rt></ruby>れられる", kana: "はれられる" }, cau: { show: "<ruby>晴<rt>は</rt></ruby>れさせる", kana: "はれさせる" }, cpas: { show: "<ruby>晴<rt>は</rt></ruby>れさせられる", kana: "はれさせられる" }, imp: { show: "<ruby>晴<rt>は</rt></ruby>れろ", kana: "はれろ" } } },
+        // 63. 冷える (一段)
+        { basic: { show: "<ruby>冷<rt>ひ</rt></ruby>える", type: "一段" }, forms: { ta: { show: "<ruby>冷<rt>ひ</rt></ruby>えた", kana: "ひえた" }, te: { show: "<ruby>冷<rt>ひ</rt></ruby>えて", kana: "ひえて" }, masu: { show: "<ruby>冷<rt>ひ</rt></ruby>えます", kana: "ひえます" }, nai: { show: "<ruby>冷<rt>ひ</rt></ruby>えない", kana: "ひえない" }, pot: { show: "<ruby>冷<rt>ひ</rt></ruby>えられる", kana: "ひえられる" }, vol: { show: "<ruby>冷<rt>ひ</rt></ruby>えよう", kana: "ひえよう" }, pas: { show: "<ruby>冷<rt>ひ</rt></ruby>えられる", kana: "ひえられる" }, cau: { show: "<ruby>冷<rt>ひ</rt></ruby>えさせる", kana: "ひえさせる" }, cpas: { show: "<ruby>冷<rt>ひ</rt></ruby>えさせられる", kana: "ひえさせられる" }, imp: { show: "<ruby>冷<rt>ひ</rt></ruby>えろ", kana: "ひえろ" } } },
+        // 64. 褒める (一段)
+        { basic: { show: "<ruby>褒<rt>ほ</rt></ruby>める", type: "一段" }, forms: { ta: { show: "<ruby>褒<rt>ほ</rt></ruby>めた", kana: "ほめた" }, te: { show: "<ruby>褒<rt>ほ</rt></ruby>めて", kana: "ほめて" }, masu: { show: "<ruby>褒<rt>ほ</rt></ruby>めます", kana: "ほめます" }, nai: { show: "<ruby>褒<rt>ほ</rt></ruby>めない", kana: "ほめない" }, pot: { show: "<ruby>褒<rt>ほ</rt></ruby>められる", kana: "ほめられる" }, vol: { show: "<ruby>褒<rt>ほ</rt></ruby>めよう", kana: "ほめよう" }, pas: { show: "<ruby>褒<rt>ほ</rt></ruby>められる", kana: "ほめられる" }, cau: { show: "<ruby>褒<rt>ほ</rt></ruby>めさせる", kana: "ほめさせる" }, cpas: { show: "<ruby>褒<rt>ほ</rt></ruby>めさせられる", kana: "ほめさせられる" }, imp: { show: "<ruby>褒<rt>ほ</rt></ruby>めろ", kana: "ほめろ" } } },
+        // 65. 回る (五段 - 有缩略)
+        { basic: { show: "<ruby>回<rt>まわ</rt></ruby>る", type: "五段" }, forms: { ta: { show: "<ruby>回<rt>まわ</rt></ruby>った", kana: "まわった" }, te: { show: "<ruby>回<rt>まわ</rt></ruby>って", kana: "まわって" }, masu: { show: "<ruby>回<rt>まわ</rt></ruby>ります", kana: "まわります" }, nai: { show: "<ruby>回<rt>まわ</rt></ruby>らない", kana: "まわらない" }, pot: { show: "<ruby>回<rt>まわ</rt></ruby>れる", kana: "まわれる" }, vol: { show: "<ruby>回<rt>まわ</rt></ruby>ろう", kana: "まわろう" }, pas: { show: "<ruby>回<rt>まわ</rt></ruby>られる", kana: "まわられる" }, cau: { show: "<ruby>回<rt>まわ</rt></ruby>らせる", kana: "まわらせる" }, cpas: { show: "<ruby>回<rt>まわ</rt></ruby>らされる", kana: ["まわらされる", "まわらせられる"] }, imp: { show: "<ruby>回<rt>まわ</rt></ruby>れ", kana: "まわれ" } } },
+        // 66. 見える (一段)
+        { basic: { show: "<ruby>見<rt>み</rt></ruby>える", type: "一段" }, forms: { ta: { show: "<ruby>見<rt>み</rt></ruby>えた", kana: "みえた" }, te: { show: "<ruby>見<rt>み</rt></ruby>えて", kana: "みえて" }, masu: { show: "<ruby>見<rt>み</rt></ruby>えます", kana: "みえます" }, nai: { show: "<ruby>見<rt>み</rt></ruby>えない", kana: "みえない" }, pot: { show: "<ruby>見<rt>み</rt></ruby>えられる", kana: "みえられる" }, vol: { show: "<ruby>見<rt>み</rt></ruby>えよう", kana: "みえよう" }, pas: { show: "<ruby>見<rt>み</rt></ruby>えられる", kana: "みえられる" }, cau: { show: "<ruby>見<rt>み</rt></ruby>えさせる", kana: "みえさせる" }, cpas: { show: "<ruby>見<rt>み</rt></ruby>えさせられる", kana: "みえさせられる" }, imp: { show: "<ruby>見<rt>み</rt></ruby>えろ", kana: "みえろ" } } },
+        // 67. 迎える (一段)
+        { basic: { show: "<ruby>迎<rt>むか</rt></ruby>える", type: "一段" }, forms: { ta: { show: "<ruby>迎<rt>むか</rt></ruby>えた", kana: "むかえた" }, te: { show: "<ruby>迎<rt>むか</rt></ruby>えて", kana: "むかえて" }, masu: { show: "<ruby>迎<rt>むか</rt></ruby>えます", kana: "むかえます" }, nai: { show: "<ruby>迎<rt>むか</rt></ruby>えない", kana: "むかえない" }, pot: { show: "<ruby>迎<rt>むか</rt></ruby>えられる", kana: "むかえられる" }, vol: { show: "<ruby>迎<rt>むか</rt></ruby>えよう", kana: "むかえよう" }, pas: { show: "<ruby>迎<rt>むか</rt></ruby>えられる", kana: "むかえられる" }, cau: { show: "<ruby>迎<rt>むか</rt></ruby>えさせる", kana: "むかえさせる" }, cpas: { show: "<ruby>迎<rt>むか</rt></ruby>えさせられる", kana: "むかえさせられる" }, imp: { show: "<ruby>迎<rt>むか</rt></ruby>えろ", kana: "むかえろ" } } },
+        // 68. 焼く (五段 - 有缩略)
+        { basic: { show: "<ruby>焼<rt>や</rt></ruby>く", type: "五段" }, forms: { ta: { show: "<ruby>焼<rt>や</rt></ruby>いた", kana: "やいた" }, te: { show: "<ruby>焼<rt>や</rt></ruby>いて", kana: "やいて" }, masu: { show: "<ruby>焼<rt>や</rt></ruby>きます", kana: "やきます" }, nai: { show: "<ruby>焼<rt>や</rt></ruby>かない", kana: "やかない" }, pot: { show: "<ruby>焼<rt>や</rt></ruby>ける", kana: "やける" }, vol: { show: "<ruby>焼<rt>や</rt></ruby>こう", kana: "やこう" }, pas: { show: "<ruby>焼<rt>や</rt></ruby>かれる", kana: "やかれる" }, cau: { show: "<ruby>焼<rt>や</rt></ruby>かせる", kana: "やかせる" }, cpas: { show: "<ruby>焼<rt>や</rt></ruby>かされる", kana: ["やかされる", "やかせられる"] }, imp: { show: "<ruby>焼<rt>や</rt></ruby>け", kana: "やけ" } } },
+        // 69. 焼ける (一段)
+        { basic: { show: "<ruby>焼<rt>や</rt></ruby>ける", type: "一段" }, forms: { ta: { show: "<ruby>焼<rt>や</rt></ruby>けた", kana: "やけた" }, te: { show: "<ruby>焼<rt>や</rt></ruby>けて", kana: "やけて" }, masu: { show: "<ruby>焼<rt>や</rt></ruby>けます", kana: "やけます" }, nai: { show: "<ruby>焼<rt>や</rt></ruby>けない", kana: "やけない" }, pot: { show: "<ruby>焼<rt>や</rt></ruby>けられる", kana: "やけられる" }, vol: { show: "<ruby>焼<rt>や</rt></ruby>けよう", kana: "やけよう" }, pas: { show: "<ruby>焼<rt>や</rt></ruby>けられる", kana: "やけられる" }, cau: { show: "<ruby>焼<rt>や</rt></ruby>けさせる", kana: "やけさせる" }, cpas: { show: "<ruby>焼<rt>や</rt></ruby>けさせられる", kana: "やけさせられる" }, imp: { show: "<ruby>焼<rt>や</rt></ruby>けろ", kana: "やけろ" } } },
+        // 70. 止む (五段 - 有缩略)
+        { basic: { show: "<ruby>止<rt>や</rt></ruby>む", type: "五段" }, forms: { ta: { show: "<ruby>止<rt>や</rt></ruby>んだ", kana: "やんだ" }, te: { show: "<ruby>止<rt>や</rt></ruby>んで", kana: "やんで" }, masu: { show: "<ruby>止<rt>や</rt></ruby>みます", kana: "やみます" }, nai: { show: "<ruby>止<rt>や</rt></ruby>まない", kana: "やまない" }, pot: { show: "<ruby>止<rt>や</rt></ruby>める", kana: "やめる" }, vol: { show: "<ruby>止<rt>や</rt></ruby>もう", kana: "やもう" }, pas: { show: "<ruby>止<rt>や</rt></ruby>まれる", kana: "やまれる" }, cau: { show: "<ruby>止<rt>や</rt></ruby>ませる", kana: "やませる" }, cpas: { show: "<ruby>止<rt>や</rt></ruby>まされる", kana: ["やまされる", "やませられる"] }, imp: { show: "<ruby>止<rt>や</rt></ruby>め", kana: "やめ" } } },
+        // 71. 呼ぶ (五段 - 有缩略)
+        { basic: { show: "<ruby>呼<rt>よ</rt></ruby>ぶ", type: "五段" }, forms: { ta: { show: "<ruby>呼<rt>よ</rt></ruby>んだ", kana: "よんだ" }, te: { show: "<ruby>呼<rt>よ</rt></ruby>んで", kana: "よんで" }, masu: { show: "<ruby>呼<rt>よ</rt></ruby>びます", kana: "よびます" }, nai: { show: "<ruby>呼<rt>よ</rt></ruby>ばない", kana: "よばない" }, pot: { show: "<ruby>呼<rt>よ</rt></ruby>べる", kana: "よべる" }, vol: { show: "<ruby>呼<rt>よ</rt></ruby>ぼう", kana: "よぼう" }, pas: { show: "<ruby>呼<rt>よ</rt></ruby>ばれる", kana: "よばれる" }, cau: { show: "<ruby>呼<rt>よ</rt></ruby>ばせる", kana: "よばせる" }, cpas: { show: "<ruby>呼<rt>よ</rt></ruby>ばされる", kana: ["よばされる", "よばせられる"] }, imp: { show: "<ruby>呼<rt>よ</rt></ruby>べ", kana: "よべ" } } },
+        // 72. 喜ぶ (五段 - 有缩略)
+        { basic: { show: "<ruby>喜<rt>よろこ</rt></ruby>ぶ", type: "五段" }, forms: { ta: { show: "<ruby>喜<rt>よろこ</rt></ruby>んだ", kana: "よろこんだ" }, te: { show: "<ruby>喜<rt>よろこ</rt></ruby>んで", kana: "よろこんで" }, masu: { show: "<ruby>喜<rt>よろこ</rt></ruby>びます", kana: "よろこびます" }, nai: { show: "<ruby>喜<rt>よろこ</rt></ruby>ばない", kana: "よろこばない" }, pot: { show: "<ruby>喜<rt>よろこ</rt></ruby>べる", kana: "よろこべる" }, vol: { show: "<ruby>喜<rt>よろこ</rt></ruby>ぼう", kana: "よろこぼう" }, pas: { show: "<ruby>喜<rt>よろこ</rt></ruby>ばれる", kana: "よろこばれる" }, cau: { show: "<ruby>喜<rt>よろこ</rt></ruby>ばせる", kana: "よろこばせる" }, cpas: { show: "<ruby>喜<rt>よろこ</rt></ruby>ばされる", kana: ["よろこばされる", "よろこばせられる"] }, imp: { show: "<ruby>喜<rt>よろこ</rt></ruby>べ", kana: "よろこべ" } } },
+        // 73. 汚れる (一段)
+        { basic: { show: "<ruby>汚<rt>よご</rt></ruby>れる", type: "一段" }, forms: { ta: { show: "<ruby>汚<rt>よご</rt></ruby>れた", kana: "よごれた" }, te: { show: "<ruby>汚<rt>よご</rt></ruby>れて", kana: "よごれて" }, masu: { show: "<ruby>汚<rt>よご</rt></ruby>れます", kana: "よごれます" }, nai: { show: "<ruby>汚<rt>よご</rt></ruby>れない", kana: "よごれない" }, pot: { show: "<ruby>汚<rt>よご</rt></ruby>れられる", kana: "よごれられる" }, vol: { show: "<ruby>汚<rt>よご</rt></ruby>れよう", kana: "よごれよう" }, pas: { show: "<ruby>汚<rt>よご</rt></ruby>れられる", kana: "よごれられる" }, cau: { show: "<ruby>汚<rt>よご</rt></ruby>れさせる", kana: "よごれさせる" }, cpas: { show: "<ruby>汚<rt>よご</rt></ruby>れさせられる", kana: "よごれさせられる" }, imp: { show: "<ruby>汚<rt>よご</rt></ruby>れろ", kana: "よごれろ" } } },
+        // 74. 笑う (五段 - 有缩略 - 注意wa行)
+        { basic: { show: "<ruby>笑<rt>わら</rt></ruby>う", type: "五段" }, forms: { ta: { show: "<ruby>笑<rt>わら</rt></ruby>った", kana: "わらった" }, te: { show: "<ruby>笑<rt>わら</rt></ruby>って", kana: "わらって" }, masu: { show: "<ruby>笑<rt>わら</rt></ruby>います", kana: "わらいます" }, nai: { show: "<ruby>笑<rt>わら</rt></ruby>わない", kana: "わらわない" }, pot: { show: "<ruby>笑<rt>わら</rt></ruby>える", kana: "わらえる" }, vol: { show: "<ruby>笑<rt>わら</rt></ruby>おう", kana: "わらおう" }, pas: { show: "<ruby>笑<rt>わら</rt></ruby>われる", kana: "わらわれる" }, cau: { show: "<ruby>笑<rt>わら</rt></ruby>わせる", kana: "わらわせる" }, cpas: { show: "<ruby>笑<rt>わら</rt></ruby>わされる", kana: ["わらわされる", "わらわせられる"] }, imp: { show: "<ruby>笑<rt>わら</rt></ruby>え", kana: "わらえ" } } },
+        // 75. 別れる (一段)
+        { basic: { show: "<ruby>別<rt>わか</rt></ruby>れる", type: "一段" }, forms: { ta: { show: "<ruby>別<rt>わか</rt></ruby>れた", kana: "わかれた" }, te: { show: "<ruby>別<rt>わか</rt></ruby>れて", kana: "わかれて" }, masu: { show: "<ruby>別<rt>わか</rt></ruby>れます", kana: "わかれます" }, nai: { show: "<ruby>別<rt>わか</rt></ruby>れない", kana: "わかれない" }, pot: { show: "<ruby>別<rt>わか</rt></ruby>れられる", kana: "わかれられる" }, vol: { show: "<ruby>別<rt>わか</rt></ruby>れよう", kana: "わかれよう" }, pas: { show: "<ruby>別<rt>わか</rt></ruby>れられる", kana: "わかれられる" }, cau: { show: "<ruby>別<rt>わか</rt></ruby>れさせる", kana: "わかれさせる" }, cpas: { show: "<ruby>別<rt>わか</rt></ruby>れさせられる", kana: "わかれさせられる" }, imp: { show: "<ruby>別<rt>わか</rt></ruby>れろ", kana: "わかれろ" } } },
+        // 76. くれる (一段 - 命令形特殊: くれ)
+        { basic: { show: "くれる", type: "一段" }, forms: { ta: { show: "くれた", kana: "くれた" }, te: { show: "くれて", kana: "くれて" }, masu: { show: "くれます", kana: "くれます" }, nai: { show: "くれない", kana: "くれない" }, pot: { show: "くれられる", kana: "くれられる" }, vol: { show: "くれよう", kana: "くれよう" }, pas: { show: "くれられる", kana: "くれられる" }, cau: { show: "くれさせる", kana: "くれさせる" }, cpas: { show: "くれさせられる", kana: "くれさせられる" }, imp: { show: "くれ", kana: "くれ" } } },
+        // 77. もらう (五段 - 有缩略 - 注意wa行)
+        { basic: { show: "もらう", type: "五段" }, forms: { ta: { show: "もらった", kana: "もらった" }, te: { show: "もらって", kana: "もらって" }, masu: { show: "もらいます", kana: "もらいます" }, nai: { show: "もらわない", kana: "もらわない" }, pot: { show: "もらえる", kana: "もらえる" }, vol: { show: "もらおう", kana: "もらおう" }, pas: { show: "もらわれる", kana: "もらわれる" }, cau: { show: "もらわせる", kana: "もらわせる" }, cpas: { show: "もらわされる", kana: ["もらわされる", "もらわせられる"] }, imp: { show: "もらえ", kana: "もらえ" } } },
+        // 78. あげる (一段)
+        { basic: { show: "あげる", type: "一段" }, forms: { ta: { show: "あげた", kana: "あげた" }, te: { show: "あげて", kana: "あげて" }, masu: { show: "あげます", kana: "あげます" }, nai: { show: "あげない", kana: "あげない" }, pot: { show: "あげられる", kana: "あげられる" }, vol: { show: "あげよう", kana: "あげよう" }, pas: { show: "あげられる", kana: "あげられる" }, cau: { show: "あげさせる", kana: "あげさせる" }, cpas: { show: "あげさせられる", kana: "あげさせられる" }, imp: { show: "あげろ", kana: "あげろ" } } },
+        // 79. 吹く (五段 - 有缩略)
+        { basic: { show: "<ruby>吹<rt>ふ</rt></ruby>く", type: "五段" }, forms: { ta: { show: "<ruby>吹<rt>ふ</rt></ruby>いた", kana: "ふいた" }, te: { show: "<ruby>吹<rt>ふ</rt></ruby>いて", kana: "ふいて" }, masu: { show: "<ruby>吹<rt>ふ</rt></ruby>きます", kana: "ふきます" }, nai: { show: "<ruby>吹<rt>ふ</rt></ruby>かない", kana: "ふかない" }, pot: { show: "<ruby>吹<rt>ふ</rt></ruby>ける", kana: "ふける" }, vol: { show: "<ruby>吹<rt>ふ</rt></ruby>こう", kana: "ふこう" }, pas: { show: "<ruby>吹<rt>ふ</rt></ruby>かれる", kana: "ふかれる" }, cau: { show: "<ruby>吹<rt>ふ</rt></ruby>かせる", kana: "ふかせる" }, cpas: { show: "<ruby>吹<rt>ふ</rt></ruby>かされる", kana: ["ふかされる", "ふかせられる"] }, imp: { show: "<ruby>吹<rt>ふ</rt></ruby>け", kana: "ふけ" } } },
+        // 80. 貼る (五段 - 有缩略)
+        { basic: { show: "<ruby>貼<rt>は</rt></ruby>る", type: "五段" }, forms: { ta: { show: "<ruby>貼<rt>は</rt></ruby>った", kana: "はった" }, te: { show: "<ruby>貼<rt>は</rt></ruby>って", kana: "はって" }, masu: { show: "<ruby>貼<rt>は</rt></ruby>ります", kana: "はります" }, nai: { show: "<ruby>貼<rt>は</rt></ruby>らない", kana: "はらない" }, pot: { show: "<ruby>貼<rt>は</rt></ruby>れる", kana: "はれる" }, vol: { show: "<ruby>貼<rt>は</rt></ruby>ろう", kana: "はろう" }, pas: { show: "<ruby>貼<rt>は</rt></ruby>られる", kana: "はられる" }, cau: { show: "<ruby>貼<rt>は</rt></ruby>らせる", kana: "はらせる" }, cpas: { show: "<ruby>貼<rt>は</rt></ruby>らされる", kana: ["はらされる", "はらせられる"] }, imp: { show: "<ruby>貼<rt>は</rt></ruby>れ", kana: "はれ" } } },
+        // 81. 無くす (五段 - 苏结尾 - 无缩略)
+        { basic: { show: "<ruby>無<rt>な</rt></ruby>くす", type: "五段" }, forms: { ta: { show: "<ruby>無<rt>な</rt></ruby>くした", kana: "なくした" }, te: { show: "<ruby>無<rt>な</rt></ruby>くして", kana: "なくして" }, masu: { show: "<ruby>無<rt>な</rt></ruby>くします", kana: "なくします" }, nai: { show: "<ruby>無<rt>な</rt></ruby>くさない", kana: "なくさない" }, pot: { show: "<ruby>無<rt>な</rt></ruby>くせる", kana: "なくせる" }, vol: { show: "<ruby>無<rt>な</rt></ruby>くそう", kana: "なくそう" }, pas: { show: "<ruby>無<rt>な</rt></ruby>くされる", kana: "なくされる" }, cau: { show: "<ruby>無<rt>な</rt></ruby>くさせる", kana: "なくさせる" }, cpas: { show: "<ruby>無<rt>な</rt></ruby>くさせられる", kana: "なくさせられる" }, imp: { show: "<ruby>無<rt>な</rt></ruby>くせ", kana: "なくせ" } } },
+        // 82. 勤める (一段)
+        { basic: { show: "<ruby>勤<rt>つと</rt></ruby>める", type: "一段" }, forms: { ta: { show: "<ruby>勤<rt>つと</rt></ruby>めた", kana: "つとめた" }, te: { show: "<ruby>勤<rt>つと</rt></ruby>めて", kana: "つとめて" }, masu: { show: "<ruby>勤<rt>つと</rt></ruby>めます", kana: "つとめます" }, nai: { show: "<ruby>勤<rt>つと</rt></ruby>めない", kana: "つとめない" }, pot: { show: "<ruby>勤<rt>つと</rt></ruby>められる", kana: "つとめられる" }, vol: { show: "<ruby>勤<rt>つと</rt></ruby>めよう", kana: "つとめよう" }, pas: { show: "<ruby>勤<rt>つと</rt></ruby>められる", kana: "つとめられる" }, cau: { show: "<ruby>勤<rt>つと</rt></ruby>めさせる", kana: "つとめさせる" }, cpas: { show: "<ruby>勤<rt>つと</rt></ruby>めさせられる", kana: "つとめさせられる" }, imp: { show: "<ruby>勤<rt>つと</rt></ruby>めろ", kana: "つとめろ" } } },
+        // 83. 働く (五段 - 有缩略)
+        { basic: { show: "<ruby>働<rt>はたら</rt></ruby>く", type: "五段" }, forms: { ta: { show: "<ruby>働<rt>はたら</rt></ruby>いた", kana: "はたらいた" }, te: { show: "<ruby>働<rt>はたら</rt></ruby>いて", kana: "はたらいて" }, masu: { show: "<ruby>働<rt>はたら</rt></ruby>きます", kana: "はたらきます" }, nai: { show: "<ruby>働<rt>はたら</rt></ruby>かない", kana: "はたらかない" }, pot: { show: "<ruby>働<rt>はたら</rt></ruby>ける", kana: "はたらける" }, vol: { show: "<ruby>働<rt>はたら</rt></ruby>こう", kana: "はたらこう" }, pas: { show: "<ruby>働<rt>はたら</rt></ruby>かれる", kana: "はたらかれる" }, cau: { show: "<ruby>働<rt>はたら</rt></ruby>かせる", kana: "はたらかせる" }, cpas: { show: "<ruby>働<rt>はたら</rt></ruby>かされる", kana: ["はたらかされる", "はたらかせられる"] }, imp: { show: "<ruby>働<rt>はたら</rt></ruby>け", kana: "はたらけ" } } },
+        // 84. とる (五段 - 有缩略)
+        { basic: { show: "<ruby>取<rt>と</rt></ruby>る", type: "五段" }, forms: { ta: { show: "<ruby>取<rt>と</rt></ruby>った", kana: "とった" }, te: { show: "<ruby>取<rt>と</rt></ruby>って", kana: "とって" }, masu: { show: "<ruby>取<rt>と</rt></ruby>ります", kana: "とります" }, nai: { show: "<ruby>取<rt>と</rt></ruby>らない", kana: "とらない" }, pot: { show: "<ruby>取<rt>と</rt></ruby>れる", kana: "とれる" }, vol: { show: "<ruby>取<rt>と</rt></ruby>ろう", kana: "とろう" }, pas: { show: "<ruby>取<rt>と</rt></ruby>られる", kana: "とられる" }, cau: { show: "<ruby>取<rt>と</rt></ruby>らせる", kana: "とらせる" }, cpas: { show: "<ruby>取<rt>と</rt></ruby>らされる", kana: ["とらされる", "とらせられる"] }, imp: { show: "<ruby>取<rt>と</rt></ruby>れ", kana: "とれ" } } },
+        // 85. できる (一段)
+        { basic: { show: "できる", type: "一段" }, forms: { ta: { show: "できた", kana: "できた" }, te: { show: "できて", kana: "できて" }, masu: { show: "できます", kana: "できます" }, nai: { show: "できない", kana: "できない" }, pot: { show: "できられる", kana: "できられる" }, vol: { show: "できよう", kana: "できよう" }, pas: { show: "できられる", kana: "できられる" }, cau: { show: "できさせる", kana: "できさせる" }, cpas: { show: "できさせられる", kana: "できさせられる" }, imp: { show: "できろ", kana: "できろ" } } },
+        // 86. 疲れる (一段)
+        { basic: { show: "<ruby>疲<rt>つか</rt></ruby>れる", type: "一段" }, forms: { ta: { show: "<ruby>疲<rt>つか</rt></ruby>れた", kana: "つかれた" }, te: { show: "<ruby>疲<rt>つか</rt></ruby>れて", kana: "つかれて" }, masu: { show: "<ruby>疲<rt>つか</rt></ruby>れます", kana: "つかれます" }, nai: { show: "<ruby>疲<rt>つか</rt></ruby>れない", kana: "つかれない" }, pot: { show: "<ruby>疲<rt>つか</rt></ruby>れられる", kana: "つかれられる" }, vol: { show: "<ruby>疲<rt>つか</rt></ruby>れよう", kana: "つかれよう" }, pas: { show: "<ruby>疲<rt>つか</rt></ruby>れられる", kana: "つかれられる" }, cau: { show: "<ruby>疲<rt>つか</rt></ruby>れさせる", kana: "つかれさせる" }, cpas: { show: "<ruby>疲<rt>つか</rt></ruby>れさせられる", kana: "つかれさせられる" }, imp: { show: "<ruby>疲<rt>つか</rt></ruby>れろ", kana: "つかれろ" } } },
+        // 87. 座る (五段 - 有缩略)
+        { basic: { show: "<ruby>座<rt>すわ</rt></ruby>る", type: "五段" }, forms: { ta: { show: "<ruby>座<rt>すわ</rt></ruby>った", kana: "すわった" }, te: { show: "<ruby>座<rt>すわ</rt></ruby>って", kana: "すわって" }, masu: { show: "<ruby>座<rt>すわ</rt></ruby>ります", kana: "すわります" }, nai: { show: "<ruby>座<rt>すわ</rt></ruby>らない", kana: "すわらない" }, pot: { show: "<ruby>座<rt>すわ</rt></ruby>れる", kana: "すわれる" }, vol: { show: "<ruby>座<rt>すわ</rt></ruby>ろう", kana: "すわろう" }, pas: { show: "<ruby>座<rt>すわ</rt></ruby>られる", kana: "すわられる" }, cau: { show: "<ruby>座<rt>すわ</rt></ruby>らせる", kana: "すわらせる" }, cpas: { show: "<ruby>座<rt>すわ</rt></ruby>らされる", kana: ["すわらされる", "すわらせられる"] }, imp: { show: "<ruby>座<rt>すわ</rt></ruby>れ", kana: "すわれ" } } },
+        // 88. 吸う (五段 - 有缩略 - 注意wa行)
+        { basic: { show: "<ruby>吸<rt>す</rt></ruby>う", type: "五段" }, forms: { ta: { show: "<ruby>吸<rt>す</rt></ruby>った", kana: "すった" }, te: { show: "<ruby>吸<rt>す</rt></ruby>って", kana: "すって" }, masu: { show: "<ruby>吸<rt>す</rt></ruby>います", kana: "すいます" }, nai: { show: "<ruby>吸<rt>す</rt></ruby>わない", kana: "すわない" }, pot: { show: "<ruby>吸<rt>す</rt></ruby>える", kana: "すえる" }, vol: { show: "<ruby>吸<rt>す</rt></ruby>おう", kana: "すおう" }, pas: { show: "<ruby>吸<rt>す</rt></ruby>われる", kana: "すわれる" }, cau: { show: "<ruby>吸<rt>す</rt></ruby>わせる", kana: "すわせる" }, cpas: { show: "<ruby>吸<rt>す</rt></ruby>わされる", kana: ["すわされる", "すわせられる"] }, imp: { show: "<ruby>吸<rt>す</rt></ruby>え", kana: "すえ" } } },
+        // 89. 借りる (一段)
+        { basic: { show: "<ruby>借<rt>か</rt></ruby>りる", type: "一段" }, forms: { ta: { show: "<ruby>借<rt>か</rt></ruby>りた", kana: "かりた" }, te: { show: "<ruby>借<rt>か</rt></ruby>りて", kana: "かりて" }, masu: { show: "<ruby>借<rt>か</rt></ruby>ります", kana: "かります" }, nai: { show: "<ruby>借<rt>か</rt></ruby>りない", kana: "かりない" }, pot: { show: "<ruby>借<rt>か</rt></ruby>りられる", kana: "かりられる" }, vol: { show: "<ruby>借<rt>か</rt></ruby>りよう", kana: "かりよう" }, pas: { show: "<ruby>借<rt>か</rt></ruby>りられる", kana: "かりられる" }, cau: { show: "<ruby>借<rt>か</rt></ruby>りさせる", kana: "かりさせる" }, cpas: { show: "<ruby>借<rt>か</rt></ruby>りさせられる", kana: "かりさせられる" }, imp: { show: "<ruby>借<rt>か</rt></ruby>りろ", kana: "かりろ" } } },
+        // 90. 貸す (五段 - 苏结尾 - 无缩略)
+        { basic: { show: "<ruby>貸<rt>か</rt></ruby>す", type: "五段" }, forms: { ta: { show: "<ruby>貸<rt>か</rt></ruby>した", kana: "かした" }, te: { show: "<ruby>貸<rt>か</rt></ruby>して", kana: "かして" }, masu: { show: "<ruby>貸<rt>か</rt></ruby>します", kana: "かします" }, nai: { show: "<ruby>貸<rt>か</rt></ruby>さない", kana: "かさない" }, pot: { show: "<ruby>貸<rt>か</rt></ruby>せる", kana: "かせる" }, vol: { show: "<ruby>貸<rt>か</rt></ruby>そう", kana: "かそう" }, pas: { show: "<ruby>貸<rt>か</rt></ruby>される", kana: "かされる" }, cau: { show: "<ruby>貸<rt>か</rt></ruby>させる", kana: "かさせる" }, cpas: { show: "<ruby>貸<rt>か</rt></ruby>させられる", kana: "かさせられる" }, imp: { show: "<ruby>貸<rt>か</rt></ruby>せ", kana: "かせ" } } },
+        // 91. 臭う (五段 - 有缩略 - 注意wa行)
+        { basic: { show: "<ruby>臭<rt>にお</rt></ruby>う", type: "五段" }, forms: { ta: { show: "<ruby>臭<rt>にお</rt></ruby>った", kana: "におった" }, te: { show: "<ruby>臭<rt>にお</rt></ruby>って", kana: "におって" }, masu: { show: "<ruby>臭<rt>にお</rt></ruby>います", kana: "においます" }, nai: { show: "<ruby>臭<rt>にお</rt></ruby>わない", kana: "におわない" }, pot: { show: "<ruby>臭<rt>にお</rt></ruby>える", kana: "におえる" }, vol: { show: "<ruby>臭<rt>にお</rt></ruby>おう", kana: "におおう" }, pas: { show: "<ruby>臭<rt>にお</rt></ruby>われる", kana: "におわれる" }, cau: { show: "<ruby>臭<rt>にお</rt></ruby>わせる", kana: "におわせる" }, cpas: { show: "<ruby>臭<rt>にお</rt></ruby>わされる", kana: ["におわされる", "におわせられる"] }, imp: { show: "<ruby>臭<rt>にお</rt></ruby>え", kana: "におえ" } } },
+        // 92. 流行る (五段 - 有缩略)
+        { basic: { show: "<ruby>流<rt>はや</rt></ruby>る", type: "五段" }, forms: { ta: { show: "<ruby>流<rt>はや</rt></ruby>った", kana: "はやった" }, te: { show: "<ruby>流<rt>はや</rt></ruby>って", kana: "はやって" }, masu: { show: "<ruby>流<rt>はや</rt></ruby>ります", kana: "はやります" }, nai: { show: "<ruby>流<rt>はや</rt></ruby>らない", kana: "はやらない" }, pot: { show: "<ruby>流<rt>はや</rt></ruby>れる", kana: "はやれる" }, vol: { show: "<ruby>流<rt>はや</rt></ruby>ろう", kana: "はやろう" }, pas: { show: "<ruby>流<rt>はや</rt></ruby>られる", kana: "はやられる" }, cau: { show: "<ruby>流<rt>はや</rt></ruby>らせる", kana: "はやらせる" }, cpas: { show: "<ruby>流<rt>はや</rt></ruby>らされる", kana: ["はやらされる", "はやらせられる"] }, imp: { show: "<ruby>流<rt>はや</rt></ruby>れ", kana: "はやれ" } } },
+        // 93. 拭く (五段 - 有缩略)
+        { basic: { show: "<ruby>拭<rt>ふ</rt></ruby>く", type: "五段" }, forms: { ta: { show: "<ruby>拭<rt>ふ</rt></ruby>いた", kana: "ふいた" }, te: { show: "<ruby>拭<rt>ふ</rt></ruby>いて", kana: "ふいて" }, masu: { show: "<ruby>拭<rt>ふ</rt></ruby>きます", kana: "ふきます" }, nai: { show: "<ruby>拭<rt>ふ</rt></ruby>かない", kana: "ふかない" }, pot: { show: "<ruby>拭<rt>ふ</rt></ruby>ける", kana: "ふける" }, vol: { show: "<ruby>拭<rt>ふ</rt></ruby>こう", kana: "ふこう" }, pas: { show: "<ruby>拭<rt>ふ</rt></ruby>かれる", kana: "ふかれる" }, cau: { show: "<ruby>拭<rt>ふ</rt></ruby>かせる", kana: "ふかせる" }, cpas: { show: "<ruby>拭<rt>ふ</rt></ruby>かされる", kana: ["ふかされる", "ふかせられる"] }, imp: { show: "<ruby>拭<rt>ふ</rt></ruby>け", kana: "ふけ" } } },
+        // 94. ぶつかる (五段 - 有缩略)
+        { basic: { show: "ぶつかる", type: "五段" }, forms: { ta: { show: "ぶつかった", kana: "ぶつかった" }, te: { show: "ぶつかって", kana: "ぶつかって" }, masu: { show: "ぶつかります", kana: "ぶつかります" }, nai: { show: "ぶつからない", kana: "ぶつからない" }, pot: { show: "ぶつかれる", kana: "ぶつかれる" }, vol: { show: "ぶつかろう", kana: "ぶつかろう" }, pas: { show: "ぶつかられる", kana: "ぶつかられる" }, cau: { show: "ぶつからせる", kana: "ぶつからせる" }, cpas: { show: "ぶつからされる", kana: ["ぶつからされる", "ぶつからせられる"] }, imp: { show: "ぶつかれ", kana: "ぶつかれ" } } },
+        // 95. 目立つ (五段 - 有缩略)
+        { basic: { show: "<ruby>目<rt>め</rt></ruby><ruby>立<rt>だ</rt></ruby>つ", type: "五段" }, forms: { ta: { show: "<ruby>目<rt>め</rt></ruby><ruby>立<rt>だ</rt></ruby>った", kana: "めだった" }, te: { show: "<ruby>目<rt>め</rt></ruby><ruby>立<rt>だ</rt></ruby>って", kana: "めだって" }, masu: { show: "<ruby>目<rt>め</rt></ruby><ruby>立<rt>だ</rt></ruby>ちます", kana: "めだちます" }, nai: { show: "<ruby>目<rt>め</rt></ruby><ruby>立<rt>だ</rt></ruby>たない", kana: "めだたない" }, pot: { show: "<ruby>目<rt>め</rt></ruby><ruby>立<rt>だ</rt></ruby>てる", kana: "めだてる" }, vol: { show: "<ruby>目<rt>め</rt></ruby><ruby>立<rt>だ</rt></ruby>とう", kana: "めだとう" }, pas: { show: "<ruby>目<rt>め</rt></ruby><ruby>立<rt>だ</rt></ruby>たれる", kana: "めだたれる" }, cau: { show: "<ruby>目<rt>め</rt></ruby><ruby>立<rt>だ</rt></ruby>たせる", kana: "めだたせる" }, cpas: { show: "<ruby>目<rt>め</rt></ruby><ruby>立<rt>だ</rt></ruby>たされる", kana: ["めだたされる", "めだたせられる"] }, imp: { show: "<ruby>目<rt>め</rt></ruby><ruby>立<rt>だ</rt></ruby>て", kana: "めだて" } } },
+        // 96. 酔っ払う (五段 - 有缩略 - 注意wa行)
+        { basic: { show: "<ruby>酔<rt>よ</rt></ruby>っ<ruby>払<rt>ぱら</rt></ruby>う", type: "五段" }, forms: { ta: { show: "<ruby>酔<rt>よ</rt></ruby>っ<ruby>払<rt>ぱら</rt></ruby>った", kana: "よっぱらった" }, te: { show: "<ruby>酔<rt>よ</rt></ruby>っ<ruby>払<rt>ぱら</rt></ruby>って", kana: "よっぱらって" }, masu: { show: "<ruby>酔<rt>よ</rt></ruby>っ<ruby>払<rt>ぱら</rt></ruby>います", kana: "よっぱらいます" }, nai: { show: "<ruby>酔<rt>よ</rt></ruby>っ<ruby>払<rt>ぱら</rt></ruby>わない", kana: "よっぱらわない" }, pot: { show: "<ruby>酔<rt>よ</rt></ruby>っ<ruby>払<rt>ぱら</rt></ruby>える", kana: "よっぱらえる" }, vol: { show: "<ruby>酔<rt>よ</rt></ruby>っ<ruby>払<rt>ぱら</rt></ruby>おう", kana: "よっぱらおう" }, pas: { show: "<ruby>酔<rt>よ</rt></ruby>っ<ruby>払<rt>ぱら</rt></ruby>われる", kana: "よっぱらわれる" }, cau: { show: "<ruby>酔<rt>よ</rt></ruby>っ<ruby>払<rt>ぱら</rt></ruby>わせる", kana: "よっぱらわせる" }, cpas: { show: "<ruby>酔<rt>よ</rt></ruby>っ<ruby>払<rt>ぱら</rt></ruby>わされる", kana: ["よっぱらわされる", "よっぱらせられる"] }, imp: { show: "<ruby>酔<rt>よ</rt></ruby>っ<ruby>払<rt>ぱら</rt></ruby>え", kana: "よっぱらえ" } } },
+        // 97. 終える (一段)
+        { basic: { show: "<ruby>終<rt>お</rt></ruby>える", type: "一段" }, forms: { ta: { show: "<ruby>終<rt>お</rt></ruby>えた", kana: "おえた" }, te: { show: "<ruby>終<rt>お</rt></ruby>えて", kana: "おえて" }, masu: { show: "<ruby>終<rt>お</rt></ruby>えます", kana: "おえます" }, nai: { show: "<ruby>終<rt>お</rt></ruby>えない", kana: "おえない" }, pot: { show: "<ruby>終<rt>お</rt></ruby>えられる", kana: "おえられる" }, vol: { show: "<ruby>終<rt>お</rt></ruby>えよう", kana: "おえよう" }, pas: { show: "<ruby>終<rt>お</rt></ruby>えられる", kana: "おえられる" }, cau: { show: "<ruby>終<rt>お</rt></ruby>えさせる", kana: "おえさせる" }, cpas: { show: "<ruby>終<rt>お</rt></ruby>えさせられる", kana: "おえさせられる" }, imp: { show: "<ruby>終<rt>お</rt></ruby>えろ", kana: "おえろ" } } },
+        // 98. 重ねる (一段)
+        { basic: { show: "<ruby>重<rt>かさ</rt></ruby>ねる", type: "一段" }, forms: { ta: { show: "<ruby>重<rt>かさ</rt></ruby>ねた", kana: "かさねた" }, te: { show: "<ruby>重<rt>かさ</rt></ruby>ねて", kana: "かさねて" }, masu: { show: "<ruby>重<rt>かさ</rt></ruby>ねます", kana: "かさねます" }, nai: { show: "<ruby>重<rt>かさ</rt></ruby>ねない", kana: "かさねない" }, pot: { show: "<ruby>重<rt>かさ</rt></ruby>ねられる", kana: "かさねられる" }, vol: { show: "<ruby>重<rt>かさ</rt></ruby>ねよう", kana: "かさねよう" }, pas: { show: "<ruby>重<rt>かさ</rt></ruby>ねられる", kana: "かさねられる" }, cau: { show: "<ruby>重<rt>かさ</rt></ruby>ねさせる", kana: "かさねさせる" }, cpas: { show: "<ruby>重<rt>かさ</rt></ruby>ねさせられる", kana: "かさねさせられる" }, imp: { show: "<ruby>重<rt>かさ</rt></ruby>ねろ", kana: "かさねろ" } } },
+        // 99. 加える (一段)
+        { basic: { show: "<ruby>加<rt>くわ</rt></ruby>える", type: "一段" }, forms: { ta: { show: "<ruby>加<rt>くわ</rt></ruby>えた", kana: "くわえた" }, te: { show: "<ruby>加<rt>くわ</rt></ruby>えて", kana: "くわえて" }, masu: { show: "<ruby>加<rt>くわ</rt></ruby>えます", kana: "くわえます" }, nai: { show: "<ruby>加<rt>くわ</rt></ruby>えない", kana: "くわえない" }, pot: { show: "<ruby>加<rt>くわ</rt></ruby>えられる", kana: "くわえられる" }, vol: { show: "<ruby>加<rt>くわ</rt></ruby>えよう", kana: "くわえよう" }, pas: { show: "<ruby>加<rt>くわ</rt></ruby>えられる", kana: "くわえられる" }, cau: { show: "<ruby>加<rt>くわ</rt></ruby>えさせる", kana: "くわえさせる" }, cpas: { show: "<ruby>加<rt>くわ</rt></ruby>えさせられる", kana: "くわえさせられる" }, imp: { show: "<ruby>加<rt>くわ</rt></ruby>えろ", kana: "くわえろ" } } },
+        // 100. 蹴る (五段 - 特殊/陷阱词)
+        { basic: { show: "<ruby>蹴<rt>け</rt></ruby>る", type: "五段(特)" }, forms: { ta: { show: "<ruby>蹴<rt>け</rt></ruby>った", kana: "けった" }, te: { show: "<ruby>蹴<rt>け</rt></ruby>って", kana: "けって" }, masu: { show: "<ruby>蹴<rt>け</rt></ruby>ります", kana: "けります" }, nai: { show: "<ruby>蹴<rt>け</rt></ruby>らない", kana: "けらない" }, pot: { show: "<ruby>蹴<rt>け</rt></ruby>れる", kana: "けれる" }, vol: { show: "<ruby>蹴<rt>け</rt></ruby>ろう", kana: "けろう" }, pas: { show: "<ruby>蹴<rt>け</rt></ruby>られる", kana: "けられる" }, cau: { show: "<ruby>蹴<rt>け</rt></ruby>らせる", kana: "けらせる" }, cpas: { show: "<ruby>蹴<rt>け</rt></ruby>らされる", kana: ["けらされる", "けらせられる"] }, imp: { show: "<ruby>蹴<rt>け</rt></ruby>れ", kana: "けれ" } } }
+    ];
+
+    const modeList = [
+        { id: "ta", label: "た形" }, { id: "te", label: "て形" }, { id: "masu", label: "ます形" }, { id: "nai", label: "ない形" },
+        { id: "pot", label: "能动形" }, { id: "vol", label: "意志形" }, { id: "pas", label: "被动形" }, { id: "cau", label: "使役形" },
+        { id: "cpas", label: "使役被动" }, { id: "imp", label: "命令形" }, { id: "ba", label: "假定形(ば)" }
+    ];
+
+    const tableModeList = [...modeList];
+
+    function getBaForm(v) {
+        const type = v.basic.type || "";
+        if (type.includes("五段")) {
+            const baseShow = v.forms.imp?.show || "";
+            const baseKana = v.forms.imp?.kana || "";
+            return {
+                show: baseShow ? `${baseShow}ば` : "-",
+                kana: Array.isArray(baseKana) ? baseKana.map(k => `${k}ば`) : `${baseKana}ば`
+            };
+        }
+        if (type === "一段") {
+            const show = v.basic.show.replace(/る$/, "れば");
+            const kana = (typeof v.forms.nai?.kana === "string") ? v.forms.nai.kana.replace(/ない$/, "れば") : "";
+            return { show: show || "-", kana: kana || "-" };
+        }
+        if (type === "不规则") {
+            if (v.basic.show.endsWith("する")) {
+                const show = v.basic.show.replace(/する$/, "すれば");
+                const kana = (typeof v.forms.masu?.kana === "string") ? v.forms.masu.kana.replace(/します$/, "すれば") : "すれば";
+                return { show, kana };
+            }
+            if (v.basic.show.includes("来")) {
+                const show = v.basic.show.replace(/る$/, "れば");
+                return { show, kana: "くれば" };
+            }
+        }
+        return { show: "-", kana: "-" };
+    }
+
+    function getFormForTable(v, formId) {
+        if (formId === "ba") return getBaForm(v);
+        return v.forms[formId];
+    }
+
+    function getFormById(v, formId) {
+        return getFormForTable(v, formId);
+    }
+
+    // ================= 逻辑 =================
+    // 1. 初始化表格 (双模式)
+    function renderTables() {
+        // A. 电脑版 (Body): Rows=Words
+        const deskBody = document.getElementById('desktopTbody');
+        verbs.forEach(v => {
+            const tr = document.createElement('tr');
+            let html = `<td>${v.basic.show}</td>`;
+            tableModeList.forEach(m => {
+                const form = getFormForTable(v, m.id);
+                html += `<td>${form ? form.show : '-'}</td>`;
+            });
+            tr.innerHTML = html;
+            deskBody.appendChild(tr);
+        });
+
+        // B. 手机版 (转置): Rows=Tenses, Cols=Words
+        const mobHead = document.getElementById('mobileThead');
+        const mobBody = document.getElementById('mobileTbody');
+
+        // B1. 表头 (单词)
+        let headRow = `<tr><th>变形</th>`; // 第一列
+        verbs.forEach(v => {
+            headRow += `<th>${v.basic.show}</th>`;
+        });
+        headRow += `</tr>`;
+        mobHead.innerHTML = headRow;
+
+        // B2. 表体 (变形)
+        tableModeList.forEach(m => {
+            let rowHtml = `<tr><td>${m.label}</td>`;
+            verbs.forEach(v => {
+                const form = getFormForTable(v, m.id);
+                rowHtml += `<td>${form ? form.show : '-'}</td>`;
+            });
+            rowHtml += `</tr>`;
+            mobBody.innerHTML += rowHtml;
+        });
+    }
+
+    // 初始化执行
+    renderTables();
+
+    // 2. 练习设置
+    const settingBox = document.querySelector('.checkbox-grid');
+    modeList.forEach(m => {
+        const label = document.createElement('label');
+        label.innerHTML = `<input type="checkbox" value="${m.id}" checked> ${m.label}`;
+        settingBox.appendChild(label);
+    });
+
+    // 3. 练习逻辑
+   // ================= 🎮 全局变量 =================
+    let streak = 0;
+    let maxStreak = 0;
+    let state = 'idle'; // idle, answering, result
+    let currentQ = {};
+    let timerInterval = null; // 计时器变量
+
+    // ================= ⏳ 倒计时逻辑 (新增部分) =================
+    
+    // 启动倒计时
+    function startTimer() {
+        clearInterval(timerInterval); // 先清除可能存在的旧定时器
+        let timeLeft = 10; // 设定 10 秒
+        const timerEl = document.getElementById('timerDisplay');
+        
+        // 初始化显示
+        timerEl.innerText = `⏱ ${timeLeft}`;
+        timerEl.style.color = "#ff9f43"; // 默认橙色
+
+        timerInterval = setInterval(() => {
+            timeLeft--;
+            timerEl.innerText = `⏱ ${timeLeft}`;
+
+            // ⚠️ 最后 3 秒变红预警
+            if (timeLeft <= 3) {
+                timerEl.style.color = "#e74c3c"; 
+            }
+
+            // ⏰ 时间到！
+            if (timeLeft <= 0) {
+                clearInterval(timerInterval);
+                handleTimeout(); // 触发超时处理
+            }
+        }, 1000);
+    }
+
+    // 超时处理 (算答错)
+    function handleTimeout() {
+        if (state !== 'answering') return;
+        
+        state = 'result';
+        const inp = document.getElementById('userAns');
+        inp.disabled = true;
+        
+        // 连对归零
+        streak = 0;
+        document.getElementById('streakVal').innerText = streak;
+
+        // 显示正确答案
+        const correctData = currentQ.answerKana;
+        const showAns = Array.isArray(correctData) ? correctData.join(' / ') : correctData;
+        
+        document.getElementById('feedback').innerHTML = `<span style='color:var(--error)'>⏰ 时间到！应该是: ${showAns}</span>`;
+        inp.classList.add('wrong'); // 加红框
+
+        // 按钮变身
+        const btn = document.getElementById('actionBtn');
+        btn.innerText = "下一题 →";
+        btn.onclick = nextQ;
+        btn.focus();
+    }
+
+    // ================= 🎮 核心游戏控制 =================
+
+    function startGame() {
+        streak = 0; 
+        maxStreak = 0; 
+        document.getElementById('streakVal').innerText = streak;
+        document.getElementById('resultCard').classList.add('hidden');
+        document.getElementById('quizCard').classList.remove('hidden');
+        document.getElementById('endBtn').classList.remove('hidden');
+        nextQ();
+    }
+    
+    function finishGame() {
+        clearInterval(timerInterval); // ★ 退出时必须停止计时
+
+        state = 'idle';
+        document.getElementById('userAns').disabled = true;
+        document.getElementById('actionBtn').innerText = "开始练习";
+        document.getElementById('actionBtn').onclick = startGame; 
+        document.getElementById('endBtn').classList.add('hidden'); 
+        
+        document.getElementById('quizCard').classList.add('hidden');
+        document.getElementById('resultCard').classList.remove('hidden');
+
+        // === 🏆 趣味评语系统 ===
+        let comment = "";
+        if (maxStreak >= 100) {
+            comment = "👑 这还能说什么呢！太带派了！朋友！orz";
+        } else if (maxStreak >= 50) {
+            comment = "🔥 太强了！建议出门左转直接去考 N1，别在这虐菜了！";
+        } else if (maxStreak >= 20) {
+            comment = "⚡️ 好家伙！你这变形速度，牛顿看了都得愣一下。";
+        } else if (maxStreak >= 10) {
+            comment = "😎 有点感觉了！虽然离“日语之神”还有 9999 步。";
+        } else if (maxStreak >= 5) {
+            comment = "🙂 不错嘛！这手速，才刚刚热身完？";
+        } else {
+            comment = "🌱 万事开头难，还是先去看看规则表压压惊吧..."; 
+        }
+
+        document.getElementById('finalScore').innerText = maxStreak;
+        document.getElementById('finalComment').innerText = comment;
+    }
+
+    function restartGame() {
+        // 关闭设置面板并重开
+        document.getElementById('settingContent').style.display = 'none';
+        startGame();
+    }
+
+    // 👉 下一题 (Next Question)
+    function nextQ() {
+        // 0. 获取用户选择的变形类型
+        const checkboxes = document.querySelectorAll('.checkbox-grid input[type="checkbox"]:checked');
+        const selectedTypes = Array.from(checkboxes).map(cb => cb.value);
+
+        if (selectedTypes.length === 0) {
+            alert("请至少选择一种变形类型！");
+            return;
+        }
+
+        state = 'answering';
+        
+        // 1. 随机抽题 (确保抽到的动词包含选中的变形类型)
+        let verb, availableForms;
+        let attempts = 0;
+        do {
+            const vIndex = Math.floor(Math.random() * verbs.length);
+            verb = verbs[vIndex];
+            // 过滤出该动词可用的、且用户选中的变形（含假定形）
+            availableForms = modeList
+                .map(m => m.id)
+                .filter(key => selectedTypes.includes(key) && !!getFormById(verb, key));
+            attempts++;
+        } while (availableForms.length === 0 && attempts < 50);
+
+        // 防御性代码：如果实在找不到（极低概率）
+        if (availableForms.length === 0) {
+             alert("抱歉，找不到符合条件的题目，请尝试增加练习类型。");
+             return;
+        }
+        
+        // 2. 随机抽变形类型 (从筛选后的列表里抽)
+        const fIndex = Math.floor(Math.random() * availableForms.length);
+        const fKey = availableForms[fIndex];
+        const targetForm = getFormById(verb, fKey);
+        
+        // 3. 准备数据
+        const typeMap = {
+            ta: "た形", te: "て形", masu: "ます形", nai: "ない形",
+            pot: "能动形", vol: "意志形", pas: "被动形", cau: "使役形", 
+            cpas: "使役被动", imp: "命令形", ba: "假定形(ば)"
+        };
+        const typeName = typeMap[fKey] || fKey;
+
+        currentQ = {
+            answerKana: targetForm.kana,
+            answerShow: targetForm.show
+        };
+
+        // 4. 更新界面
+        document.getElementById('qDisplay').innerHTML = verb.basic.show;
+        document.getElementById('typeTag').innerText = verb.basic.type;
+        document.getElementById('qTarget').innerText = typeName;
+        
+        const inp = document.getElementById('userAns');
+        inp.value = '';
+        inp.disabled = false;
+        inp.classList.remove('correct', 'wrong');
+        inp.focus();
+        
+        document.getElementById('feedback').innerHTML = '';
+        
+        const btn = document.getElementById('actionBtn');
+        btn.innerText = "提交";
+        btn.onclick = checkAns;
+
+        // ★★★ 核心：检查开关并启动计时 ★★★
+        const isTimerOn = document.getElementById('timerMode').checked;
+        const timerDisplay = document.getElementById('timerDisplay');
+
+        if (isTimerOn) {
+            timerDisplay.style.visibility = 'visible'; 
+            startTimer(); // 启动倒计时
+        } else {
+            timerDisplay.style.visibility = 'hidden'; 
+            clearInterval(timerInterval); // 确保不计时
+        }
+    }
+
+    // ✅ 检查答案
+    function checkAns() {
+        // 1. 状态检查
+        if (state !== 'answering') { nextQ(); return; }
+        
+        const inp = document.getElementById('userAns');
+        // 2. 空值检查
+        if (!inp.value.trim()) return;
+
+        // ★★★ 关键修复：提交答案时必须停止计时 ★★★
+        clearInterval(timerInterval);
+
+        // 3. 锁定界面
+        state = 'result'; 
+        inp.disabled = true;
+
+        const btn = document.getElementById('actionBtn');
+
+        // 4. 判题 (支持多答案)
+        const correctData = currentQ.answerKana; 
+        const userVal = inp.value.trim();
+        let isCorrect = false;
+
+        if (Array.isArray(correctData)) {
+            isCorrect = correctData.includes(userVal);
+        } else {
+            isCorrect = (userVal === correctData);
+        }
+
+        // 5. 结果处理
+        if (isCorrect) {
+            streak++; 
+            if (streak > maxStreak) maxStreak = streak;
+            inp.classList.add('correct');
+            document.getElementById('feedback').innerHTML = "<span style='color:var(--success)'>🎉 正解！</span>";
+        } else {
+            streak = 0;
+            inp.classList.add('wrong');
+            const showAns = Array.isArray(correctData) ? correctData.join(' / ') : correctData;
+            document.getElementById('feedback').innerHTML = `<span style='color:var(--error)'>❌ 应该是: ${showAns}</span>`;
+        }
+        
+        document.getElementById('streakVal').innerText = streak;
+        btn.innerText = "下一题 →";
+        btn.onclick = nextQ; 
+        btn.focus(); 
+    }
+
+    // ================= ⌨️ 辅助功能 =================
+
+    // 键盘监听
+    document.addEventListener('keypress', (e) => { 
+        if(e.key === 'Enter') { 
+            if(state === 'answering') checkAns(); 
+            else if(state === 'result') nextQ(); 
+        }
+    });
+    
+    function switchTab(tabId) {
+        document.querySelectorAll('.tab-view').forEach(el => el.classList.remove('active'));
+        document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
+        document.getElementById('tab-' + tabId).classList.add('active');
+        let idx = 0;
+        if(tabId === 'study') idx = 1;
+        if(tabId === 'practice') idx = 2;
+        document.querySelectorAll('.nav-btn')[idx].classList.add('active');
+    }
+    
+    // 设置面板开关
+    function toggleSettings() {
+        const el = document.getElementById('settingContent');
+        el.style.display = el.style.display === 'none' ? 'block' : 'none'; // 改为 block 或 grid 均可
+    }
+</script>
+</body>
+</html>

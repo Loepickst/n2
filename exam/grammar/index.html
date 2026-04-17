@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>文法演習 - kiki的日语小窝</title>
+    <link rel="stylesheet" href="../../shared/site-fonts.css">
+    <style>
+        :root {
+            --bg-color: #fdfaf5;
+            --paper-color: #ffffff;
+            --text-color: #2c2c2c;
+            --accent-color: #b33e3e;
+            --sub-color: #787878;
+            --line-color: rgba(126, 103, 92, 0.14);
+            --shadow: 0 10px 24px rgba(63, 43, 36, 0.06);
+            --radius: 18px;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            background:
+                radial-gradient(circle at top left, rgba(179, 62, 62, 0.05), transparent 24%),
+                linear-gradient(180deg, #fbf8f2 0%, #f4ede3 100%);
+            color: var(--text-color);
+            display: flex;
+            flex-direction: column;
+        }
+
+        header {
+            width: 100%;
+            padding: 18px 20px;
+            box-sizing: border-box;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: sticky;
+            top: 0;
+            background-color: rgba(253, 250, 245, 0.95);
+            backdrop-filter: blur(8px);
+            z-index: 100;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .back-btn {
+            position: absolute;
+            left: 20px;
+            text-decoration: none;
+            color: var(--text-color);
+            font-size: 15px;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            min-height: 34px;
+            opacity: 0.72;
+            transition: opacity 0.25s, transform 0.25s;
+        }
+
+        .back-btn:hover {
+            opacity: 1;
+            transform: translateX(-2px);
+        }
+
+
+        h1 {
+            margin: 0;
+            font-size: 19px;
+            font-weight: 600;
+            letter-spacing: 0.04em;
+        }
+
+        .page-shell {
+            width: min(92%, 880px);
+            margin: 0 auto;
+            padding: 32px 0 48px;
+        }
+
+        .intro-card,
+        .group-card {
+            background: rgba(255, 255, 255, 0.9);
+            border: 1px solid var(--line-color);
+            border-radius: calc(var(--radius) + 4px);
+            box-shadow: var(--shadow);
+        }
+
+        .intro-card {
+            padding: 26px 28px;
+            margin-bottom: 20px;
+        }
+
+        .eyebrow {
+            margin: 0 0 10px;
+            font-size: 12px;
+            letter-spacing: 0.16em;
+            text-transform: uppercase;
+            color: var(--sub-color);
+        }
+
+        .intro-card h2 {
+            margin: 0;
+            font-size: 30px;
+            font-weight: 600;
+            letter-spacing: 0.06em;
+        }
+
+        .intro-card p {
+            margin: 12px 0 0;
+            color: var(--sub-color);
+            line-height: 1.8;
+            font-size: 14px;
+        }
+
+        .group-card {
+            padding: 22px;
+            margin-bottom: 18px;
+        }
+
+        .group-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+
+        .group-title {
+            margin: 0;
+            font-size: 24px;
+            font-weight: 600;
+            letter-spacing: 0.05em;
+        }
+
+        .group-note {
+            margin: 0;
+            color: var(--sub-color);
+            font-size: 13px;
+            line-height: 1.7;
+        }
+
+        .lesson-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .lesson-item {
+            background: var(--paper-color);
+            padding: 18px 20px;
+            border-radius: var(--radius);
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.04);
+            transition: 0.2s;
+            border-left: 4px solid transparent;
+            text-decoration: none;
+            color: var(--text-color);
+        }
+
+        .lesson-item:hover {
+            border-left-color: var(--accent-color);
+            transform: translateX(5px);
+            box-shadow: 0 6px 14px rgba(0, 0, 0, 0.08);
+        }
+
+        .lesson-item.disabled {
+            opacity: 0.62;
+            cursor: not-allowed;
+            pointer-events: none;
+            filter: grayscale(0.15);
+        }
+
+        .lesson-content {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            min-width: 0;
+        }
+
+        .lesson-icon {
+            font-size: 22px;
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            font-weight: 700;
+            background: rgba(179, 62, 62, 0.1);
+            color: var(--accent-color);
+        }
+
+        .lesson-text {
+            min-width: 0;
+        }
+
+        .lesson-text h3 {
+            margin: 0 0 4px;
+            font-size: 16px;
+            font-weight: 700;
+        }
+
+        .lesson-text p {
+            margin: 0;
+            font-size: 12px;
+            color: var(--sub-color);
+            line-height: 1.6;
+        }
+
+        .lesson-tag {
+            background: #f5f2ed;
+            color: #8b8078;
+            padding: 4px 10px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+
+        footer {
+            margin-top: auto;
+            padding: 28px;
+            text-align: center;
+            font-size: 12px;
+            color: var(--sub-color);
+        }
+
+        @media (max-width: 680px) {
+            .page-shell {
+                width: min(94%, 880px);
+                padding-top: 24px;
+            }
+
+            .intro-card,
+            .group-card {
+                padding: 18px;
+            }
+
+            .intro-card h2 {
+                font-size: 24px;
+            }
+
+            .group-head {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .lesson-item {
+                align-items: flex-start;
+            }
+
+            .lesson-tag {
+                margin-top: 4px;
+            }
+        }
+    </style>
+    <link rel="stylesheet" href="../../shared/header-back-control.css">
+</head>
+<body>
+    <header>
+        <a href="../../index.html#exam" class="back-btn header-back-control" data-back-nav>戻る</a>
+        <h1>文法演習</h1>
+    </header>
+
+    <main class="page-shell">
+        <section class="group-card">
+            <div class="group-head">
+                <div>
+                    <h3 class="group-title">文法専練</h3>
+                    <p class="group-note">对易混淆的语法进行专项攻破。</p>
+                </div>
+            </div>
+
+            <div class="lesson-list">
+                <a href="复合格助词.html" class="lesson-item">
+                    <div class="lesson-content">
+                        <div class="lesson-icon">複</div>
+                        <div class="lesson-text">
+                            <h3>複合格助詞</h3>
+                            <p>集中梳理につれて、に対して、に基づいて等复合格助词的差别和用法。</p>
+                        </div>
+                    </div>
+                    <span class="lesson-tag">Go</span>
+                </a>
+
+                <a href="形式名词.html" class="lesson-item">
+                    <div class="lesson-content">
+                        <div class="lesson-icon">形</div>
+                        <div class="lesson-text">
+                            <h3>形式名詞</h3>
+                            <p>系统区分こと、もの、ところ、わけ等形式名词及其高频考试搭配。</p>
+                        </div>
+                    </div>
+                    <span class="lesson-tag">Go</span>
+                </a>
+
+            </div>
+        </section>
+
+        <section class="group-card">
+            <div class="group-head">
+                <div>
+                    <h3 class="group-title">真題演習</h3>
+                    <p class="group-note">按题型去训练实际考试手感，把语法知识转成可得分的答题能力。</p>
+                </div>
+            </div>
+
+            <div class="lesson-list">
+                <a href="javascript:void(0)" class="lesson-item disabled">
+                    <div class="lesson-content">
+                        <div class="lesson-icon">年</div>
+                        <div class="lesson-text">
+                            <h3>文法専練</h3>
+                            <p>根据历年真题，练习不同类型的语法题。</p>
+                        </div>
+                    </div>
+                    <span class="lesson-tag">Soon</span>
+                </a>
+
+                <a href="javascript:void(0)" class="lesson-item disabled">
+                    <div class="lesson-content">
+                        <div class="lesson-icon">順</div>
+                        <div class="lesson-text">
+                            <h3>排序専練</h3>
+                            <p>按历年真题做排序专项训练，把句型接续和语序判断练熟。</p>
+                        </div>
+                    </div>
+                    <span class="lesson-tag">Soon</span>
+                </a>
+
+                <a href="javascript:void(0)" class="lesson-item disabled">
+                    <div class="lesson-content">
+                        <div class="lesson-icon">完</div>
+                        <div class="lesson-text">
+                            <h3>完形専練</h3>
+                            <p>通过真题来锻炼上下文理解能力。</p>
+                        </div>
+                    </div>
+                    <span class="lesson-tag">Soon</span>
+                </a>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        © 2026 kiki's Japanese Corner
+    </footer>
+
+    <script src="../../shared/back-navigation.js"></script>
+    <script>
+        window.bindHierarchicalBack({
+            selector: "[data-back-nav]",
+            fallback: "../../index.html#exam"
+        });
+    </script>
+</body>
+</html>

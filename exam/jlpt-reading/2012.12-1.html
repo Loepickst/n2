@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>日本語読解 - 鑑賞</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@300;500;700&display=swap');
+
+        :root {
+            --bg-color: #fdfaf5;
+            --paper-color: #ffffff;
+            --text-color: #2c2c2c;
+            --accent-color: #b33e3e; 
+            --sub-color: #787878;
+            --popup-bg: #333333;
+            --note-bg: #faf6eb; /* 笔记区专属底色，淡淡的牛皮纸色 */
+            --chinese-font: "Microsoft YaHei", "PingFang SC", sans-serif;
+            --japanese-font: 'Noto Serif JP', serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: var(--japanese-font);
+            margin: 0;
+            padding: 80px 15px 120px; 
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* 顶部控制栏 */
+        .top-bar {
+            position: fixed; top: 0; left: 0; right: 0;
+            height: 60px; background: rgba(253, 250, 245, 0.95);
+            backdrop-filter: blur(8px);
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 0 25px; z-index: 1000;
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+        }
+
+        #today-date { font-size: 0.85rem; color: var(--accent-color); font-weight: 500; }
+        .toggle-btn {
+            background: white; color: var(--accent-color); border: 1px solid var(--accent-color);
+            padding: 6px 14px; border-radius: 20px; font-size: 0.8rem;
+            font-family: var(--chinese-font); cursor: pointer; transition: 0.3s;
+        }
+        @media (hover: hover) { .toggle-btn:hover { background: var(--accent-color); color: white; } }
+        .toggle-btn.active { background: var(--accent-color); color: white; }
+
+        .container {
+            max-width: 720px; width: 100%;
+            background: var(--paper-color); padding: 50px 30px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+            box-sizing: border-box; border-radius: 8px;
+        }
+
+        .header-title { 
+            text-align: center; margin-top: 0; margin-bottom: 40px; 
+            font-size: 1.3rem; color: var(--text-color); border-bottom: 2px solid #f0f0f0; padding-bottom: 15px;
+            letter-spacing: 2px;
+        }
+
+        /* 文章段落 */
+        p.japanese {
+            font-size: 1.15rem; line-height: 2.2; 
+            text-align: justify; margin: 0 0 20px 0;
+            text-indent: 1em; 
+        }
+        ruby rt { font-size: 0.55em; color: var(--sub-color); letter-spacing: 0; }
+
+        .vocab-word {
+            color: var(--accent-color); border-bottom: 2px dashed #f2d0d0;
+            cursor: pointer; font-weight: 500; transition: 0.2s;
+        }
+        .vocab-word:hover { background: #fff0f0; }
+
+        /* 译文区块 */
+        .translation {
+            display: none; margin: -5px 0 30px 0; font-size: 0.95rem;
+            color: #5a626b; line-height: 1.8; padding: 15px 20px;
+            background-color: #f7f8f9; font-family: var(--chinese-font);
+            border-left: 3px solid #ddd; text-align: justify;
+        }
+        .translation::before { content: "訳"; display: block; font-size: 0.75rem; color: #aaa; margin-bottom: 5px; font-weight: bold; }
+
+        /* --- 新增：深度鉴赏与讲解区块 --- */
+        .analysis-box {
+            display: none; /* 默认隐藏 */
+            margin-top: 50px;
+            padding: 35px 30px;
+            background: var(--note-bg);
+            border-radius: 8px;
+            border: 1px solid #e8dec7;
+            position: relative;
+            font-family: var(--chinese-font); /* 讲解部分建议用中文黑体，更利于阅读理解 */
+        }
+
+        /* 模拟笔记本边缘的装饰标签 */
+        .analysis-box::before {
+            content: "📝 先生のノート";
+            position: absolute;
+            top: -16px;
+            left: 25px;
+            background: var(--accent-color);
+            color: white;
+            padding: 4px 15px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: bold;
+            letter-spacing: 1px;
+        }
+
+        .analysis-item {
+            margin-bottom: 25px;
+            line-height: 1.7;
+            font-size: 1rem;
+            color: #444;
+        }
+
+        .analysis-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .analysis-label {
+            display: inline-block;
+            font-weight: bold;
+            color: #8c6a41;
+            background: #f1e4ce;
+            padding: 3px 10px;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            margin-bottom: 10px;
+            border-left: 3px solid #c9a778;
+        }
+
+        .highlight-text {
+            background: linear-gradient(transparent 60%, #ffe0b2 40%);
+            font-weight: bold;
+            color: #333;
+        }
+
+        .quote-text {
+            color: var(--accent-color);
+            font-family: var(--japanese-font);
+            font-weight: 500;
+        }
+
+        /* 动态气泡与音频 CSS 保持原样 */
+        #smart-tooltip {
+            position: absolute; z-index: 2000; background: var(--popup-bg); color: white;
+            padding: 12px 16px; border-radius: 8px; font-size: 0.85rem; font-family: var(--chinese-font);
+            line-height: 1.6; max-width: 280px; min-width: 140px; box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            display: none; opacity: 0; pointer-events: none; transition: opacity 0.2s;
+        }
+        #smart-tooltip::after {
+            content: ""; position: absolute; top: 100%; border: 8px solid transparent; border-top-color: var(--popup-bg);
+        }
+        .audio-wrapper { position: fixed; bottom: 0; left: 0; right: 0; z-index: 2000; background: rgba(255, 255, 255, 0.98); backdrop-filter: blur(10px); padding: 15px 20px 25px 20px; display: flex; justify-content: center; border-top: 1px solid rgba(0,0,0,0.05); box-shadow: 0 -4px 20px rgba(0,0,0,0.05); }
+        .audio-player { display: flex; align-items: center; width: 100%; max-width: 600px; }
+        .play-btn { width: 36px; height: 36px; border-radius: 50%; background-color: var(--accent-color); color: white; border: none; display: flex; align-items: center; justify-content: center; cursor: pointer; margin-right: 12px; flex-shrink: 0; transition: transform 0.2s; padding: 0; }
+        .play-btn:active { transform: scale(0.95); }
+        .play-btn svg { width: 14px; height: 14px; fill: white; margin-left: 2px; }
+        .play-btn.playing svg { margin-left: 0; }
+        .progress-container { flex-grow: 1; height: 20px; display: flex; align-items: center; margin-right: 12px; cursor: pointer; position: relative; }
+        .progress-bg { width: 100%; height: 4px; background-color: #f0f0f0; border-radius: 2px; position: relative; }
+        .progress-bar { height: 100%; background-color: var(--accent-color); width: 0%; border-radius: 2px; position: relative; }
+        .progress-bar::after { content: ""; position: absolute; right: -6px; top: 50%; transform: translateY(-50%); width: 12px; height: 12px; background-color: white; border: 2px solid var(--accent-color); border-radius: 50%; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .time-display { font-size: 0.7rem; color: #999; width: 70px; text-align: right; font-feature-settings: "tnum"; font-variant-numeric: tabular-nums; }
+        .loop-btn { background: none; border: none; cursor: pointer; padding: 8px; margin-left: 8px; opacity: 0.5; transition: all 0.2s; display: flex; align-items: center; justify-content: center; }
+        .loop-btn.active { opacity: 1; color: var(--accent-color); }
+        .loop-btn svg { width: 18px; height: 18px; fill: currentColor; }
+        .footer { margin-top: 50px; color: #ccc; font-size: 0.8rem; letter-spacing: 3px; }
+
+        /* 移动端字号调整 */
+        @media (max-width: 768px) {
+            .header-title { font-size: 1.15rem; margin-bottom: 30px; }
+            p.japanese { font-size: 1.05rem; line-height: 2.4; margin-bottom: 20px; }
+            .translation { font-size: 0.9rem; padding: 15px 18px; line-height: 1.9; }
+            .analysis-box { padding: 25px 20px; margin-top: 35px; }
+            .analysis-item { font-size: 0.92rem; line-height: 1.9; }
+            .analysis-label { font-size: 0.8rem; padding: 2px 8px; }
+            .container { padding: 40px 20px; }
+        }
+    </style>
+    <link rel="stylesheet" href="../../shared/header-back-control.css">
+</head>
+<body>
+
+<div class="top-bar">
+    <a href="index.html" class="header-back-control">戻る</a>
+    <div id="today-date">N2真题・名文鑑賞</div>
+    <button id="analysis-btn" class="toggle-btn" onclick="toggleAnalysis()">解析</button>
+</div>
+
+<div class="container">
+    <h2 class="header-title">教育と社会を哲学する</h2>
+
+    <div class="article-content">
+        <p class="japanese">
+            まず、教育とは何か、ということから考えてみよう。<span class="vocab-word" data-info="さしあたって：目前，暂且">さしあたって</span>ぼくは、教育とは、子どもを「社会の成員(大人)としてふさわしい存在」へと育て上げていくこと、と定義してみたい。
+        </p>
+        <div class="translation">首先，让我们思考一下教育是什么。目前我试着将教育定义为：把孩子培养成“作为社会成员（大人）而言合适的存在”。</div>
+
+        <p class="japanese">
+            どんな時代、どんな社会の人びとでも、子どもを大人に育て上げなくてはならなかった。そのさいには、社会の成員として「ふさわしい」あり方が何かしら<span class="vocab-word" data-info="想定（そうてい）される：设想，假定（这里是「想定する」的被动态加て形，表示状态的存续）">想定されて</span>いて、それが教育の営みを導いていたはずだ。
+        </p>
+        <div class="translation">无论在哪个时代、哪个社会的人们，都必须把孩子培养成大人。在这个过程中，必然设想了某种作为社会成员“合适”的状态，而这应该指导着教育的行为。</div>
+    </div>
+
+    <div class="analysis-box">
+        <div class="analysis-item">
+            <span class="analysis-label">📝 先生のノート：第1-2段の役割</span><br>
+            <strong>【導入と定義の提示（破题与立论）】</strong><br>
+            文章开篇直接对“教育”进行了明确的定义（<span class="quote-text">「社会の成員としてふさわしい存在」へと育て上げていくこと</span>）。第一段和第二段构成了全文的立论基础。作者指出，无论是何种时代或社会，教育的本质都包含了将儿童培养为符合社会期待的“合格成人”这一前提。这就为后文探讨“现代社会所要求的合格标准究竟是什么”确立了讨论的基调与出发点。
+        </div>
+    </div>
+
+    <div class="article-content" style="margin-top: 40px;">
+        <p class="japanese">
+            その「ふさわしさ」は、大きく二つに分けられるだろう。一つは、働いて食べていけるために必要な能力、つまり農民なら農民としての、漁民ならば漁民としての、技能や知識。もう一つは、他の人びとのあいだでふさわしい<span class="vocab-word" data-info="振る舞い（ふるまい）：举止，行为，表现">ふるまい</span>ができること一一基本的なルールを守り、他の人びとと協力する態勢をとれること、自分に与えられた役割を果たし、その責任をとれること等々、つまり、他者との関係能力である。では、現代社会においては、どういうことが「大人としてふさわしい」のだろうか?教育理念を構築するとは、このことをあらためて考え、<span class="vocab-word" data-info="且つ（かつ）：并且，而且">かつ</span>共有しようとすることに他ならない。だが、この「共有」ということはなかなかむずかしい。そこには、社会のあり方と人間の生き方をどのようなものとして思い描くか、つまりは、異なった社会観·人間観がさまざまに<span class="vocab-word" data-info="入り込む（いりこむ）：混入，交织，进入（这里是动词第一连用形，用于句型中顿）">入り込み</span>、衝突してくるからだ。
+        </p>
+        <div class="translation">这种“合适性”大致可以分为两类。一种是为了工作糊口所需的生存能力，即农民作为农民、渔民作为渔民的技能和知识。另一种是在他人之间能够做出恰当举止的能力——遵守基本规则、具备与他人合作的姿态、履行赋予自己的角色并承担责任等，也就是与他人的关系能力。那么，在现代社会中，怎样才算“作为大人是合适的”呢？构筑教育理念，无非就是重新思考这一点并试图达成共识。但是，这种“共识”是很难达成的。因为其中会掺杂各种对社会形态和人类生存方式的设想，即不同的社会观和人类观会交织在一起并发生冲突。</div>
+    </div>
+
+    <div class="analysis-box">
+        <div class="analysis-item">
+            <span class="analysis-label">📝 先生のノート：第3段の役割</span><br>
+            <strong>【概念の細分化と問題提起（概念拆解与抛出核心议题）】</strong><br>
+            第三段对前文的“合适性（ふさわしさ）”进行了具体的维度拆解：一是生存所需的“硬性技能”，二是维持人际关系的“社会性规则与协作能力”。随后，作者通过设问句 <span class="quote-text">現代社会においては、どういうことが『大人としてふさわしい』のだろうか？</span> 完成了论述视角的转换。在此，作者指出现代社会的复杂性在于多元价值观（<span class="quote-text">異なった社会観·人間観</span>）的交织与冲突，导致社会难以对“合格的社会成员”这一标准达成共识，从而自然地引出了本文的核心困境。
+        </div>
+    </div>
+
+    <div class="article-content" style="margin-top: 40px;">
+        <p class="japanese">
+            たとえば、ぼくが最初にあげた「教育とは、子どもを社会の成員としてふさわしい存在にすることだ」という定義に対しても、<span class="vocab-word" data-info="反発（はんぱつ）を覚える（おぼえる）：感到反感，产生抵触情绪">反発を覚える</span>人がいるだろう。「それは、社会的期待に子供を<span class="vocab-word" data-info="添わせる（そわせる）：使...迎合，使...顺应（这里是使役态的意志形「添わせよう」，表示试图让孩子去迎合）">添わせよう</span>とするよくない発想だ。教育とはむしろ、子供の主体的な判断力を育てるものだ」というわけである。
+        </p>
+        <div class="translation">例如，对于我最开始提出的“教育就是把孩子变成合适的社会成员”这一定义，大概也会有人感到反感吧。他们会说：“那是试图让孩子迎合社会期待的错误想法。教育倒不如说是培养孩子主体判断力的东西。”</div>
+
+        <p class="japanese">
+            この意見はしかし、「社会の秩序にただ従うだけでなく、主体的な判断の<span class="vocab-word" data-info="もとに：在……之下，基于……（常用于「～のもとに」句型）">もとに</span><span class="vocab-word" data-info="自ら（みずから）：自己，自身">みずから</span>の人生をつくりあげ、社会のあり方をも批判的に検討する人間こそが社会の成員としてふさわしい」という近代的な人間観にもとづいている。これもまた、社会の側が子どもたちに寄せる「期待」の一種だと言わざるをえない。そして子供を放置すれば主体的·批判的な人間になるはずもないから、そのように「育て上げ」ようとしなくてはならない。
+        </p>
+        <div class="translation">然而，这种意见也是基于一种近代的人类观，即“不仅要顺从社会秩序，还要在主体判断下创造自己的人生，并对社会形态进行批判性探讨的人，才是合适的社会成员”。不得不说，这也是社会对孩子们寄予的一种“期待”。而且，如果对孩子放任不管，他们是不可能自己变成具有主体性和批判性的人的，因此我们必须去那样“培养”他们。</div>
+    </div>
+
+    <div class="analysis-box">
+        <div class="analysis-item">
+            <span class="analysis-label">📝 先生のノート：第4-5段の役割</span><br>
+            <strong>【譲歩と逆説（让步与反驳）】</strong><br>
+            这两段是典型的“让步与反驳”论述结构，也是日语论说文中的高频考点。在第四段，作者预判了读者可能产生的反对意见（即认为教育不应是迎合社会期待，而应培养孩子的“主体性”）。<br>
+            紧接着在第五段，作者对这一反论进行了有力的驳斥：所谓的“培养主体性与批判精神”，本质上依然是近代社会对个体提出的一种“期待”与“要求”。若不加以人为的教育干预（<span class="quote-text">放置すれば</span>），儿童也无法自然形成主体性。通过这种严密的逻辑推演，作者进一步巩固了“教育必然带有社会期待与塑造性质”这一核心观点。
+        </div>
+    </div>
+
+    <div class="article-content" style="margin-top: 40px;">
+        <p class="japanese">
+            <span class="vocab-word" data-info="いずれにせよ：无论如何，总之（用于总结前文，引出最终结论）">いずれにせよ</span>、教育というものは、社会(大人)の側が子供に寄せる期待、もっと強い言い方をすれば、ある種の強制から自由ではない、とぼくは考える。重要なことは、「この社会の一員、つまり大人として生きていくうえで何が必要な条件なのか」ということをきちんと<span class="vocab-word" data-info="見定める（みさだめる）：看清，认准，断定（这里是动词第一连用形，用于名词化或中顿连接）">見定め</span>共有したうえでの強制であるかどうか、という点なのだ。
+        </p>
+        <div class="translation">无论如何，我认为教育无法摆脱社会（大人）一方对孩子寄予的期待，说得更强烈一点，就是无法摆脱某种强制。关键在于，这种强制是否建立在认清并共享了“作为这个社会的一员，也就是作为大人生活下去所必需的条件是什么”这一基础之上。</div>
+    </div>
+
+    <div class="analysis-box">
+        <div class="analysis-item">
+            <span class="analysis-label">📝 先生のノート：第6段の役割</span><br>
+            <strong>【結論の提示（收束全文与深化主旨）】</strong><br>
+            第六段使用了 <span class="quote-text">いずれにせよ</span>（无论如何）进行全文的收束与总结。作者最终明确指出，教育无法脱离社会对儿童的期待，甚至不可避免地带有某种“强制性”。<br>
+            然而，文章的最终落脚点并非单纯批判这种强制性，而是提出建设性的呼吁：在施加这种教育强制之前，整个社会必须理性地认清并共享“作为现代社会的一员，生存下去的必要条件究竟是什么（<span class="quote-text">何が必要な条件なのか</span>）”。只有在达成这一共识的前提下，教育才具备其正当性与意义。
+        </div>
+    </div>
+</div>
+
+<div id="smart-tooltip"></div>
+
+<div class="audio-wrapper">
+    <div class="audio-player">
+        <button id="play-btn" class="play-btn" onclick="togglePlay()">
+            <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+        </button>
+        <div class="progress-container" id="progress-container">
+            <div class="progress-bg"><div class="progress-bar" id="progress-bar"></div></div>
+        </div>
+        <div class="time-display"><span id="current-time">00:00</span> / <span id="duration">00:00</span></div>
+        <button id="loop-btn" class="loop-btn" onclick="toggleLoop()" title="ループ再生">
+            <svg viewBox="0 0 24 24"><path d="M12 4V1L8 5l4 4V6c3.31 0 6 2.69 6 6 0 1.01-.25 1.97-.7 2.8l1.46 1.46C19.54 15.03 20 13.57 20 12c0-4.42-3.58-8-8-8zm0 14c-3.31 0-6-2.69-6-6 0-1.01.25-1.97.7-2.8L5.24 7.74C4.46 8.97 4 10.43 4 12c0 4.42 3.58 8 8 8v3l4-4-4-4v3z"/></svg>
+        </button>
+        <audio id="audio-element" src="audio/2012.12-10.mp3"></audio>
+    </div>
+</div>
+
+<div class="footer">Ichigo Ichie - 一期一会</div>
+
+<script>
+    // 解析切换 (控制译文和先生のノート)
+    function toggleAnalysis() {
+        const btn = document.getElementById('analysis-btn');
+        const isActive = btn.classList.toggle('active');
+        
+        // 切换译文显示
+        document.querySelectorAll('.translation').forEach(el => {
+            el.style.display = isActive ? 'block' : 'none';
+        });
+
+        // 切换先生のノート显示
+        document.querySelectorAll('.analysis-box').forEach(el => {
+            el.style.display = isActive ? 'block' : 'none';
+        });
+    }
+
+    // 智能气泡
+    const tooltip = document.getElementById('smart-tooltip');
+    let activeWord = null;
+    document.querySelectorAll('.vocab-word').forEach(word => {
+        word.addEventListener('click', function(e) {
+            e.stopPropagation();
+            if (activeWord === this) { hideTooltip(); return; }
+            activeWord = this;
+            tooltip.innerText = this.getAttribute('data-info');
+            tooltip.style.display = 'block';
+            const rect = this.getBoundingClientRect();
+            const tipRect = tooltip.getBoundingClientRect();
+            const screenWidth = window.innerWidth;
+            let left = rect.left + (rect.width / 2) - (tipRect.width / 2);
+            let top = rect.top + window.scrollY - tipRect.height - 12;
+            const margin = 15; let arrowOffset = '50%';
+            if (left < margin) { left = margin; arrowOffset = (rect.left + rect.width/2 - margin) + 'px'; } 
+            else if (left + tipRect.width > screenWidth - margin) { left = screenWidth - tipRect.width - margin; arrowOffset = (rect.left + rect.width/2 - left) + 'px'; }
+            tooltip.style.left = left + 'px'; tooltip.style.top = top + 'px'; tooltip.style.opacity = '1';
+            const styleTag = document.getElementById('dynamic-arrow') || document.createElement('style');
+            styleTag.id = 'dynamic-arrow';
+            styleTag.innerHTML = `#smart-tooltip::after { left: ${arrowOffset} !important; transform: translateX(-50%); }`;
+            document.head.appendChild(styleTag);
+        });
+    });
+    function hideTooltip() { tooltip.style.opacity = '0'; setTimeout(() => { tooltip.style.display = 'none'; }, 200); activeWord = null; }
+    document.addEventListener('click', hideTooltip); window.addEventListener('resize', hideTooltip);
+
+    // 音频播放器
+    const audio = document.getElementById('audio-element');
+    const playBtn = document.getElementById('play-btn');
+    const progressBar = document.getElementById('progress-bar');
+    const progressContainer = document.getElementById('progress-container');
+    const currentTimeEl = document.getElementById('current-time');
+    const durationEl = document.getElementById('duration');
+    const loopBtn = document.getElementById('loop-btn');
+    let isLooping = false;
+    function toggleLoop() { isLooping = !isLooping; audio.loop = isLooping; loopBtn.classList.toggle('active', isLooping); }
+    function togglePlay() {
+        if (audio.paused) {
+            audio.play().catch(e => console.log("Audio play error:", e));
+            playBtn.classList.add('playing');
+            playBtn.innerHTML = '<svg viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>';
+        } else {
+            audio.pause();
+            playBtn.classList.remove('playing');
+            playBtn.innerHTML = '<svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>';
+        }
+    }
+    audio.addEventListener('timeupdate', () => { if (audio.duration) { progressBar.style.width = (audio.currentTime / audio.duration * 100) + '%'; currentTimeEl.textContent = formatTime(audio.currentTime); }});
+    audio.addEventListener('loadedmetadata', () => { durationEl.textContent = formatTime(audio.duration); });
+    audio.addEventListener('ended', () => { playBtn.classList.remove('playing'); playBtn.innerHTML = '<svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>'; progressBar.style.width = '0%'; currentTimeEl.textContent = "00:00"; });
+    function seek(e) { if (!audio.duration) return; const rect = progressContainer.getBoundingClientRect(); const clientX = e.type.startsWith('touch') ? e.touches[0].clientX : e.clientX; let clickX = Math.max(0, Math.min(clientX - rect.left, rect.width)); audio.currentTime = (clickX / rect.width) * audio.duration; }
+    let isDragging = false;
+    progressContainer.addEventListener('mousedown', (e) => { isDragging = true; seek(e); });
+    window.addEventListener('mousemove', (e) => { if (isDragging) seek(e); });
+    window.addEventListener('mouseup', () => { isDragging = false; });
+    progressContainer.addEventListener('touchstart', (e) => { isDragging = true; seek(e); });
+    window.addEventListener('touchmove', (e) => { if (isDragging) { e.preventDefault(); seek(e); } }, { passive: false });
+    window.addEventListener('touchend', () => { isDragging = false; });
+    function formatTime(seconds) { if (isNaN(seconds)) return "00:00"; const m = Math.floor(seconds / 60); const s = Math.floor(seconds % 60); return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`; }
+</script>
+
+</body>
+</html>

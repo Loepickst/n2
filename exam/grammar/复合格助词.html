@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>日语复合格助词学习与练习</title>
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { 
+            font-family: 'Helvetica Neue', Helvetica, Arial, 'Hiragino Sans', 'Hiragino Kaku Gothic ProN', Meiryo, sans-serif; 
+            background-color: #f5f6f7; 
+        }
+        
+        /* 汉字注音样式调整，使其更贴近截图的排版 */
+        ruby {
+            ruby-align: center;
+        }
+        rt {
+            font-size: 0.6em;
+            color: #888;
+            transform: translateY(2px);
+        }
+        
+        /* 动画 */
+        .fade-in { animation: fadeIn 0.3s ease-out forwards; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="min-h-screen text-gray-800">
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState } = React;
+
+        // 学习资料数据
+        const learningData = [
+            {
+                particle: "〜に ＋ ついて",
+                origin: "助词「に」 + 动词「就く（つく）」的て形",
+                explanation: "动词「就く」有<b>“附着、就位、跟着”</b>的意思。引申为<b>针对某个特定的主题或事物进行思考、调查、叙述</b>。相当于把目光“附着”在这个焦点上。",
+                meaning: "关于... / 就...",
+                connection: "名詞 ＋ について",
+                examples: [
+                    {
+                        jp: "<ruby>日<rt>に</rt></ruby><ruby>本<rt>ほん</rt></ruby>の<ruby>歴<rt>れき</rt></ruby><ruby>史<rt>し</rt></ruby><span class='text-[#c55a5a] font-bold'>について</span><ruby>調<rt>しら</rt></ruby>べています。",
+                        cn: "正在调查关于日本的历史。"
+                    }
+                ]
+            },
+            {
+                particle: "〜に ＋ とって",
+                origin: "助词「に」 + 动词「取る（とる）」的て形",
+                explanation: "动词「取る」是<b>“拿、取、采取”</b>的意思。引申为<b>“如果把某人/某物拿来作为衡量标准的话”</b>。通常后项接续的是<b>某种评价或判断</b>（如：很重要、很困难等）。",
+                meaning: "对...来说（从...的立场来看）",
+                connection: "名詞 ＋ にとって",
+                examples: [
+                    {
+                        jp: "<ruby>彼<rt>かれ</rt></ruby><span class='text-[#c55a5a] font-bold'>にとって</span>、お<ruby>金<rt>かね</rt></ruby>が<ruby>一<rt>いち</rt></ruby><ruby>番<rt>ばん</rt></ruby><ruby>大<rt>たい</rt></ruby><ruby>切<rt>せつ</rt></ruby>だ。",
+                        cn: "对他来说，钱是最重要的。"
+                    }
+                ]
+            },
+            {
+                particle: "〜に ＋ 対して",
+                origin: "助词「に」 + 动词「対する（たいする）」的て形",
+                explanation: "动词「対する」是<b>“面对、相对”</b>的意思。既可以表示<b>面对某人做出的态度/行为</b>，也可以表示<b>把两项事物放在一起“面对面”进行对比</b>。",
+                meaning: "对...（态度对象） / 与...相对（对比）",
+                connection: "名詞 / 普通形（ナ形な・名詞な）＋ の ＋ に対して",
+                examples: [
+                    {
+                        jp: "お<ruby>客<rt>きゃく</rt></ruby><ruby>様<rt>さま</rt></ruby><span class='text-[#c55a5a] font-bold'>に対して</span>、<ruby>丁<rt>てい</rt></ruby><ruby>寧<rt>ねい</rt></ruby>な<ruby>言<rt>こと</rt></ruby><ruby>葉<rt>ば</rt></ruby>を<ruby>使<rt>つか</rt></ruby>います。",
+                        cn: "对客人使用礼貌用语。"
+                    },
+                    {
+                        jp: "<ruby>兄<rt>あに</rt></ruby>が<ruby>活<rt>かつ</rt></ruby><ruby>発<rt>ぱつ</rt></ruby>なの<span class='text-[#c55a5a] font-bold'>に対して</span>、<ruby>弟<rt>おとうと</rt></ruby>はおとなしい。",
+                        cn: "与哥哥活泼相对，弟弟很老实。"
+                    }
+                ]
+            },
+            {
+                particle: "〜に ＋ よって",
+                origin: "助词「に」 + 动词「因る/依る（よる）」的て形",
+                explanation: "动词「因る/依る」表示<b>“依据、起因于”</b>。可表示<b>根据不同情况产生不同结果</b>；也可作为<b>被动态的主体</b>（动作起因于谁）；还可表示<b>依赖的手段或原因</b>。",
+                meaning: "根据... / 被... / 通过... / 因为...",
+                connection: "名詞 ＋ によって",
+                examples: [
+                    {
+                        jp: "<ruby>人<rt>ひと</rt></ruby><span class='text-[#c55a5a] font-bold'>によって</span><ruby>考<rt>かんが</rt></ruby>え<ruby>方<rt>かた</rt></ruby>が<ruby>違<rt>ちが</rt></ruby>います。",
+                        cn: "根据人的不同，想法也不同。"
+                    },
+                    {
+                        jp: "この<ruby>本<rt>ほん</rt></ruby>は<ruby>有<rt>ゆう</rt></ruby><ruby>名<rt>めい</rt></ruby>な<ruby>作<rt>さっ</rt></ruby><ruby>家<rt>か</rt></ruby><span class='text-[#c55a5a] font-bold'>によって</span><ruby>書<rt>か</rt></ruby>かれました。",
+                        cn: "这本书是由著名作家写的。（被动态主体）"
+                    }
+                ]
+            },
+            {
+                particle: "〜と ＋ して",
+                origin: "助词「と」 + 动词「する」的て形",
+                explanation: "动词「する」在这里有<b>“当作、认为”</b>的意思。变成「名詞＋として」就直接表示<b>将其作为某种身份、资格、名义或立场</b>。",
+                meaning: "作为...（身份、资格、名义）",
+                connection: "名詞 ＋ として",
+                examples: [
+                    {
+                        jp: "<ruby>彼<rt>かれ</rt></ruby>は<ruby>留<rt>りゅう</rt></ruby><ruby>学<rt>がく</rt></ruby><ruby>生<rt>せい</rt></ruby><span class='text-[#c55a5a] font-bold'>として</span><ruby>日<rt>に</rt></ruby><ruby>本<rt>ほん</rt></ruby>へ<ruby>来<rt>き</rt></ruby>ました。",
+                        cn: "他作为留学生来到了日本。"
+                    }
+                ]
+            },
+            {
+                particle: "〜に ＋ 代わって",
+                origin: "助词「に」 + 动词「代わる（かわる）」的て形",
+                explanation: "动词「代わる」本身就是<b>“替代、替换”</b>的意思。前面加「に」表示被替代的对象，通常用于<b>人代替另一个人做某事，或者代表某团体</b>。",
+                meaning: "代替... / 代表...",
+                connection: "名詞 ＋ に代わって",
+                examples: [
+                    {
+                        jp: "<ruby>社<rt>しゃ</rt></ruby><ruby>長<rt>ちょう</rt></ruby><span class='text-[#c55a5a] font-bold'>に代わって</span>、<ruby>私<rt>わたし</rt></ruby>がご<ruby>挨<rt>あい</rt></ruby><ruby>拶<rt>さつ</rt></ruby><ruby>申<rt>もう</rt></ruby>し<ruby>上<rt>あ</rt></ruby>げます。",
+                        cn: "我代替社长向大家致辞。"
+                    }
+                ]
+            }
+        ];
+
+        const quizData = [
+            {
+                question: "環境問題（　　　）、皆で話し合いましょう。",
+                options: ["にとって", "について", "として", "によって"],
+                correctIndex: 1,
+                explanation: "句意：让我们大家一起讨论【关于】环境问题。表示论述、思考的主题，用「について」。"
+            },
+            {
+                question: "現代の若者（　　　）、スマートフォンは不可欠なものだ。",
+                options: ["に対して", "によって", "にとって", "について"],
+                correctIndex: 2,
+                explanation: "句意：【对】现代的年轻人【来说】，智能手机是不可或缺的。后面是评价/判断，表示立场，用「にとって」。"
+            },
+            {
+                question: "アメリカ大陸はコロンブス（　　　）発見された。",
+                options: ["として", "によって", "に対して", "に代わって"],
+                correctIndex: 1,
+                explanation: "句意：美洲大陆【被】哥伦布发现了。「発見された」是被动态，表示被动态的动作主体（由谁发现的）用「によって」。"
+            },
+            {
+                question: "病気の母（　　　）、私が夕食を作りました。",
+                options: ["に代わって", "について", "として", "にとって"],
+                correctIndex: 0,
+                explanation: "句意：我【代替】生病的母亲做了晚饭。表示替代某人做某事，用「に代わって」。"
+            }
+        ];
+
+        const App = () => {
+            const [activeTab, setActiveTab] = useState('learn');
+            // 将学习模式的页面状态提升到顶层，以便切换 Tab 时能保留状态
+            const [learnStep, setLearnStep] = useState('intro'); // 'intro' (概念介绍) 或 'entries' (词条学习)
+
+            return (
+                <div className="max-w-3xl mx-auto px-4 py-8 md:py-12 relative">
+                    {/* 右上角模式切换入口 */}
+                    <div className="absolute top-4 right-4 md:top-8 md:right-4 z-10 fade-in">
+                        <button 
+                            onClick={() => setActiveTab(activeTab === 'learn' ? 'practice' : 'learn')}
+                            className="bg-white border border-gray-200 text-gray-700 px-4 py-2 md:px-5 md:py-2.5 rounded-full shadow-sm hover:shadow hover:border-[#8eb29a] hover:text-[#8eb29a] transition-all flex items-center text-sm font-bold"
+                        >
+                            {activeTab === 'learn' ? '📝 练习模式 ➡️' : '⬅️ 📖 返回学习'}
+                        </button>
+                    </div>
+
+                    {/* 页面大标题与副标题 */}
+                    <header className="mb-8 md:mb-12 text-center fade-in pt-12 md:pt-0">
+                        <h1 className="text-3xl font-bold text-gray-800 mb-3 tracking-wide">日语复合格助词特训</h1>
+                        <p className="text-gray-500 font-medium">回归动词本源，告别死记硬背</p>
+                    </header>
+
+                    <div className="fade-in border-t border-gray-200/60 pt-8">
+                        {activeTab === 'learn' ? (
+                            <LearningMode step={learnStep} setStep={setLearnStep} />
+                        ) : (
+                            <PracticeMode />
+                        )}
+                    </div>
+                </div>
+            );
+        };
+
+        const LearningMode = ({ step, setStep }) => {
+            // 第 1 部分：概念介绍页
+            if (step === 'intro') {
+                return (
+                    <div className="space-y-8 fade-in">
+                        <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                            <div className="relative border-b border-gray-200 px-6 py-5 flex items-center bg-white">
+                                <div className="absolute left-0 top-0 bottom-0 w-[6px] bg-[#8eb29a] rounded-tl-xl"></div>
+                                <div className="text-2xl mr-3">💡</div>
+                                <h2 className="text-[22px] font-bold text-gray-800 tracking-wide">复合格助词概念解析</h2>
+                            </div>
+                            
+                            <div className="p-6 md:p-8 space-y-8 text-gray-700 leading-relaxed text-[15px]">
+                                {/* 关系讲解 */}
+                                <div>
+                                    <h3 className="text-lg font-bold text-gray-800 mb-3 border-b-2 border-[#8eb29a] inline-block pb-1">1. 与普通格助词的关系</h3>
+                                    <p className="bg-[#fcfcfc] p-4 rounded border border-gray-100 shadow-sm">
+                                        复合格助词在句中的作用和普通的“格助词”（如「に」、「を」、「で」）类似，都是用来决定名词在句子中的语法地位。但相比于单个假名，复合格助词由于融入了动词的含义，能表达<span className="font-bold text-[#c55a5a]">更具体、更细腻的逻辑关系</span>。
+                                    </p>
+                                </div>
+
+                                {/* 组成方式 */}
+                                <div>
+                                    <h3 className="text-lg font-bold text-gray-800 mb-3 border-b-2 border-[#8eb29a] inline-block pb-1">2. 核心构成规律</h3>
+                                    <div className="bg-[#f4f5f6] border-l-4 border-[#8eb29a] p-5 rounded-r shadow-sm flex flex-col items-center justify-center">
+                                        <p className="text-gray-500 text-sm mb-2 font-bold tracking-widest">万能拆解公式</p>
+                                        <p className="font-bold text-xl tracking-widest text-gray-800">
+                                            格助词 <span className="mx-2 text-gray-400">+</span> <span className="text-[#c55a5a]">动词的て形</span>
+                                        </p>
+                                    </div>
+                                    <p className="mt-4 text-gray-500 text-sm text-center">
+                                        ※ 只要认识基础动词，就能依靠逻辑自然推导出整个语法的含义！
+                                    </p>
+                                </div>
+
+                                {/* 实例解析 */}
+                                <div>
+                                    <h3 className="text-lg font-bold text-gray-800 mb-3 border-b-2 border-[#8eb29a] inline-block pb-1">3. 实例解析</h3>
+                                    <div className="space-y-5">
+                                        <div className="bg-gray-50 p-5 rounded-lg border border-gray-200">
+                                            <p className="mb-3 font-medium">以 <span className="font-bold text-xl text-[#c55a5a] mx-1">〜に ＋ ついて</span> 为例：</p>
+                                            <ul className="space-y-3 ml-2">
+                                                <li className="flex items-start">
+                                                    <span className="text-[#8eb29a] mr-2">🔹</span> 
+                                                    <span>由助词 <span className="font-bold text-gray-800 px-1">「に」</span>（表示附着点/对象）+ 动词 <span className="font-bold text-gray-800 px-1">「<ruby>就<rt>つ</rt></ruby>く」</span> 的て形组合而成。</span>
+                                                </li>
+                                                <li className="flex items-start">
+                                                    <span className="text-[#8eb29a] mr-2">🔹</span> 
+                                                    <span>动词「就く」本意为“附着、就位”。</span>
+                                                </li>
+                                                <li className="flex items-start">
+                                                    <span className="text-[#c55a5a] mr-2 font-bold">🎯</span> 
+                                                    <span><strong>结合后引申：</strong> 将目光或思考“附着”在某个特定事物上，由此产生了 <span className="font-bold text-[#c55a5a] underline decoration-2 underline-offset-4">“关于...”</span> 的含义。</span>
+                                                </li>
+                                            </ul>
+                                        </div>
+
+                                        <div className="bg-gray-50 p-5 rounded-lg border border-gray-200">
+                                            <p className="mb-3 font-medium">以 <span className="font-bold text-xl text-[#c55a5a] mx-1">〜に ＋ 対して</span> 为例：</p>
+                                            <ul className="space-y-3 ml-2">
+                                                <li className="flex items-start">
+                                                    <span className="text-[#8eb29a] mr-2">🔹</span> 
+                                                    <span>由助词 <span className="font-bold text-gray-800 px-1">「に」</span>（表示动作方向/对象）+ 动词 <span className="font-bold text-gray-800 px-1">「<ruby>対<rt>たい</rt></ruby>する」</span> 的て形组合而成。</span>
+                                                </li>
+                                                <li className="flex items-start">
+                                                    <span className="text-[#8eb29a] mr-2">🔹</span> 
+                                                    <span>动词「対する」本意为“面对、相对”。</span>
+                                                </li>
+                                                <li className="flex items-start">
+                                                    <span className="text-[#c55a5a] mr-2 font-bold">🎯</span> 
+                                                    <span><strong>结合后引申：</strong> 带着某种态度“面对”某人，产生了 <span className="font-bold text-[#c55a5a] underline decoration-2 underline-offset-4">“对...”</span> 的含义；或者将两事物“面对面”比较，产生了 <span className="font-bold text-[#c55a5a] underline decoration-2 underline-offset-4">“与...相对”</span> 的含义。</span>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* 进入词条学习的入口按钮 */}
+                        <div className="text-center pt-4">
+                            <button 
+                                onClick={() => {
+                                    setStep('entries');
+                                    window.scrollTo(0, 0); // 切换时自动回到页面顶部
+                                }}
+                                className="bg-gray-700 text-white px-10 py-4 rounded shadow-md hover:bg-gray-800 hover:shadow-lg transition-all font-bold text-lg tracking-widest inline-flex items-center"
+                            >
+                                <span>进入具体词条学习</span>
+                                <svg className="w-6 h-6 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                            </button>
+                        </div>
+                    </div>
+                );
+            }
+
+            // 第 2 部分：具体词条学习页
+            return (
+                <div className="space-y-6 fade-in">
+                    {/* 顶部返回概念介绍的按钮 */}
+                    <div className="flex justify-start mb-2">
+                        <button 
+                            onClick={() => {
+                                setStep('intro');
+                                window.scrollTo(0, 0); // 返回时也自动回到页面顶部
+                            }}
+                            className="text-gray-500 hover:text-[#8eb29a] font-bold text-sm transition-colors flex items-center"
+                        >
+                            <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+                            返回概念介绍
+                        </button>
+                    </div>
+
+                    {/* 词条遍历展示 */}
+                    {learningData.map((item, index) => (
+                        <div key={index} className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden fade-in" style={{ animationDelay: `${index * 0.1}s` }}>
+                            {/* 卡片头部（带左侧深色粗边） */}
+                            <div className="relative border-b border-gray-200 px-6 py-4 flex justify-between items-center bg-white">
+                                <div className="absolute left-0 top-0 bottom-0 w-[6px] bg-gray-500 rounded-tl-xl"></div>
+                                <h2 className="text-[22px] font-bold text-gray-800 flex items-center tracking-wide ml-2">
+                                    <span className="text-gray-400 mr-3 text-2xl font-black">{index + 1}</span> 
+                                    {item.particle}
+                                </h2>
+                                {/* 已移除右上角的级别标签 */}
+                            </div>
+                            
+                            {/* 卡片内容区 */}
+                            <div className="p-6">
+                                {/* 用法要点标签 */}
+                                <div className="mb-3">
+                                    <span className="bg-gray-500 text-white px-3 py-1.5 rounded-md text-sm font-medium inline-flex items-center shadow-sm">
+                                        <span className="mr-1.5 text-yellow-200">💡</span> 用法要点
+                                    </span>
+                                </div>
+
+                                {/* 释义框 (灰底绿边) */}
+                                <div className="bg-[#f4f5f6] border-l-4 border-[#8eb29a] p-4 text-gray-700 leading-relaxed mb-5 rounded-r text-[15px]">
+                                    <div className="mb-1"><span className="font-bold text-gray-800 mr-2">构成：</span>{item.origin}。</div>
+                                    <div dangerouslySetInnerHTML={{__html: item.explanation}}></div>
+                                    <div className="mt-2">
+                                        <span className="font-bold text-gray-800 mr-2">含义：</span><span className="text-[#c55a5a] font-bold tracking-wide">{item.meaning}</span>
+                                    </div>
+                                </div>
+
+                                {/* 接续规则 */}
+                                <div className="flex items-center mb-6 pl-1">
+                                    <span className="text-gray-600 mr-4 font-medium">接续规则：</span>
+                                    <span className="bg-[#f0f1f2] text-gray-800 px-5 py-1.5 rounded-full text-sm font-bold shadow-sm">
+                                        {item.connection}
+                                    </span>
+                                </div>
+
+                                {/* 例句区域 (带顶部细线分隔) */}
+                                <div className="border-t border-gray-100 pt-5 space-y-5">
+                                    {item.examples.map((ex, i) => (
+                                        <div key={i} className="flex items-start">
+                                            <span className="text-gray-400 mr-3 mt-1.5 font-sans font-medium text-lg">
+                                                {String.fromCharCode(9312 + i)} {/* ①, ②... */}
+                                            </span>
+                                            <div>
+                                                {/* 注入带 Ruby 注音和高亮的 HTML */}
+                                                <div 
+                                                    className="text-gray-800 text-[18px] leading-[2.2] tracking-wide mb-1" 
+                                                    dangerouslySetInnerHTML={{__html: ex.jp}}
+                                                ></div>
+                                                <div className="text-gray-500 text-[15px]">{ex.cn}</div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            );
+        };
+
+        const PracticeMode = () => {
+            const [currentIndex, setCurrentIndex] = useState(0);
+            const [selectedOption, setSelectedOption] = useState(null);
+            const [showResult, setShowResult] = useState(false);
+            const [score, setScore] = useState(0);
+            const [isFinished, setIsFinished] = useState(false);
+
+            const question = quizData[currentIndex];
+
+            const handleOptionClick = (index) => {
+                if (showResult) return; 
+                setSelectedOption(index);
+                setShowResult(true);
+                
+                if (index === question.correctIndex) {
+                    setScore(score + 1);
+                }
+            };
+
+            const handleNext = () => {
+                if (currentIndex < quizData.length - 1) {
+                    setCurrentIndex(currentIndex + 1);
+                    setSelectedOption(null);
+                    setShowResult(false);
+                } else {
+                    setIsFinished(true);
+                }
+            };
+
+            if (isFinished) {
+                return (
+                    <div className="bg-white p-10 rounded-xl shadow-sm border border-gray-200 text-center max-w-xl mx-auto">
+                        <h2 className="text-2xl font-bold text-gray-800 mb-4">练习完成</h2>
+                        <p className="text-gray-600 mb-8 text-lg">
+                            得分：<span className="text-[#c55a5a] font-bold text-2xl mx-1">{score}</span> / {quizData.length}
+                        </p>
+                        <button 
+                            onClick={() => {
+                                setCurrentIndex(0); setSelectedOption(null); setShowResult(false); setScore(0); setIsFinished(false);
+                            }}
+                            className="bg-gray-500 text-white px-8 py-3 rounded text-sm font-bold hover:bg-gray-600 transition-colors"
+                        >
+                            重新开始
+                        </button>
+                    </div>
+                );
+            }
+
+            return (
+                <div className="max-w-xl mx-auto">
+                    <div className="bg-white p-8 rounded-xl shadow-sm border border-gray-200 mb-6">
+                        <div className="flex justify-between items-center mb-6 border-b border-gray-100 pb-4">
+                            <span className="text-gray-400 font-bold">Q {currentIndex + 1} / {quizData.length}</span>
+                        </div>
+                        
+                        <h3 className="text-xl font-bold text-gray-800 mb-8 leading-relaxed">
+                            {question.question}
+                        </h3>
+                        
+                        <div className="space-y-4">
+                            {question.options.map((option, index) => {
+                                // 适配截图配色的选项按钮状态
+                                let buttonClass = "w-full text-left px-5 py-4 rounded border-2 transition-all font-bold text-lg flex justify-between items-center ";
+                                
+                                if (!showResult) {
+                                    buttonClass += "bg-[#f4f5f6] border-transparent hover:border-gray-300 text-gray-700";
+                                } else {
+                                    if (index === question.correctIndex) {
+                                        buttonClass += "bg-[#f4f5f6] border-[#8eb29a] text-[#8eb29a]"; 
+                                    } else if (index === selectedOption) {
+                                        buttonClass += "bg-[#fcf3f3] border-[#dca4a4] text-[#c55a5a]"; 
+                                    } else {
+                                        buttonClass += "bg-[#f4f5f6] border-transparent text-gray-400 opacity-60"; 
+                                    }
+                                }
+
+                                return (
+                                    <button 
+                                        key={index}
+                                        onClick={() => handleOptionClick(index)}
+                                        className={buttonClass}
+                                        disabled={showResult}
+                                    >
+                                        <span>{option}</span>
+                                        {showResult && index === question.correctIndex && <span>⭕</span>}
+                                        {showResult && index === selectedOption && index !== question.correctIndex && <span>❌</span>}
+                                    </button>
+                                );
+                            })}
+                        </div>
+                    </div>
+
+                    {showResult && (
+                        <div className="fade-in mb-6 p-5 bg-[#f4f5f6] border-l-4 border-[#8eb29a] rounded-r text-gray-700">
+                            <span className="font-bold mr-2">解析:</span> {question.explanation}
+                        </div>
+                    )}
+
+                    {showResult && (
+                        <div className="text-right">
+                            <button 
+                                onClick={handleNext}
+                                className="bg-gray-500 text-white px-6 py-2.5 rounded text-sm font-bold hover:bg-gray-600 transition-colors"
+                            >
+                                {currentIndex < quizData.length - 1 ? '下一题' : '查看结果'}
+                            </button>
+                        </div>
+                    )}
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>

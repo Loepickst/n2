@@ -1,0 +1,1308 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>形式名词学习助手</title>
+    <style>
+        /* ================= 提取自主页的色彩与变量 ================= */
+        :root {
+            --primary: #75a890;       /* 鼠尾草绿 */
+            --primary-hover: #63927b;
+            --primary-light: #f0f4f2; /* 极淡的绿色背景 */
+            --bg: #f5f6f5;            /* 米灰底色 */
+            --text: #333333;
+            --text-light: #666666;
+            --white: #ffffff;
+            --border: #e0e0e0;
+            --success: #75a890;
+            --error: #e09f9f;         /* 柔和的红色，原错题颜色 */
+            --highlight: #d96c6c;     /* 用于语法高亮的红色 */
+            
+            /* JLPT 级别颜色 */
+            --n1-color: #e09f9f; 
+            --n2-color: #d1b399; 
+            --n3-color: #d1c599; 
+            --n4-color: #9eb8a8; 
+            --n5-color: #9cb4c4;
+
+            --font-serif: 'Noto Serif JP', 'Songti SC', 'SimSun', serif;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+
+        /* 注音样式优化 */
+        ruby { font-family: "Hiragino Sans", sans-serif; margin-right: 1px;}
+        rt { font-size: 0.6em; color: #888; user-select: none; transform: translateY(-10%); }
+
+        /* --- 导航栏 --- */
+        .nav-bar {
+            background: var(--white);
+            padding: 10px 92px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.03);
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            z-index: 100;
+            flex-shrink: 0;
+            position: relative;
+        }
+
+        .back-btn {
+            position: absolute;
+            left: 10px;
+            top: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transform: translateY(-50%);
+            text-decoration: none;
+            color: #666;
+            z-index: 101;
+        }
+
+        .nav-item {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: #999;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: 0.3s;
+            padding: 10px 0;
+        }
+
+        .nav-item.active {
+            color: var(--primary);
+            border-bottom-color: var(--primary);
+            background-color: var(--primary-light);
+        }
+
+        /* --- 内容容器 --- */
+        .content-container {
+            flex: 1;
+            overflow: hidden; 
+            position: relative;
+        }
+
+        .tab-view {
+            display: none;
+            height: 100%;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .tab-view.active { display: block; }
+
+        /* --- 学习板块 (Index View) --- */
+        .intro-box {
+            background: var(--white);
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+            margin-bottom: 20px;
+            border-left: 4px solid var(--primary);
+        }
+        .intro-title { font-size: 1.2rem; font-weight: bold; margin-bottom: 10px; color: var(--primary); }
+        .intro-text { font-size: 0.95rem; color: var(--text-light); line-height: 1.6; }
+
+        .noun-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 15px;
+        }
+
+        .noun-card {
+            background: var(--white);
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.02);
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            border: 1px solid var(--border);
+        }
+
+        .noun-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(117, 168, 144, 0.15);
+            border-color: var(--primary);
+        }
+
+        .noun-main { font-size: 1.6rem; font-weight: bold; color: var(--text); margin-bottom: 5px; }
+        .noun-sub { font-size: 0.85rem; color: #888; }
+
+        /* --- 详情视图 (Detail View) --- */
+        .detail-view {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: var(--bg);
+            z-index: 50;
+            overflow-y: auto;
+            transform: translateX(100%);
+            transition: transform 0.3s ease-in-out;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .detail-view.show { transform: translateX(0); }
+
+        .detail-header { display: flex; align-items: center; margin-bottom: 20px; }
+        .detail-back { font-size: 1.5rem; margin-right: 15px; cursor: pointer; color: var(--primary); }
+        .detail-title { font-size: 1.8rem; font-weight: bold; color: var(--text); }
+
+        /* 详情页筛选器 */
+        .detail-filter-bar {
+            background: var(--white);
+            padding: 15px 20px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.02);
+        }
+        .detail-filter-label { font-weight: bold; color: var(--text); font-size: 0.95rem; white-space: nowrap; }
+
+        /* 语法分类标题 */
+        .pos-title {
+            font-size: 1.15rem;
+            color: var(--primary);
+            border-bottom: 2px solid var(--primary);
+            padding-bottom: 8px;
+            margin: 30px 0 15px 0;
+            display: inline-block;
+            font-weight: bold;
+        }
+
+        /* ==== 语法内容全新排版 (参照截图) ==== */
+        .grammar-list { display: flex; flex-direction: column; gap: 25px; }
+        
+        .detail-grammar-block {
+            background: var(--white);
+            border-radius: 8px;
+            padding: 0 0 25px 0;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.03);
+            border: 1px solid var(--border);
+            overflow: hidden;
+        }
+        
+        .dgb-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #f8f9fa;
+            padding: 15px 20px;
+            border-left: 8px solid var(--text-light); /* 截图中的深色左侧边框 */
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .dgb-title {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: var(--text);
+        }
+        
+        .dgb-index {
+            font-size: 1.4rem;
+            margin-right: 12px;
+            color: var(--text-light);
+            font-family: Arial, sans-serif;
+        }
+
+        .level-tag { font-size: 0.75rem; color: white; padding: 3px 10px; border-radius: 4px; font-weight: bold; letter-spacing: 1px;}
+        .tag-N1 { background-color: var(--n1-color); }
+        .tag-N2 { background-color: var(--n2-color); }
+        .tag-N3 { background-color: var(--n3-color); }
+        .tag-N4 { background-color: var(--n4-color); }
+        .tag-N5 { background-color: var(--n5-color); }
+
+        .dgb-body { padding: 20px; }
+
+        .dgb-usage-tag {
+            background: #777; /* 截图中类似深灰色 */
+            color: var(--white);
+            padding: 4px 12px;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            font-weight: bold;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            margin-bottom: 12px;
+        }
+
+        .dgb-usage-content {
+            background: var(--primary-light);
+            border-left: 4px solid var(--primary);
+            padding: 15px 20px;
+            border-radius: 0 6px 6px 0;
+            font-size: 1rem;
+            color: var(--text);
+            margin-bottom: 25px;
+            line-height: 1.6;
+        }
+
+        .dgb-connect {
+            font-size: 1rem;
+            margin-bottom: 25px;
+            color: var(--text);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .conn-label { color: var(--text-light); font-size: 0.95rem;}
+        .conn-val {
+            font-weight: bold;
+            color: #555;
+            background: #eee;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.95rem;
+        }
+
+        .dgb-ex-list {
+            border-top: 1px solid #eee;
+            padding-top: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .dgb-ex-jp {
+            font-size: 1.15rem;
+            color: var(--text);
+            margin-bottom: 6px;
+            display: flex;
+            align-items: flex-start;
+            line-height: 2; /* 留出注音空间 */
+        }
+        
+        .ex-num {
+            margin-right: 8px;
+            font-weight: normal;
+            color: #555;
+            margin-top: 4px;
+            font-family: Arial, sans-serif;
+        }
+
+        .dgb-ex-tr {
+            font-size: 0.9rem;
+            color: #888;
+            padding-left: 28px;
+            line-height: 1.5;
+        }
+
+        /* 高亮文字样式 */
+        .hl-text {
+            color: var(--highlight);
+            font-weight: bold;
+        }
+
+        /* --- 练习区样式 --- */
+        .quiz-wrapper { max-width: 500px; margin: 0 auto; }
+        .settings-panel { background: var(--white); padding: 20px; border-radius: 8px; margin-bottom: 20px; border: 1px solid var(--border); box-shadow: 0 2px 5px rgba(0,0,0,0.02); }
+        .section-label { font-size: 1rem; font-weight: bold; color: var(--text); margin-bottom: 12px; display: block; border-bottom: 1px dashed var(--border); padding-bottom: 5px; }
+        
+        .checkbox-group { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px; }
+        .checkbox-btn { display: inline-block; }
+        .checkbox-btn input { display: none; }
+        .checkbox-btn span { display: inline-block; padding: 6px 16px; border-radius: 20px; background: #fff; border: 1px solid #ccc; color: #666; font-size: 0.9rem; cursor: pointer; transition: 0.2s; }
+        .checkbox-btn input:checked + span { background: var(--primary); border-color: var(--primary); color: white; box-shadow: 0 2px 5px rgba(117, 168, 144, 0.3); }
+
+        .card { background: var(--white); padding: 30px 20px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.03); margin-bottom: 20px; text-align: center; border: 1px solid var(--border); }
+        .question-text { font-size: 1.4rem; color: var(--text); margin: 20px 0; line-height: 1.6; font-weight: bold; }
+        .hint-text { font-size: 0.9rem; color: #888; margin-bottom: 25px; background: var(--bg); padding: 5px 12px; border-radius: 15px; display: inline-block; }
+        .blank-line { border-bottom: 2px solid var(--primary); color: var(--primary); padding: 0 10px; }
+
+        /* --- 选择题样式 --- */
+        .options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 20px; }
+        .option-btn { padding: 15px; background: var(--white); border: 1px solid #ccc; border-radius: 6px; font-size: 1.2rem; cursor: pointer; transition: all 0.2s; color: var(--text); font-weight: bold; }
+        .option-btn:hover { border-color: var(--primary); color: var(--primary); }
+        .option-btn.correct { background: var(--success) !important; color: white !important; border-color: var(--success) !important; }
+        .option-btn.wrong { background: var(--error) !important; color: white !important; border-color: var(--error) !important; }
+        .option-btn.disabled { pointer-events: none; opacity: 0.7; }
+
+        .btn-main { width: 100%; padding: 14px; background: var(--primary); color: white; border: none; border-radius: 6px; font-size: 1.1rem; cursor: pointer; transition: 0.2s; margin-top: 20px; font-family: -apple-system, sans-serif; letter-spacing: 1px;}
+        .btn-main:hover { background: var(--primary-hover); }
+        .btn-secondary { width: 100%; padding: 12px; background: transparent; color: #999; border: 1px solid #ccc; border-radius: 6px; font-size: 0.95rem; cursor: pointer; margin-top: 10px; transition: 0.2s;}
+        .btn-secondary:hover { background: #f0f0f0; color: #666; }
+        
+        .result-score { font-size: 4rem; color: var(--primary); font-weight: bold; margin: 10px 0; }
+        .hidden { display: none !important; }
+
+        /* ================= 移动端/手机自适应优化 (更紧凑的排版) ================= */
+        @media (max-width: 768px) {
+            /* 1. 缩小全局基准字号，令 rem 单位整体等比缩小 */
+            html { font-size: 13.5px; } 
+
+            /* 2. 优化导航栏和整体容器边距 */
+            .nav-item { font-size: 0.95rem; padding: 8px 0; }
+            .tab-view { padding: 12px; }
+
+            /* 3. 优化网格列表 */
+            .noun-grid { grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 10px; }
+            .noun-card { padding: 15px; }
+
+            /* 4. 详情页排版优化 (专门针对语法标题和例句缩小) */
+            .detail-filter-bar { flex-wrap: wrap; gap: 8px; padding: 12px; }
+            
+            .dgb-header { padding: 12px 15px; border-left-width: 6px; }
+            .dgb-title { font-size: 1.15rem; } /* 缩小语法标题 */
+            .dgb-index { font-size: 1.2rem; margin-right: 8px; }
+            
+            .dgb-body { padding: 15px; }
+            .dgb-usage-content { font-size: 0.95rem; padding: 12px 15px; margin-bottom: 15px; }
+            
+            .dgb-connect { font-size: 0.95rem; margin-bottom: 15px; }
+            .conn-val { font-size: 0.85rem; padding: 3px 10px; }
+            
+            .dgb-ex-list { gap: 15px; padding-top: 15px; }
+            .dgb-ex-jp { font-size: 1.05rem; line-height: 1.8; margin-bottom: 4px; } /* 缩小日语例句 */
+            .ex-num { font-size: 0.95rem; margin-top: 2px; margin-right: 6px; }
+            .dgb-ex-tr { font-size: 0.85rem; padding-left: 22px; } /* 缩小中文翻译 */
+
+            /* 5. 练习区优化：手机上选项改为单列排版 */
+            .card { padding: 20px 15px; }
+            .question-text { font-size: 1.25rem; }
+            .options-grid { grid-template-columns: 1fr; gap: 10px; } 
+            .option-btn { padding: 12px; font-size: 1.1rem; }
+        }
+    </style>
+    <link rel="stylesheet" href="../../shared/header-back-control.css">
+</head>
+<body>
+
+<!-- 导航栏 -->
+<div class="nav-bar">
+    <a href="index.html" class="back-btn header-back-control">戻る</a>
+    <div class="nav-item active" onclick="switchTab('study')">📖 概念学習</div>
+    <div class="nav-item" onclick="switchTab('practice')">✏️ 专项特訓</div>
+    <div class="nav-item" onclick="switchTab('mistakes')">📓 錯題ノート</div>
+</div>
+
+<div class="content-container">
+
+    <!-- 学习板块 -->
+    <div id="tab-study" class="tab-view active">
+        <!-- 索引视图 -->
+        <div id="study-index">
+            <div class="intro-box">
+                <div class="intro-title">什么是形式名词？</div>
+                <div class="intro-text">
+                    形式名词（形式名詞）是指那些失去了原本具体的实意，主要用于语法功能的名词。例如「こと」原本指具体的“事情”，但在语法中常用来将动词名词化，或者构成特定的句型。
+                </div>
+            </div>
+            <div class="noun-grid" id="nounGrid">
+                <!-- JS 生成 -->
+            </div>
+        </div>
+
+        <!-- 详情视图 (分类和排序功能) -->
+        <div id="study-detail" class="detail-view">
+            <div class="detail-header">
+                <div class="detail-back" onclick="closeDetail()">←</div>
+                <div class="detail-title" id="detailTitle">...</div>
+            </div>
+            <div class="intro-text" id="detailDesc" style="margin-bottom: 20px;"></div>
+
+            <!-- 详情页专属级别筛选 -->
+            <div class="detail-filter-bar">
+                <span class="detail-filter-label">级别筛选：</span>
+                <div class="checkbox-group" style="margin-bottom: 0;" id="detailLevelChecks">
+                    <label class="checkbox-btn"><input type="checkbox" value="N3" checked onchange="updateDetailView()"><span>N3</span></label>
+                    <label class="checkbox-btn"><input type="checkbox" value="N2" checked onchange="updateDetailView()"><span>N2</span></label>
+                </div>
+            </div>
+
+            <div id="grammarListWrapper">
+                <!-- JS 分类生成内容 -->
+            </div>
+        </div>
+    </div>
+
+    <!-- 练习板块 -->
+    <div id="tab-practice" class="tab-view">
+        <div class="quiz-wrapper">
+            <div class="settings-panel" id="settingsPanel">
+                <div style="font-weight:bold; display:flex; justify-content:space-between; cursor:pointer; margin-bottom:15px; color:var(--primary);" onclick="toggleSettings()">
+                    <span>⚙️ 練習設定</span><span id="settingIcon">▼</span>
+                </div>
+                <div id="settingContent">
+                    <span class="section-label">目標選択 (多选)</span>
+                    <div class="checkbox-group" id="nounFilter"></div>
+
+                    <span class="section-label">難易度選択 (多选)</span>
+                    <div class="checkbox-group" id="levelFilter">
+                        <label class="checkbox-btn"><input type="checkbox" value="N3" checked><span>N3</span></label>
+                        <label class="checkbox-btn"><input type="checkbox" value="N2" checked><span>N2</span></label>
+                    </div>
+
+                    <button class="btn-main" style="margin-top:10px;" onclick="restartGame()">特訓開始</button>
+                </div>
+            </div>
+
+            <div class="card hidden" id="quizCard">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+                    <span style="font-size:0.9rem; color:#666; font-weight:bold;">連続正解: <b id="streakVal" style="color:var(--primary); font-size:1.1rem;">0</b></span>
+                    <span id="qTag" class="level-tag tag-N3">N3</span>
+                </div>
+                
+                <div class="question-text" id="qDisplay">...</div>
+                <div class="hint-text" id="qHint">...</div>
+                
+                <div class="options-grid" id="optionsGrid"></div>
+                
+                <div id="feedbackBox" style="margin-top:20px; text-align:left; background:#f9f9f9; padding:15px; border-radius:6px; display:none; border-left:4px solid var(--error);">
+                    <div id="fbResult" style="font-weight:bold; margin-bottom:8px;"></div>
+                    <div id="fbConn" style="font-size:0.85rem; color:var(--primary); margin-bottom:5px; font-weight:bold;"></div>
+                    <div id="fbEx" style="font-size:0.9rem; color:#555;"></div>
+                </div>
+            </div>
+
+            <div class="card hidden" id="resultCard">
+                <h2 style="margin:0; color:#444;">特訓終了</h2>
+                <div style="font-size:1rem; color:#888; margin-top:10px;">最高連続正解</div>
+                <div class="result-score" id="finalScore">0</div>
+                <div id="finalComment" style="color:#666; margin-bottom:20px;"></div>
+            </div>
+            
+            <button class="btn-main hidden" id="actionBtn" onclick="nextQuestion()">次へ →</button>
+            <button class="btn-main" id="startBtn" onclick="startGame()">練習を始める</button>
+            <button class="btn-secondary hidden" id="endBtn" onclick="finishGame()">⏹ 終了して設定に戻る</button>
+        </div>
+    </div>
+    
+    <!-- 错题本板块 -->
+    <div id="tab-mistakes" class="tab-view">
+        <div class="intro-box" style="border-color:var(--error); background:#fcf7f7;">
+            <div class="intro-title" style="color:var(--error);">錯題ノート</div>
+            <div class="intro-text">
+                这里记录了你在练习中答错的语法点。重点复习「接续规则」可以有效巩固记忆。
+            </div>
+            <button class="btn-secondary" onclick="clearMistakes()" style="width:auto; margin-top:10px; color:var(--error); border-color:var(--error); padding:5px 15px; border-radius:4px; background:white;">🗑 記録をクリア</button>
+        </div>
+        <div id="mistakeList" class="grammar-list" style="margin-top: 20px;"></div>
+    </div>
+</div>
+
+<script>
+    // ================= 数据定义 (全新高亮与注音规范) =================
+    // 使用 <span class="hl-text"> 包裹需要标红的文字
+    // 严格对每个日文汉字使用 <ruby>单独注音
+    const formalNouns = [
+        {
+            id: "koto", label: "こと", sub: "事",
+            desc: "表示抽象的“事情”、“内容”或“情况”。常用于名物化（将动词变为名词），或者位于句末构成感叹、决定等。",
+            grammars: [
+                { 
+                    id: "koto_aru", pt: "～ことがある／こともある", pos: "名词用法 / 形式名词", 
+                    usage: "表示有时会发生某种情况，或曾经有过某种经历。含义：<span class=\"hl-text\">有时会... / 偶尔会...</span>", 
+                    connect: "辞書形 / ない形 ＋ ことがある(頻度)\nた形 ＋ ことがある(経験)",
+                    ex: [
+                        { jp: "<ruby>時<rt>とき</rt></ruby><ruby>々<rt>どき</rt></ruby>、<ruby>朝<rt>あさ</rt></ruby>ごはんを<ruby>食<rt>た</rt></ruby>べない<span class=\"hl-text\">ことがある</span>。", tr: "有时候会不吃早饭。" },
+                        { jp: "<ruby>日<rt>に</rt></ruby><ruby>本<rt>ほん</rt></ruby>へ<ruby>行<rt>い</rt></ruby>った<span class=\"hl-text\">ことがありますか</span>。", tr: "你去过日本吗？" }
+                    ],
+                    lv: "N3",
+                    questions: [
+                        { q: "時々、朝ごはんを食べない____があります。", a: "こと" },
+                        { q: "日本へ行った____がありますか。", a: "こと" }
+                    ]
+                },
+                { 
+                    id: "koto_da", pt: "～ことだ", pos: "终助词用法 / 句末表达", 
+                    usage: "对别人的行为提出忠告或建议。含义：<span class=\"hl-text\">应该... / 最好...</span>", 
+                    connect: "辞書形 / ない形 ＋ ことだ",
+                    ex: [
+                        { jp: "<ruby>合<rt>ごう</rt></ruby><ruby>格<rt>かく</rt></ruby>したければ、もっと<ruby>勉<rt>べん</rt></ruby><ruby>強<rt>きょう</rt></ruby>する<span class=\"hl-text\">ことだ</span>。", tr: "想及格的话，就应该多学习。" },
+                        { jp: "ピアノが<ruby>上<rt>じょう</rt></ruby><ruby>手<rt>ず</rt></ruby>になりたければ、<ruby>毎<rt>まい</rt></ruby><ruby>日<rt>にち</rt></ruby><ruby>練<rt>れん</rt></ruby><ruby>習<rt>しゅう</rt></ruby>する<span class=\"hl-text\">ことだ</span>。", tr: "想弹好钢琴的话，就应该每天练习。" }
+                    ],
+                    lv: "N3",
+                    questions: [
+                        { q: "合格したければ、もっと勉強する____だ。", a: "こと" },
+                        { q: "ピアノが上手になりたければ、毎日練習する____だ。", a: "こと" }
+                    ]
+                },
+                { 
+                    id: "koto_ni", pt: "～ことに", pos: "名词用法 / 形式名词", 
+                    usage: "前接表示感情的词汇，强调说话人的感情。含义：<span class=\"hl-text\">令人...的是</span>", 
+                    connect: "た形 / い形 / な形な ＋ ことに",
+                    ex: [
+                        { jp: "<ruby>驚<rt>おどろ</rt></ruby>いた<span class=\"hl-text\">ことに</span>、<ruby>彼<rt>かれ</rt></ruby>はもう<ruby>結<rt>けっ</rt></ruby><ruby>婚<rt>こん</rt></ruby>していた。", tr: "令人惊讶的是，他已经结婚了。" },
+                        { jp: "<ruby>残<rt>ざん</rt></ruby><ruby>念<rt>ねん</rt></ruby>な<span class=\"hl-text\">ことに</span>、<ruby>試<rt>し</rt></ruby><ruby>合<rt>あい</rt></ruby>に<ruby>負<rt>ま</rt></ruby>けてしまった。", tr: "令人遗憾的是，输掉了比赛。" }
+                    ],
+                    lv: "N3",
+                    questions: [
+                        { q: "驚いた____、彼はもう結婚していた。", a: "こと" },
+                        { q: "残念な____、試合に負けてしまった。", a: "こと" }
+                    ]
+                },
+                { 
+                    id: "koto_ni_suru", pt: "～ことにする／こととする", pos: "名词用法 / 形式名词", 
+                    usage: "表示经过自己的主观意志做出的决定。含义：<span class=\"hl-text\">决定（主观）</span>", 
+                    connect: "辞書形 / ない形 ＋ ことにする",
+                    ex: [
+                        { jp: "<ruby>健<rt>けん</rt></ruby><ruby>康<rt>こう</rt></ruby>のために、<ruby>毎<rt>まい</rt></ruby><ruby>日<rt>にち</rt></ruby><ruby>走<rt>はし</rt></ruby>る<span class=\"hl-text\">ことにしました</span>。", tr: "为了健康，我决定每天跑步。" },
+                        { jp: "<ruby>明<rt>あ</rt></ruby><ruby>日<rt>した</rt></ruby>からダイエットをする<span class=\"hl-text\">ことにします</span>。", tr: "决定从明天开始减肥。" }
+                    ],
+                    lv: "N3",
+                    questions: [
+                        { q: "健康のために、毎日走る____にしました。", a: "こと" },
+                        { q: "明日からダイエットをする____にします。", a: "こと" }
+                    ]
+                },
+                { 
+                    id: "koto_ni_natteiru", pt: "～ことになっている／こととなっている", pos: "名词用法 / 形式名词", 
+                    usage: "表示社会习惯、规则、预定或约定等客观形成的状态。含义：<span class=\"hl-text\">规定... / 预定...</span>", 
+                    connect: "辞書形 / ない形 ＋ ことになっている",
+                    ex: [
+                        { jp: "この<ruby>部<rt>へ</rt></ruby><ruby>屋<rt>や</rt></ruby>ではタバコを<ruby>吸<rt>す</rt></ruby>ってはいけない<span class=\"hl-text\">ことになっています</span>。", tr: "规定这个房间里不能吸烟。" },
+                        { jp: "<ruby>明<rt>あ</rt></ruby><ruby>日<rt>した</rt></ruby>、<ruby>社<rt>しゃ</rt></ruby><ruby>長<rt>ちょう</rt></ruby>と<ruby>面<rt>めん</rt></ruby><ruby>接<rt>せつ</rt></ruby>する<span class=\"hl-text\">ことになっている</span>。", tr: "规定/安排明天和总经理面试。" }
+                    ],
+                    lv: "N3",
+                    questions: [
+                        { q: "この部屋ではタバコを吸ってはいけない____になっています。", a: "こと" },
+                        { q: "明日、社長と面接する____になっている。", a: "こと" }
+                    ]
+                },
+                { 
+                    id: "koto_naru", pt: "～ことになる／こととなる", pos: "名词用法 / 形式名词", 
+                    usage: "表示由于客观原因、规定或他人的安排而导致了某种决定/结果。含义：<span class=\"hl-text\">决定/结果（客观）</span>", 
+                    connect: "辞書形 / ない形 ＋ ことになる",
+                    ex: [
+                        { jp: "<ruby>来<rt>らい</rt></ruby><ruby>年<rt>ねん</rt></ruby>、<ruby>転<rt>てん</rt></ruby><ruby>勤<rt>きん</rt></ruby>する<span class=\"hl-text\">ことになりました</span>。", tr: "决定明年要调职了。" },
+                        { jp: "<ruby>今<rt>こん</rt></ruby><ruby>度<rt>ど</rt></ruby>、<ruby>大<rt>おお</rt></ruby><ruby>阪<rt>さか</rt></ruby>に<ruby>引<rt>ひ</rt></ruby>っ<ruby>越<rt>こ</rt></ruby>す<span class=\"hl-text\">ことになりました</span>。", tr: "这次，决定要搬到大阪了。" }
+                    ],
+                    lv: "N3",
+                    questions: [
+                        { q: "来年、転勤する____になりました。", a: "こと" },
+                        { q: "今度、大阪に引っ越す____になりました。", a: "こと" }
+                    ]
+                },
+                { 
+                    id: "koto_wa_nai", pt: "～ことはない／こともない", pos: "名词用法 / 形式名词", 
+                    usage: "表示没有必要做某事。含义：<span class=\"hl-text\">没必要... / 不用...</span>", 
+                    connect: "辞書形 ＋ ことはない",
+                    ex: [
+                        { jp: "<ruby>心<rt>しん</rt></ruby><ruby>配<rt>ぱい</rt></ruby>する<span class=\"hl-text\">ことはない</span>よ。", tr: "没必要担心哦。" },
+                        { jp: "まだ<ruby>時<rt>じ</rt></ruby><ruby>間<rt>かん</rt></ruby>はありますから、<ruby>急<rt>いそ</rt></ruby>ぐ<span class=\"hl-text\">ことはありません</span>。", tr: "还有时间，没必要着急。" }
+                    ],
+                    lv: "N3",
+                    questions: [
+                        { q: "心配する____はないよ。", a: "こと" },
+                        { q: "まだ時間はありますから、急ぐ____はありません。", a: "こと" }
+                    ]
+                },
+                { 
+                    id: "koto_ka", pt: "～ことか／ことだろう／ことだろうか／ことでしょう", pos: "终助词用法 / 句末表达", 
+                    usage: "表示强烈的感叹。常与「どんなに」「どれほど」等疑问词呼应。含义：<span class=\"hl-text\">多么...啊 / ...吧</span>", 
+                    connect: "た形 / い形 / な形な ＋ ことか",
+                    ex: [
+                        { jp: "<ruby>合<rt>ごう</rt></ruby><ruby>格<rt>かく</rt></ruby>して、どんなに<ruby>嬉<rt>うれ</rt></ruby>しい<span class=\"hl-text\">ことだろうか</span>。", tr: "及格了，别提有多高兴了。" },
+                        { jp: "この<ruby>日<rt>ひ</rt></ruby>をどれほど<ruby>待<rt>ま</rt></ruby>っていた<span class=\"hl-text\">ことか</span>。", tr: "我等这一天等了多久啊。" }
+                    ],
+                    lv: "N2",
+                    questions: [
+                        { q: "合格して、どんなに嬉しい____だろうか。", a: "こと" },
+                        { q: "この日をどれほど待っていた____か。", a: "こと" }
+                    ]
+                },
+                { 
+                    id: "koto_kara", pt: "～ことから", pos: "名词用法 / 形式名词", 
+                    usage: "表示判断的根据、事情的起因或名字的由来。含义：<span class=\"hl-text\">因为... / 由此...</span>", 
+                    connect: "辞書形 / た形 / い形 / な形な / 名詞である ＋ ことから",
+                    ex: [
+                        { jp: "<ruby>富<rt>ふ</rt></ruby><ruby>士<rt>じ</rt></ruby><ruby>山<rt>さん</rt></ruby>が<ruby>見<rt>み</rt></ruby>える<span class=\"hl-text\">ことから</span>、この<ruby>町<rt>まち</rt></ruby>は「<ruby>富<rt>ふ</rt></ruby><ruby>士<rt>じ</rt></ruby><ruby>見<rt>み</rt></ruby><ruby>町<rt>ちょう</rt></ruby>」と<ruby>呼<rt>よ</rt></ruby>ばれている。", tr: "因为能看到富士山，这个小镇被称为“富士见町”。" },
+                        { jp: "<ruby>顔<rt>かお</rt></ruby>が<ruby>似<rt>に</rt></ruby>ている<span class=\"hl-text\">ことから</span>、<ruby>彼<rt>かれ</rt></ruby>らが<ruby>兄<rt>きょう</rt></ruby><ruby>弟<rt>だい</rt></ruby>だとすぐにわかった。", tr: "因为长得很像，马上就知道他们是兄弟。" }
+                    ],
+                    lv: "N2",
+                    questions: [
+                        { q: "富士山が見える____、この町は「富士見町」と呼ばれている。", a: "こと" },
+                        { q: "顔が似ている____、彼らが兄弟だとすぐにわかった。", a: "こと" }
+                    ]
+                },
+                { 
+                    id: "koto_ni_shiteiru", pt: "～ことにしている", pos: "名词用法 / 形式名词", 
+                    usage: "表示自己主观决定并一直坚持执行的某个习惯。含义：<span class=\"hl-text\">规定自己一直... / 坚持...</span>", 
+                    connect: "辞書形 / ない形 ＋ ことにしている",
+                    ex: [
+                        { jp: "<ruby>健<rt>けん</rt></ruby><ruby>康<rt>こう</rt></ruby>のために、<ruby>毎<rt>まい</rt></ruby><ruby>日<rt>にち</rt></ruby><ruby>運<rt>うん</rt></ruby><ruby>動<rt>どう</rt></ruby>する<span class=\"hl-text\">ことにしている</span>。", tr: "为了健康，我规定自己每天运动。" },
+                        { jp: "<ruby>寝<rt>ね</rt></ruby>る<ruby>前<rt>まえ</rt></ruby>に<ruby>必<rt>かなら</rt></ruby>ず<ruby>本<rt>ほん</rt></ruby>を<ruby>読<rt>よ</rt></ruby>む<span class=\"hl-text\">ことにしている</span>。", tr: "我规定自己睡前一定要看书。" }
+                    ],
+                    lv: "N3",
+                    questions: [
+                        { q: "健康のために、毎日運動する____にしている。", a: "こと" },
+                        { q: "寝る前に必ず本を読む____にしている。", a: "こと" }
+                    ]
+                },
+                { 
+                    id: "koto_ni_wa_naranai", pt: "～ことにはならない", pos: "名词用法 / 形式名词", 
+                    usage: "表示即使有前项的事实，也不能因此就得出后项的结论。含义：<span class=\"hl-text\">并不意味着... / 不等于...</span>", 
+                    connect: "辞書形 / た形 ＋ ことにはならない",
+                    ex: [
+                        { jp: "<ruby>謝<rt>あやま</rt></ruby>ったからといって、<ruby>許<rt>ゆる</rt></ruby>された<span class=\"hl-text\">ことにはならない</span>。", tr: "虽说道歉了，但并不意味着就被原谅了。" },
+                        { jp: "<ruby>試<rt>し</rt></ruby><ruby>合<rt>あい</rt></ruby>に<ruby>勝<rt>か</rt></ruby>ったからといって、<ruby>一<rt>いち</rt></ruby><ruby>番<rt>ばん</rt></ruby><ruby>強<rt>つよ</rt></ruby>いという<span class=\"hl-text\">ことにはならない</span>。", tr: "就算赢了比赛，也不意味着就是最强的。" }
+                    ],
+                    lv: "N2",
+                    questions: [
+                        { q: "謝ったからといって、許された____にはならない。", a: "こと" },
+                        { q: "試合に勝ったからといって、一番強いという____にはならない。", a: "こと" }
+                    ]
+                },
+                { 
+                    id: "koto_kono_uenai", pt: "～ことこの上ない／この上ない～／この上なく～", pos: "名词用法 / 形式名词", 
+                    usage: "表示程度达到了极限，无以复加。含义：<span class=\"hl-text\">无比... / 非常...</span>", 
+                    connect: "い形 / な形な / 辞書形 / た形 ＋ ことこの上ない",
+                    ex: [
+                        { jp: "<ruby>彼<rt>かれ</rt></ruby>は<ruby>不<rt>ふ</rt></ruby><ruby>真<rt>ま</rt></ruby><ruby>面<rt>め</rt></ruby><ruby>目<rt>め</rt></ruby>な<span class=\"hl-text\">ことこの<ruby>上<rt>うえ</rt></ruby>ない</span>。", tr: "他无比不认真。" },
+                        { jp: "<ruby>試<rt>し</rt></ruby><ruby>合<rt>あい</rt></ruby>に<ruby>勝<rt>か</rt></ruby>って、<ruby>嬉<rt>うれ</rt></ruby>しい<span class=\"hl-text\">ことこの<ruby>上<rt>うえ</rt></ruby>ない</span>。", tr: "赢了比赛，无比高兴。" }
+                    ],
+                    lv: "N1",
+                    questions: [
+                        { q: "彼は不真面目な____この上ない。", a: "こと" },
+                        { q: "試合に勝って、嬉しい____この上ない。", a: "こと" }
+                    ]
+                },
+                { 
+                    id: "koto_dashi", pt: "～ことだし", pos: "名词用法 / 形式名词", 
+                    usage: "提示某一个理由，常带有一种“既然已经这样了，那就顺便/理所当然做某事”的语气。含义：<span class=\"hl-text\">既然... / 因为...</span>", 
+                    connect: "普通形 ＋ ことだし",
+                    ex: [
+                        { jp: "<ruby>雨<rt>あめ</rt></ruby>もやんだ<span class=\"hl-text\">ことだし</span>、そろそろ<ruby>出<rt>で</rt></ruby>かけよう。", tr: "既然雨也停了，差不多该出门了。" },
+                        { jp: "みんな<ruby>集<rt>あつ</rt></ruby>まった<span class=\"hl-text\">ことだし</span>、<ruby>始<rt>はじ</rt></ruby>めましょう。", tr: "既然大家都到齐了，就开始吧。" }
+                    ],
+                    lv: "N1",
+                    questions: [
+                        { q: "雨もやんだ____、そろそろ出かけよう。", a: "こと" },
+                        { q: "みんな集まった____、始めましょう。", a: "こと" }
+                    ]
+                },
+                { 
+                    id: "koto_tote", pt: "～こととて", pos: "名词用法 / 形式名词", 
+                    usage: "书面语，用于说明导致后项（往往是请求原谅、不得已的情况）的原因。含义：<span class=\"hl-text\">因为...</span>", 
+                    connect: "普通形 ＋ こととて",
+                    ex: [
+                        { jp: "<ruby>慣<rt>な</rt></ruby>れぬ<span class=\"hl-text\">こととて</span>、ご<ruby>迷<rt>めい</rt></ruby><ruby>惑<rt>わく</rt></ruby>をおかけしました。", tr: "因为不习惯，给您添麻烦了。" },
+                        { jp: "<ruby>子<rt>こ</rt></ruby><ruby>供<rt>ども</rt></ruby>のやった<span class=\"hl-text\">こととて</span>、どうか<ruby>許<rt>ゆる</rt></ruby>してやってください。", tr: "因为是小孩子干的事，请您原谅他吧。" }
+                    ],
+                    lv: "N1",
+                    questions: [
+                        { q: "慣れぬ____、ご迷惑をおかけしました。", a: "こと" },
+                        { q: "子供のやった____、どうか許してやってください。", a: "こと" }
+                    ]
+                },
+                { 
+                    id: "koto_naku", pt: "～ことなく／ことなしに／こともなく", pos: "名词用法 / 形式名词", 
+                    usage: "表示在没有发生前项动作的状态下，进行了后项动作。含义：<span class=\"hl-text\">不... / 没有...</span>", 
+                    connect: "辞書形 ＋ ことなく",
+                    ex: [
+                        { jp: "<ruby>彼<rt>かれ</rt></ruby>は<ruby>休<rt>やす</rt></ruby>む<span class=\"hl-text\">ことなく</span><ruby>働<rt>はたら</rt></ruby>き<ruby>続<rt>つづ</rt></ruby>けた。", tr: "他没有休息，一直工作。" },
+                        { jp: "<ruby>雨<rt>あめ</rt></ruby>は<ruby>一<rt>いち</rt></ruby><ruby>日<rt>にち</rt></ruby><ruby>中<rt>じゅう</rt></ruby>やむ<span class=\"hl-text\">ことなく</span><ruby>降<rt>ふ</rt></ruby>り<ruby>続<rt>つづ</rt></ruby>いた。", tr: "雨一整天都没停，一直下着。" }
+                    ],
+                    lv: "N1",
+                    questions: [
+                        { q: "彼は休む____働き続けた。", a: "こと" },
+                        { q: "雨は一日中やむ____降り続いた。", a: "こと" }
+                    ]
+                },
+                { 
+                    id: "koto_nashini", pt: "～ことなしに", pos: "名词用法 / 形式名词", 
+                    usage: "表示如果不做前项，就无法实现后项（常与可能态的否定连用）。含义：<span class=\"hl-text\">如果不...就不...</span>", 
+                    connect: "辞書形 ＋ ことなしに",
+                    ex: [
+                        { jp: "<ruby>努<rt>ど</rt></ruby><ruby>力<rt>りょく</rt></ruby>する<span class=\"hl-text\">ことなしに</span><ruby>成<rt>せい</rt></ruby><ruby>功<rt>こう</rt></ruby>はあり<ruby>得<rt>え</rt></ruby>ない。", tr: "如果不努力，就不可能成功。" },
+                        { jp: "<ruby>先<rt>せん</rt></ruby><ruby>生<rt>せい</rt></ruby>の<ruby>許<rt>きょ</rt></ruby><ruby>可<rt>か</rt></ruby>を<ruby>得<rt>え</rt></ruby>る<span class=\"hl-text\">ことなしに</span>、この<ruby>部<rt>へ</rt></ruby><ruby>屋<rt>や</rt></ruby>に<ruby>入<rt>はい</rt></ruby>ってはいけない。", tr: "没有取得老师的许可，不能进入这个房间。" }
+                    ],
+                    lv: "N1",
+                    questions: [
+                        { q: "努力する____成功はあり得ない。", a: "ことなしに" },
+                        { q: "先生の許可を得る____、この部屋に入ってはいけない。", a: "ことなしに" }
+                    ]
+                },
+                { 
+                    id: "koto_no_naiyou", pt: "～ことのないよう（に）／ことがないよう（に）", pos: "名词用法 / 形式名词", 
+                    usage: "表示为了避免发生某种不好的事而采取措施，常用于郑重的叮嘱或警告。含义：<span class=\"hl-text\">为了不... / 以免...</span>", 
+                    connect: "辞書形 / ない形 ＋ ことのないように",
+                    ex: [
+                        { jp: "<ruby>二<rt>に</rt></ruby><ruby>度<rt>ど</rt></ruby>と<ruby>遅<rt>ち</rt></ruby><ruby>刻<rt>こく</rt></ruby>する<span class=\"hl-text\">ことのないように</span><ruby>注<rt>ちゅう</rt></ruby><ruby>意<rt>い</rt></ruby>してください。", tr: "请注意以免再次迟到。" },
+                        { jp: "お<ruby>客<rt>きゃく</rt></ruby><ruby>様<rt>さま</rt></ruby>に<ruby>失<rt>しつ</rt></ruby><ruby>礼<rt>れい</rt></ruby>な<span class=\"hl-text\">ことがないように</span>、<ruby>言<rt>こと</rt></ruby><ruby>葉<rt>ば</rt></ruby><ruby>遣<rt>づか</rt></ruby>いに<ruby>気<rt>き</rt></ruby>をつけなさい。", tr: "请注意措辞，以免对客人无礼。" }
+                    ],
+                    lv: "N1",
+                    questions: [
+                        { q: "二度と遅刻する____ないように注意してください。", a: "こと" },
+                        { q: "お客様に失礼な____ないように、言葉遣いに気をつけなさい。", a: "こと" }
+                    ]
+                },
+                { 
+                    id: "koto_mo_atte", pt: "～こともあって", pos: "名词用法 / 形式名词", 
+                    usage: "提示多个原因中的一个，暗示还有其他原因。含义：<span class=\"hl-text\">也是因为...</span>", 
+                    connect: "普通形 ＋ こともあって",
+                    ex: [
+                        { jp: "<ruby>初<rt>はじ</rt></ruby>めての<ruby>場<rt>ば</rt></ruby><ruby>所<rt>しょ</rt></ruby>だった<span class=\"hl-text\">こともあって</span>、<ruby>道<rt>みち</rt></ruby>に<ruby>迷<rt>まよ</rt></ruby>ってしまった。", tr: "也是因为第一次去那个地方，所以迷路了。" },
+                        { jp: "<ruby>荷<rt>に</rt></ruby><ruby>物<rt>もつ</rt></ruby>が<ruby>多<rt>おお</rt></ruby>かった<span class=\"hl-text\">こともあって</span>、タクシーで<ruby>帰<rt>かえ</rt></ruby>った。", tr: "也是因为行李很多，所以坐出租车回去了。" }
+                    ],
+                    lv: "N1",
+                    questions: [
+                        { q: "初めての場所だった____もあって、道に迷ってしまった。", a: "こと" },
+                        { q: "荷物が多かった____もあって、タクシーで帰った。", a: "こと" }
+                    ]
+                },
+                { 
+                    id: "nai_koto_ni_wa", pt: "～ないことには", pos: "名词用法 / 形式名词", 
+                    usage: "表示如果不发生前项的事情，后项就不会发生（后项常伴随否定或消极表达）。含义：<span class=\"hl-text\">如果不...就不...</span>", 
+                    connect: "ない形 ＋ ことには",
+                    ex: [
+                        { jp: "<ruby>実<rt>じっ</rt></ruby><ruby>際<rt>さい</rt></ruby>に<ruby>見<rt>み</rt></ruby>てみない<span class=\"hl-text\">ことには</span>、<ruby>買<rt>か</rt></ruby>うかどうか<ruby>決<rt>き</rt></ruby>められない。", tr: "如果不实际看看，就决定不了买不买。" },
+                        { jp: "<ruby>社<rt>しゃ</rt></ruby><ruby>長<rt>ちょう</rt></ruby>が<ruby>来<rt>こ</rt></ruby>ない<span class=\"hl-text\">ことには</span>、<ruby>会<rt>かい</rt></ruby><ruby>議<rt>ぎ</rt></ruby>を<ruby>始<rt>はじ</rt></ruby>められない。", tr: "如果总经理不来，会议就无法开始。" }
+                    ],
+                    lv: "N2",
+                    questions: [
+                        { q: "実際に見てみない____、買うかどうか決められない。", a: "ことには" },
+                        { q: "社長が来ない____、会議を始められない。", a: "ことには" }
+                    ]
+                }
+            ]
+        },
+        {
+            id: "mono", label: "もの", sub: "物",
+            desc: "表示具象的“东西”，也常指代社会常理、真理、倾向或回忆。",
+            grammars: [
+                { 
+                    id: "mono_da", pt: "～ものだ", pos: "终助词用法 / 句末表达", 
+                    usage: "表示普遍的真理、常识，或带着感叹的心情回忆过去。含义：<span class=\"hl-text\">理应如此(常理) / 回忆过去</span>", 
+                    connect: "辞書形 / ない形 ＋ ものだ(常理)\nた形 ＋ ものだ(回想)",
+                    ex: [
+                        { jp: "<ruby>昔<rt>むかし</rt></ruby>はよくこの<ruby>川<rt>かわ</rt></ruby>で<ruby>泳<rt>およ</rt></ruby>いだ<span class=\"hl-text\">ものだ</span>。", tr: "以前经常在这条河里游泳呢。（回想）" },
+                        { jp: "<ruby>子<rt>こ</rt></ruby><ruby>供<rt>ども</rt></ruby>は<ruby>外<rt>そと</rt></ruby>で<ruby>元<rt>げん</rt></ruby><ruby>気<rt>き</rt></ruby>に<ruby>遊<rt>あそ</rt></ruby>ぶ<span class=\"hl-text\">ものだ</span>。", tr: "小孩子理应在外面充满活力地玩耍。" }
+                    ],
+                    lv: "N3",
+                    questions: [
+                        { q: "昔はよくこの川で泳いだ____だ。", a: "もの" },
+                        { q: "子供は外で元気に遊ぶ____だ。", a: "もの" }
+                    ]
+                },
+                { 
+                    id: "mono_ka", pt: "～ものか", pos: "终助词用法 / 句末表达", 
+                    usage: "表示说话人强烈的否定意志。含义：<span class=\"hl-text\">绝不... / 怎么会...</span>", 
+                    connect: "辞書形 ＋ ものか",
+                    ex: [
+                        { jp: "あんな<ruby>店<rt>みせ</rt></ruby>、<ruby>二<rt>に</rt></ruby><ruby>度<rt>ど</rt></ruby>と<ruby>行<rt>い</rt></ruby>く<span class=\"hl-text\">ものか</span>。", tr: "那种店，我绝不会去第二次。" },
+                        { jp: "<ruby>彼<rt>かれ</rt></ruby>になんか<ruby>頼<rt>たの</rt></ruby>む<span class=\"hl-text\">ものか</span>。", tr: "我绝不会求他。" }
+                    ],
+                    lv: "N2",
+                    questions: [
+                        { q: "あんな店、二度と行く____か。", a: "もの" },
+                        { q: "彼になんか頼む____か。", a: "もの" }
+                    ]
+                },
+                { 
+                    id: "mono_nara", pt: "～ものなら", pos: "接续助词用法", 
+                    usage: "表示前项实现的可能性极低，如果能实现的话，想做后项。含义：<span class=\"hl-text\">如果能...的话</span>", 
+                    connect: "能動態(可能形) ＋ ものなら",
+                    ex: [
+                        { jp: "<ruby>戻<rt>もど</rt></ruby>れる<span class=\"hl-text\">ものなら</span>、<ruby>子<rt>こ</rt></ruby><ruby>供<rt>ども</rt></ruby>の<ruby>頃<rt>ころ</rt></ruby>に<ruby>戻<rt>もど</rt></ruby>りたい。", tr: "如果能回去的话，想回到小时候。" },
+                        { jp: "やり<ruby>直<rt>なお</rt></ruby>せる<span class=\"hl-text\">ものなら</span>、もう<ruby>一<rt>いち</rt></ruby><ruby>度<rt>ど</rt></ruby>やり<ruby>直<rt>なお</rt></ruby>したい。", tr: "如果能重来的话，我想再重来一次。" }
+                    ],
+                    lv: "N2",
+                    questions: [
+                        { q: "戻れる____、子供の頃に戻りたい。", a: "もの" },
+                        { q: "やり直せる____、もう一度やり直したい。", a: "もの" }
+                    ]
+                }
+            ]
+        },
+        {
+            id: "tokoro", label: "ところ", sub: "所",
+            desc: "表示“场所”、“时刻”或“局面”。",
+            grammars: [
+                { 
+                    id: "tokoro_da", pt: "～ところだ", pos: "名词用法 / 形式名词", 
+                    usage: "表示动作所处的阶段（正要开始、正在进行或刚刚结束）。含义：<span class=\"hl-text\">正要/正在/刚刚</span>", 
+                    connect: "辞書形 ＋ ところだ(正要)\nている形 ＋ ところだ(正在)\nた形 ＋ ところだ(刚刚)",
+                    ex: [
+                        { jp: "<ruby>今<rt>いま</rt></ruby>、<ruby>昼<rt>ひる</rt></ruby>ごはんを<ruby>食<rt>た</rt></ruby>べている<span class=\"hl-text\">ところです</span>。", tr: "现在正在吃午饭。" },
+                        { jp: "たった<ruby>今<rt>いま</rt></ruby>、バスが<ruby>出<rt>しゅっ</rt></ruby><ruby>発<rt>ぱつ</rt></ruby>した<span class=\"hl-text\">ところだ</span>。", tr: "巴士刚刚出发。" }
+                    ],
+                    lv: "N4",
+                    questions: [
+                        { q: "ちょうど昼ごはんを食べている____です。", a: "ところ" },
+                        { q: "たった今、バスが出発した____だ。", a: "ところ" }
+                    ]
+                },
+                { 
+                    id: "ta_tokoro", pt: "～たところ", pos: "接续助词用法", 
+                    usage: "表示尝试做某事后得到了某个结果。含义：<span class=\"hl-text\">试着做了一下...结果...</span>", 
+                    connect: "た形 ＋ ところ",
+                    ex: [
+                        { jp: "<ruby>先<rt>せん</rt></ruby><ruby>生<rt>せい</rt></ruby>に<ruby>頼<rt>たの</rt></ruby>んだ<span class=\"hl-text\">ところ</span>、<ruby>断<rt>ことわ</rt></ruby>られた。", tr: "试着拜托了老师，结果被拒绝了。" },
+                        { jp: "<ruby>電<rt>でん</rt></ruby><ruby>話<rt>わ</rt></ruby>してみた<span class=\"hl-text\">ところ</span>、<ruby>留<rt>る</rt></ruby><ruby>守<rt>す</rt></ruby>だった。", tr: "试着打了个电话，结果不在家。" }
+                    ],
+                    lv: "N3",
+                    questions: [
+                        { q: "先生に頼んだ____、断られた。", a: "ところ" },
+                        { q: "電話してみた____、留守だった。", a: "ところ" }
+                    ]
+                },
+                { 
+                    id: "tokoro_de", pt: "～たところで", pos: "接续助词用法", 
+                    usage: "表示即使做了前项的动作，也得不到期待的结果（多带有消极语气）。含义：<span class=\"hl-text\">即使...也（白费力气）</span>", 
+                    connect: "た形 ＋ ところで",
+                    ex: [
+                        { jp: "<ruby>今<rt>いま</rt></ruby>から<ruby>走<rt>はし</rt></ruby>った<span class=\"hl-text\">ところで</span>、<ruby>間<rt>ま</rt></ruby>に<ruby>合<rt>あ</rt></ruby>わない。", tr: "就算现在开始跑，也赶不上了。" },
+                        { jp: "いくら<ruby>謝<rt>あやま</rt></ruby>った<span class=\"hl-text\">ところで</span>、<ruby>許<rt>ゆる</rt></ruby>してくれないだろう。", tr: "无论怎么道歉，也不会被原谅吧。" }
+                    ],
+                    lv: "N3",
+                    questions: [
+                        { q: "今から走った____、間に合わない。", a: "ところ" },
+                        { q: "いくら謝った____、許してくれないだろう。", a: "ところ" }
+                    ]
+                }
+            ]
+        },
+        {
+            id: "wake", label: "わけ", sub: "訳",
+            desc: "表示“理由”、“道理”或“结论”。",
+            grammars: [
+                { 
+                    id: "wake_da", pt: "～わけだ", pos: "名词用法 / 形式名词", 
+                    usage: "表示从常理推断出的结论，或对某个事实表示理解。含义：<span class=\"hl-text\">难怪/理所当然</span>", 
+                    connect: "普通形 ＋ わけだ",
+                    ex: [
+                        { jp: "<ruby>寒<rt>さむ</rt></ruby>い<span class=\"hl-text\">わけだ</span>。<ruby>窓<rt>まど</rt></ruby>が<ruby>開<rt>あ</rt></ruby>いている。", tr: "难怪冷，窗户开着。" },
+                        { jp: "<ruby>毎<rt>まい</rt></ruby><ruby>日<rt>にち</rt></ruby><ruby>練<rt>れん</rt></ruby><ruby>習<rt>しゅう</rt></ruby>したのだから、<ruby>上<rt>じょう</rt></ruby><ruby>手<rt>ず</rt></ruby>な<span class=\"hl-text\">わけだ</span>。", tr: "因为每天都练习，理所当然很擅长。" }
+                    ],
+                    lv: "N3",
+                    questions: [
+                        { q: "寒い____だ。窓が開いている。", a: "わけ" },
+                        { q: "毎日練習したのだから、上手な____だ。", a: "わけ" }
+                    ]
+                },
+                { 
+                    id: "wake_ga_nai", pt: "～わけがない", pos: "名词用法 / 形式名词", 
+                    usage: "表示根据常识判断，某件事绝对不可能发生。含义：<span class=\"hl-text\">绝不可能...</span>", 
+                    connect: "普通形 ＋ わけがない",
+                    ex: [
+                        { jp: "<ruby>彼<rt>かれ</rt></ruby>が<ruby>嘘<rt>うそ</rt></ruby>をつく<span class=\"hl-text\">わけがない</span>。", tr: "他绝不可能撒谎。" },
+                        { jp: "こんな<ruby>難<rt>むずか</rt></ruby>しい<ruby>問<rt>もん</rt></ruby><ruby>題<rt>だい</rt></ruby>、<ruby>私<rt>わたし</rt></ruby>に<ruby>解<rt>と</rt></ruby>ける<span class=\"hl-text\">わけがない</span>。", tr: "这么难的问题，我怎么可能解得出来。" }
+                    ],
+                    lv: "N3",
+                    questions: [
+                        { q: "彼が嘘をつく____がない。", a: "わけ" },
+                        { q: "こんな難しい問題、私に解ける____がない。", a: "わけ" }
+                    ]
+                },
+                { 
+                    id: "wake_niwa", pt: "～わけにはいかない", pos: "名词用法 / 形式名词", 
+                    usage: "表示受限于心理、社会情理或客观条件，不能做某事。含义：<span class=\"hl-text\">不能（受限于情理/义务）</span>", 
+                    connect: "辞書形 ＋ わけにはいかない",
+                    ex: [
+                        { jp: "<ruby>今<rt>きょう</rt></ruby><ruby>日<rt>ひ</rt></ruby>は<ruby>大<rt>だい</rt></ruby><ruby>事<rt>じ</rt></ruby>な<ruby>会<rt>かい</rt></ruby><ruby>議<rt>ぎ</rt></ruby>があるから、<ruby>休<rt>やす</rt></ruby>む<span class=\"hl-text\">わけにはいかない</span>。", tr: "今天有重要的会议，不能请假。" },
+                        { jp: "<ruby>上<rt>じょう</rt></ruby><ruby>司<rt>し</rt></ruby>の<ruby>命<rt>めい</rt></ruby><ruby>令<rt>れい</rt></ruby>だから、<ruby>断<rt>ことわ</rt></ruby>る<span class=\"hl-text\">わけにはいかない</span>。", tr: "因为是上司的命令，所以不能拒绝。" }
+                    ],
+                    lv: "N3",
+                    questions: [
+                        { q: "今日は大事な会議があるから、休む____にはいかない。", a: "わけ" },
+                        { q: "上司の命令だから、断る____にはいかない。", a: "わけ" }
+                    ]
+                }
+            ]
+        },
+        {
+            id: "hazu", label: "はず", sub: "筈",
+            desc: "表示基于根据的“推测”或“理应如此”。",
+            grammars: [
+                { 
+                    id: "hazu_da", pt: "～はずだ", pos: "名词用法 / 形式名词", 
+                    usage: "表示说话人根据某种客观事实做出的确信度很高的推测。含义：<span class=\"hl-text\">应该是/理应是...</span>", 
+                    connect: "普通形 ＋ はずだ",
+                    ex: [
+                        { jp: "<ruby>彼<rt>かれ</rt></ruby>は３<ruby>時<rt>じ</rt></ruby>に<ruby>来<rt>く</rt></ruby>ると<ruby>言<rt>い</rt></ruby>ったから、もうすぐ<ruby>着<rt>つ</rt></ruby>く<span class=\"hl-text\">はずだ</span>。", tr: "他说过3点来，应该马上到了。" },
+                        { jp: "この<ruby>本<rt>ほん</rt></ruby>は<ruby>面<rt>おも</rt></ruby><ruby>白<rt>しろ</rt></ruby>かったから、<ruby>彼<rt>かれ</rt></ruby>も<ruby>気<rt>き</rt></ruby>に<ruby>入<rt>い</rt></ruby>る<span class=\"hl-text\">はずだ</span>。", tr: "这本书很有趣，他应该也会喜欢。" }
+                    ],
+                    lv: "N3",
+                    questions: [
+                        { q: "彼は3時に来ると言ったから、もうすぐ着く____だ。", a: "はず" },
+                        { q: "この本は面白かったから、彼も気に入る____だ。", a: "はず" }
+                    ]
+                }
+            ]
+        },
+        {
+            id: "tsumori", label: "つもり", sub: "打算",
+            desc: "表示意图、打算或某种心态。",
+            grammars: [
+                { 
+                    id: "tsumori_da", pt: "～つもりだ", pos: "名词用法 / 形式名词", 
+                    usage: "表示说话人做某事的打算、意图。含义：<span class=\"hl-text\">打算/计划...</span>", 
+                    connect: "辞書形 / ない形 ＋ つもりだ",
+                    ex: [
+                        { jp: "<ruby>夏<rt>なつ</rt></ruby><ruby>休<rt>やす</rt></ruby>みに<ruby>旅<rt>りょ</rt></ruby><ruby>行<rt>こう</rt></ruby>に<ruby>行<rt>い</rt></ruby>く<span class=\"hl-text\">つもりです</span>。", tr: "打算暑假去旅行。" },
+                        { jp: "<ruby>大<rt>だい</rt></ruby><ruby>学<rt>がく</rt></ruby>を<ruby>卒<rt>そつ</rt></ruby><ruby>業<rt>ぎょう</rt></ruby>したら、<ruby>留<rt>りゅう</rt></ruby><ruby>学<rt>がく</rt></ruby>する<span class=\"hl-text\">つもりだ</span>。", tr: "大学毕业后打算去留学。" }
+                    ],
+                    lv: "N4",
+                    questions: [
+                        { q: "夏休みに旅行に行く____です。", a: "つもり" },
+                        { q: "大学を卒業したら、留学する____だ。", a: "つもり" }
+                    ]
+                },
+                { 
+                    id: "tsumori_de", pt: "～つもりで", pos: "名词用法 / 形式名词", 
+                    usage: "表示虽然实际上并非如此，但在心里抱着那样的心态去做某事。含义：<span class=\"hl-text\">当作/抱着...的心态</span>", 
+                    connect: "た形 / 名詞の ＋ つもりで",
+                    ex: [
+                        { jp: "<ruby>死<rt>し</rt></ruby>んだ<span class=\"hl-text\">つもりで</span><ruby>頑<rt>がん</rt></ruby><ruby>張<rt>ば</rt></ruby>ります。", tr: "抱着必死的决心努力。" },
+                        { jp: "<ruby>旅<rt>りょ</rt></ruby><ruby>行<rt>こう</rt></ruby>に<ruby>行<rt>い</rt></ruby>った<span class=\"hl-text\">つもりで</span>、<ruby>貯<rt>ちょ</rt></ruby><ruby>金<rt>きん</rt></ruby>する。", tr: "当作去旅行了，把钱存起来。" }
+                    ],
+                    lv: "N3",
+                    questions: [
+                        { q: "死んだ____で頑張ります。", a: "つもり" },
+                        { q: "旅行に行った____で、貯金する。", a: "つもり" }
+                    ]
+                }
+            ]
+        }
+    ];
+
+    // ================= 逻辑控制 =================
+    
+    function init() {
+        renderNounGrid();
+        renderPracticeSettings();
+    }
+
+    function renderNounGrid() {
+        const grid = document.getElementById('nounGrid');
+        grid.innerHTML = '';
+        formalNouns.forEach(item => {
+            const card = document.createElement('div');
+            card.className = 'noun-card';
+            card.innerHTML = `<div class="noun-main">${item.label}</div><div class="noun-sub">${item.sub}</div>`;
+            card.onclick = () => showDetail(item);
+            grid.appendChild(card);
+        });
+    }
+
+    let currentDetailItem = null;
+
+    function showDetail(item) {
+        currentDetailItem = item;
+        document.getElementById('detailTitle').innerText = `${item.label} (${item.sub})`;
+        document.getElementById('detailDesc').innerText = item.desc;
+        
+        const checkboxes = document.querySelectorAll('#detailLevelChecks input[type="checkbox"]');
+        checkboxes.forEach(cb => cb.checked = true);
+        updateDetailView();
+        document.getElementById('study-detail').classList.add('show');
+    }
+
+    function updateDetailView() {
+        if (!currentDetailItem) return;
+        const checkedBoxes = document.querySelectorAll('#detailLevelChecks input:checked');
+        const selectedLevels = Array.from(checkedBoxes).map(cb => cb.value);
+
+        let filtered = currentDetailItem.grammars.filter(g => selectedLevels.includes(g.lv));
+        const lvScore = { 'N1': 1, 'N2': 2, 'N3': 3, 'N4': 4, 'N5': 5 };
+        filtered.sort((a, b) => lvScore[a.lv] - lvScore[b.lv]);
+
+        const groups = {};
+        filtered.forEach(g => {
+            const pos = g.pos || '其他用法';
+            if (!groups[pos]) groups[pos] = [];
+            groups[pos].push(g);
+        });
+
+        const wrapper = document.getElementById('grammarListWrapper');
+        wrapper.innerHTML = '';
+
+        if (filtered.length === 0) {
+            wrapper.innerHTML = '<div style="text-align:center; color:#999; padding:30px;">没有找到符合当前级别的语法。</div>';
+            return;
+        }
+
+        for (const pos in groups) {
+            const groupDiv = document.createElement('div');
+            groupDiv.innerHTML = `<h3 class="pos-title">${pos}</h3>`;
+
+            const listDiv = document.createElement('div');
+            listDiv.className = 'grammar-list';
+
+            groups[pos].forEach((g, index) => {
+                const itemDiv = document.createElement('div');
+                itemDiv.className = 'detail-grammar-block';
+                
+                // 拼接例句 HTML (加入 ①, ② 数字标识)
+                let examplesHtml = '';
+                if(g.ex && g.ex.length > 0) {
+                    examplesHtml = g.ex.map((e, idx) => {
+                        const num = String.fromCharCode(9312 + idx); // ①, ②, ③
+                        return `
+                        <div>
+                            <div class="dgb-ex-jp"><span class="ex-num">${num}</span><span>${e.jp}</span></div>
+                            <div class="dgb-ex-tr">${e.tr}</div>
+                        </div>
+                        `;
+                    }).join('');
+                }
+
+                // 按截图风格组装 HTML
+                itemDiv.innerHTML = `
+                    <div class="dgb-header">
+                        <div class="dgb-title"><span class="dgb-index">${index + 1}</span> ${g.pt}</div>
+                        <span class="level-tag tag-${g.lv}">${g.lv}</span>
+                    </div>
+                    
+                    <div class="dgb-body">
+                        <div class="dgb-usage-tag">💡 用法要点</div>
+                        <div class="dgb-usage-content">
+                            ${g.usage}
+                        </div>
+                        
+                        ${g.connect ? `
+                        <div class="dgb-connect">
+                            <span class="conn-label">接续规则：</span>
+                            <span class="conn-val">${g.connect.replace(/\n/g, ' ＋ ')}</span>
+                        </div>` : ''}
+                        
+                        <div class="dgb-ex-list">
+                            ${examplesHtml}
+                        </div>
+                    </div>
+                `;
+                listDiv.appendChild(itemDiv);
+            });
+            groupDiv.appendChild(listDiv);
+            wrapper.appendChild(groupDiv);
+        }
+    }
+
+    function closeDetail() { document.getElementById('study-detail').classList.remove('show'); }
+
+    function renderPracticeSettings() {
+        const box = document.getElementById('nounFilter');
+        box.innerHTML = '';
+        formalNouns.forEach(item => {
+            const label = document.createElement('label');
+            label.className = 'checkbox-btn';
+            label.innerHTML = `<input type="checkbox" value="${item.id}" checked><span>${item.label}</span>`;
+            box.appendChild(label);
+        });
+    }
+
+    window.switchTab = function(tabId) {
+        document.querySelectorAll('.tab-view').forEach(el => el.classList.remove('active'));
+        document.getElementById('tab-' + tabId).classList.add('active');
+        document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+        const items = document.querySelectorAll('.nav-item');
+        if (tabId === 'study') items[0].classList.add('active');
+        if (tabId === 'practice') items[1].classList.add('active');
+        if (tabId === 'mistakes') { items[2].classList.add('active'); renderMistakes(); }
+    };
+
+    // ================= 错题本与练习逻辑 =================
+    function saveMistake(grammarId) {
+        let mistakes = JSON.parse(localStorage.getItem('noun_mistakes') || '[]');
+        if (!mistakes.includes(grammarId)) {
+            mistakes.push(grammarId);
+            localStorage.setItem('noun_mistakes', JSON.stringify(mistakes));
+        }
+    }
+
+    // 错题本展示逻辑：稍微简化，复用新版的排版框架，去除例句的序号等冗余
+    function renderMistakes() {
+        const mistakes = JSON.parse(localStorage.getItem('noun_mistakes') || '[]');
+        const list = document.getElementById('mistakeList');
+        if (mistakes.length === 0) { list.innerHTML = '<div style="text-align:center; color:#999; margin-top:50px;">暂无错题，继续加油！</div>'; return; }
+
+        list.innerHTML = '';
+        formalNouns.forEach(noun => {
+            noun.grammars.forEach(g => {
+                if (mistakes.includes(g.id)) {
+                    const div = document.createElement('div');
+                    div.className = 'detail-grammar-block';
+                    div.style.borderLeftColor = "var(--error)";
+                    
+                    let examplesHtml = g.ex ? g.ex.map(e => `
+                        <div style="margin-top:10px;">
+                            <div class="dgb-ex-jp"><span style="margin-right:8px; color:#999;">•</span><span>${e.jp}</span></div>
+                            <div class="dgb-ex-tr">${e.tr}</div>
+                        </div>
+                    `).join('') : '';
+
+                    div.innerHTML = `
+                        <div class="dgb-header" style="border-left-color: var(--error);">
+                            <div class="dgb-title">${g.pt}</div>
+                            <span class="level-tag tag-${g.lv}">${g.lv}</span>
+                        </div>
+                        <div class="dgb-body">
+                            ${g.connect ? `
+                            <div class="dgb-connect" style="margin-bottom:15px;">
+                                <span class="conn-label" style="color:var(--error);">接续复习：</span>
+                                <span class="conn-val">${g.connect.replace(/\n/g, ' ＋ ')}</span>
+                            </div>` : ''}
+                            <div style="font-size:0.95rem; color:#444; margin-bottom:15px;">${g.usage}</div>
+                            <div class="dgb-ex-list" style="padding-top:10px;">
+                                ${examplesHtml}
+                            </div>
+                            <div style="text-align:right; margin-top:15px;">
+                                <button onclick="removeMistake('${g.id}')" style="font-size:0.85rem; color:#666; background:#f0f0f0; border:1px solid #ccc; border-radius:4px; padding:6px 15px; cursor:pointer;">已掌握，移除 ✕</button>
+                            </div>
+                        </div>
+                    `;
+                    list.appendChild(div);
+                }
+            });
+        });
+    }
+
+    function removeMistake(grammarId) {
+        let mistakes = JSON.parse(localStorage.getItem('noun_mistakes') || '[]');
+        mistakes = mistakes.filter(id => id !== grammarId);
+        localStorage.setItem('noun_mistakes', JSON.stringify(mistakes));
+        renderMistakes(); 
+    }
+
+    function clearMistakes() {
+        if(confirm('确定要清空所有错题记录吗？')) { localStorage.removeItem('noun_mistakes'); renderMistakes(); }
+    }
+
+    function toggleSettings() {
+        const content = document.getElementById('settingContent');
+        const icon = document.getElementById('settingIcon');
+        if (content.style.display === 'none') { content.style.display = 'block'; icon.innerText = '▼'; } 
+        else { content.style.display = 'none'; icon.innerText = '▲'; }
+    }
+
+    let streak = 0, maxStreak = 0, state = 'idle', currentQ = {}, validQuestions = [];
+
+    function restartGame() {
+        document.getElementById('settingContent').style.display = 'none';
+        document.getElementById('settingIcon').innerText = '▲';
+        streak = 0; maxStreak = 0;
+        document.getElementById('streakVal').innerText = streak;
+        startGame();
+    }
+
+    function startGame() {
+        const nounChecks = document.querySelectorAll('#nounFilter input:checked');
+        const levelChecks = document.querySelectorAll('#levelFilter input:checked');
+        if (nounChecks.length === 0 || levelChecks.length === 0) return alert("请至少选择一个名词和一个级别！");
+
+        validQuestions = [];
+        const selectedNouns = Array.from(nounChecks).map(cb => cb.value);
+        const selectedLevels = Array.from(levelChecks).map(cb => cb.value);
+
+        formalNouns.forEach(noun => {
+            if (selectedNouns.includes(noun.id)) {
+                noun.grammars.forEach(g => {
+                    if (selectedLevels.includes(g.lv) && g.questions) {
+                        g.questions.forEach(q => {
+                            // 提取例句数据传递给练习区
+                            // 去掉用法中的 HTML 标签，仅保留纯文本用于提示
+                            let hintStr = g.usage.replace(/<[^>]*>?/gm, ''); 
+                            validQuestions.push({ q: q.q, a: q.a, hint: hintStr, lv: g.lv, exData: g.ex, connect: g.connect, grammarId: g.id });
+                        });
+                    }
+                });
+            }
+        });
+
+        if (validQuestions.length === 0) return alert("没有符合条件的题目，请调整筛选设置。");
+
+        document.getElementById('quizCard').classList.remove('hidden');
+        document.getElementById('resultCard').classList.add('hidden');
+        document.getElementById('startBtn').classList.add('hidden'); 
+        document.getElementById('endBtn').classList.remove('hidden');
+        nextQuestion();
+    }
+
+    function nextQuestion() {
+        state = 'answering';
+        currentQ = validQuestions[Math.floor(Math.random() * validQuestions.length)];
+
+        document.getElementById('qDisplay').innerHTML = currentQ.q.replace('____', '<span class="blank-line">____</span>');
+        document.getElementById('qHint').innerText = "提示: " + currentQ.hint;
+        document.getElementById('qTag').className = `level-tag tag-${currentQ.lv}`;
+        document.getElementById('qTag').innerText = currentQ.lv;
+
+        const distractors = formalNouns.filter(n => n.label !== currentQ.a).sort(() => 0.5 - Math.random()).slice(0, 3).map(n => n.label);
+        const options = [currentQ.a, ...distractors].sort(() => 0.5 - Math.random()); 
+
+        const grid = document.getElementById('optionsGrid');
+        grid.innerHTML = options.map(opt => `<div class="option-btn" onclick="checkAnswer(this, '${opt}')">${opt}</div>`).join('');
+
+        document.getElementById('feedbackBox').style.display = 'none';
+        document.getElementById('actionBtn').classList.add('hidden'); 
+    }
+
+    function checkAnswer(btn, userVal) {
+        if (state !== 'answering') return;
+        state = 'result';
+
+        document.querySelectorAll('.option-btn').forEach(b => b.classList.add('disabled'));
+        const fbBox = document.getElementById('feedbackBox');
+
+        if (userVal === currentQ.a) {
+            streak++;
+            if(streak > maxStreak) maxStreak = streak;
+            btn.classList.add('correct');
+            fbBox.style.borderLeftColor = 'var(--success)';
+            document.getElementById('fbResult').innerHTML = `<span style='color:var(--success)'>⭕️ 正确！</span>`;
+            document.getElementById('fbConn').innerText = '';
+            document.getElementById('fbEx').innerText = '';
+            fbBox.style.display = 'block';
+        } else {
+            streak = 0;
+            btn.classList.add('wrong');
+            document.querySelectorAll('.option-btn').forEach(b => { if (b.innerText === currentQ.a) b.classList.add('correct'); });
+            
+            fbBox.style.borderLeftColor = 'var(--error)';
+            document.getElementById('fbResult').innerHTML = `<span style='color:var(--error)'>❌ 错误，正解是: ${currentQ.a}</span>`;
+            document.getElementById('fbConn').innerText = currentQ.connect ? `接续规则: ${currentQ.connect.replace(/\n/g, ' ＋ ')}` : '';
+            
+            // 展示包含注音的例句
+            let exHtml = '';
+            if(currentQ.exData && currentQ.exData.length > 0) {
+                exHtml = `<div style="margin-top:8px; padding-top:8px; border-top:1px dashed #ccc;"><div style="color:#333; font-size:1.05rem; line-height:2;">${currentQ.exData[0].jp}</div><div style="color:#888; font-size:0.85rem;">${currentQ.exData[0].tr}</div></div>`;
+            }
+            document.getElementById('fbEx').innerHTML = exHtml;
+            fbBox.style.display = 'block';
+            
+            saveMistake(currentQ.grammarId);
+        }
+
+        document.getElementById('streakVal').innerText = streak;
+        document.getElementById('actionBtn').classList.remove('hidden'); 
+    }
+
+    function finishGame() {
+        document.getElementById('quizCard').classList.add('hidden');
+        document.getElementById('resultCard').classList.remove('hidden');
+        document.getElementById('endBtn').classList.add('hidden');
+        document.getElementById('startBtn').classList.remove('hidden');
+        document.getElementById('startBtn').innerText = "設定に戻る";
+        document.getElementById('actionBtn').classList.add('hidden');
+        document.getElementById('finalScore').innerText = maxStreak;
+        document.getElementById('finalComment').innerText = maxStreak > 10 ? "素晴らしい！" : "お疲れ様でした！";
+        document.getElementById('settingContent').style.display = 'block';
+        document.getElementById('settingIcon').innerText = '▼';
+    }
+
+    init();
+</script>
+
+</body>
+</html>

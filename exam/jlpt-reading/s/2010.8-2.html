@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>日本語読解 - 2010年 短文（一）</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@300;500;700&display=swap');
+
+        :root {
+            --bg-color: #fdfaf5;
+            --paper-color: #ffffff;
+            --text-color: #2c2c2c;
+            --accent-color: #3b5998; 
+            --sub-color: #787878;
+            --note-bg: #f4f6f9; 
+            --chinese-font: "Microsoft YaHei", "PingFang SC", sans-serif;
+            --japanese-font: 'Noto Serif JP', serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: var(--japanese-font);
+            margin: 0;
+            padding: 80px 15px 120px; 
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* 顶部控制栏 */
+        .top-bar {
+            position: fixed; top: 0; left: 0; right: 0;
+            height: 60px; background: rgba(253, 250, 245, 0.95);
+            backdrop-filter: blur(8px);
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 0 25px; z-index: 1000;
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+        }
+
+        #today-date { font-size: 0.85rem; color: var(--accent-color); font-weight: 500; }
+        .toggle-btn {
+            background: white; color: var(--accent-color); border: 1px solid var(--accent-color);
+            padding: 6px 14px; border-radius: 20px; font-size: 0.8rem;
+            font-family: var(--chinese-font); cursor: pointer; transition: 0.3s;
+        }
+        @media (hover: hover) { .toggle-btn:hover { background: var(--accent-color); color: white; } }
+        .toggle-btn.active { background: var(--accent-color); color: white; }
+
+        .container {
+            max-width: 720px; width: 100%;
+            background: var(--paper-color); padding: 50px 30px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+            box-sizing: border-box; border-radius: 8px;
+        }
+
+        .header-title { 
+            text-align: center; margin-top: 0; margin-bottom: 40px; 
+            font-size: 1.3rem; color: var(--text-color); border-bottom: 2px solid #f0f0f0; padding-bottom: 15px;
+            letter-spacing: 2px;
+        }
+
+        /* 文章段落基础样式 */
+        p.japanese {
+            font-size: 1.15rem; line-height: 2.2; 
+            text-align: justify; margin: 0 0 20px 0;
+            text-indent: 1em; 
+        }
+        ruby rt { font-size: 0.55em; color: var(--sub-color); letter-spacing: 0; }
+
+        /* 统一控制[解析]模式的显示 */
+        .analysis-element { display: none; }
+        body.show-analysis .analysis-element { display: block; }
+
+        /* 译文区块 */
+        .translation {
+            margin: -5px 0 30px 0; font-size: 0.95rem;
+            color: #5a626b; line-height: 1.8; padding: 15px 20px;
+            background-color: #f7f8f9; font-family: var(--chinese-font);
+            border-left: 3px solid #ddd; text-align: justify;
+        }
+        .translation::before { content: "訳"; display: block; font-size: 0.75rem; color: #aaa; margin-bottom: 5px; font-weight: bold; }
+
+        /* --- 新增：内联句法交互 (重点高亮与展开) --- */
+        .key-sentence {
+            transition: 0.3s ease;
+        }
+        
+        body.show-analysis .key-sentence {
+            background-color: rgba(59, 89, 152, 0.06); 
+            border-bottom: 2px dashed #baccf1;
+            cursor: pointer;
+            border-radius: 3px;
+            padding: 2px 0;
+        }
+
+        body.show-analysis .key-sentence:hover {
+            background-color: rgba(59, 89, 152, 0.12);
+        }
+
+        body.show-analysis .key-sentence.active {
+            background-color: rgba(216, 67, 21, 0.08); /* 展开时变成淡淡的暖色 */
+            border-bottom-color: #e74c3c;
+        }
+
+        .sentence-badge {
+            display: none;
+        }
+
+        body.show-analysis .sentence-badge {
+            display: inline-flex; align-items: center; justify-content: center;
+            background-color: var(--accent-color); color: white;
+            font-size: 0.75rem; padding: 2px 8px; border-radius: 12px;
+            margin: 0 6px; vertical-align: middle;
+            font-family: var(--chinese-font); font-weight: bold;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            transform: translateY(-2px); transition: 0.3s;
+        }
+
+        body.show-analysis .key-sentence:hover .sentence-badge {
+            transform: translateY(-2px) scale(1.05);
+        }
+
+        body.show-analysis .key-sentence.active .sentence-badge {
+            background-color: #e74c3c;
+        }
+
+        .inline-note-container {
+            display: none;
+            background-color: #fff; border-left: 4px solid #e74c3c;
+            padding: 15px 20px; margin: 15px 0 15px -1em; /* 抵消首行缩进 */
+            font-size: 0.95rem; color: #444; box-shadow: 0 4px 15px rgba(0,0,0,0.06);
+            font-family: var(--chinese-font); border-radius: 0 6px 6px 0;
+            text-indent: 0; line-height: 1.8; cursor: text;
+        }
+
+        .key-sentence.active .inline-note-container {
+            display: block; /* 核心技巧：使用 block 直接在行内折行撑开空间 */
+        }
+
+        .inline-note-title {
+            font-weight: bold; color: #e74c3c; margin-bottom: 8px;
+            font-size: 1rem; display: flex; align-items: center;
+        }
+        /* ------------------------------------------- */
+
+        /* 实战演练区 (设问与选项辨析) */
+        .qa-section {
+            margin-top: 50px; border-top: 2px solid #f0f0f0; padding-top: 40px; font-family: var(--chinese-font);
+        }
+        .question-title { font-size: 1.1rem; color: var(--text-color); margin-bottom: 25px; font-weight: bold; font-family: var(--japanese-font); line-height: 1.6; }
+        .question-title::before { content: "問："; color: var(--accent-color); }
+        .option-item {
+            background: #fff; border: 1px solid #e2e8f0; border-radius: 8px; margin-bottom: 15px;
+            cursor: pointer; transition: 0.2s; overflow: hidden;
+        }
+        .option-item:hover { border-color: var(--accent-color); box-shadow: 0 2px 10px rgba(59, 89, 152, 0.1); }
+        .option-content { padding: 15px 20px; display: flex; align-items: flex-start; font-family: var(--japanese-font); }
+        .option-number { font-weight: bold; color: var(--accent-color); margin-right: 15px; font-family: var(--chinese-font); }
+        
+        .option-text-group { display: flex; flex-direction: column; }
+        .option-translation { font-size: 0.85rem; color: #718096; margin-top: 4px; font-family: var(--chinese-font); }
+
+        .option-explanation {
+            display: none; padding: 15px 20px; background: #f8fafc; border-top: 1px dashed #e2e8f0;
+            font-size: 0.95rem; color: #4a5568; line-height: 1.7;
+        }
+        .option-item.expanded .option-explanation { display: block; }
+        .badge { display: inline-block; padding: 2px 8px; border-radius: 4px; color: white; font-size: 0.8rem; font-weight: bold; margin-right: 8px; }
+        .badge.wrong { background: #e53e3e; }
+        .badge.correct { background: #38a169; }
+
+        /* 音频播放器 */
+        .audio-wrapper { position: fixed; bottom: 0; left: 0; right: 0; z-index: 2000; background: rgba(255, 255, 255, 0.98); backdrop-filter: blur(10px); padding: 15px 20px 25px 20px; display: flex; justify-content: center; border-top: 1px solid rgba(0,0,0,0.05); box-shadow: 0 -4px 20px rgba(0,0,0,0.05); }
+        .audio-player { display: flex; align-items: center; width: 100%; max-width: 600px; }
+        .play-btn { width: 36px; height: 36px; border-radius: 50%; background-color: var(--accent-color); color: white; border: none; display: flex; align-items: center; justify-content: center; cursor: pointer; margin-right: 12px; flex-shrink: 0; transition: transform 0.2s; padding: 0; }
+        .play-btn:active { transform: scale(0.95); }
+        .play-btn svg { width: 14px; height: 14px; fill: white; margin-left: 2px; }
+        .play-btn.playing svg { margin-left: 0; }
+        .progress-container { flex-grow: 1; height: 20px; display: flex; align-items: center; margin-right: 12px; cursor: pointer; position: relative; }
+        .progress-bg { width: 100%; height: 4px; background-color: #f0f0f0; border-radius: 2px; position: relative; }
+        .progress-bar { height: 100%; background-color: var(--accent-color); width: 0%; border-radius: 2px; position: relative; }
+        .progress-bar::after { content: ""; position: absolute; right: -6px; top: 50%; transform: translateY(-50%); width: 12px; height: 12px; background-color: white; border: 2px solid var(--accent-color); border-radius: 50%; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .time-display { font-size: 0.7rem; color: #999; width: 70px; text-align: right; font-feature-settings: "tnum"; font-variant-numeric: tabular-nums; }
+        .loop-btn { background: none; border: none; cursor: pointer; padding: 8px; margin-left: 8px; opacity: 0.5; transition: all 0.2s; display: flex; align-items: center; justify-content: center; }
+        .loop-btn.active { opacity: 1; color: var(--accent-color); }
+        .loop-btn svg { width: 18px; height: 18px; fill: currentColor; }
+        .footer { margin-top: 50px; color: #ccc; font-size: 0.8rem; letter-spacing: 3px; }
+
+        @media (max-width: 768px) {
+            .header-title { font-size: 1.15rem; margin-bottom: 30px; }
+            p.japanese { font-size: 1.05rem; line-height: 2.4; margin-bottom: 20px; }
+            .container { padding: 40px 20px; }
+            .top-bar { padding: 0 15px; }
+            .toggle-btn { padding: 5px 10px; font-size: 0.75rem; }
+            .inline-note-container { margin-left: 0; padding: 12px 15px; }
+        }
+    </style>
+    <link rel="stylesheet" href="../../../shared/header-back-control.css">
+</head>
+<body>
+
+<div class="top-bar">
+    <a href="../index.html" class="header-back-control">戻る</a>
+    <div id="today-date">N2真题・名文鑑賞</div>
+    <button id="analysis-btn" class="toggle-btn" onclick="toggleAnalysis()">解析</button>
+</div>
+
+<div class="container">
+    <h2 class="header-title">2010年 短文（一）</h2>
+
+    <div class="article-content">
+        <p class="japanese">
+            <!-- 句子一：可点击交互 -->
+            <span class="key-sentence" onclick="toggleInlineNote(event, this)">
+                ネット<ruby>社<rt>しゃ</rt></ruby><ruby>会<rt>かい</rt></ruby>の<ruby>匿<rt>とく</rt></ruby><ruby>名<rt>めい</rt></ruby><ruby>性<rt>せい</rt></ruby>は<ruby>完<rt>かん</rt></ruby><ruby>全<rt>ぜん</rt></ruby>に<ruby>透<rt>とう</rt></ruby><ruby>明<rt>めい</rt></ruby><ruby>人<rt>にん</rt></ruby><ruby>間<rt>げん</rt></ruby>の<ruby>心<rt>しん</rt></ruby><ruby>理<rt>り</rt></ruby>です。
+                <span class="sentence-badge">提出结论</span>
+                <span class="inline-note-container">
+                    <span class="inline-note-title">💡 構文の役割と意味</span>
+                    作者开篇直接给出核心结论：网络社会的匿名性在本质上就是“隐形人的心理”。这句话直接奠定了全篇的论述基调，明确了网络匿名的核心特征。
+                </span>
+            </span>
+
+            <!-- 句子二：可点击交互 -->
+            <span class="key-sentence" onclick="toggleInlineNote(event, this)">
+                <ruby>自<rt>じ</rt></ruby><ruby>分<rt>ぶん</rt></ruby>がどこにアクセスしているかなど、みんなにわかってしまうなら、やっても<ruby>面<rt>おも</rt></ruby><ruby>白<rt>しろ</rt></ruby>くないはずです。それだと<ruby>制<rt>せい</rt></ruby><ruby>限<rt>げん</rt></ruby>のある<ruby>普<rt>ふ</rt></ruby><ruby>通<rt>つう</rt></ruby>の<ruby>社<rt>しゃ</rt></ruby><ruby>会<rt>かい</rt></ruby>と<ruby>同<rt>おな</rt></ruby>じだから。
+                <span class="sentence-badge">说明理由</span>
+                <span class="inline-note-container">
+                    <span class="inline-note-title">💡 構文の役割と意味</span>
+                    此处是对上述结论的理由说明：如果上网不能隐身，就和受限制的现实社会没有区别，进而失去乐趣。反面论证了“隐形”是网络社会的心理基础。
+                </span>
+            </span>
+
+            <!-- 普通句子：无交互 -->
+            ですから、ネット<ruby>社<rt>しゃ</rt></ruby><ruby>会<rt>かい</rt></ruby>の<ruby>匿<rt>とく</rt></ruby><ruby>名<rt>めい</rt></ruby><ruby>性<rt>せい</rt></ruby>というのは、<ruby>心<rt>しん</rt></ruby><ruby>理<rt>り</rt></ruby><ruby>的<rt>てき</rt></ruby>には<ruby>透<rt>とう</rt></ruby><ruby>明<rt>めい</rt></ruby><ruby>人<rt>にん</rt></ruby><ruby>間<rt>げん</rt></ruby>の<ruby>世<rt>せ</rt></ruby><ruby>界<rt>かい</rt></ruby>なのです。
+        </p>
+        <div class="translation analysis-element">网络社会的匿名性完全就是隐形人的心理。如果自己访问了哪里等信息大家都知道的话，那么做起来也就没意思了。因为那样就和有各种限制的普通社会一样了。因此，网络社会的匿名性，在心理上其实就是隐形人的世界。</div>
+    </div>
+
+    <div class="article-content" style="margin-top: 40px;">
+        <p class="japanese">
+            しかも<ruby>初<rt>しょ</rt></ruby><ruby>期<rt>き</rt></ruby>には<ruby>規<rt>き</rt></ruby><ruby>制<rt>せい</rt></ruby>はほとんどなかった。
+
+            <!-- 句子三：可点击交互 -->
+            <span class="key-sentence" onclick="toggleInlineNote(event, this)">
+                <ruby>今<rt>いま</rt></ruby>でも<ruby>巨<rt>きょ</rt></ruby><ruby>大<rt>だい</rt></ruby><ruby>匿<rt>とく</rt></ruby><ruby>名<rt>めい</rt></ruby><ruby>掲<rt>けい</rt></ruby><ruby>示<rt>じ</rt></ruby><ruby>板<rt>ばん</rt></ruby>「２ちゃんねる」などでは、<ruby>犯<rt>はん</rt></ruby><ruby>罪<rt>ざい</rt></ruby>を<ruby>起<rt>お</rt></ruby>こした<ruby>場<rt>ば</rt></ruby><ruby>合<rt>あい</rt></ruby>は<ruby>摘<rt>てき</rt></ruby><ruby>発<rt>はつ</rt></ruby>されますが、そこまでいかなければ、<ruby>何<rt>なに</rt></ruby>を<ruby>書<rt>か</rt></ruby>いてもいい<ruby>社<rt>しゃ</rt></ruby><ruby>会<rt>かい</rt></ruby>になっています。
+                <span class="sentence-badge">举例说明</span>
+                <span class="inline-note-container">
+                    <span class="inline-note-title">💡 構文の役割と意味</span>
+                    文章引用「２ちゃんねる」作为具体例子进行补充说明。指出只要不触碰犯罪底线，人们在网络世界里几乎可以为所欲为，这正是“隐形人心理”在现实中的具体表现。
+                </span>
+            </span>
+        </p>
+        <div class="translation analysis-element">而且在初期几乎没有限制。即使是现在，在诸如“2ch”这样巨大的匿名留言板上，如果引发了犯罪确实会被查处，但只要没到那个地步，这就变成了一个写什么都可以的社会。</div>
+    </div>
+
+    <!-- 实战演练区 -->
+    <div class="qa-section analysis-element">
+        <div class="question-title">
+            <ruby>筆<rt>ひっ</rt></ruby><ruby>者<rt>しゃ</rt></ruby>が<ruby>考<rt>かんが</rt></ruby>えるネット<ruby>上<rt>じょう</rt></ruby>の<ruby>透<rt>とう</rt></ruby><ruby>明<rt>めい</rt></ruby><ruby>人<rt>にん</rt></ruby><ruby>間<rt>げん</rt></ruby>の<ruby>世<rt>せ</rt></ruby><ruby>界<rt>かい</rt></ruby>とは、どのようなものか。
+        </div>
+        
+        <div class="option-item" onclick="this.classList.toggle('expanded')">
+            <div class="option-content">
+                <span class="option-number">1</span>
+                <div class="option-text-group">
+                    <span><ruby>情<rt>じょう</rt></ruby><ruby>報<rt>ほう</rt></ruby>の<ruby>発<rt>はっ</rt></ruby><ruby>信<rt>しん</rt></ruby><ruby>者<rt>しゃ</rt></ruby>が<ruby>誰<rt>だれ</rt></ruby>なのかが<ruby>見<rt>み</rt></ruby>えてしまう<ruby>社<rt>しゃ</rt></ruby><ruby>会<rt>かい</rt></ruby></span>
+                    <span class="option-translation">能够看清信息发送者是谁的社会</span>
+                </div>
+            </div>
+            <div class="option-explanation">
+                <span class="badge wrong">誤り</span>
+                文章明确提到「みんなにわかってしまうなら、やっても面白くない（如果大家都知道的话就没意思了）」，因此隐形人的世界是“看不见”谁在发信息的，此项表述正好相反。
+            </div>
+        </div>
+
+        <div class="option-item" onclick="this.classList.toggle('expanded')">
+            <div class="option-content">
+                <span class="option-number">2</span>
+                <div class="option-text-group">
+                    <span><ruby>犯<rt>はん</rt></ruby><ruby>罪<rt>ざい</rt></ruby>を<ruby>起<rt>お</rt></ruby>こしても<ruby>誰<rt>だれ</rt></ruby>からも<ruby>気<rt>き</rt></ruby>づかれない<ruby>社<rt>しゃ</rt></ruby><ruby>会<rt>かい</rt></ruby></span>
+                    <span class="option-translation">即使犯罪也不会被任何人察觉的社会</span>
+                </div>
+            </div>
+            <div class="option-explanation">
+                <span class="badge wrong">誤り</span>
+                文章最后一句明确提到「犯罪を起こした場合は摘発されますが（发生犯罪的情况下会被查处）」，所以并非“不会被察觉”。
+            </div>
+        </div>
+
+        <div class="option-item" onclick="this.classList.toggle('expanded')">
+            <div class="option-content">
+                <span class="option-number">3</span>
+                <div class="option-text-group">
+                    <span>どんな<ruby>情<rt>じょう</rt></ruby><ruby>報<rt>ほう</rt></ruby>を<ruby>発<rt>はっ</rt></ruby><ruby>信<rt>しん</rt></ruby>しても<ruby>犯<rt>はん</rt></ruby><ruby>罪<rt>ざい</rt></ruby>にならない<ruby>社<rt>しゃ</rt></ruby><ruby>会<rt>かい</rt></ruby></span>
+                    <span class="option-translation">无论发布什么信息都不会构成犯罪的社会</span>
+                </div>
+            </div>
+            <div class="option-explanation">
+                <span class="badge wrong">誤り</span>
+                同样违背了最后一句的内容。既然有「摘発される（被查处）」的情况，就说明在网上发布某些极其恶劣的信息依然是会构成犯罪的。
+            </div>
+        </div>
+
+        <div class="option-item" onclick="this.classList.toggle('expanded')" style="border-left: 4px solid #38a169;">
+            <div class="option-content">
+                <span class="option-number">4</span>
+                <div class="option-text-group">
+                    <span><ruby>誰<rt>だれ</rt></ruby>がどこに<ruby>接<rt>せつ</rt></ruby><ruby>続<rt>ぞく</rt></ruby>しているのかわからない<ruby>社<rt>しゃ</rt></ruby><ruby>会<rt>かい</rt></ruby></span>
+                    <span class="option-translation">无法知道谁连接了哪里的社会</span>
+                </div>
+            </div>
+            <div class="option-explanation">
+                <span class="badge correct">正解</span>
+                完美对应文中第一段「自分がどこにアクセスしているかなど、みんなにわかってしまうなら、やっても面白くない（如果大家都知道你在访问哪里，那就没意思了）」的意图。作者心目中的隐形人世界，正是基于“大家都不知道（谁连接了哪里）”这一前提成立的。
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- 音频播放器 -->
+<div class="audio-wrapper">
+    <div class="audio-player">
+        <button id="play-btn" class="play-btn" onclick="togglePlay()">
+            <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+        </button>
+        <div class="progress-container" id="progress-container">
+            <div class="progress-bg"><div class="progress-bar" id="progress-bar"></div></div>
+        </div>
+        <div class="time-display"><span id="current-time">00:00</span> / <span id="duration">00:00</span></div>
+        <button id="loop-btn" class="loop-btn" onclick="toggleLoop()" title="ループ再生">
+            <svg viewBox="0 0 24 24"><path d="M12 4V1L8 5l4 4V6c3.31 0 6 2.69 6 6 0 1.01-.25 1.97-.7 2.8l1.46 1.46C19.54 15.03 20 13.57 20 12c0-4.42-3.58-8-8-8zm0 14c-3.31 0-6-2.69-6-6 0-1.01.25-1.97.7-2.8L5.24 7.74C4.46 8.97 4 10.43 4 12c0 4.42 3.58 8 8 8v3l4-4-4-4v3z"/></svg>
+        </button>
+        <audio id="audio-element" src="audio/2010_short_01.mp3"></audio>
+    </div>
+</div>
+
+<div class="footer">Ichigo Ichie - 一期一会</div>
+
+<script>
+    // 切换解析模式
+    function toggleAnalysis() {
+        const btn = document.getElementById('analysis-btn');
+        btn.classList.toggle('active');
+        document.body.classList.toggle('show-analysis');
+        
+        // 当关闭解析时，重置所有已展开的状态
+        if (!document.body.classList.contains('show-analysis')) {
+            document.querySelectorAll('.option-item.expanded').forEach(item => item.classList.remove('expanded'));
+            document.querySelectorAll('.key-sentence.active').forEach(item => item.classList.remove('active'));
+        }
+    }
+
+    // 内联句法交互逻辑
+    function toggleInlineNote(event, element) {
+        // 如果未开启解析模式，则不响应点击
+        if (!document.body.classList.contains('show-analysis')) return;
+        
+        // 防止点击展开的笔记框本身（如复制文字）导致笔记意外关闭
+        if (event.target.closest('.inline-note-container')) {
+            return; 
+        }
+        
+        element.classList.toggle('active');
+    }
+
+    // 音频播放器逻辑
+    const audio = document.getElementById('audio-element');
+    const playBtn = document.getElementById('play-btn');
+    const progressBar = document.getElementById('progress-bar');
+    const progressContainer = document.getElementById('progress-container');
+    const currentTimeEl = document.getElementById('current-time');
+    const durationEl = document.getElementById('duration');
+    const loopBtn = document.getElementById('loop-btn');
+    let isLooping = false;
+    function toggleLoop() { isLooping = !isLooping; audio.loop = isLooping; loopBtn.classList.toggle('active', isLooping); }
+    function togglePlay() {
+        if (audio.paused) {
+            audio.play().catch(e => console.log("Audio play error:", e));
+            playBtn.classList.add('playing');
+            playBtn.innerHTML = '<svg viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>';
+        } else {
+            audio.pause();
+            playBtn.classList.remove('playing');
+            playBtn.innerHTML = '<svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>';
+        }
+    }
+    audio.addEventListener('timeupdate', () => { if (audio.duration) { progressBar.style.width = (audio.currentTime / audio.duration * 100) + '%'; currentTimeEl.textContent = formatTime(audio.currentTime); }});
+    audio.addEventListener('loadedmetadata', () => { durationEl.textContent = formatTime(audio.duration); });
+    audio.addEventListener('ended', () => { playBtn.classList.remove('playing'); playBtn.innerHTML = '<svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>'; progressBar.style.width = '0%'; currentTimeEl.textContent = "00:00"; });
+    function seek(e) { if (!audio.duration) return; const rect = progressContainer.getBoundingClientRect(); const clientX = e.type.startsWith('touch') ? e.touches[0].clientX : e.clientX; let clickX = Math.max(0, Math.min(clientX - rect.left, rect.width)); audio.currentTime = (clickX / rect.width) * audio.duration; }
+    let isDragging = false;
+    progressContainer.addEventListener('mousedown', (e) => { isDragging = true; seek(e); });
+    window.addEventListener('mousemove', (e) => { if (isDragging) seek(e); });
+    window.addEventListener('mouseup', () => { isDragging = false; });
+    progressContainer.addEventListener('touchstart', (e) => { isDragging = true; seek(e); });
+    window.addEventListener('touchmove', (e) => { if (isDragging) { e.preventDefault(); seek(e); } }, { passive: false });
+    window.addEventListener('touchend', () => { isDragging = false; });
+    function formatTime(seconds) { if (isNaN(seconds)) return "00:00"; const m = Math.floor(seconds / 60); const s = Math.floor(seconds % 60); return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`; }
+</script>
+
+</body>
+</html>

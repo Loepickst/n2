@@ -1,0 +1,1248 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>日本語文法検索</title>
+    <!-- 引入明朝体与黑体，确保不同字重下显示清晰细腻 -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;600&family=Noto+Sans+SC:wght@300;400;500;600&family=Noto+Serif+JP:wght@400;500;600;700&family=Noto+Serif+SC:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🇯🇵</text></svg>">
+    <style>
+        /* ================= 基础变量 (春日樱花和风调色板) ================= */
+        :root {
+            --page-bg: #fcf9f9;      /* 樱花白/淡粉底色 */
+            --surface: #ffffff;      /* 纯白 */
+            --surface-strong: #fff6f7; /* 微透粉的暖白 */
+            --text: #4a3c3d;         /* 树皮褐/深暖灰 */
+            --muted: #9e8e8f;        /* 偏暖的灰红 */
+            
+            /* 樱花粉 (Primary Accent) */
+            --accent: #d47a8c;       /* 樱色 */
+            --accent-strong: #b55b6d;
+            --accent-soft: rgba(212, 122, 140, 0.1);
+            
+            /* 若叶绿 (Secondary Accent) */
+            --accent-sky: #8eb59b;   /* 若叶色/新绿 */
+            --accent-sky-soft: rgba(142, 181, 155, 0.1);
+
+            --border: #f0e6e7;       /* 细腻的边界线（带粉色倾向） */
+            --border-strong: #e3d1d4;/* 加深的边界线 */
+            
+            /* 更有呼吸感和生机的柔和阴影 */
+            --shadow-sm: 0 2px 8px rgba(74, 60, 61, 0.03);
+            --shadow-md: 0 6px 20px rgba(74, 60, 61, 0.06);
+
+            /* 克制的微圆角，增强精致感 */
+            --radius-xl: 12px;
+            --radius-lg: 8px;
+            --radius-md: 6px;
+            --radius-sm: 4px;
+
+            /* N系列徽章颜色 (和风樱花改良版) */
+            --c-n1: #b85b67; /* 绯红 */
+            --c-n2: #7a9eb8; /* 勿忘草色 */
+            --c-n3: #82a688; /* 若叶色 */
+
+            --transition: 300ms cubic-bezier(0.34, 1.2, 0.64, 1);
+            
+            --font-ui: "Noto Sans SC", "Noto Sans JP", -apple-system, BlinkMacSystemFont, sans-serif;
+            --font-display: "Noto Serif SC", "Noto Serif JP", "Songti SC", "SimSun", serif;
+        }
+
+        body {
+            font-family: var(--font-ui);
+            background-color: var(--page-bg);
+            color: var(--text);
+            margin: 0;
+            padding: 20px;
+            line-height: 1.6;
+            overscroll-behavior-y: none;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            letter-spacing: 0.02em;
+        }
+
+        /* 极其微妙的背景肌理 */
+        body::before {
+            content: "";
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            background-image: radial-gradient(var(--border-strong) 1px, transparent 1px);
+            background-size: 24px 24px;
+            opacity: 0.3;
+            z-index: -1;
+        }
+
+        /* Furigana Adjustments */
+        ruby rt { font-size: 0.5em; zoom: 0.85; color: var(--accent-sky); font-family: var(--font-ui); }
+        .no-scroll { overflow: hidden; }
+
+        /* ================= 导航栏 ================= */
+        .navbar {
+            padding: 0;      
+            height: 44px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: relative;
+            width: 100%;
+            max-width: 840px; 
+            margin: 0 auto 16px;
+            box-sizing: border-box;
+            z-index: 10;
+        }
+        .nav-btn {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(8px);
+            border: 1px solid var(--border-strong); 
+            padding: 8px 16px;
+            border-radius: var(--radius-md); 
+            font-size: 0.85rem; 
+            cursor: pointer; 
+            display: inline-flex;
+            align-items: center; 
+            gap: 6px; 
+            transition: all var(--transition); 
+            box-shadow: var(--shadow-sm);
+            color: var(--text); 
+            font-weight: 600; 
+            text-decoration: none;
+            letter-spacing: 0.05em;
+        }
+        .nav-btn:hover { 
+            transform: translateY(-2px); 
+            box-shadow: var(--shadow-md); 
+            border-color: var(--accent); 
+            background: var(--surface);
+            color: var(--accent-strong); 
+        }
+
+        /* ================= 视图通用 ================= */
+        .view-section { display: none; animation: fadeIn 0.4s ease-out; padding-top: 0;}
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* ================= 1. 搜索视图 ================= */
+        .hero-section { 
+            min-height: auto; 
+            padding-top: 10px;
+            padding-bottom: 24px;
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            justify-content: flex-start; 
+            text-align: center; 
+        }
+        .main-title { 
+            font-size: 2rem; 
+            margin: 0 0 8px; 
+            color: var(--text); 
+            font-family: var(--font-display);
+            letter-spacing: 0.08em;
+            font-weight: 600;
+        }
+        .sub-title { 
+            color: var(--muted); 
+            font-size: 0.85rem; 
+            margin-bottom: 0; 
+            margin-top: 4px; 
+            letter-spacing: 0.05em;
+            font-family: var(--font-ui);
+        }
+        
+        .search-container { 
+            width: 100%; 
+            max-width: 840px; /* 扩展至与下方卡片等宽 */
+            position: relative; 
+            margin-top: 20px; 
+        }
+        .search-input { 
+            width: 100%; 
+            padding: 16px 48px 16px 24px; /* 增加内边距，使之更大气 */
+            font-size: 16px; 
+            border: 1px solid var(--border-strong); 
+            border-radius: var(--radius-lg); 
+            box-shadow: var(--shadow-sm); 
+            outline: none; 
+            transition: all var(--transition); 
+            box-sizing: border-box; 
+            background: rgba(255, 255, 255, 0.9);
+            color: var(--text);
+            font-family: var(--font-ui);
+            letter-spacing: 0.02em;
+        }
+        .search-input::placeholder { color: #bcaeb0; } /* 柔和的樱花灰占位符 */
+        .search-clear {
+            position: absolute; right: 16px; top: 50%; transform: translateY(-50%);
+            background: var(--page-bg); border-radius: 50%; width: 26px; height: 26px;
+            display: none; align-items: center; justify-content: center;
+            cursor: pointer; color: var(--muted); font-size: 13px; transition: 0.2s;
+            border: 1px solid var(--border);
+        }
+        .search-clear:hover { background: var(--border); color: var(--text); }
+        .search-input:focus { 
+            box-shadow: var(--shadow-md); 
+            border-color: var(--accent);
+            background: var(--surface);
+        }
+        
+        .filter-bar { margin-top: 20px; display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+        .filter-select { 
+            padding: 8px 16px; 
+            border-radius: var(--radius-md); 
+            border: 1px solid var(--border-strong); 
+            background: rgba(255, 255, 255, 0.8); 
+            cursor: pointer; 
+            outline: none; 
+            box-shadow: var(--shadow-sm); 
+            color: var(--text); 
+            font-size: 13px; 
+            min-width: 130px; 
+            transition: all var(--transition);
+            font-weight: 500;
+        }
+        .filter-select:hover, .filter-select:focus { 
+            border-color: var(--accent); 
+            background: var(--surface);
+            box-shadow: var(--shadow-md); 
+        }
+
+        /* ================= 2. 书架/目录/课程视图 ================= */
+        .page-container { max-width: 840px; margin: 0 auto; padding: 0; }
+        .page-header { margin-bottom: 24px; display: flex; align-items: center; gap: 15px;}
+        
+        /* ================= 面包屑导航 ================= */
+        .breadcrumb {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(8px);
+            padding: 10px 18px;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow-sm);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.85rem;
+            color: var(--muted);
+            font-weight: 500;
+        }
+        .breadcrumb-item { cursor: pointer; display: flex; align-items: center; gap: 6px; transition: 0.2s; }
+        .breadcrumb-item:hover { color: var(--accent-strong); }
+        .breadcrumb-active { color: var(--text); font-weight: 600; cursor: default; font-family: var(--font-display); letter-spacing: 0.05em;}
+        .breadcrumb-sep { color: var(--border-strong); font-size: 0.8rem; }
+
+        /* ================= 书架视图 ================= */
+        .books-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 16px; }
+        .book-card {
+            background: var(--surface);
+            border-radius: var(--radius-lg);
+            padding: 24px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all var(--transition);
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border);
+            position: relative;
+            overflow: hidden;
+        }
+        .book-card::before {
+            content: '';
+            position: absolute;
+            left: 0; top: 0; bottom: 0; width: 4px;
+            background: var(--border-strong);
+            transition: all var(--transition);
+        }
+        .book-card:hover { 
+            transform: translateY(-4px); 
+            box-shadow: var(--shadow-md); 
+            border-color: var(--border-strong);
+        }
+        .book-card:hover::before {
+            background: var(--accent-sky);
+        }
+        .book-icon-new { font-size: 2rem; margin-bottom: 12px; display: inline-block; opacity: 0.9; }
+        .book-title-new { font-size: 1.05rem; font-weight: 600; color: var(--text); margin-bottom: 6px; font-family: var(--font-display); letter-spacing: 0.05em;}
+        .book-info-new { font-size: 0.75rem; color: var(--muted); letter-spacing: 0.02em; }
+
+        /* ================= 课程列表视图 ================= */
+        .lesson-list-container { display: flex; flex-direction: column; gap: 12px; }
+        .lesson-row {
+            background: var(--surface);
+            padding: 16px 20px;
+            border-radius: var(--radius-md);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: var(--shadow-sm);
+            cursor: pointer;
+            transition: all var(--transition);
+            border: 1px solid var(--border);
+            position: relative;
+            overflow: hidden;
+        }
+        .lesson-row::before {
+            content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: transparent; transition: all var(--transition);
+        }
+        .lesson-row:hover {
+            transform: translateX(4px);
+            box-shadow: var(--shadow-md);
+            border-color: var(--border-strong);
+        }
+        .lesson-row:hover::before { background: var(--accent); }
+        .lesson-left { display: flex; align-items: center; gap: 14px; }
+        .lesson-icon { font-size: 1.1rem; color: var(--muted); opacity: 0.8; }
+        .lesson-title { font-size: 1rem; font-weight: 600; color: var(--text); font-family: var(--font-display); letter-spacing: 0.05em;}
+        .lesson-right { display: flex; align-items: center; gap: 10px; color: var(--muted); font-size: 0.8rem; }
+
+        /* ================= 列表卡片与弹窗 ================= */
+        .container { max-width: 840px; margin: 0 auto 60px; padding: 0; }
+        .grid { display: flex; flex-direction: column; gap: 14px; }
+        .status-state { text-align: center; padding: 40px; color: var(--muted); display: none; animation: fadeIn 0.5s; font-family: var(--font-display); letter-spacing: 0.05em;}
+        .status-icon { font-size: 3rem; margin-bottom: 16px; opacity: 0.6; display: block;}
+        
+        /* Strip Layout for Card (日式木牌感) */
+        .card { 
+            background: var(--surface); 
+            border-radius: var(--radius-lg); 
+            padding: 16px 24px; 
+            box-shadow: var(--shadow-sm); 
+            transition: all var(--transition); 
+            cursor: pointer; 
+            position: relative; 
+            border: 1px solid var(--border); 
+            display: grid; 
+            grid-template-columns: auto auto 1fr; 
+            align-items: center; 
+            gap: 18px;
+            overflow: hidden;
+        }
+        .card::before {
+            content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: transparent; transition: all var(--transition);
+        }
+        .card:hover { 
+            transform: translateY(-2px); 
+            box-shadow: var(--shadow-md); 
+            border-color: var(--border-strong); 
+        }
+        .card:hover::before { background: var(--accent); }
+        
+        .card-star { position: static; font-size: 1.3rem; color: var(--border-strong); z-index: 2; transition: 0.2s; user-select: none;}
+        .card-star:hover { transform: scale(1.2) rotate(-10deg); color: var(--accent); } 
+        .card-star.is-fav { color: #d4a373; /* 雅致的暗金 */ }
+        
+        .card-header { margin: 0; padding: 0; display: flex; flex-direction: row; align-items: center; gap: 12px; min-width: 0;}
+        .card-title { font-size: 1.15rem; font-weight: 600; color: var(--text); margin: 0; white-space: nowrap; font-family: var(--font-display); letter-spacing: 0.05em;}
+        .badge-group { display: flex; gap: 6px; margin: 0; flex-shrink: 0;}
+        .card-badge { 
+            display: inline-flex; align-items: center; justify-content: center;
+            font-size: 0.7rem; padding: 2px 8px; border-radius: var(--radius-sm); 
+            font-weight: 600; letter-spacing: 0.05em; font-family: var(--font-ui);
+        }
+        
+        /* 仅在搜索结果隐藏 lesson badge */
+        #grammarGrid .card-badge:nth-child(2) { display: none; }
+
+        /* N系列徽章：和风柔和处理 */
+        .bg-n1 { background-color: rgba(184, 91, 103, 0.1); color: var(--c-n1); border: 1px solid rgba(184, 91, 103, 0.2); }
+        .bg-n2 { background-color: var(--accent-sky-soft); color: var(--c-n2); border: 1px solid rgba(142, 181, 155, 0.2); }
+        .bg-n3 { background-color: var(--accent-soft); color: var(--c-n3); border: 1px solid rgba(212, 122, 140, 0.2); }
+        .bg-other { background-color: var(--page-bg); color: var(--muted); border: 1px solid var(--border-strong); }
+        
+        .card-meaning { font-size: 0.95rem; color: var(--muted); font-weight: 500; margin: 0; text-align: right; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;}
+        .card-connection { display: none; }
+
+        /* ================= 弹窗 (和风纸张感) ================= */
+        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(252, 249, 249, 0.85); backdrop-filter: blur(8px); }
+        .modal-content { 
+            background-color: var(--surface); 
+            margin: 6vh auto; 
+            border-radius: var(--radius-xl); 
+            width: 92%; max-width: 760px; 
+            box-shadow: 0 12px 40px rgba(74, 60, 61, 0.08); 
+            max-height: 88vh; overflow-y: auto; 
+            border: 1px solid var(--border-strong); 
+            animation: popIn 0.3s cubic-bezier(0.2, 0.8, 0.2, 1); 
+            overscroll-behavior: contain; 
+        }
+        @keyframes popIn { from { transform: scale(0.98) translateY(10px); opacity: 0; } to { transform: scale(1) translateY(0); opacity: 1; } }
+        
+        .modal-header { padding: 28px 36px 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: flex-start; }
+        .modal-fav-btn { font-size: 1.8rem; cursor: pointer; transition: all var(--transition); line-height: 1; color: var(--border-strong); user-select: none;}
+        .modal-fav-btn:hover { transform: scale(1.1) rotate(-10deg); color: #d4a373;}
+        .close-btn { 
+            position: fixed; top: 24px; right: 24px; width: 36px; height: 36px; 
+            background: var(--surface); border-radius: 50%; box-shadow: var(--shadow-md); border: 1px solid var(--border);
+            display: flex; align-items: center; justify-content: center; cursor: pointer; 
+            font-size: 20px; color: var(--muted); z-index: 1001; transition: all var(--transition); 
+        }
+        .close-btn:hover { transform: rotate(90deg); background: var(--surface-strong); color: var(--text); }
+        
+        .modal-body { padding: 32px 36px 40px; }
+        .detail-item { margin-bottom: 28px; }
+        .label { display: inline-block; font-size: 0.75rem; font-weight: 600; color: var(--muted); margin-bottom: 10px; letter-spacing: 0.1em; font-family: var(--font-display); }
+        .label::before { content: ''; display: inline-block; width: 4px; height: 4px; border-radius: 50%; background: var(--border-strong); margin-right: 6px; vertical-align: middle; transform: translateY(-1px);}
+        
+        /* 高亮文字：荧光笔划线效果 */
+        .text-highlight { 
+            color: var(--text); font-weight: 600; font-size: 1.2rem; font-family: var(--font-display); letter-spacing: 0.05em;
+            background: linear-gradient(transparent 65%, rgba(212, 122, 140, 0.2) 65%); display: inline-block; padding: 0 4px;
+        }
+        .code-style { background: var(--surface-strong); padding: 8px 14px; border-radius: var(--radius-sm); border: 1px solid var(--border-strong); font-family: monospace; display: inline-block; font-size: 0.9rem; color: var(--text);}
+        .example-card { background: var(--surface-strong); border-left: 3px solid var(--accent-sky); padding: 14px 18px; margin-bottom: 12px; border-radius: 0 var(--radius-md) var(--radius-md) 0; }
+        
+        .related-tag { display: inline-flex; align-items: center; background: var(--page-bg); border: 1px solid var(--border-strong); padding: 6px 14px; border-radius: var(--radius-sm); cursor: pointer; font-size: 0.85rem; margin-right: 10px; margin-bottom: 10px; transition: all 0.2s; color: var(--text); font-family: var(--font-display); letter-spacing: 0.02em;}
+        .related-tag:hover { background: var(--surface); border-color: var(--text); transform: translateY(-1px); box-shadow: var(--shadow-sm);}
+        
+        @media (max-width: 768px) {
+            .navbar { padding: 10px 0; margin-bottom: 10px;}
+            .view-section { padding-top: 10px; }
+            .hero-section { padding-top: 10px; padding-bottom: 16px;}
+            .books-grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px;}
+            
+            .main-title { font-size: 1.5rem; margin-bottom: 4px; }
+            .sub-title { font-size: 0.8rem; margin-bottom: 12px; }
+            .search-container { margin-top: 12px; }
+            .search-input { padding: 12px 40px 12px 16px; font-size: 14px; }
+            .filter-bar { margin-top: 12px; gap: 8px; margin-bottom: 20px; }
+            .filter-select { padding: 6px 12px; font-size: 0.8rem; min-width: auto; }
+
+            .container { padding: 0 4px; }
+            .grid { gap: 10px; }
+            
+            .card { 
+                padding: 12px 14px; 
+                border-radius: var(--radius-md);
+                gap: 12px;
+            }
+            .card-header { 
+                gap: 6px; 
+                max-width: 50vw;
+            }
+            .card-title { font-size: 0.95rem; }
+            .card-star { font-size: 1.1rem; }
+            .card-meaning { font-size: 0.8rem; }
+            .card-badge { padding: 2px 6px; font-size: 0.65rem; }
+
+            .breadcrumb { font-size: 0.8rem; padding: 8px 14px; margin-bottom: 16px; }
+            .book-card { padding: 16px 12px; }
+            .book-title-new { font-size: 0.95rem; }
+            .lesson-row { padding: 12px 14px; }
+            .lesson-title { font-size: 0.95rem; }
+            .nav-btn { font-size: 0.8rem; padding: 6px 10px; }
+
+            .modal-content { width: 96%; margin: 3vh auto; max-height: 94vh; border-radius: var(--radius-lg); }
+            .modal-header { padding: 20px 24px 16px; }
+            .modal-fav-btn { font-size: 1.5rem; }
+            .close-btn { width: 32px; height: 32px; font-size: 18px; top: 16px; right: 16px; }
+            .modal-body { padding: 20px 24px 60px; }
+            .detail-item { margin-bottom: 24px; }
+            
+            #modalTitle { font-size: 1.3rem; }
+            .text-highlight { font-size: 1.05rem; } 
+            .code-style { font-size: 0.8rem; padding: 6px 10px; } 
+            #modalDesc { font-size: 0.85rem; line-height: 1.7; } 
+            .example-card { padding: 12px 14px; } 
+            .example-card .jp { font-size: 0.95rem; margin-bottom: 4px; } 
+            .example-card .cn { font-size: 0.85rem; } 
+            .label { font-size: 0.7rem; margin-bottom: 6px; }
+
+            .compare-title { font-size: 1.2rem; }
+            .compare-meaning { font-size: 0.95rem; }
+            .compare-desc { font-size: 0.85rem; line-height: 1.7; }
+        }
+
+        /* ================= 3. 优化的对比模式样式 ================= */
+        .compare-container { display: flex; flex-direction: column; height: 100%; background: var(--page-bg); border-radius: var(--radius-xl); overflow: hidden; }
+        .compare-header {
+            display: grid; grid-template-columns: 1fr auto 1fr; align-items: center;
+            background: var(--surface); padding: 16px 24px; border-bottom: 1px solid var(--border-strong);
+            box-shadow: var(--shadow-sm); z-index: 10;
+        }
+        .compare-col-title { text-align: center; font-weight: 600; font-size: 1.3rem; color: var(--text); word-break: break-all; font-family: var(--font-display); letter-spacing: 0.05em;}
+        .compare-vs-badge { 
+            background: var(--surface-strong); color: var(--accent); font-size: 0.75rem; font-weight: 700;
+            padding: 4px 10px; border-radius: var(--radius-sm); margin: 0 12px; border: 1px solid rgba(212, 122, 140, 0.2);
+            letter-spacing: 0.1em;
+        }
+        .compare-body { overflow-y: auto; padding: 24px; flex: 1; -webkit-overflow-scrolling: touch; }
+        
+        .compare-section { margin-bottom: 28px; }
+        .compare-section-label { 
+            text-align: center; font-size: 0.8rem; color: var(--muted); font-weight: 600; 
+            margin-bottom: 16px; position: relative; letter-spacing: 0.1em; font-family: var(--font-display);
+        }
+        .compare-section-label::before, .compare-section-label::after {
+            content: ''; position: absolute; top: 50%; width: 25%; height: 1px; background: var(--border-strong);
+        }
+        .compare-section-label::before { left: 0; }
+        .compare-section-label::after { right: 0; }
+        
+        .compare-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+        .compare-card { 
+            background: var(--surface); padding: 18px; border-radius: var(--radius-md); 
+            box-shadow: var(--shadow-sm); border: 1px solid var(--border); height: 100%; box-sizing: border-box;
+        }
+        .compare-meaning-text { color: var(--text); font-weight: 600; font-size: 1.1rem; font-family: var(--font-display); letter-spacing: 0.05em;}
+        .compare-desc { font-size: 0.9rem; line-height: 1.7; color: var(--text); }
+        
+        @media (max-width: 768px) {
+            .compare-header { padding: 14px 12px; }
+            .compare-col-title { font-size: 1.05rem; }
+            .compare-body { padding: 16px 12px; padding-bottom: 60px; }
+            .compare-row { gap: 10px; }
+            .compare-card { padding: 14px; }
+            .compare-section-label { font-size: 0.75rem; }
+            .compare-section-label::before, .compare-section-label::after { width: 15%; }
+            .compare-meaning-text { font-size: 0.95rem; }
+            .status-icon { font-size: 2.5rem; margin-bottom: 12px; }
+        }
+
+        .compare-center { display: flex; align-items: center; justify-content: center; text-align: center; }
+        .conn-diff { color: var(--accent-strong); font-weight: 600; background: var(--accent-soft); padding: 2px 6px; border-radius: 4px; border: 1px solid rgba(212, 122, 140, 0.2);}
+        .conn-same { color: var(--muted); font-weight: normal; }
+        .scene-card { background: var(--surface-strong); padding: 14px; border-left: 3px solid var(--accent-sky); font-size: 0.9rem; }
+        .scene-jp { margin-bottom: 6px; font-weight: 500; color: var(--text); font-family: var(--font-display); letter-spacing: 0.02em;}
+        .scene-cn { color: var(--muted); font-size: 0.85rem; line-height: 1.6;}
+    </style>
+</head>
+<body>
+
+    <nav class="navbar">
+        <div style="display:flex; gap:10px; align-items:center;">
+            <a id="navHomeBtn" href="../../index.html#daily" class="nav-btn">🏠 ホーム</a>
+            <div id="navLeftBtn" class="nav-btn" style="display:none;"></div>
+        </div>
+        <div style="display:flex; gap:10px; margin-left: auto; align-items:center;">
+            <a id="navBookshelfBtn" href="../../test/Try！N2.html" class="nav-btn">🗺️ 思维导图</a>
+            <div id="navFavBtn" class="nav-btn" onclick="navigateTo('favorites')">⭐ 收藏夹</div>
+            <div id="navBackBtn" class="nav-btn" style="display:none;" onclick="navigateTo('search')">↩ 返回搜索</div>
+        </div>
+    </nav>
+
+    <div id="searchView" class="view-section" style="display:block;">
+        <section class="hero-section">
+            <h1 class="main-title">日本語文法検索</h1>
+            <p class="sub-title">快速查找语法、接续与例句</p>
+            
+            <div class="search-container">
+                <input type="text" id="searchInput" class="search-input" placeholder="输入语法关键词、特征或假名（如：niitattewa / 举例）..." oninput="renderGrammarList()">
+                <div id="searchClear" class="search-clear" onclick="clearSearch()">✕</div>
+            </div>
+
+            <div class="filter-bar">
+                <select id="bookFilter" class="filter-select" onchange="renderGrammarList()">
+                    <option value="all">📖 全部书籍</option>
+                </select>
+                <select id="levelFilter" class="filter-select" onchange="renderGrammarList()">
+                    <option value="all">🎓 全部等级</option>
+                    <option value="N1">🔴 N1</option>
+                    <option value="N2">🔵 N2</option>
+                    <option value="N3">🟢 N3</option>
+                </select>
+            </div>
+        </section>
+
+        <div class="container">
+            <div id="emptyState" class="status-state">
+                <div class="status-icon">📭</div>
+                <h3>未找到结果</h3>
+            </div>
+            <div id="grammarGrid" class="grid"></div>
+        </div>
+    </div>
+
+    <div id="bookshelfView" class="view-section">
+        <div class="page-container">
+            <div class="breadcrumb">
+                <div class="breadcrumb-item" onclick="navigateTo('search')">🔍 搜索页</div>
+                <div class="breadcrumb-sep">/</div>
+                <div class="breadcrumb-active">书架</div>
+            </div>
+            <div id="booksGrid" class="books-grid"></div>
+        </div>
+    </div>
+
+    <div id="bookDetailView" class="view-section">
+        <div class="page-container">
+            <div class="breadcrumb">
+                <div class="breadcrumb-item" onclick="navigateTo('search')">🔍 搜索页</div>
+                <div class="breadcrumb-sep">/</div>
+                <div class="breadcrumb-item" onclick="navigateTo('bookshelf')">书架</div>
+                <div class="breadcrumb-sep">/</div>
+                <div class="breadcrumb-active" id="crumbBookName"></div>
+            </div>
+            <div id="lessonListGrid" class="lesson-list-container"></div>
+        </div>
+    </div>
+
+    <div id="lessonDetailView" class="view-section">
+        <div class="page-container">
+            <div class="breadcrumb">
+                <div class="breadcrumb-item" onclick="navigateTo('search')">🔍 搜索页</div>
+                <div class="breadcrumb-sep">/</div>
+                <div class="breadcrumb-item" onclick="navigateTo('bookshelf')">书架</div>
+                <div class="breadcrumb-sep">/</div>
+                <div class="breadcrumb-item" onclick="navigateTo('bookDetail', {bookName: currentBookName})"><span id="crumbBookNameInLesson"></span></div>
+                <div class="breadcrumb-sep">/</div>
+                <div class="breadcrumb-active" id="crumbLessonName"></div>
+            </div>
+            
+            <div id="lessonGrid" class="grid"></div>
+        </div>
+    </div>
+
+    <div id="favoritesView" class="view-section">
+        <div class="page-container">
+            <div class="page-header">
+                <h2 style="margin:0; font-size: 1.1rem; font-family: var(--font-display); letter-spacing: 0.05em;">收藏夹</h2>
+            </div>
+            
+            <div id="favoritesGrid" class="grid"></div>
+            <div id="emptyFavState" class="status-state" style="display:none;">
+                <span class="status-icon">📭</span>
+                <p>暂无收藏的语法</p>
+            </div>
+        </div>
+    </div>
+
+    <div id="examplesView" class="view-section">
+        <div class="page-container">
+            <div class="breadcrumb">
+                <div class="breadcrumb-item" onclick="history.back()">↩ 返回详情</div>
+            </div>
+            <div class="hero-section" style="padding-bottom: 20px; align-items: flex-start; text-align: left;">
+                 <h2 id="exViewTitle" class="main-title" style="font-size: 1.4rem;"></h2>
+                 <p id="exViewMeaning" class="sub-title" style="font-size: 1rem; font-weight: 600; margin: 0; color: var(--muted);"></p>
+            </div>
+            <div id="extraExamplesList" class="lesson-list-container"></div>
+        </div>
+    </div>
+
+    <div id="detailModal" class="modal">
+        <span class="close-btn" onclick="closeModal('detailModal')">&times;</span>
+        <div class="modal-content">
+            <div class="modal-header">
+                <div><h2 id="modalTitle" style="margin:0; font-family: var(--font-display); letter-spacing: 0.05em; font-size: 1.6rem;"></h2><div id="modalBadges" style="margin-top:12px; display: flex; gap: 8px;"></div></div>
+                <div id="modalFavBtn" class="modal-fav-btn" onclick="toggleDetailFav()">☆</div>
+            </div>
+            <div class="modal-body">
+                <div class="detail-item"><span class="label">意味</span><br><div id="modalMeaning" class="text-highlight"></div></div>
+                <div class="detail-item"><span class="label">接续</span><br><div id="modalConnection" class="code-style"></div></div>
+                <div class="detail-item"><span class="label">解説</span><div id="modalDesc" style="line-height:1.8; color: var(--text);"></div></div>
+                <div class="detail-item">
+                    <span class="label">例文</span>
+                    <div id="modalExamples"></div>
+                    <div id="viewMoreExamplesBtn" style="margin-top: 14px; cursor: pointer; color: var(--accent-sky); font-size: 0.9rem; font-weight: 600; display: none; align-items: center; gap: 4px; letter-spacing: 0.05em;" onclick="showMoreExamples(currentDetailId)">
+                        查看更多例句 <span style="font-size: 0.8em;">➜</span>
+                    </div>
+                </div>
+                <div id="modalRelatedArea" style="margin-top:36px; display:none;">
+                    <span class="label">关联语法</span><br><div id="modalRelatedTags" style="margin-top:10px;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="compareModal" class="modal">
+        <span class="close-btn" onclick="closeModal('compareModal')">&times;</span>
+        <div class="modal-content" style="max-width:840px; height:85vh; padding:0; overflow:hidden; background:transparent; box-shadow:none; border:none;">
+            <!-- 内容将通过 JS 注入 -->
+            <div id="compareContainer" class="compare-container"></div>
+        </div>
+    </div>
+
+    <script src="../../shared/grammar-db-core.js"></script>
+    <script src="../../shared/grammar-db-tags.js"></script>
+    <script src="../../shared/grammar-db-resources.js"></script>
+    <script src="../../shared/grammar-db-repo.js"></script>
+    <script>
+        // ================= 数据区域 (共享数据库入口) =================
+        const grammarDbRepo = window.GrammarDB && window.GrammarDB.repo ? window.GrammarDB.repo : null;
+        const extraExampleData = grammarDbRepo ? grammarDbRepo.getExtraExamples() : (window.extraExampleData || {});
+        const comparisonData = grammarDbRepo ? grammarDbRepo.getComparisonNotes() : (window.comparisonData || {});
+        const grammarData = grammarDbRepo ? grammarDbRepo.getSearchDataset() : [];
+
+        // ================= 逻辑 =================
+        let favorites = JSON.parse(localStorage.getItem('n1_favorites_v2')) || [];
+        let showFavOnly = false;
+        let currentDetailId = null;
+        let previousViewBeforeExamples = 'search'; 
+        let currentBookName = ""; 
+
+        window.onload = function() {
+            initFilters();
+            renderGrammarList(); 
+            initBookshelf();
+            initHistory();
+        };
+
+        function initHistory() {
+            try {
+                history.replaceState({view: 'root'}, '');
+                history.pushState({view: 'search'}, '');
+            } catch (e) {
+                console.warn('History API not fully supported in this environment.');
+            }
+            
+            window.onpopstate = function(event) {
+                const state = event.state;
+                document.body.classList.remove('no-scroll');
+                
+                if (!state || state.view === 'root') {
+                    try { history.pushState({view: 'search'}, ''); } catch(e) {}
+                    navigateTo('search', {}, true); 
+                    return;
+                }
+                
+                document.querySelectorAll('.modal').forEach(el => el.style.display = 'none');
+                document.querySelectorAll('.view-section').forEach(el => el.style.display = 'none');
+
+                if (state.view === 'modal') {
+                    if (state.bgView) document.getElementById(state.bgView + 'View').style.display = 'block';
+                    else document.getElementById('searchView').style.display = 'block';
+                    
+                    if (state.id) showDetail(state.id, true);
+                    else if (state.compareIds) startCompare(state.compareIds[0], state.compareIds[1], true);
+                } else if (state.view === 'examples') {
+                     showMoreExamples(state.id, true);
+                } else {
+                    navigateTo(state.view, state.params, true);
+                }
+            };
+        }
+
+        // --- 视图导航控制器 ---
+        function navigateTo(viewName, params = {}, isFromHistory = false) {
+            if (!isFromHistory) {
+                try { history.pushState({view: viewName, params: params}, '', ''); } catch(e) {}
+            }
+            document.querySelectorAll('.view-section').forEach(el => el.style.display = 'none');
+            window.scrollTo(0, 0);
+
+            const hideAllNav = () => {
+                ['navHomeBtn', 'navBookshelfBtn', 'navFavBtn', 'navLeftBtn', 'navBackBtn'].forEach(id => {
+                    const el = document.getElementById(id);
+                    if(el) el.style.display = 'none';
+                });
+            };
+            hideAllNav();
+
+            switch(viewName) {
+                case 'search':
+                    document.getElementById('searchView').style.display = 'block';
+                    document.getElementById('navHomeBtn').style.display = 'inline-flex';
+                    document.getElementById('navBookshelfBtn').style.display = 'inline-flex';
+                    document.getElementById('navFavBtn').style.display = 'inline-flex';
+                    renderGrammarList(); 
+                    break;
+                case 'favorites': 
+                    renderFavorites();
+                    document.getElementById('favoritesView').style.display = 'block';
+                    document.getElementById('navBackBtn').style.display = 'inline-flex';
+                    break;
+                case 'bookshelf':
+                    document.getElementById('bookshelfView').style.display = 'block';
+                    document.getElementById('navBackBtn').style.display = 'inline-flex';
+                    break;
+                case 'bookDetail':
+                    currentBookName = params.bookName;
+                    renderBookDetail(currentBookName);
+                    document.getElementById('bookDetailView').style.display = 'block';
+                    const leftBtn = document.getElementById('navLeftBtn');
+                    leftBtn.innerText = '⬅ 返回书架';
+                    leftBtn.onclick = () => navigateTo('bookshelf');
+                    leftBtn.style.display = 'inline-flex';
+                    document.getElementById('navBackBtn').style.display = 'inline-flex';
+                    break;
+                case 'lessonDetail': 
+                    renderLessonDetail(params.lessonName);
+                    document.getElementById('lessonDetailView').style.display = 'block';
+                    const leftBtn2 = document.getElementById('navLeftBtn');
+                    leftBtn2.innerText = '⬅ 返回目录';
+                    leftBtn2.onclick = () => navigateTo('bookDetail', {bookName: currentBookName});
+                    leftBtn2.style.display = 'inline-flex';
+                    document.getElementById('navBackBtn').style.display = 'inline-flex';
+                    break;
+            }
+        }
+
+        function renderFavorites() {
+            const grid = document.getElementById('favoritesGrid');
+            grid.innerHTML = '';
+            
+            if (favorites.length === 0) {
+                document.getElementById('emptyFavState').style.display = 'block';
+                return;
+            }
+            document.getElementById('emptyFavState').style.display = 'none';
+
+            const favItems = grammarData.filter(item => favorites.includes(item.id));
+
+            favItems.forEach(item => {
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.onclick = () => showDetail(item.id);
+                const levelClass = getLevelBadgeClass(item.level);
+                card.innerHTML = `
+                    <div class="card-star is-fav" onclick="toggleFavorite(${item.id}, event)">★</div>
+                    <div class="card-header">
+                        <h3 class="card-title">${item.title}</h3>
+                        <div class="badge-group"><span class="card-badge ${levelClass}">${item.level}</span><span class="card-badge">${item.lesson}</span></div>
+                    </div>
+                    <div class="card-meaning">${item.meaning}</div>
+                    <div class="card-connection">${item.connection}</div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        // --- 书架与详情逻辑 ---
+        function initBookshelf() {
+            const books = [...new Set(grammarData.map(item => item.book))];
+            if (!books.includes('其他')) books.push('其他');
+            const container = document.getElementById('booksGrid');
+            container.innerHTML = books.map(book => {
+                const count = grammarData.filter(i => i.book === book).length;
+                const lessonCount = new Set(grammarData.filter(i => i.book === book).flatMap(i => i.lesson.split('/').map(s=>s.trim()))).size;
+                return `
+                <div class="book-card" onclick="navigateTo('bookDetail', {bookName: '${book}'})">
+                    <div class="book-icon-new">📖</div>
+                    <div class="book-title-new">${book}</div>
+                    <div class="book-info-new">共 ${lessonCount} 课 · ${count} 项</div>
+                </div>
+            `}).join('');
+        }
+
+        function renderBookDetail(bookName) {
+            const bookItems = grammarData.filter(i => i.book === bookName);
+            const lessons = [...new Set(bookItems.flatMap(i => i.lesson.split('/').map(s=>s.trim())))];
+            lessons.sort((a, b) => parseInt(a.replace(/\D/g,'')) - parseInt(b.replace(/\D/g,'')));
+
+            document.getElementById('crumbBookName').innerText = bookName;
+
+            const grid = document.getElementById('lessonListGrid');
+            grid.innerHTML = lessons.map(lesson => {
+                const count = bookItems.filter(i => i.lesson.split('/').map(s=>s.trim()).includes(lesson)).length;
+                return `
+                    <div class="lesson-row" onclick="navigateTo('lessonDetail', {lessonName: '${lesson}'})">
+                        <div class="lesson-left">
+                            <div class="lesson-icon">🔖</div>
+                            <div class="lesson-title">${lesson}</div>
+                        </div>
+                        <div class="lesson-right">
+                            <span>${count} 项</span>
+                            <span>›</span>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function renderLessonDetail(lessonName) {
+            document.getElementById('crumbBookNameInLesson').innerText = currentBookName;
+            document.getElementById('crumbLessonName').innerText = lessonName;
+            
+            const items = grammarData.filter(i => i.book === currentBookName && i.lesson.split('/').map(s=>s.trim()).includes(lessonName));
+
+            const grid = document.getElementById('lessonGrid');
+            grid.innerHTML = '';
+            
+            items.forEach(item => {
+                const isFav = favorites.includes(item.id);
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.onclick = () => showDetail(item.id);
+                const levelClass = getLevelBadgeClass(item.level);
+                card.innerHTML = `
+                    <div class="card-star ${isFav?'is-fav':''}" onclick="toggleFavorite(${item.id}, event)">${isFav?'★':'☆'}</div>
+                    <div class="card-header">
+                        <h3 class="card-title">${item.title}</h3>
+                        <div class="badge-group"><span class="card-badge ${levelClass}">${item.level}</span></div>
+                    </div>
+                    <div class="card-meaning">${item.meaning}</div>
+                    <div class="card-connection">${item.connection}</div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        // --- 搜索与渲染逻辑 (首页) ---
+        function renderGrammarList() {
+            const searchInput = document.getElementById('searchInput');
+            const normalize = (str) => str ? str.replace(/\u301C/g, '\uFF5E') : '';
+            const searchText = normalize(searchInput.value.toLowerCase().trim());
+            
+            const clearBtn = document.getElementById('searchClear');
+            if(clearBtn) clearBtn.style.display = searchText ? 'flex' : 'none';
+
+            const filterBook = document.getElementById('bookFilter').value;
+            const filterLevel = document.getElementById('levelFilter').value;
+            const grid = document.getElementById('grammarGrid');
+            
+            grid.innerHTML = '';
+            
+            if (searchText === '') {
+                document.getElementById('emptyState').style.display = 'none';
+                return;
+            }
+
+            const filtered = grammarData.filter(item => {
+                const matchBook = filterBook === 'all' || item.book === filterBook;
+                const matchLevel = filterLevel === 'all' || item.level === filterLevel;
+                
+                const checkMultiStart = (field, text) => {
+                    if (!field) return false;
+                    return normalize(field.toLowerCase()).split('/').some(part => part.trim().startsWith(text));
+                };
+
+                const matchSearch = normalize(item.title.toLowerCase()).includes(searchText) || 
+                                    normalize(item.meaning).includes(searchText) || 
+                                    (item.romaji && normalize(item.romaji.toLowerCase()).includes(searchText)) || 
+                                    (item.kana && normalize(item.kana).includes(searchText)) ||
+                                    (item.tags && normalize(item.tags).includes(searchText));
+                return matchBook && matchLevel && matchSearch;
+            });
+
+            filtered.sort((a, b) => {
+                const cleanTitle = (t) => t.toLowerCase().replace(/^～/, '');
+                const checkMultiStart = (field, text) => {
+                    if (!field) return false;
+                    return field.toLowerCase().split('/').some(part => part.trim().startsWith(text));
+                };
+
+                const aTitle = cleanTitle(a.title);
+                const bTitle = cleanTitle(b.title);
+                const aKana = a.kana || '';
+                const bKana = b.kana || '';
+                const aRomaji = a.romaji || '';
+                const bRomaji = b.romaji || '';
+
+                if (aTitle === searchText && bTitle !== searchText) return -1;
+                if (aTitle !== searchText && bTitle === searchText) return 1;
+
+                const checkMultiExact = (field, text) => {
+                    if(!field) return false;
+                    return field.toLowerCase().split('/').some(p => p.trim() === text);
+                };
+                
+                const aKanaExact = checkMultiExact(aKana, searchText);
+                const bKanaExact = checkMultiExact(bKana, searchText);
+                if (aKanaExact && !bKanaExact) return -1;
+                if (!aKanaExact && bKanaExact) return 1;
+
+                const aRomajiExact = checkMultiExact(aRomaji, searchText);
+                const bRomajiExact = checkMultiExact(bRomaji, searchText);
+                if (aRomajiExact && !bRomajiExact) return -1;
+                if (!aRomajiExact && bRomajiExact) return 1;
+
+                const aStarts = aTitle.startsWith(searchText) || checkMultiStart(aKana, searchText) || checkMultiStart(aRomaji, searchText);
+                const bStarts = bTitle.startsWith(searchText) || checkMultiStart(bKana, searchText) || checkMultiStart(bRomaji, searchText);
+
+                if (aStarts && !bStarts) return -1;
+                if (!aStarts && bStarts) return 1;
+
+                return 0;
+            });
+
+            if (filtered.length === 0) {
+                document.getElementById('emptyState').style.display = 'block';
+                return;
+            }
+            document.getElementById('emptyState').style.display = 'none';
+
+            filtered.forEach(item => {
+                const isFav = favorites.includes(item.id);
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.onclick = () => showDetail(item.id);
+                const levelClass = getLevelBadgeClass(item.level);
+                card.innerHTML = `
+                    <div class="card-star ${isFav?'is-fav':''}" onclick="toggleFavorite(${item.id}, event)">${isFav?'★':'☆'}</div>
+                    <div class="card-header">
+                        <h3 class="card-title">${item.title}</h3>
+                        <div class="badge-group"><span class="card-badge ${levelClass}">${item.level}</span><span class="card-badge">${item.lesson}</span></div>
+                    </div>
+                    <div class="card-meaning">${item.meaning}</div>
+                    <div class="card-connection">${item.connection}</div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        // --- 辅助功能 ---
+        function clearSearch() {
+            const input = document.getElementById('searchInput');
+            input.value = '';
+            renderGrammarList();
+            input.focus();
+        }
+
+        function initFilters() {
+            const books = [...new Set(grammarData.map(item => item.book))];
+            if (!books.includes('其他')) books.push('其他');
+            const select = document.getElementById('bookFilter');
+            books.forEach(b => { const opt = document.createElement('option'); opt.value = b; opt.innerText = b; select.appendChild(opt); });
+        }
+
+        function toggleFavorite(id, e) {
+            if(e) e.stopPropagation();
+            const idx = favorites.indexOf(id);
+            idx === -1 ? favorites.push(id) : favorites.splice(idx, 1);
+            localStorage.setItem('n1_favorites_v2', JSON.stringify(favorites));
+            if(currentDetailId === id) updateDetailFavBtn(id);
+            
+            if(document.getElementById('searchView').style.display === 'block') renderGrammarList();
+            if(document.getElementById('favoritesView').style.display === 'block') renderFavorites(); 
+            if(document.getElementById('lessonDetailView').style.display === 'block') renderLessonDetail(document.getElementById('crumbLessonName').innerText);
+        }
+
+        function toggleDetailFav() {
+            if(currentDetailId) toggleFavorite(currentDetailId);
+        }
+
+        function getLevelBadgeClass(level) {
+            if (level === 'N1') return 'bg-n1';
+            if (level === 'N2') return 'bg-n2';
+            if (level === 'N3') return 'bg-n3';
+            return 'bg-other';
+        }
+
+        function goToLesson(book, lesson) {
+            currentBookName = book;
+            document.getElementById('detailModal').style.display = 'none';
+            document.body.classList.remove('no-scroll');
+            navigateTo('lessonDetail', {lessonName: lesson});
+        }
+
+        function showDetail(id, isFromHistory = false) {
+            document.body.classList.add('no-scroll');
+            if (!isFromHistory) {
+                let bgView = 'search';
+                if (document.getElementById('favoritesView').style.display === 'block') bgView = 'favorites';
+                else if (document.getElementById('bookshelfView').style.display === 'block') bgView = 'bookshelf';
+                else if (document.getElementById('bookDetailView').style.display === 'block') bgView = 'bookDetail';
+                else if (document.getElementById('lessonDetailView').style.display === 'block') bgView = 'lessonDetail';
+                try { history.pushState({view: 'modal', id: id, bgView: bgView}, '', ''); } catch(e) {}
+            }
+            const item = grammarData.find(g => g.id === id);
+            currentDetailId = id;
+            document.getElementById('modalTitle').innerText = item.title;
+            const levelClass = getLevelBadgeClass(item.level);
+            
+            const lessonBadges = item.lesson.split('/').map(l => l.trim()).map(l => `
+                <span class="card-badge" style="cursor:pointer; color:var(--accent-sky); background:var(--surface); border:1px solid var(--border-strong);" onclick="goToLesson('${item.book}', '${l}')">
+                    ${item.book} ${l} ➜
+                </span>
+            `).join(' ');
+
+            document.getElementById('modalBadges').innerHTML = `
+                <span class="card-badge ${levelClass}">${item.level}</span> 
+                ${lessonBadges}
+            `;
+            
+            document.getElementById('modalMeaning').innerText = item.meaning;
+            document.getElementById('modalConnection').innerText = item.connection;
+            document.getElementById('modalDesc').innerHTML = item.desc;
+            updateDetailFavBtn(id);
+            document.getElementById('modalExamples').innerHTML = item.examples.map(ex => `<div class="example-card"><div class="jp">${ex.jp}</div><div class="cn">${ex.cn}</div></div>`).join('');
+
+            const moreBtn = document.getElementById('viewMoreExamplesBtn');
+            if (moreBtn) {
+                if (typeof extraExampleData !== 'undefined' && extraExampleData[id]) {
+                    moreBtn.style.display = 'inline-flex';
+                } else {
+                    moreBtn.style.display = 'none';
+                }
+            }
+
+            const rDiv = document.getElementById('modalRelatedArea');
+            const hasRelated = item.related && item.related.length;
+            const hasCompare = item.compareWith && item.compareWith.length;
+
+            if (hasRelated || hasCompare) {
+                rDiv.style.display = 'block';
+                let html = '';
+
+                if (hasRelated) {
+                    html += item.related.map(rid => {
+                        const r = grammarData.find(i => i.id === rid);
+                        return r ? `<div class="related-tag" onclick="showDetail(${r.id})">🔗 ${r.title}</div>` : '';
+                    }).join('');
+                }
+
+                if (hasCompare) {
+                    html += item.compareWith.map(cid => {
+                        const c = grammarData.find(i => i.id === cid);
+                        return c ? `<div class="related-tag" style="border-color:rgba(212, 122, 140, 0.4); color:var(--accent); background:var(--surface);" onclick="startCompare(${item.id}, ${c.id})">⚔️ vs ${c.title}</div>` : '';
+                    }).join('');
+                }
+
+                document.getElementById('modalRelatedTags').innerHTML = html;
+            } else {
+                rDiv.style.display = 'none';
+            }
+            const modal = document.getElementById('detailModal');
+            modal.style.display = 'block';
+            const content = modal.querySelector('.modal-content');
+            if(content) content.scrollTop = 0;
+        }
+
+        function showMoreExamples(id, isFromHistory = false) {
+            if (!isFromHistory) {
+                try { history.pushState({view: 'examples', id: id}, '', ''); } catch(e) {}
+            }
+            const item = grammarData.find(i => i.id === id);
+            const extraExamples = (typeof extraExampleData !== 'undefined') ? extraExampleData[id] : null;
+            if (!item || !extraExamples) return;
+
+            if (document.getElementById('searchView').style.display === 'block') previousViewBeforeExamples = 'search';
+            else if (document.getElementById('favoritesView').style.display === 'block') previousViewBeforeExamples = 'favorites';
+            else if (document.getElementById('bookshelfView').style.display === 'block') previousViewBeforeExamples = 'bookshelf';
+            else if (document.getElementById('bookDetailView').style.display === 'block') previousViewBeforeExamples = 'bookDetail';
+            else if (document.getElementById('lessonDetailView').style.display === 'block') previousViewBeforeExamples = 'lessonDetail';
+
+            document.getElementById('detailModal').style.display = 'none';
+            document.querySelectorAll('.view-section').forEach(el => el.style.display = 'none');
+            document.getElementById('examplesView').style.display = 'block';
+            window.scrollTo(0, 0);
+
+            document.getElementById('exViewTitle').innerText = item.title;
+            document.getElementById('exViewMeaning').innerText = item.meaning;
+            
+            const list = document.getElementById('extraExamplesList');
+            const allExamples = [...item.examples, ...extraExamples];
+            
+            list.innerHTML = allExamples.map((ex) => `
+                <div class="example-card" style="margin-bottom: 12px; border-left-width: 4px;">
+                    <div style="margin-bottom: 6px; font-weight: 500; color: var(--text); font-size: 1.05rem; font-family: var(--font-display); letter-spacing: 0.02em;">${ex.jp}</div>
+                    <div style="color: var(--muted); font-size: 0.9rem; line-height: 1.6;">${ex.cn}</div>
+                </div>
+            `).join('');
+            
+            document.getElementById('navHomeBtn').style.display = 'none';
+            document.getElementById('navBookshelfBtn').style.display = 'none';
+            document.getElementById('navLeftBtn').style.display = 'none';
+            document.getElementById('navFavBtn').style.display = 'none';
+            document.getElementById('navBackBtn').style.display = 'none';
+        }
+
+        function updateDetailFavBtn(id) {
+            const isFav = favorites.includes(id);
+            const btn = document.getElementById('modalFavBtn');
+            btn.innerText = isFav ? '★' : '☆';
+            btn.style.color = isFav ? '#d4a373' : 'var(--border-strong)';
+        }
+
+        function closeModal(id) { 
+            document.body.classList.remove('no-scroll');
+            history.back(); 
+        }
+
+        window.onclick = e => { 
+            if(e.target.classList.contains('modal')) {
+                document.body.classList.remove('no-scroll');
+                history.back();
+            } 
+        };
+
+        function startCompare(id1, id2, isFromHistory = false) {
+             document.body.classList.add('no-scroll');
+             if (!isFromHistory) {
+                let bgView = 'search';
+                if (document.getElementById('favoritesView').style.display === 'block') bgView = 'favorites';
+                else if (document.getElementById('bookshelfView').style.display === 'block') bgView = 'bookshelf';
+                else if (document.getElementById('bookDetailView').style.display === 'block') bgView = 'bookDetail';
+                else if (document.getElementById('lessonDetailView').style.display === 'block') bgView = 'lessonDetail';
+                try { history.pushState({view: 'modal', compareIds: [id1, id2], bgView: bgView}, '', ''); } catch(e) {}
+             }
+             const i1 = grammarData.find(g=>g.id===id1);
+             const i2 = grammarData.find(g=>g.id===id2);
+             if(!i1 || !i2) return;
+             
+             const getPrefix = (str) => {
+                 const parts = str.split('+');
+                 return parts.length > 1 ? parts[0].trim() : str;
+             };
+             const p1 = getPrefix(i1.connection);
+             const p2 = getPrefix(i2.connection);
+             
+             const formatConn = (fullStr, prefix) => {
+                 const isDiff = p1 !== p2;
+                 const cls = isDiff ? 'conn-diff' : 'conn-same';
+                 if(fullStr.startsWith(prefix)) {
+                     const rest = fullStr.substring(prefix.length);
+                     return `<span class="${cls}">${prefix}</span>${rest}`;
+                 }
+                 return fullStr;
+             };
+             
+             const conn1Html = formatConn(i1.connection, p1);
+             const conn2Html = formatConn(i2.connection, p2);
+
+             const ex1 = i1.examples[0] || {jp:'暂无例句', cn:''};
+             const ex2 = i2.examples[0] || {jp:'暂无例句', cn:''};
+
+             const compareKey = [id1, id2].sort((a,b) => a-b).join('-');
+             const compareNote = comparisonData[compareKey];
+
+             const html = `
+                <div class="compare-header">
+                    <div class="compare-col-title">${i1.title}</div>
+                    <div class="compare-vs-badge">VS</div>
+                    <div class="compare-col-title">${i2.title}</div>
+                </div>
+                <div class="compare-body">
+                    <div class="compare-section">
+                        <div class="compare-section-label">意味</div>
+                        <div class="compare-row">
+                            <div class="compare-card compare-center compare-meaning-text">${i1.meaning}</div>
+                            <div class="compare-card compare-center compare-meaning-text">${i2.meaning}</div>
+                        </div>
+                    </div>
+                    <div class="compare-section">
+                        <div class="compare-section-label">接续</div>
+                        <div class="compare-row">
+                            <div class="compare-card compare-center"><span class="code-style">${conn1Html}</span></div>
+                            <div class="compare-card compare-center"><span class="code-style">${conn2Html}</span></div>
+                        </div>
+                    </div>
+                    <div class="compare-section">
+                        <div class="compare-section-label">解説</div>
+                        <div class="compare-row">
+                            <div class="compare-card compare-desc">${i1.desc}</div>
+                            <div class="compare-card compare-desc">${i2.desc}</div>
+                        </div>
+                    </div>
+                    ${compareNote ? `
+                    <div class="compare-section">
+                        <div class="compare-section-label">辨析</div>
+                        <div class="compare-card compare-desc" style="width:100%; box-sizing:border-box;">${compareNote}</div>
+                    </div>
+                    ` : ''}
+                    <div class="compare-section">
+                        <div class="compare-section-label">场景对比</div>
+                        <div class="compare-row">
+                            <div class="compare-card" style="padding:0; overflow:hidden;">
+                                <div class="scene-card" style="border:none; border-left:3px solid var(--accent-sky); height:100%; box-sizing:border-box;">
+                                    <div class="scene-jp">${ex1.jp}</div>
+                                    <div class="scene-cn">${ex1.cn}</div>
+                                </div>
+                            </div>
+                            <div class="compare-card" style="padding:0; overflow:hidden;">
+                                <div class="scene-card" style="border:none; border-left:3px solid var(--accent); height:100%; box-sizing:border-box;">
+                                    <div class="scene-jp">${ex2.jp}</div>
+                                    <div class="scene-cn">${ex2.cn}</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+             `;
+             
+             document.getElementById('compareContainer').innerHTML = html;
+             document.getElementById('compareModal').style.display = 'block';
+        }
+    </script>
+</body>
+</html>

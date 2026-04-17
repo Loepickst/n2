@@ -1,0 +1,796 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>日本語読解 - 八百比丘尼</title>
+    <style>
+        /* 引入毛笔字体 Yuji Syuku 和 常规衬线体 Noto Serif JP */
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;600&family=Yuji+Syuku&display=swap');
+
+        :root {
+            /* 传统和色（日本の伝統色） */
+            --bg-color: #e8e4d9; /* 稍暗的和纸背景底色 */
+            --paper-color: #f6f3eb; /* 主内容区的和纸色 */
+            --text-color: #2b2b2b; /* 墨色 (Sumi) */
+            --accent-color: #c13224; /* 朱色 (Shu) - 传统印章红 */
+            --sub-color: #787878; /* 灰墨 */
+            --popup-bg: #3a3838; /* 深墨色 */
+            --chinese-font: "Microsoft YaHei", "PingFang SC", sans-serif;
+            --japanese-font: 'Noto Serif JP', serif;
+            --brush-font: 'Yuji Syuku', serif; /* 毛笔字体 */
+        }
+
+        body {
+            background-color: var(--bg-color);
+            /* 和纸噪点纹理 (Washi Paper Texture) */
+            background-image: url("data:image/svg+xml,%3Csvg width='200' height='200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.04' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.08'/%3E%3C/svg%3E");
+            color: var(--text-color);
+            font-family: var(--japanese-font);
+            margin: 0;
+            padding: 100px 15px 120px; 
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* 顶部控制栏 - 宣纸磨砂质感 */
+        .top-bar {
+            position: fixed; top: 0; left: 0; right: 0;
+            height: 60px; 
+            background: rgba(246, 243, 235, 0.85);
+            backdrop-filter: blur(8px);
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 0 25px; z-index: 1000;
+            border-bottom: 1px solid rgba(43, 43, 43, 0.1);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.03);
+        }
+
+        #today-date { 
+            font-family: var(--brush-font); /* 日期使用毛笔字 */
+            font-size: 1.1rem; 
+            color: var(--text-color); 
+        }
+
+        .toggle-btn {
+            background: transparent; 
+            color: var(--text-color); 
+            border: 1px solid var(--text-color);
+            padding: 4px 16px; 
+            border-radius: 2px; /* 取消大圆角，改为传统方章感 */
+            font-size: 0.9rem;
+            font-family: var(--brush-font); 
+            cursor: pointer; 
+            transition: 0.3s;
+            box-shadow: 2px 2px 0 rgba(43,43,43,0.1); /* 传统立体阴影 */
+        }
+        @media (hover: hover) {
+            .toggle-btn:hover { background: var(--text-color); color: var(--paper-color); }
+        }
+        .toggle-btn.active { 
+            background: var(--text-color); 
+            color: var(--paper-color); 
+            box-shadow: 0 0 0 rgba(43,43,43,0);
+            transform: translate(2px, 2px);
+        }
+
+        /* 主容器 - 书卷质感 */
+        .container {
+            max-width: 720px; width: 100%;
+            background: var(--paper-color); 
+            padding: 60px 40px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+            border-radius: 4px;
+            position: relative;
+            /* 给容器内部也加上和纸纹理 */
+            background-image: url("data:image/svg+xml,%3Csvg width='200' height='200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.04' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.05'/%3E%3C/svg%3E");
+        }
+
+        /* 顶部装饰线 */
+        .container::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 4px;
+            background: var(--accent-color);
+            border-radius: 4px 4px 0 0;
+        }
+
+        /* 标题区域 */
+        .header-title { 
+            text-align: center; 
+            margin-bottom: 60px; 
+            position: relative;
+            padding: 30px 20px; /* 新增内边距：为背景图留出一定的上下空间 */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* ✨ 新增：标题背景图样式 */
+        .title-bg {
+            position: absolute;
+            top: 50%;
+            /* 距离左侧的距离根据容器宽度动态调整 */
+            left: max(2%, calc(15% - 20px)); 
+            transform: translateY(-50%);
+            /* 宽度随视口宽度缩放，但有最大值限制 */
+            width: clamp(120px, 25vw, 260px); 
+            height: auto; 
+            max-height: 280px; 
+            object-fit: contain;
+            z-index: 0; /* 放置在底层 */
+            pointer-events: none; /* 防止图片挡住点击 */
+            opacity: 0.85; /* 图片透明度，避免抢占文字焦点 */
+        }
+
+        /* ✨ 新增：包裹标题文字的容器，保证层级在图片上方 */
+        .title-content {
+            position: relative;
+            z-index: 1; /* 层级高于背景图 */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* 红色印章风格标记 */
+        .stamp-mark {
+            display: inline-block;
+            border: 2px solid var(--accent-color);
+            color: var(--accent-color);
+            font-family: var(--brush-font);
+            font-size: 0.9rem;
+            padding: 2px 6px;
+            border-radius: 4px;
+            margin-bottom: 15px;
+            transform: rotate(-3deg); /* 轻微倾斜，更显真实印章感 */
+            letter-spacing: 2px;
+        }
+
+        .header-title h2 {
+            font-family: var(--brush-font); /* 毛笔大标题 */
+            font-size: 2.2rem;
+            color: var(--text-color);
+            font-weight: normal;
+            letter-spacing: 0.15em;
+            margin: 0 0 10px 0;
+            text-shadow: 0 2px 5px rgba(246, 243, 235, 0.9); /* 增加和纸颜色的文字发光，防止被背景图干扰 */
+        }
+
+        /* 阅读区块 */
+        .reading-block {
+            margin-bottom: 35px;
+            position: relative;
+        }
+
+        p.japanese {
+            /* 使用 clamp 动态缩放：最小 1.05rem，随视口变化，最大 1.25rem */
+            font-size: clamp(1.05rem, 3vw, 1.25rem); 
+            line-height: 2.6; 
+            text-align: justify; 
+            margin: 0;
+            letter-spacing: 0.05em;
+            font-weight: 400;
+        }
+
+        ruby rt { 
+            font-size: 0.5em; 
+            color: var(--sub-color); 
+            letter-spacing: 0; 
+            font-family: var(--japanese-font);
+        }
+
+        /* 译文（黑体中文，带有一点古风装裱感） */
+        .translation {
+            display: none; 
+            margin-top: 15px; 
+            /* 译文动态缩放：最小 0.85rem，随视口变化，最大 0.95rem */
+            font-size: clamp(0.85rem, 2.5vw, 0.95rem);
+            color: #4a4a4a; 
+            line-height: 2; 
+            padding: 15px 20px;
+            background-color: rgba(0, 0, 0, 0.03); 
+            font-family: var(--chinese-font);
+            border-left: 4px solid var(--accent-color); /* 朱红色左边框 */
+            text-align: justify;
+        }
+        .translation::before { 
+            content: "【訳文】"; 
+            display: block; 
+            font-size: 0.8rem; 
+            color: var(--accent-color); 
+            margin-bottom: 5px; 
+            font-family: var(--brush-font); 
+        }
+
+        /* 重点词汇样式 - 朱红虚线 */
+        .vocab-word {
+            color: var(--text-color);
+            text-decoration: underline;
+            text-decoration-style: dotted;
+            text-decoration-color: var(--accent-color);
+            text-underline-offset: 4px;
+            text-decoration-thickness: 2px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: color 0.2s;
+        }
+        .vocab-word:hover {
+            color: var(--accent-color);
+        }
+
+        /* 动态气泡容器 - 泼墨风感 */
+        #smart-tooltip {
+            position: absolute; z-index: 2000;
+            background: var(--popup-bg); color: #f6f3eb;
+            padding: 12px 18px; border-radius: 4px; /* 较硬的圆角 */
+            font-size: 0.9rem; font-family: var(--chinese-font);
+            line-height: 1.6; max-width: 280px; min-width: 140px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.4);
+            border-top: 2px solid var(--accent-color);
+            display: none; opacity: 0; pointer-events: none;
+        }
+        #smart-tooltip::after {
+            content: ""; position: absolute; top: 100%;
+            border: 8px solid transparent; border-top-color: var(--popup-bg);
+        }
+
+        /* Audio Player - 传统配色版 */
+        .audio-wrapper {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            z-index: 2000;
+            background: rgba(246, 243, 235, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 15px 20px 25px 20px;
+            display: flex;
+            justify-content: center;
+            border-top: 1px solid rgba(43, 43, 43, 0.1);
+            box-shadow: 0 -4px 20px rgba(0,0,0,0.05);
+        }
+
+        .audio-player {
+            display: flex;
+            align-items: center;
+            width: 100%;
+            max-width: 600px;
+        }
+
+        .play-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: var(--accent-color); /* 朱红色播放键 */
+            color: var(--paper-color);
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            margin-right: 15px;
+            flex-shrink: 0;
+            transition: transform 0.2s;
+            padding: 0;
+            box-shadow: 0 4px 10px rgba(193, 50, 36, 0.3);
+        }
+
+        .play-btn:active { transform: scale(0.95); }
+        .play-btn svg { width: 16px; height: 16px; fill: currentColor; margin-left: 2px; }
+        .play-btn.playing svg { margin-left: 0; }
+
+        .progress-container {
+            flex-grow: 1;
+            height: 24px; 
+            display: flex;
+            align-items: center;
+            margin-right: 15px;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .progress-bg {
+            width: 100%;
+            height: 4px;
+            background-color: rgba(43, 43, 43, 0.15); /* 墨色半透明底 */
+            border-radius: 2px;
+            position: relative;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background-color: var(--text-color); /* 墨色进度条 */
+            width: 0%;
+            border-radius: 2px;
+            position: relative;
+        }
+
+        /* The draggable thumb (红色小圆点，类似红日) */
+        .progress-bar::after {
+            content: "";
+            position: absolute;
+            right: -6px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 12px;
+            height: 12px;
+            background-color: var(--accent-color);
+            border-radius: 50%;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .time-display {
+            font-size: 0.75rem;
+            color: var(--sub-color);
+            width: 75px; 
+            text-align: right;
+            font-family: monospace;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .loop-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 8px;
+            margin-left: 8px;
+            color: var(--text-color);
+            opacity: 0.4;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .loop-btn.active {
+            opacity: 1;
+            color: var(--accent-color);
+        }
+        
+        .loop-btn svg {
+            width: 20px;
+            height: 20px;
+            fill: currentColor;
+        }
+
+        .footer { 
+            margin-top: 60px; 
+            color: #b0a8a6; 
+            font-size: 0.85rem; 
+            letter-spacing: 4px; 
+            font-family: var(--brush-font);
+        }
+
+        @media (max-width: 768px) {
+            .container { padding: 50px 30px; }
+            /* 平板尺寸下稍微缩小标题字体，避免重叠 */
+            .header-title h2 { font-size: 1.8rem; }
+        }
+
+        @media (max-width: 480px) {
+            body { padding: 80px 10px 100px; } /* 缩小页面整体 padding */
+            .container { padding: 30px 15px; } /* 缩小容器内边距 */
+            
+            .title-bg { 
+                position: static; /* 手机端取消绝对定位，避免重叠或超出屏幕 */
+                transform: none;
+                margin-bottom: 20px;
+                width: 140px; /* 手机端固定大小 */
+            }
+            
+            .header-title {
+                padding: 10px;
+                margin-bottom: 30px;
+            }
+
+            .header-title h2 { font-size: 1.5rem; letter-spacing: 0.1em; } /* 进一步缩小标题 */
+            .stamp-mark { font-size: 0.8rem; padding: 2px 4px; }
+            
+            p.japanese { 
+                line-height: 2.2; /* 稍微缩小行高 */
+                letter-spacing: 0.02em;
+            }
+            
+            .translation {
+                padding: 10px 15px;
+            }
+        }
+
+    </style>
+    <link rel="stylesheet" href="../../../shared/header-back-control.css">
+</head>
+<body>
+
+<div class="top-bar">
+    <a href="read_folklore.html" class="header-back-control">戻る</a>
+    <div id="today-date">日本昔話</div>
+    <button id="trans-btn" class="toggle-btn" onclick="toggleTranslation()">訳文</button>
+</div>
+
+<div class="container">
+   <div class="header-title">
+    <!-- ⬇️ 放在这里的图片将作为标题的底纹背景。替换 src 里的内容为您自己的透明底图片路径 -->
+    <img class="title-bg" src="image/1.png" alt="标题背景" onerror="this.style.display='none';">
+    
+    <div class="title-content">
+        <span class="stamp-mark">昔話</span>
+        <h2><ruby>八<rt>やお</rt></ruby><ruby>百<rt>び</rt></ruby><ruby>比<rt>く</rt></ruby><ruby>丘<rt>に</rt></ruby><ruby>尼<rt>に</rt></ruby></h2>
+        <span style="color: var(--sub-color); font-size: 0.85rem; font-family: var(--chinese-font); text-shadow: 0 1px 3px rgba(246, 243, 235, 0.9);">人魚の肉を食べた女</span>
+    </div>
+</div>
+
+<div class="reading-block">
+    <p class="japanese">
+        <ruby>若<rt>わか</rt></ruby><ruby>狭<rt>さ</rt></ruby>の<ruby>国<rt>くに</rt></ruby>(わかさのくに→<ruby>福<rt>ふく</rt></ruby><ruby>井<rt>い</rt></ruby><ruby>県<rt>けん</rt></ruby>)の<ruby>古<rt>ふる</rt></ruby>いほら<ruby>穴<rt>あな</rt></ruby>には、<ruby>人<rt>にん</rt></ruby><ruby>魚<rt>ぎょ</rt></ruby>の<ruby>肉<rt>にく</rt></ruby>を<ruby>食<rt>た</rt></ruby>べた<ruby>女<rt>おんな</rt></ruby>が<ruby>八<rt>はっ</rt></ruby><ruby>百<rt>ぴゃく</rt></ruby><ruby>才<rt>さい</rt></ruby>まで<ruby>生<rt>い</rt></ruby>きて<ruby>身<rt>み</rt></ruby>を<ruby>隠<rt>かく</rt></ruby>したとの<ruby>言<rt>い</rt></ruby>い<ruby>伝<rt>つた</rt></ruby>えがあります。
+    </p>
+    <div class="translation">
+        在若狭国（现在的福井县）古老的山洞里，流传着这样一个传说：一个吃了人鱼肉的女人一直活到了八百岁，并隐居在其中。
+    </div>
+</div>
+
+<div class="reading-block">
+    <p class="japanese">
+        その<ruby>女<rt>おんな</rt></ruby>は<ruby>尼<rt>あま</rt></ruby>さんになって<ruby>諸<rt>しょ</rt></ruby><ruby>国<rt>こく</rt></ruby>をまわったので、いつの<ruby>頃<rt>ころ</rt></ruby>からか<ruby>八<rt>はっ</rt></ruby><ruby>百<rt>ぴゃく</rt></ruby><ruby>才<rt>さい</rt></ruby>の<ruby>尼<rt>あま</rt></ruby>さんという<ruby>意<rt>い</rt></ruby><ruby>味<rt>み</rt></ruby>の、<ruby>八<rt>やお</rt></ruby><ruby>百<rt>び</rt></ruby><ruby>比<rt>く</rt></ruby><ruby>丘<rt>に</rt></ruby><ruby>尼<rt>に</rt></ruby>と<ruby>呼<rt>よ</rt></ruby>ばれるようになりました。
+    </p>
+    <div class="translation">
+        那个女人后来出家当了尼姑，云游了全国各地。不知从何时起，人们开始称她为“八百比丘尼”，意思就是活了八百岁的尼姑。
+    </div>
+</div>
+
+<div class="reading-block">
+    <p class="japanese">
+        さて、その<ruby>八<rt>やお</rt></ruby><ruby>百<rt>び</rt></ruby><ruby>比<rt>く</rt></ruby><ruby>丘<rt>に</rt></ruby><ruby>尼<rt>に</rt></ruby>がまだ<ruby>子<rt>こ</rt></ruby><ruby>供<rt>ども</rt></ruby>の<ruby>頃<rt>ころ</rt></ruby>、<ruby>近<rt>ちか</rt></ruby>くの<ruby>村<rt>むら</rt></ruby>の<ruby>長<rt>ちょう</rt></ruby><ruby>者<rt>じゃ</rt></ruby>たちが<ruby>集<rt>あつ</rt></ruby>まって<span class="vocab-word" data-info="宝比べ（たからくらべ）：斗宝，比试谁的宝物好。"><ruby>宝<rt>たから</rt></ruby><ruby>比<rt>くら</rt></ruby>べ</span>をした<ruby>事<rt>こと</rt></ruby>がありました。
+    </p>
+    <div class="translation">
+        话说当年，在这个八百比丘尼还是个小女孩的时候，附近村子里的富翁们曾聚在一起举行过一场“斗宝大会”。
+    </div>
+</div>
+
+<div class="reading-block">
+    <p class="japanese">
+        その<ruby>中<rt>なか</rt></ruby>に<ruby>見<rt>み</rt></ruby>た<ruby>事<rt>こと</rt></ruby>もない<ruby>白<rt>しろ</rt></ruby>いひげの<span class="vocab-word" data-info="上品（じょうひん）：高雅的，优雅的。"><ruby>上<rt>じょう</rt></ruby><ruby>品<rt>ひん</rt></ruby></span>な<ruby>老<rt>ろう</rt></ruby><ruby>人<rt>じん</rt></ruby>が<span class="vocab-word" data-info="仲間入り（なかまいり）：加入，成为伙伴。"><ruby>仲<rt>なか</rt></ruby><ruby>間<rt>ま</rt></ruby><ruby>入<rt>い</rt></ruby>り</span>をして、<ruby>一<rt>ひと</rt></ruby><ruby>通<rt>とお</rt></ruby>りみんなの<span class="vocab-word" data-info="宝自慢（たからじまん）：炫耀宝物。"><ruby>宝<rt>たから</rt></ruby><ruby>自<rt>じ</rt></ruby><ruby>慢<rt>まん</rt></ruby></span>が<ruby>終<rt>お</rt></ruby>わると、<ruby>自<rt>じ</rt></ruby><ruby>分<rt>ぶん</rt></ruby>の<ruby>屋<rt>や</rt></ruby><ruby>敷<rt>しき</rt></ruby>へ<ruby>長<rt>ちょう</rt></ruby><ruby>者<rt>じゃ</rt></ruby>たちを<ruby>招<rt>まね</rt></ruby>いたのです。
+    </p>
+    <div class="translation">
+        当时，一个从未见过的、长着白胡子、举止优雅的老人也加入了进来。等大家都炫耀完自己的宝贝后，这位老人便邀请富翁们去他的府邸做客。
+    </div>
+</div>
+
+<div class="reading-block">
+    <p class="japanese">
+        <ruby>浜<rt>はま</rt></ruby><ruby>辺<rt>べ</rt></ruby>には<ruby>美<rt>うつく</rt></ruby>しい<ruby>小<rt>こ</rt></ruby><ruby>舟<rt>ぶね</rt></ruby>が<ruby>用<rt>よう</rt></ruby><ruby>意<rt>い</rt></ruby>されていて、<ruby>全<rt>ぜん</rt></ruby><ruby>員<rt>いん</rt></ruby>が<ruby>乗<rt>の</rt></ruby>り<ruby>込<rt>こ</rt></ruby>むと<ruby>絹<rt>きぬ</rt></ruby>の<ruby>様<rt>よう</rt></ruby>な<ruby>白<rt>しろ</rt></ruby>い<ruby>布<rt>ぬの</rt></ruby>がまるで<span class="vocab-word" data-info="目隠し（めかくし）：蒙上眼睛。"><ruby>目<rt>め</rt></ruby><ruby>隠<rt>かく</rt></ruby>し</span>でもするようにみんなの<ruby>上<rt>うえ</rt></ruby>に<ruby>か<rt>か</rt></ruby>けられました。
+    </p>
+    <div class="translation">
+        海滩上早已准备好了一艘美丽的小船。等所有人上了船后，一块如丝绸般的白布像蒙眼布一样盖在了大家的头上。
+    </div>
+</div>
+
+<div class="reading-block">
+    <p class="japanese">
+        そして<ruby>舟<rt>ふね</rt></ruby>が<ruby>着<rt>つ</rt></ruby>いた<ruby>先<rt>さき</rt></ruby>は、とても<ruby>立<rt>りっ</rt></ruby><ruby>派<rt>ぱ</rt></ruby>なご<ruby>殿<rt>てん</rt></ruby>でした。
+    </p>
+    <div class="translation">
+        小船最终抵达的地方，是一座非常气派的宫殿。
+    </div>
+</div>
+
+<div class="reading-block">
+    <p class="japanese">
+        <ruby>老<rt>ろう</rt></ruby><ruby>人<rt>じん</rt></ruby>の<ruby>案<rt>あん</rt></ruby><ruby>内<rt>ない</rt></ruby>でたくさんの<ruby>部<rt>へ</rt></ruby><ruby>屋<rt>や</rt></ruby>に<span class="vocab-word" data-info="ぎっしりと：满满地，挤得满满当当地。">ぎっしりと</span>つまった<ruby>宝<rt>たから</rt></ruby><ruby>物<rt>もの</rt></ruby>を<ruby>見<rt>み</rt></ruby>せてもらっている<ruby>途<rt>と</rt></ruby><ruby>中<rt>ちゅう</rt></ruby>、<ruby>一<rt>ひと</rt></ruby><ruby>人<rt>り</rt></ruby>の<ruby>長<rt>ちょう</rt></ruby><ruby>者<rt>じゃ</rt></ruby>が<ruby>台<rt>だい</rt></ruby><ruby>所<rt>どころ</rt></ruby>をのぞくと、まさに<ruby>女<rt>おんな</rt></ruby>の<ruby>子<rt>こ</rt></ruby>の<ruby>様<rt>よう</rt></ruby>な<ruby>生<rt>い</rt></ruby>き<ruby>物<rt>もの</rt></ruby>を<ruby>料<rt>りょう</rt></ruby><ruby>理<rt>り</rt></ruby>しているところだったのです。
+    </p>
+    <div class="translation">
+        在老人的带领下，大家参观了许多堆满奇珍异宝的房间。就在这个时候，其中一位富翁偷偷往厨房看了一眼，发现里面竟然正在烹煮一个看起来像小女孩一样的生物。
+    </div>
+</div>
+
+<div class="reading-block">
+    <p class="japanese">
+        「なっ、<ruby>何<rt>なん</rt></ruby>じゃ、あれは！？　 <ruby>人<rt>にん</rt></ruby><ruby>間<rt>げん</rt></ruby>の<ruby>子<rt>こ</rt></ruby>どもの<ruby>様<rt>よう</rt></ruby>だが、<ruby>腰<rt>こし</rt></ruby>から<ruby>下<rt>した</rt></ruby>が<ruby>魚<rt>さかな</rt></ruby>の<ruby>尾<rt>お</rt></ruby>びれだ」<ruby>驚<rt>おどろ</rt></ruby>いた<ruby>長<rt>ちょう</rt></ruby><ruby>者<rt>じゃ</rt></ruby>がその<ruby>事<rt>こと</rt></ruby>をすぐにみんなに<ruby>知<rt>し</rt></ruby>らせたので、<ruby>後<rt>あと</rt></ruby>から<ruby>出<rt>で</rt></ruby>たごちそうには、<ruby>誰<rt>だれ</rt></ruby><ruby>一<rt>ひと</rt></ruby><ruby>人<rt>り</rt></ruby><ruby>手<rt>て</rt></ruby>をつけませんでした。
+    </p>
+    <div class="translation">
+        “那、那是什么！？看起来像是人类的小孩，可腰部以下却是鱼的尾鳍啊！”大惊失色的富翁立刻把这件事悄悄告诉了大家，所以对于后来端上来的佳肴，没有一个人敢动筷子。
+    </div>
+</div>
+
+<div class="reading-block">
+    <p class="japanese">
+        それを<ruby>見<rt>み</rt></ruby>た<ruby>老<rt>ろう</rt></ruby><ruby>人<rt>じん</rt></ruby>は、「せっかく<ruby>人<rt>にん</rt></ruby><ruby>魚<rt>ぎょ</rt></ruby>の<ruby>肉<rt>にく</rt></ruby>をごちそうしようと<ruby>思<rt>おも</rt></ruby>ったのに、<ruby>残<rt>のこ</rt></ruby>ってしまってはもったいない」と、<ruby>長<rt>ちょう</rt></ruby><ruby>者<rt>じゃ</rt></ruby>たちが<ruby>帰<rt>かえ</rt></ruby>る<ruby>時<rt>とき</rt></ruby>に<ruby>土<rt>み</rt></ruby><ruby>産<rt>やげ</rt></ruby>として<ruby>持<rt>も</rt></ruby>たせたのです。
+    </p>
+    <div class="translation">
+        老人见状，说道：“我本想用人鱼肉来好好款待各位，剩下了实在可惜。”于是，在富翁们回去的时候，老人把这些肉当作礼物让他们带了回去。
+    </div>
+</div>
+
+<div class="reading-block">
+    <p class="japanese">
+        <ruby>帰<rt>かえ</rt></ruby>りもまたあの<ruby>白<rt>しろ</rt></ruby>い<ruby>布<rt>ぬの</rt></ruby>が<ruby>か<rt>か</rt></ruby>けられて、どこを<ruby>走<rt>はし</rt></ruby>っているかわからないままに<ruby>元<rt>もと</rt></ruby>の<ruby>浜<rt>はま</rt></ruby><ruby>辺<rt>べ</rt></ruby>へとたどり<ruby>着<rt>つ</rt></ruby>きました。
+    </p>
+    <div class="translation">
+        回去的路上，大家同样被盖上了那块白布，在完全不知道船开往何处的情况下，又回到了原来的海滩。
+    </div>
+</div>
+
+<div class="reading-block">
+    <p class="japanese">
+        そして<ruby>舟<rt>ふね</rt></ruby>がどこへ<span class="vocab-word" data-info="ともなく：不知不觉地，无意中（どこへともなく：不知去向）。">ともなく</span><ruby>姿<rt>すがた</rt></ruby>を<ruby>消<rt>け</rt></ruby>すと、<ruby>長<rt>ちょう</rt></ruby><ruby>者<rt>じゃ</rt></ruby>たちは<span class="vocab-word" data-info="気味の悪い（きみのわるい）：令人毛骨悚然的，恶心的。"><ruby>気<rt>き</rt></ruby><ruby>味<rt>み</rt></ruby>の<ruby>悪<rt>わる</rt></ruby>い</span><ruby>人<rt>にん</rt></ruby><ruby>魚<rt>ぎょ</rt></ruby>の<ruby>肉<rt>にく</rt></ruby>を<ruby>海<rt>うみ</rt></ruby>に<ruby>投<rt>な</rt></ruby>げ<ruby>捨<rt>す</rt></ruby>てました。
+    </p>
+    <div class="translation">
+        等小船不知去向地消失后，富翁们纷纷把那块令人毛骨悚然的人鱼肉扔进了海里。
+    </div>
+</div>
+
+<div class="reading-block">
+    <p class="japanese">
+        ところが<ruby>珍<rt>めずら</rt></ruby>しい<ruby>物<rt>もの</rt></ruby>が<ruby>大<rt>だい</rt></ruby><ruby>好<rt>す</rt></ruby>きな<ruby>高<rt>たか</rt></ruby><ruby>橋<rt>はし</rt></ruby><ruby>長<rt>ちょう</rt></ruby><ruby>者<rt>じゃ</rt></ruby>だけは<ruby>人<rt>にん</rt></ruby><ruby>魚<rt>ぎょ</rt></ruby>の<ruby>肉<rt>にく</rt></ruby>を<ruby>捨<rt>す</rt></ruby>てずに<ruby>家<rt>いえ</rt></ruby>に<ruby>持<rt>も</rt></ruby>って<ruby>帰<rt>かえ</rt></ruby>り、とりあえず<ruby>戸<rt>と</rt></ruby>だなの<ruby>中<rt>なか</rt></ruby>に<ruby>隠<rt>かく</rt></ruby>したのです。
+    </p>
+    <div class="translation">
+        然而，唯独非常喜欢稀奇古怪玩意儿的高桥富翁没有扔掉人鱼肉，而是把它带回了家，并暂且藏在了橱柜里。
+    </div>
+</div>
+
+<div class="reading-block">
+    <p class="japanese">
+        そして<ruby>高<rt>たか</rt></ruby><ruby>橋<rt>はし</rt></ruby><ruby>長<rt>ちょう</rt></ruby><ruby>者<rt>じゃ</rt></ruby>には<ruby>十<rt>じゅう</rt></ruby><ruby>五<rt>ご</rt></ruby><ruby>歳<rt>さい</rt></ruby>になる<ruby>娘<rt>むすめ</rt></ruby>がいたのですが、この<ruby>娘<rt>むすめ</rt></ruby>は<ruby>長<rt>ちょう</rt></ruby><ruby>者<rt>じゃ</rt></ruby>が<ruby>眠<rt>ねむ</rt></ruby>ってしまった<ruby>後<rt>あと</rt></ruby>で、こっそりその<ruby>肉<rt>にく</rt></ruby>を<ruby>食<rt>た</rt></ruby>べてしまったのでした。
+    </p>
+    <div class="translation">
+        高桥富翁有一个十五岁的女儿。在富翁睡着之后，这个女孩竟然偷偷把那块肉给吃掉了。
+    </div>
+</div>
+
+<div class="reading-block">
+    <p class="japanese">
+        <ruby>人<rt>にん</rt></ruby><ruby>魚<rt>ぎょ</rt></ruby>の<ruby>肉<rt>にく</rt></ruby>を<ruby>食<rt>た</rt></ruby>べた<ruby>娘<rt>むすめ</rt></ruby>は、<ruby>年<rt>とし</rt></ruby><ruby>頃<rt>ごろ</rt></ruby>になると<ruby>色<rt>いろ</rt></ruby>の<ruby>白<rt>しろ</rt></ruby>い<ruby>美<rt>うつく</rt></ruby>しい<ruby>娘<rt>むすめ</rt></ruby>になりました。
+    </p>
+    <div class="translation">
+        吃了人鱼肉的女孩到了妙龄时，出落成了一个皮肤白皙、容貌美丽的姑娘。
+    </div>
+</div>
+
+<div class="reading-block">
+    <p class="japanese">
+        やがて<ruby>結<rt>けっ</rt></ruby><ruby>婚<rt>こん</rt></ruby>をして<ruby>時<rt>とき</rt></ruby>が<ruby>流<rt>なが</rt></ruby>れ、<ruby>夫<rt>おっと</rt></ruby>は<ruby>老<rt>ろう</rt></ruby><ruby>人<rt>じん</rt></ruby>になっていきましたが、<span class="vocab-word" data-info="どうした事か（どうしたことか）：不知怎么回事，不知为何。">どうした<ruby>事<rt>こと</rt></ruby>か</span><ruby>嫁<rt>よめ</rt></ruby>は<ruby>若<rt>わか</rt></ruby>くて<ruby>美<rt>うつく</rt></ruby>しいままなのです。
+    </p>
+    <div class="translation">
+        后来她结了婚。随着时光的流逝，丈夫渐渐老去，可不知为何，作为妻子的她却依然保持着年轻美丽的容貌。
+    </div>
+</div>
+
+<div class="reading-block">
+    <p class="japanese">
+        その<ruby>美<rt>うつく</rt></ruby>しさに<ruby>夫<rt>おっと</rt></ruby>が<ruby>死<rt>し</rt></ruby>んだ<ruby>後<rt>あと</rt></ruby>も<ruby>求<rt>きゅう</rt></ruby><ruby>婚<rt>こん</rt></ruby><ruby>者<rt>しゃ</rt></ruby>は<ruby>後<rt>あと</rt></ruby>を<ruby>絶<rt>た</rt></ruby>たず、とうとう<ruby>三<rt>さん</rt></ruby><ruby>十<rt>じゅう</rt></ruby><ruby>九<rt>きゅう</rt></ruby><ruby>人<rt>にん</rt></ruby>もの<ruby>男<rt>おとこ</rt></ruby>に<ruby>嫁<rt>よめ</rt></ruby><ruby>入<rt>い</rt></ruby>りをしたのでした。
+    </p>
+    <div class="translation">
+        因为她的美貌，即使在丈夫死后，向她求婚的人依然络绎不绝，她最终竟然先后嫁给了三十九个男人。
+    </div>
+</div>
+
+<div class="reading-block">
+    <p class="japanese">
+        その<ruby>間<rt>かん</rt></ruby>、<ruby>夫<rt>おっと</rt></ruby>や<ruby>村<rt>むら</rt></ruby><ruby>人<rt>びと</rt></ruby>が<ruby>次<rt>つぎ</rt></ruby>々と<ruby>死<rt>し</rt></ruby>んで<ruby>行<rt>い</rt></ruby>くのに、<ruby>女<rt>おんな</rt></ruby>は<ruby>年<rt>とし</rt></ruby>を<ruby>取<rt>と</rt></ruby>る<ruby>事<rt>こと</rt></ruby>も<ruby>死<rt>し</rt></ruby>ぬ<ruby>事<rt>こと</rt></ruby>もないのです。
+    </p>
+    <div class="translation">
+        在这期间，她的丈夫和村里的人一个接一个地老去、死亡，可这个女人却既不会变老，也不会死去。
+    </div>
+</div>
+
+<div class="reading-block">
+    <p class="japanese">
+        <ruby>人<rt>ひと</rt></ruby>々は、「<ruby>年<rt>とし</rt></ruby>を<ruby>取<rt>と</rt></ruby>らんのは、<ruby>人<rt>にん</rt></ruby><ruby>魚<rt>ぎょ</rt></ruby>の<ruby>肉<rt>にく</rt></ruby>を<ruby>食<rt>た</rt></ruby>べたからじゃ。あの<ruby>女<rt>おんな</rt></ruby>は<ruby>人<rt>にん</rt></ruby><ruby>魚<rt>ぎょ</rt></ruby>の<ruby>肉<rt>にく</rt></ruby>を<ruby>食<rt>た</rt></ruby>べて、<ruby>化<rt>ば</rt></ruby>け<ruby>物<rt>もの</rt></ruby>になったのじゃ」と、<ruby>噂<rt>うわさ</rt></ruby>をしました。
+    </p>
+    <div class="translation">
+        人们开始议论纷纷：“她之所以不会变老，是因为吃了人鱼肉。那个女人吃了人鱼肉，变成妖怪了。”
+    </div>
+</div>
+
+<div class="reading-block">
+    <p class="japanese">
+        そして<ruby>誰<rt>だれ</rt></ruby>からも<ruby>相<rt>あい</rt></ruby><ruby>手<rt>て</rt></ruby>にされなくなった<ruby>女<rt>おんな</rt></ruby>は、<span class="vocab-word" data-info="一人ぼっち（ひとりぼっち）：孤单一人，孤零零一个人。"><ruby>一<rt>ひと</rt></ruby><ruby>人<rt>り</rt></ruby>ぼっち</span>の<ruby>悲<rt>かな</rt></ruby>しさに<ruby>尼<rt>あま</rt></ruby>の<ruby>姿<rt>すがた</rt></ruby>になって、<ruby>諸<rt>しょ</rt></ruby><ruby>国<rt>こく</rt></ruby><ruby>行<rt>あん</rt></ruby><ruby>脚<rt>ぎゃ</rt></ruby>に<ruby>出<rt>で</rt></ruby>たのです。
+    </p>
+    <div class="translation">
+        最终，再也没有人愿意理睬她。怀揣着孤身一人的悲凉，女人剃度出家，开始云游四方。
+    </div>
+</div>
+
+<div class="reading-block">
+    <p class="japanese">
+        そして<ruby>行<rt>い</rt></ruby>く<ruby>先<rt>さき</rt></ruby>々で<ruby>良<rt>よ</rt></ruby>い<ruby>事<rt>こと</rt></ruby>をしながら<ruby>白<rt>しろ</rt></ruby>い<ruby>椿<rt>つばき</rt></ruby>を<ruby>植<rt>う</rt></ruby>えて<ruby>歩<rt>ある</rt></ruby>き、やがて<ruby>古<rt>ふる</rt></ruby><ruby>里<rt>さと</rt></ruby>に<ruby>帰<rt>かえ</rt></ruby>ってくると、<ruby>浜<rt>はま</rt></ruby><ruby>辺<rt>べ</rt></ruby><ruby>近<rt>ちか</rt></ruby>くのほら<ruby>穴<rt>あな</rt></ruby>のそばに<ruby>白<rt>しろ</rt></ruby><ruby>椿<rt>つばき</rt></ruby>の<ruby>木<rt>き</rt></ruby>を<ruby>植<rt>う</rt></ruby>えて、その<ruby>中<rt>なか</rt></ruby>に<ruby>入<rt>はい</rt></ruby>ったきり<ruby>出<rt>で</rt></ruby>てくる<ruby>事<rt>こと</rt></ruby>はありませんでした。
+    </p>
+    <div class="translation">
+        她每到一处，都会一边行善，一边种下白色的山茶花。后来，她回到了故乡，在海滩附近的山洞旁种下了一棵白山茶树，然后走进了山洞，从此再也没有出来过。
+    </div>
+</div>
+
+</div>
+
+<div id="smart-tooltip"></div>
+
+<!-- Fixed Bottom Audio Player -->
+<div class="audio-wrapper">
+    <div class="audio-player">
+        <button id="play-btn" class="play-btn" onclick="togglePlay()">
+            <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+        </button>
+        <div class="progress-container" id="progress-container">
+            <div class="progress-bg">
+                <div class="progress-bar" id="progress-bar"></div>
+            </div>
+        </div>
+        <div class="time-display">
+            <span id="current-time">00:00</span> / <span id="duration">00:00</span>
+        </div>
+        <button id="loop-btn" class="loop-btn" onclick="toggleLoop()" title="ループ再生">
+            <svg viewBox="0 0 24 24"><path d="M12 4V1L8 5l4 4V6c3.31 0 6 2.69 6 6 0 1.01-.25 1.97-.7 2.8l1.46 1.46C19.54 15.03 20 13.57 20 12c0-4.42-3.58-8-8-8zm0 14c-3.31 0-6-2.69-6-6 0-1.01.25-1.97.7-2.8L5.24 7.74C4.46 8.97 4 10.43 4 12c0 4.42 3.58 8 8 8v3l4-4-4-4v3z"/></svg>
+        </button>
+        <!-- 占位音频，请替换为您的实际文件 -->
+        <audio id="audio-element" src="audio/yao.mp3"></audio>
+    </div>
+</div>
+
+<div class="footer">語り継がれる物語</div>
+
+<script>
+    // 译文切换
+    function toggleTranslation() {
+        const btn = document.getElementById('trans-btn');
+        const isActive = btn.classList.toggle('active');
+        
+        document.querySelectorAll('.translation').forEach(el => {
+            el.style.display = isActive ? 'block' : 'none';
+        });
+    }
+
+    // 智能自适应气泡逻辑
+    const tooltip = document.getElementById('smart-tooltip');
+    let activeWord = null;
+
+    // --- Audio Player Logic ---
+    const audio = document.getElementById('audio-element');
+    const playBtn = document.getElementById('play-btn');
+    const progressBar = document.getElementById('progress-bar');
+    const progressContainer = document.getElementById('progress-container');
+    const currentTimeEl = document.getElementById('current-time');
+    const durationEl = document.getElementById('duration');
+    const loopBtn = document.getElementById('loop-btn');
+
+    let isLooping = false;
+
+    function toggleLoop() {
+        isLooping = !isLooping;
+        audio.loop = isLooping;
+        loopBtn.classList.toggle('active', isLooping);
+    }
+
+    function togglePlay() {
+        if (audio.paused) {
+            audio.play().catch(e => console.log("Audio play error (no source set):", e));
+            playBtn.classList.add('playing');
+            playBtn.innerHTML = '<svg viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>';
+        } else {
+            audio.pause();
+            playBtn.classList.remove('playing');
+            playBtn.innerHTML = '<svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>';
+        }
+    }
+
+    audio.addEventListener('timeupdate', () => {
+        if (audio.duration) {
+            const percent = (audio.currentTime / audio.duration) * 100;
+            progressBar.style.width = percent + '%';
+            currentTimeEl.textContent = formatTime(audio.currentTime);
+        }
+    });
+
+    audio.addEventListener('loadedmetadata', () => {
+        durationEl.textContent = formatTime(audio.duration);
+    });
+
+    audio.addEventListener('ended', () => {
+        playBtn.classList.remove('playing');
+        playBtn.innerHTML = '<svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>';
+        progressBar.style.width = '0%';
+        currentTimeEl.textContent = "00:00";
+    });
+
+    function seek(e) {
+        if (!audio.duration) return;
+        const rect = progressContainer.getBoundingClientRect();
+        const width = rect.width;
+        const clientX = e.type.startsWith('touch') ? e.touches[0].clientX : e.clientX;
+        let clickX = clientX - rect.left;
+        clickX = Math.max(0, Math.min(clickX, width));
+        audio.currentTime = (clickX / width) * audio.duration;
+    }
+
+    let isDragging = false;
+
+    progressContainer.addEventListener('mousedown', (e) => {
+        isDragging = true;
+        seek(e);
+    });
+
+    window.addEventListener('mousemove', (e) => {
+        if (isDragging) {
+            seek(e);
+        }
+    });
+
+    window.addEventListener('mouseup', () => {
+        isDragging = false;
+    });
+
+    progressContainer.addEventListener('touchstart', (e) => {
+        isDragging = true;
+        seek(e);
+    });
+
+    window.addEventListener('touchmove', (e) => {
+        if (isDragging) {
+            e.preventDefault(); 
+            seek(e);
+        }
+    }, { passive: false });
+
+    window.addEventListener('touchend', () => {
+        isDragging = false;
+    });
+
+    function formatTime(seconds) {
+        if (isNaN(seconds)) return "00:00";
+        const m = Math.floor(seconds / 60);
+        const s = Math.floor(seconds % 60);
+        return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+    }
+
+    // --- 词汇气泡逻辑 ---
+    document.querySelectorAll('.vocab-word').forEach(word => {
+        word.addEventListener('click', function(e) {
+            e.stopPropagation();
+            if (activeWord === this) { hideTooltip(); return; }
+
+            activeWord = this;
+            tooltip.innerText = this.getAttribute('data-info');
+            tooltip.style.display = 'block';
+
+            const rect = this.getBoundingClientRect();
+            const tipRect = tooltip.getBoundingClientRect();
+            const screenWidth = window.innerWidth;
+            
+            let left = rect.left + (rect.width / 2) - (tipRect.width / 2);
+            let top = rect.top + window.scrollY - tipRect.height - 12;
+
+            const margin = 15;
+            let arrowOffset = '50%';
+
+            if (left < margin) {
+                left = margin;
+                arrowOffset = (rect.left + rect.width/2 - margin) + 'px';
+            } else if (left + tipRect.width > screenWidth - margin) {
+                left = screenWidth - tipRect.width - margin;
+                arrowOffset = (rect.left + rect.width/2 - left) + 'px';
+            }
+
+            tooltip.style.left = left + 'px';
+            tooltip.style.top = top + 'px';
+            tooltip.style.opacity = '1';
+
+            const styleTag = document.getElementById('dynamic-arrow') || document.createElement('style');
+            styleTag.id = 'dynamic-arrow';
+            styleTag.innerHTML = `#smart-tooltip::after { left: ${arrowOffset} !important; transform: translateX(-50%); }`;
+            document.head.appendChild(styleTag);
+        });
+    });
+
+    function hideTooltip() {
+        tooltip.style.opacity = '0';
+        setTimeout(() => { tooltip.style.display = 'none'; }, 200);
+        activeWord = null;
+    }
+
+    document.addEventListener('click', hideTooltip);
+    window.addEventListener('resize', hideTooltip);
+
+</script>
+
+</body>
+</html>

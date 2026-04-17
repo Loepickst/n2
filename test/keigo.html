@@ -1,0 +1,2845 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>kiki的日语小窝 - 敬语生存战与训练场</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Noto+Serif+JP:wght@700;900&family=Noto+Serif+SC:wght@700;900&family=VT323&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        washi: '#F9F6F0',
+                        sumi: '#3E3A39',
+                        enji: '#9B2C2C',
+                        ukon: '#D4A017',
+                        koge: '#6B4E31',
+                        bossBg: '#000000',
+                        bossText: '#FFFFFF',
+                        utBorder: '#FFFFFF',
+                        dojo: '#E8DFD5'
+                    },
+                    fontFamily: {
+                        serif: ['"Noto Serif SC"', '"Noto Serif JP"', 'serif'],
+                        sans: ['"Noto Sans JP"', 'sans-serif'],
+                        pixel: ['"VT323"', 'monospace', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { background-color: #F9F6F0; color: #3E3A39; transition: background-color 0.5s ease-out, color 0.5s; overflow-x: hidden; }
+        .boss-mode-active { background-color: #000000; color: #FFFFFF; }
+        
+        .card { background: #FFFFFF; border: 1px solid #E8DFD5; box-shadow: 0 8px 20px rgba(62, 58, 57, 0.05); border-radius: 1rem; }
+        
+        .btn { transition: all 0.2s ease; cursor: pointer; }
+        .btn:active { transform: translateY(0); }
+
+        /* ================= 动画特效区域 ================= */
+        @keyframes shake {
+            0% { transform: translate(2px, 2px) rotate(0deg); }
+            10% { transform: translate(-2px, -3px) rotate(-1deg); }
+            20% { transform: translate(-4px, 0px) rotate(1deg); }
+            30% { transform: translate(4px, 3px) rotate(0deg); }
+            40% { transform: translate(2px, -2px) rotate(1deg); }
+            50% { transform: translate(-2px, 3px) rotate(-1deg); }
+            60% { transform: translate(-4px, 2px) rotate(0deg); }
+            70% { transform: translate(4px, 2px) rotate(-1deg); }
+            80% { transform: translate(-2px, -2px) rotate(1deg); }
+            90% { transform: translate(2px, 3px) rotate(0deg); }
+            100% { transform: translate(0px, 0px) rotate(0deg); }
+        }
+        .animate-shake { animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) both; }
+
+        @keyframes damage-flash {
+            0% { filter: brightness(1) drop-shadow(0 0 0 red); transform: translateX(0); }
+            20% { filter: brightness(2) sepia(1) hue-rotate(-50deg) saturate(5) drop-shadow(0 0 20px red); transform: translateX(-15px); }
+            40% { transform: translateX(15px); }
+            60% { transform: translateX(-15px); }
+            80% { transform: translateX(15px); }
+            100% { filter: brightness(1) drop-shadow(0 0 0 red); transform: translateX(0); }
+        }
+        .animate-damage { animation: damage-flash 0.5s ease-out; }
+
+        /* 斩击与数字 */
+        .slash-container { position: absolute; top: 40%; left: 50%; transform: translate(-50%, -50%); width: 200px; height: 200px; pointer-events: none; z-index: 50; display: none; }
+        .slash-line { position: absolute; top: 50%; left: 10%; width: 0%; height: 8px; background-color: #FFF; box-shadow: 0 0 15px #FFF, 0 0 30px #9B2C2C; transform: translateY(-50%) rotate(25deg); transform-origin: left center; }
+        @keyframes slash { 0% { width: 0%; opacity: 1; } 50% { width: 120%; opacity: 1; } 100% { width: 120%; opacity: 0; } }
+        .animate-slash-play { display: block; }
+        .animate-slash-play .slash-line { animation: slash 0.3s cubic-bezier(0.1, 0.8, 0.3, 1) forwards; }
+
+        .damage-text { position: absolute; top: 30%; left: 50%; transform: translate(-50%, -50%); font-size: 3rem; font-weight: 900; font-family: 'VT323', monospace; color: #D4A017; text-shadow: 4px 4px 0 #9B2C2C; opacity: 0; pointer-events: none; z-index: 60; white-space: nowrap; }
+        .damage-text.normal-hit { color: #FFFFFF; text-shadow: 3px 3px 0 #666; font-size: 2.5rem; }
+        .damage-text.player-hit { position: fixed; color: #FF3333; text-shadow: 3px 3px 0 #660000; font-size: 2.5rem; top: 75%; }
+        
+        @keyframes floatUp { 0% { opacity: 0; transform: translate(-50%, 20px) scale(0.8); } 20% { opacity: 1; transform: translate(-50%, 0) scale(1.2); } 80% { opacity: 1; transform: translate(-50%, -30px) scale(1); } 100% { opacity: 0; transform: translate(-50%, -50px) scale(1); } }
+        .animate-float { animation: floatUp 0.8s ease-out forwards; }
+
+        /* 状态条 */
+        .hp-bar-bg { background-color: #444; border: 2px solid #FFF; position: relative; overflow: hidden; }
+        .hp-bar-fill { height: 100%; transition: width 0.3s ease-out, background-color 0.3s; }
+        .boss-hp-fill { background-color: #00FF00; }
+        .player-hp-fill { background-color: #FFFF00; }
+        .timer-bar { transition: width 0.1s linear, background-color 0.3s; }
+        .timer-warning { background-color: #9B2C2C !important; }
+
+        /* 打字机光标 */
+        .typing-cursor::after { content: '▼'; display: inline-block; margin-left: 8px; font-size: 0.8em; animation: blink 1s step-end infinite; color: #FFF; }
+        @keyframes blink { 50% { opacity: 0; } }
+
+        /* 传说之下风格对话框 */
+        .ut-dialogue-box { border: 4px solid #FFFFFF; background-color: #000000; padding: 1.5rem 2rem; min-height: 140px; font-family: '"Noto Serif JP"', serif; font-size: 1.35rem; line-height: 1.8; border-radius: 8px; }
+        .ut-option-btn { background-color: #000; border: 2px solid #FFF; color: #FFF; padding: 1rem; font-size: 1.15rem; font-family: '"Noto Serif JP"', serif; position: relative; text-align: left; padding-left: 2.5rem; transition: all 0.1s; cursor: pointer; }
+        .ut-option-btn::before { content: '❤'; position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); opacity: 0; color: #9B2C2C; transition: opacity 0.1s; }
+
+        /* 训练场专属样式 */
+        .dojo-item { border: 2px solid #E8DFD5; transition: all 0.2s ease; background-color: #FCFAF6; }
+        .rest-area-item { background-color: #FDFBF8; border-left: 4px solid #9B2C2C; }
+
+        .ui-interactive,
+        .btn,
+        .dojo-item,
+        .ut-option-btn,
+        .ui-row-hover {
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .ui-interactive:focus,
+        .ut-option-btn:focus {
+            outline: none;
+        }
+
+        .ui-interactive:focus-visible,
+        .ut-option-btn:focus-visible {
+            outline: 2px solid rgba(212, 160, 23, 0.65);
+            outline-offset: 3px;
+        }
+
+        .ut-option-btn:focus-visible {
+            border-color: #D4A017;
+            color: #D4A017;
+        }
+
+        .ut-option-btn:focus-visible::before {
+            opacity: 1;
+            color: #D4A017;
+        }
+
+        .ui-text-link,
+        .ui-outline-koge-btn,
+        .ui-primary-enji-btn,
+        .ui-secondary-border-btn,
+        .ui-clear-records-btn,
+        .ui-flee-btn,
+        .ui-story-avatar,
+        .ui-retry-btn,
+        .ui-next-question-btn,
+        .ui-training-option-btn,
+        .ui-menu-card,
+        .ui-menu-card-icon,
+        .ui-leaderboard-card,
+        .ui-leaderboard-card-icon,
+        .ui-rest-entry,
+        .ui-rest-entry-icon {
+            transition: all 0.2s ease;
+        }
+
+        @media (hover: hover) and (pointer: fine) {
+            .btn:hover { transform: translateY(-2px); }
+
+            .ut-option-btn:hover {
+                border-color: #D4A017;
+                color: #D4A017;
+            }
+            .ut-option-btn:hover::before {
+                opacity: 1;
+                color: #D4A017;
+            }
+
+            .dojo-item:hover {
+                border-color: #D4A017;
+                background-color: #FFFFFF;
+                transform: translateY(-3px);
+                box-shadow: 0 4px 12px rgba(212, 160, 23, 0.15);
+            }
+
+            .ui-menu-card:hover {
+                border-left-color: #9B2C2C;
+            }
+            .ui-menu-card:hover .ui-menu-card-icon {
+                color: #9B2C2C;
+            }
+
+            .ui-leaderboard-card:hover {
+                background-color: #FFFFFF;
+            }
+            .ui-leaderboard-card:hover .ui-leaderboard-card-icon,
+            .ui-rest-entry:hover .ui-rest-entry-icon {
+                transform: scale(1.1);
+            }
+
+            .ui-rest-entry:hover {
+                background-color: #FFFFFF;
+                border-color: #9B2C2C;
+            }
+
+            .ui-story-avatar:hover {
+                transform: scale(1.1);
+            }
+
+            .ui-text-link:hover {
+                color: #9B2C2C;
+            }
+
+            .ui-outline-koge-btn:hover {
+                background-color: #6B4E31;
+                color: #FFFFFF;
+            }
+
+            .ui-primary-enji-btn:hover {
+                background-color: #991B1B;
+                transform: translateY(-4px);
+                box-shadow: 0 12px 24px rgba(155, 44, 44, 0.22);
+            }
+
+            .ui-secondary-border-btn:hover,
+            .ui-training-option-btn:hover {
+                border-color: #D4A017;
+            }
+
+            .ui-training-option-btn:hover {
+                box-shadow: 0 10px 20px rgba(62, 58, 57, 0.08);
+                transform: translateY(-4px);
+            }
+
+            .ui-next-question-btn:hover {
+                background-color: #000000;
+            }
+
+            .ui-retry-btn:hover {
+                background-color: #9B2C2C;
+                color: #FFFFFF;
+            }
+
+            .ui-clear-records-btn:hover {
+                color: #EF4444;
+            }
+
+            .ui-flee-btn:hover {
+                color: #FFFFFF;
+            }
+
+            .ui-row-hover:hover {
+                background-color: #FFFFFF;
+            }
+        }
+        
+        /* 朝上的气泡框三角 (用于训练场引入页) */
+        .speech-bubble-top::after { content: ''; position: absolute; top: -12px; left: 50%; transform: translateX(-50%); border-width: 0 10px 12px; border-style: solid; border-color: transparent transparent #FFFFFF; display: block; width: 0; }
+        .speech-bubble-top::before { content: ''; position: absolute; top: -14px; left: 50%; transform: translateX(-50%); border-width: 0 11px 13px; border-style: solid; border-color: transparent transparent #E8DFD5; display: block; width: 0; }
+        
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background-color: #E8DFD5; border-radius: 10px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background-color: #D4A017; }
+
+        @media (max-width: 767px) {
+            #app-container { padding: 0.75rem; align-items: center; }
+            .card { border-radius: 0.875rem; }
+
+            #view-challenge-intro {
+                padding-top: 1.25rem;
+                padding-bottom: 1.75rem;
+            }
+
+            #view-challenge {
+                padding-top: 1rem;
+                padding-bottom: 1.25rem;
+            }
+
+            #challenge-stage-shell {
+                margin-top: 1rem;
+            }
+
+            .ut-dialogue-box {
+                padding: 1rem 1.1rem;
+                min-height: 108px;
+                font-size: 1.05rem;
+                line-height: 1.65;
+                border-width: 3px;
+            }
+
+            .ut-option-btn {
+                font-size: 0.95rem;
+                padding: 0.85rem 0.9rem 0.85rem 2rem;
+            }
+
+            .ut-option-btn::before {
+                left: 0.75rem;
+                font-size: 0.8rem;
+            }
+
+            .damage-text {
+                font-size: 2.1rem;
+                text-shadow: 3px 3px 0 #9B2C2C;
+            }
+
+            .damage-text.normal-hit,
+            .damage-text.player-hit {
+                font-size: 1.85rem;
+            }
+
+            .slash-container {
+                width: 150px;
+                height: 150px;
+            }
+
+            #boss-avatar {
+                font-size: 3rem !important;
+                margin-bottom: 0.5rem !important;
+            }
+
+            #boss-name {
+                font-size: 0.95rem !important;
+                letter-spacing: 0.08em;
+            }
+
+            #challenge-question {
+                font-size: 1rem;
+                line-height: 1.75;
+            }
+
+            #challenge-options { gap: 0.6rem; }
+
+            #story-container {
+                min-height: 170px;
+                line-height: 1.9;
+            }
+
+            #training-question {
+                font-size: 1.35rem !important;
+                line-height: 1.7;
+            }
+
+            #intro-instructor-advice {
+                font-size: 0.95rem !important;
+                line-height: 1.8;
+            }
+
+            #summary-rank { font-size: 3.5rem !important; }
+            #summary-eval { font-size: 1rem !important; }
+        }
+    </style>
+    <link rel="stylesheet" href="../shared/header-back-control.css">
+</head>
+<body class="font-sans antialiased min-h-screen flex flex-col" id="game-body">
+
+    <div class="page-topbar w-full bg-washi border-b border-[#E8DFD5] shadow-sm backdrop-blur-md bg-opacity-90 px-3 sm:px-4 md:px-6" id="main-header">
+        <div class="topbar-inner w-full max-w-4xl mx-auto py-4 flex items-center">
+            <a href="../daily/grammar/敬语.html" id="header-back-link" class="topbar-back header-back-control ui-text-link inline-flex items-center gap-2 rounded-2xl border border-[#E8DFD5] bg-white px-4 py-3 text-koge font-bold text-sm md:text-base no-underline shadow-sm whitespace-nowrap">
+                <span id="header-back-label">戻る</span>
+            </a>
+        </div>
+    </div>
+
+    <main class="flex-grow flex items-center justify-center w-full px-3 sm:px-4 md:px-6 py-3 sm:py-4 md:py-6" id="app-container">
+        
+        <!-- ================= 1. 主菜单 ================= -->
+        <div id="view-menu" class="relative -mt-6 md:-mt-10 w-full max-w-4xl mx-auto grid md:grid-cols-2 gap-4 md:gap-8">
+            <div class="col-span-1 md:col-span-2 flex justify-center pt-2 md:pt-4 pb-1 md:pb-2">
+                <div class="flex items-center justify-center gap-4 md:gap-8 flex-wrap sm:flex-nowrap text-center">
+                    <div class="flex items-center gap-3 md:gap-4">
+                        <i class="fas fa-paw text-sumi text-3xl sm:text-4xl md:text-5xl leading-none"></i>
+                        <span class="font-serif text-3xl sm:text-4xl md:text-5xl font-bold text-sumi leading-none tracking-wide">kikiの</span>
+                    </div>
+                    <span class="h-10 md:h-14 w-px bg-enji shrink-0"></span>
+                    <span class="font-serif text-3xl sm:text-4xl md:text-5xl font-bold text-sumi leading-none tracking-wide">敬语特训</span>
+                </div>
+            </div>
+            <div onclick="showTrainingMenu()" class="card p-5 md:p-8 btn ui-interactive ui-menu-card border-l-4 border-l-ukon">
+                <div class="text-3xl md:text-4xl mb-3 md:mb-4 text-ukon ui-menu-card-icon">🎯</div>
+                <h2 class="font-serif text-xl md:text-2xl font-bold mb-2 text-sumi">训练场 (学习模式)</h2>
+                <p class="text-koge text-xs md:text-sm leading-relaxed">分专项练习词汇变形、关系判断与场景应用。无时间压力，稳扎稳打。</p>
+            </div>
+            
+            <div onclick="startChallengeIntro()" class="card p-5 md:p-8 btn ui-interactive ui-menu-card border-l-4 border-l-sumi bg-gradient-to-br from-white to-gray-50">
+                <div class="text-3xl md:text-4xl mb-3 md:mb-4 text-sumi ui-menu-card-icon">⚔️</div>
+                <h2 class="font-serif text-xl md:text-2xl font-bold mb-2 text-sumi">生存战 (挑战模式)</h2>
+                <p class="text-koge text-xs md:text-sm leading-relaxed">直面🐶ki 的刁难！你能将其击破吗？</p>
+            </div>
+
+            <div onclick="showLeaderboard()" class="card p-4 md:p-6 btn ui-interactive ui-leaderboard-card border border-border col-span-1 md:col-span-2 bg-washi flex items-center justify-center gap-3 md:gap-4">
+                <div class="text-2xl md:text-3xl ui-leaderboard-card-icon">🏆</div>
+                <div>
+                    <h3 class="font-serif font-bold text-lg md:text-xl text-sumi">历战荣耀榜</h3>
+                    <p class="text-xs md:text-sm text-koge mt-1">查看你的挑战模式历史积分与评级</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= 2. 训练场目录 ================= -->
+        <div id="view-training-menu" class="hidden w-full max-w-4xl mx-auto flex flex-col h-full justify-center">
+            <div class="text-center mb-6 md:mb-8">
+                <h2 class="font-serif text-2xl md:text-3xl font-bold text-sumi mb-2">敬语训练场</h2>
+                <p class="text-sm md:text-base text-koge">选择你要进行特训的项目，打好基础吧！</p>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mb-6 md:mb-8">
+                <div onclick="showTrainingIntro('conjugation')" class="dojo-item p-4 md:p-6 rounded-lg cursor-pointer flex items-center gap-3 md:gap-4">
+                    <div class="text-3xl md:text-4xl">🛠️</div>
+                    <div>
+                        <h3 class="font-serif font-bold text-base md:text-lg text-sumi">敬语类别判断</h3>
+                        <p class="text-xs md:text-sm text-koge mt-1">判断表达属于尊他、郑重还是自谦，先建立识别框架。</p>
+                    </div>
+                </div>
+                <div onclick="showTrainingIntro('special')" class="dojo-item p-4 md:p-6 rounded-lg cursor-pointer flex items-center gap-3 md:gap-4">
+                    <div class="text-3xl md:text-4xl">📜</div>
+                    <div>
+                        <h3 class="font-serif font-bold text-base md:text-lg text-sumi">特殊敬语分辨</h3>
+                        <p class="text-xs md:text-sm text-koge mt-1">辨别那些不规则的尊他与自谦专用动词。</p>
+                    </div>
+                </div>
+                <div onclick="showTrainingIntro('relationship')" class="dojo-item p-4 md:p-6 rounded-lg cursor-pointer flex items-center gap-3 md:gap-4">
+                    <div class="text-3xl md:text-4xl">🤝</div>
+                    <div>
+                        <h3 class="font-serif font-bold text-base md:text-lg text-sumi">关系判断</h3>
+                        <p class="text-xs md:text-sm text-koge mt-1">明确内外关系，判断对谁抬高、对谁压低。</p>
+                    </div>
+                </div>
+                <div onclick="showTrainingIntro('scenario')" class="dojo-item p-4 md:p-6 rounded-lg cursor-pointer flex items-center gap-3 md:gap-4">
+                    <div class="text-3xl md:text-4xl">🏢</div>
+                    <div>
+                        <h3 class="font-serif font-bold text-base md:text-lg text-sumi">场景分辨</h3>
+                        <p class="text-xs md:text-sm text-koge mt-1">商务、服务业等实战语境下的长句选择。</p>
+                    </div>
+                </div>
+            </div>
+            <div onclick="showRestArea()" class="w-full bg-washi border border-border p-4 md:p-6 rounded-lg cursor-pointer ui-interactive ui-rest-entry flex items-center justify-center gap-3">
+                <div class="text-2xl md:text-3xl ui-rest-entry-icon">🍵</div>
+                <h3 class="font-serif font-bold text-lg md:text-xl text-enji">休息室 (错题复习)</h3>
+                <span class="bg-enji text-white px-2 py-0.5 rounded-full text-xs ml-2" id="wrong-count-badge">0</span>
+            </div>
+        </div>
+
+        <!-- ================= 3.0 训练场引入页 (课前指导) ================= -->
+        <div id="view-training-intro" class="hidden w-full max-w-3xl mx-auto flex-col h-full justify-center items-center text-center relative pb-6 md:pb-10">
+            <h2 class="font-serif text-2xl md:text-4xl font-bold text-sumi mb-6 md:mb-8 tracking-wide md:tracking-wider" id="intro-category-title">特训模块</h2>
+            
+            <div class="flex flex-col items-center mb-8 md:mb-10 w-full max-w-2xl px-2 md:px-4">
+                <div class="text-5xl md:text-7xl drop-shadow-md mb-3 md:mb-4 z-10 ui-story-avatar">🐶</div>
+                <div class="speech-bubble-top bg-white border-2 border-border rounded-2xl p-4 md:p-8 shadow-md relative w-full text-left">
+                    <p class="text-xs md:text-sm text-enji font-bold mb-3 md:mb-4 border-b border-border pb-2 md:pb-3 flex items-center"><i class="fas fa-bullhorn mr-2 text-base md:text-lg"></i> Kiki 教官的战术板</p>
+                    <p class="text-base md:text-lg text-sumi leading-relaxed" id="intro-instructor-advice">这里是针对该题型的提示内容...</p>
+                </div>
+            </div>
+
+            <button onclick="beginTrainingSession()" class="ui-interactive ui-primary-enji-btn bg-enji text-white px-8 md:px-12 py-3 md:py-4 rounded-full font-bold text-base md:text-xl shadow-md transform tracking-wide md:tracking-widest">
+                开始练习
+            </button>
+        </div>
+
+        <!-- ================= 3.1 训练界面 (核心答题) ================= -->
+        <div id="view-training-session" class="hidden w-full max-w-3xl mx-auto flex-col h-full relative pb-2 md:pb-4">
+            <div class="flex justify-end items-center mb-4 md:mb-6 px-1 md:px-2">
+                <span class="text-sm font-bold text-ukon tracking-wider" id="training-category-title">特训模块</span>
+            </div>
+            
+            <!-- 中心聚焦的答题卡片 -->
+            <div class="card p-4 md:p-10 text-center relative overflow-hidden flex-grow flex flex-col justify-center w-full shadow-lg border-2 border-border">
+                <div class="absolute top-0 left-0 bg-washi border-r border-b border-border px-3 md:px-4 py-1 md:py-1.5 rounded-br-lg font-bold text-xs text-koge tracking-wider" id="training-progress">进度: 1/5</div>
+                <div class="absolute top-0 right-0 bg-ukon text-white px-3 md:px-4 py-1 md:py-1.5 rounded-bl-lg font-bold text-xs tracking-wider">特训中</div>
+                
+                <div class="mt-6 md:mt-8 mb-6 md:mb-8">
+                    <p class="text-koge text-xs md:text-sm mb-3 md:mb-4 font-bold tracking-wide md:tracking-widest" id="training-desc">请选出合适的表达填入空白处：</p>
+                    
+                    <div class="text-lg md:text-3xl font-serif font-bold text-sumi mb-6 md:mb-8 leading-relaxed bg-gray-50 py-6 md:py-10 px-3 md:px-4 rounded-xl border border-gray-200 shadow-inner" id="training-question">
+                        <!-- 题目内容 -->
+                    </div>
+                    
+                    <div class="text-xs md:text-sm text-left text-gray-600 bg-blue-50 p-3 md:p-4 rounded-lg border border-blue-100 hidden mt-4" id="training-hint-box">
+                        <!-- 解析内容 -->
+                    </div>
+                </div>
+                
+                <!-- 选项矩阵：为了聚焦，紧贴在题目下方 -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4 mt-auto" id="training-options">
+                    <!-- 选项 -->
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= 4. 休息室 (错题本) ================= -->
+        <div id="view-rest-area" class="hidden w-full max-w-4xl mx-auto">
+            <div class="mb-6">
+                <h2 class="font-serif text-2xl md:text-3xl font-bold text-sumi flex items-center gap-2 md:gap-3"><span class="text-3xl md:text-4xl">🍵</span> 休息室</h2>
+            </div>
+            <div class="bg-white border border-border rounded-xl p-4 md:p-8 min-h-[280px] md:min-h-[300px]">
+                <p class="text-sm md:text-base text-koge mb-5 md:mb-6 leading-relaxed">这里收录了你在训练中不小心滑倒的错题。<br>喝口茶，静下心来重新挑战它们吧！全部答对即可清除记录。</p>
+                <div id="rest-area-list" class="space-y-4"></div>
+                <div id="rest-area-empty" class="hidden text-center py-12">
+                    <div class="text-5xl md:text-6xl mb-4 opacity-50">✨</div>
+                    <p class="text-koge font-bold text-base md:text-lg">太棒了！当前没有需要复习的错题。</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= 5.0 历战荣耀榜 ================= -->
+        <div id="view-leaderboard" class="hidden w-full max-w-4xl mx-auto">
+            <div class="mb-6">
+                <h2 class="font-serif text-2xl md:text-3xl font-bold text-sumi flex items-center gap-2 md:gap-3"><span class="text-3xl md:text-4xl">🏆</span> 历战荣耀榜</h2>
+            </div>
+            <div class="card p-4 md:p-8 min-h-[360px] md:min-h-[400px] flex flex-col">
+                <p class="text-koge mb-5 md:mb-6 text-xs md:text-sm">这里铭刻着你每一次直面生存战的荣耀记录。</p>
+                <div class="overflow-x-auto custom-scrollbar flex-grow">
+                    <table class="w-full text-left border-collapse min-w-[500px]">
+                        <thead>
+                            <tr class="border-b-2 border-border text-sumi font-serif">
+                                <th class="p-3 w-1/4">挑战时间</th>
+                                <th class="p-3 w-1/4">最终关卡</th>
+                                <th class="p-3 w-1/4 text-center">战斗积分</th>
+                                <th class="p-3 w-1/4 text-center">综合评级</th>
+                            </tr>
+                        </thead>
+                        <tbody id="leaderboard-list" class="text-koge text-sm"></tbody>
+                    </table>
+                </div>
+                <div class="mt-6 border-t border-border pt-4 flex justify-end">
+                    <button onclick="clearLeaderboard()" class="ui-interactive ui-clear-records-btn text-xs text-gray-400">清除记录</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= 5.1 挑战模式 (前置剧情页) ================= -->
+        <div id="view-challenge-intro" class="hidden w-full max-w-3xl flex-col h-full justify-center items-center text-center mx-auto text-white cursor-pointer select-none" onclick="completeStory()">
+            <div id="story-container" class="font-serif text-base md:text-2xl leading-loose mb-8 md:mb-12 min-h-[190px] md:min-h-[250px] whitespace-pre-wrap px-3 md:px-4"></div>
+            <button id="start-boss-btn" class="hidden ui-interactive ut-option-btn text-center mx-auto opacity-0 transition-opacity duration-1000 !px-6 md:!px-8" onclick="event.stopPropagation(); startBossFight();">FILL WITH DETERMINATION (开始讨伐)</button>
+        </div>
+
+        <!-- ================= 5.2 挑战模式 (Boss战本体 - 极限聚焦排版) ================= -->
+        <div id="view-challenge" class="hidden w-full max-w-3xl flex-col h-full relative mx-auto pb-2 md:pb-4 justify-center">
+            
+            <!-- 右上角撤退按钮 -->
+            <div class="absolute top-3 md:top-4 right-3 md:right-4 z-20">
+                <button onclick="showMenu()" class="ui-interactive ui-flee-btn text-xs text-gray-500 border border-gray-600 px-3 py-1.5 rounded font-pixel">FLEE</button>
+            </div>
+
+            <div id="challenge-stage-shell" class="flex flex-col items-center w-full mx-auto mt-4 md:mt-6">
+                <!-- 极简 Boss 状态条 (居中) -->
+                <div class="flex flex-col items-center justify-center relative mb-3 md:mb-4">
+                    <div class="slash-container" id="slash-effect"><div class="slash-line"></div></div>
+                    <div class="damage-text" id="damage-text"></div>
+                    <div class="text-5xl md:text-6xl mb-2 md:mb-3 transition-transform duration-200 z-10" id="boss-avatar">🐶</div>
+                    <div class="flex items-center gap-3 md:gap-4 bg-black/80 px-4 md:px-6 py-1.5 md:py-2 rounded-full border border-gray-700">
+                        <span class="font-pixel text-gray-300 text-sm md:text-lg tracking-wide md:tracking-widest" id="boss-name">PHASE 1 - 变形考验</span>
+                        <div class="hp-bar-bg border-gray-500 rounded-sm w-28 md:w-36" style="height: 8px; border-width: 1px;">
+                            <div class="hp-bar-fill boss-hp-fill" id="boss-hp-fill" style="width: 100%;"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 中心化战斗区：题目框 + 倒计时 + 选项网格，紧密贴合 -->
+                <div class="w-full flex flex-col items-center flex-grow mb-2">
+                    
+                    <!-- 题目框 -->
+                    <div class="ut-dialogue-box w-full relative flex flex-col justify-center min-h-[140px] mb-1">
+                        <div class="flex-grow">
+                            <span id="challenge-question" class="text-white"></span><span id="typing-cursor"></span>
+                        </div>
+                    </div>
+
+                    <!-- 倒计时 (夹在题目和选项之间) -->
+                    <div class="w-full bg-gray-900 h-1.5 overflow-hidden rounded-full border border-gray-800 mb-3" id="timer-container" style="opacity: 0;">
+                        <div id="timer-bar" class="bg-red-800 h-full timer-bar w-full"></div>
+                    </div>
+
+                    <!-- 选项网格 -->
+                    <div class="w-full grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-3 opacity-0 transition-opacity duration-300 pointer-events-none" id="challenge-options"></div>
+                </div>
+
+                <!-- 底座：玩家状态栏 -->
+                <div class="flex flex-wrap items-center justify-between px-4 md:px-6 py-3 md:py-4 border-2 border-gray-700 rounded-xl bg-gray-900 w-full mt-2">
+                    <div class="flex items-center gap-4 md:gap-8">
+                        <span class="text-white font-pixel text-xl md:text-2xl tracking-widest">YOU</span>
+                        <span class="text-gray-400 font-pixel text-base md:text-xl tracking-widest">LV 1</span>
+                    </div>
+                    <div class="flex items-center gap-2 md:gap-3">
+                        <span class="text-gray-300 font-pixel text-base md:text-xl tracking-widest mr-1 md:mr-2">HP</span>
+                        <div class="hp-bar-bg border-2 border-white w-32 md:w-40" style="height: 24px;">
+                            <div class="hp-bar-fill player-hp-fill" id="player-hp-fill" style="width: 100%;"></div>
+                        </div>
+                        <span class="text-white font-pixel text-base md:text-xl w-16 md:w-20 text-right" id="player-hp-text">100/100</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= 5.3 挑战模式 (结算记分板) ================= -->
+        <div id="view-challenge-summary" class="hidden w-full max-w-xl md:max-w-2xl flex-col h-full justify-center relative mx-auto text-white text-center">
+            <h2 class="font-pixel text-3xl md:text-5xl mb-5 md:mb-6 text-white tracking-wide md:tracking-widest">BATTLE RESULT</h2>
+            <div class="ut-dialogue-box text-left space-y-6 relative overflow-hidden mb-6">
+                <div class="flex justify-between items-end border-b border-gray-700 pb-4">
+                    <div>
+                        <p class="text-sm text-gray-400 font-pixel">FINAL PHASE</p>
+                        <p class="text-xl md:text-2xl font-bold font-serif text-white" id="summary-phase">KIKI - PHASE 1</p>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-sm text-gray-400 font-pixel">SCORE</p>
+                        <p class="text-3xl md:text-4xl font-pixel text-ukon" id="summary-score">0</p>
+                    </div>
+                </div>
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm text-gray-400 font-pixel mb-1">RANK</p>
+                        <p id="summary-rank" class="text-5xl md:text-6xl font-pixel font-bold">F</p>
+                    </div>
+                    <div class="text-5xl md:text-6xl drop-shadow-lg" id="summary-avatar">🦴</div>
+                </div>
+                <div class="bg-gray-900 p-3 md:p-4 rounded border border-gray-700 mt-4">
+                    <p class="text-sm text-gray-400 font-pixel mb-2">KIKI'S EVALUATION</p>
+                    <p class="text-base md:text-lg text-gray-200 leading-relaxed font-serif" id="summary-eval">...</p>
+                </div>
+            </div>
+            <button onclick="saveAndReturn()" class="ui-interactive ut-option-btn text-center w-full !pl-0">记录成绩并返回 (Save & Return)</button>
+        </div>
+
+    </main>
+
+    <script src="../shared/back-navigation.js"></script>
+    <script>
+        let isChallengeActive = false; 
+        let challengeActionTimeout;    
+        let trainingActionTimeout;     
+
+        // 通用的滚动聚焦函数
+        function scrollToCenter(elementId) {
+            setTimeout(() => {
+                const el = document.getElementById(elementId);
+                if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }, 100);
+        }
+
+        function clearInteractiveFocus() {
+            const activeElement = document.activeElement;
+            if (activeElement && activeElement !== document.body && typeof activeElement.blur === 'function') {
+                activeElement.blur();
+            }
+        }
+
+        let headerBackHandler = null;
+
+        function setHeaderBack(options = {}) {
+            const header = document.getElementById('main-header');
+            const link = document.getElementById('header-back-link');
+            const labelEl = document.getElementById('header-back-label');
+            if (!header || !link || !labelEl) {
+                return;
+            }
+
+            const {
+                label = '戻る',
+                href = '../daily/grammar/敬语.html',
+                action = null,
+                hidden = false
+            } = options;
+
+            header.classList.toggle('hidden', !!hidden);
+            if (hidden) {
+                headerBackHandler = null;
+                return;
+            }
+
+            labelEl.innerText = '戻る';
+            link.setAttribute('href', href);
+            link.dataset.headerHref = href;
+            headerBackHandler = typeof action === 'function' ? action : null;
+        }
+
+        function handleHeaderBack(event) {
+            event.preventDefault();
+            if (typeof headerBackHandler === 'function') {
+                headerBackHandler();
+                return;
+            }
+
+            const link = document.getElementById('header-back-link');
+            const fallback = link
+                ? (link.dataset.headerHref || link.getAttribute('href') || '../daily/grammar/敬语.html')
+                : '../daily/grammar/敬语.html';
+
+            if (window.backNavigation && typeof window.backNavigation.navigateHierarchical === 'function') {
+                window.backNavigation.navigateHierarchical({
+                    fallback: fallback
+                });
+                return;
+            }
+
+            window.location.href = fallback;
+        }
+
+        function hideAll() {
+            clearInteractiveFocus();
+            document.getElementById('view-menu').classList.add('hidden');
+            document.getElementById('view-training-menu').classList.add('hidden');
+            document.getElementById('view-training-intro').classList.add('hidden', 'flex');
+            document.getElementById('view-training-session').classList.add('hidden');
+            document.getElementById('view-rest-area').classList.add('hidden');
+            document.getElementById('view-leaderboard').classList.add('hidden');
+            document.getElementById('view-challenge-intro').classList.add('hidden', 'flex');
+            document.getElementById('view-challenge').classList.add('hidden', 'flex');
+            document.getElementById('view-challenge-summary').classList.add('hidden', 'flex');
+            
+            document.body.classList.remove('boss-mode-active');
+            document.body.style.backgroundColor = ''; 
+            
+            // 默认显示统一页头
+            document.getElementById('main-header').classList.remove('hidden');
+        }
+
+        function showMenu() {
+            isChallengeActive = false; 
+            clearInterval(challengeTimer);
+            clearTimeout(storyTimeout);
+            clearTimeout(typingTimeout);
+            clearTimeout(challengeActionTimeout);
+            clearTimeout(trainingActionTimeout);
+            
+            document.getElementById('game-body').classList.remove('animate-shake');
+            document.getElementById('boss-avatar').classList.remove('animate-damage');
+
+            hideAll();
+            setHeaderBack({
+                label: '返回敬语讲解',
+                href: '../daily/grammar/敬语.html'
+            });
+            document.getElementById('view-menu').classList.remove('hidden');
+            window.scrollTo({top: 0, behavior: 'smooth'});
+        }
+
+        const trainingData = {
+            conjugation: {
+                title: "敬语类别判断",
+                advice: "汪！这一组先不看上下关系，也不看场景，只看表达形式本身。<br><br>看到「〜ます」优先判断郑重语；看到「お＋第一连用形＋になる」或被动态作尊他表达，优先判断尊他；看到「お＋第一连用形＋する／いたす」，优先判断自谦。先把形式认熟，再进阶到场景运用！",
+                questions: [
+                    {
+                        id: "T001",
+                        type: "keigo_category_judgement",
+                        difficulty: "easy",
+                        word: "休む",
+                        prompt: "「休みます」属于哪一类敬语？",
+                        options: [
+                            { key: "A", text: "尊他" },
+                            { key: "B", text: "郑重" },
+                            { key: "C", text: "自谦" }
+                        ],
+                        answerKey: "B",
+                        explanation: "「休みます」属于郑重语。结构为动词接续助动词「ます」，由动词「休む」的第一连用形「休み」接续郑重助动词「ます」变化而成。"
+                    },
+                    {
+                        id: "T002",
+                        type: "keigo_category_judgement",
+                        difficulty: "easy",
+                        word: "読む",
+                        prompt: "「お読みになる」属于哪一类敬语？",
+                        options: [
+                            { key: "A", text: "自谦" },
+                            { key: "B", text: "尊他" },
+                            { key: "C", text: "郑重" }
+                        ],
+                        answerKey: "B",
+                        explanation: "「お読みになる」属于尊他语。结构为「お＋第一连用形＋になる」，由动词「読む」的第一连用形「読み」套用该公式变化而成。"
+                    },
+                    {
+                        id: "T003",
+                        type: "keigo_category_judgement",
+                        difficulty: "easy",
+                        word: "守る",
+                        prompt: "「お守りする」属于哪一类敬语？",
+                        options: [
+                            { key: "A", text: "郑重" },
+                            { key: "B", text: "尊他" },
+                            { key: "C", text: "自谦" }
+                        ],
+                        answerKey: "C",
+                        explanation: "「お守りする」属于自谦语。结构为「お＋第一连用形＋する」，由动词「守る」的第一连用形「守り」套用该公式变化而成。"
+                    },
+                    {
+                        id: "T004",
+                        type: "keigo_category_judgement",
+                        difficulty: "normal",
+                        word: "書く",
+                        prompt: "「書かれる」属于哪一类敬语？",
+                        options: [
+                            { key: "A", text: "尊他" },
+                            { key: "B", text: "自谦" },
+                            { key: "C", text: "郑重" }
+                        ],
+                        answerKey: "A",
+                        explanation: "「書かれる」属于尊他语。此处直接使用动词的被动态作为尊他表达，由动词「書く」变形为被动态「書かれる」构成。"
+                    },
+                    {
+                        id: "T005",
+                        type: "keigo_category_judgement",
+                        difficulty: "normal",
+                        word: "届ける",
+                        prompt: "「お届けいたす」属于哪一类敬语？",
+                        options: [
+                            { key: "A", text: "自谦" },
+                            { key: "B", text: "郑重" },
+                            { key: "C", text: "尊他" }
+                        ],
+                        answerKey: "A",
+                        explanation: "「お届けいたす」属于自谦语。结构为「お＋第一连用形＋いたす」，由动词「届ける」的第一连用形「届け」套用该公式变化而成。"
+                    },
+                    {
+                        id: "T006",
+                        type: "keigo_category_judgement",
+                        difficulty: "easy",
+                        word: "聞く",
+                        prompt: "「お聞きになる」属于哪一类敬语？",
+                        options: [
+                            { key: "A", text: "郑重" },
+                            { key: "B", text: "尊他" },
+                            { key: "C", text: "自谦" }
+                        ],
+                        answerKey: "B",
+                        explanation: "「お聞きになる」属于尊他语。结构为「お＋第一连用形＋になる」，由动词「聞く」的第一连用形「聞き」套用该公式变化而成。"
+                    },
+                    {
+                        id: "T007",
+                        type: "keigo_category_judgement",
+                        difficulty: "easy",
+                        word: "探す",
+                        prompt: "「お探しする」属于哪一类敬语？",
+                        options: [
+                            { key: "A", text: "自谦" },
+                            { key: "B", text: "郑重" },
+                            { key: "C", text: "尊他" }
+                        ],
+                        answerKey: "A",
+                        explanation: "「お探しする」属于自谦语。结构为「お＋第一连用形＋する」，由动词「探す」的第一连用形「探し」套用该公式变化而成。"
+                    },
+                    {
+                        id: "T008",
+                        type: "keigo_category_judgement",
+                        difficulty: "normal",
+                        word: "歌う",
+                        prompt: "「歌われる」属于哪一类敬语？",
+                        options: [
+                            { key: "A", text: "尊他" },
+                            { key: "B", text: "自谦" },
+                            { key: "C", text: "郑重" }
+                        ],
+                        answerKey: "A",
+                        explanation: "「歌われる」属于尊他语。此处直接使用动词的被动态作为尊他表达，由动词「歌う」变形为被动态「歌われる」构成。"
+                    },
+                    {
+                        id: "T009",
+                        type: "keigo_category_judgement",
+                        difficulty: "normal",
+                        word: "呼ぶ",
+                        prompt: "「お呼びいたす」属于哪一类敬语？",
+                        options: [
+                            { key: "A", text: "郑重" },
+                            { key: "B", text: "尊他" },
+                            { key: "C", text: "自谦" }
+                        ],
+                        answerKey: "C",
+                        explanation: "「お呼びいたす」属于自谦语。结构为「お＋第一连用形＋いたす」，由动词「呼ぶ」的第一连用形「呼び」套用该公式变化而成。"
+                    },
+                    {
+                        id: "T010",
+                        type: "keigo_category_judgement",
+                        difficulty: "easy",
+                        word: "歩く",
+                        prompt: "「歩きます」属于哪一类敬语？",
+                        options: [
+                            { key: "A", text: "自谦" },
+                            { key: "B", text: "郑重" },
+                            { key: "C", text: "尊他" }
+                        ],
+                        answerKey: "B",
+                        explanation: "「歩きます」属于郑重语。结构为动词接续助动词「ます」，由动词「歩く」的第一连用形「歩き」接续郑重助动词「ます」变化而成。"
+                    },
+                    {
+                        id: "T011",
+                        type: "keigo_category_judgement",
+                        difficulty: "normal",
+                        word: "飲む",
+                        prompt: "「飲まれる」属于哪一类敬语？",
+                        options: [
+                            { key: "A", text: "郑重" },
+                            { key: "B", text: "尊他" },
+                            { key: "C", text: "自谦" }
+                        ],
+                        answerKey: "B",
+                        explanation: "「飲まれる」属于尊他语。此处直接使用动词的被动态作为尊他表达，由动词「飲む」变形为被动态「飲まれる」构成。"
+                    },
+                    {
+                        id: "T012",
+                        type: "keigo_category_judgement",
+                        difficulty: "easy",
+                        word: "会う",
+                        prompt: "「お会いする」属于哪一类敬语？",
+                        options: [
+                            { key: "A", text: "自谦" },
+                            { key: "B", text: "郑重" },
+                            { key: "C", text: "尊他" }
+                        ],
+                        answerKey: "A",
+                        explanation: "「お会いする」属于自谦语。结构为「お＋第一连用形＋する」，由动词「会う」的第一连用形「会い」套用该公式变化而成。"
+                    },
+                    {
+                        id: "T013",
+                        type: "keigo_category_judgement",
+                        difficulty: "easy",
+                        word: "急ぐ",
+                        prompt: "「急ぎます」属于哪一类敬语？",
+                        options: [
+                            { key: "A", text: "尊他" },
+                            { key: "B", text: "自谦" },
+                            { key: "C", text: "郑重" }
+                        ],
+                        answerKey: "C",
+                        explanation: "「急ぎます」属于郑重语。结构为动词接续助动词「ます」，由动词「急ぐ」的第一连用形「急ぎ」接续郑重助动词「ます」变化而成。"
+                    },
+                    {
+                        id: "T014",
+                        type: "keigo_category_judgement",
+                        difficulty: "easy",
+                        word: "使う",
+                        prompt: "「お使いになる」属于哪一类敬语？",
+                        options: [
+                            { key: "A", text: "自谦" },
+                            { key: "B", text: "尊他" },
+                            { key: "C", text: "郑重" }
+                        ],
+                        answerKey: "B",
+                        explanation: "「お使いになる」属于尊他语。结构为「お＋第一连用形＋になる」，由动词「使う」的第一连用形「使い」套用该公式变化而成。"
+                    },
+                    {
+                        id: "T015",
+                        type: "keigo_category_judgement",
+                        difficulty: "normal",
+                        word: "待つ",
+                        prompt: "「お待ちいたす」属于哪一类敬语？",
+                        options: [
+                            { key: "A", text: "郑重" },
+                            { key: "B", text: "尊他" },
+                            { key: "C", text: "自谦" }
+                        ],
+                        answerKey: "C",
+                        explanation: "「お待ちいたす」属于自谦语。结构为「お＋第一连用形＋いたす」，由动词「待つ」的第一连用形「待ち」套用该公式变化而成。"
+                    },
+                    {
+                        id: "T016",
+                        type: "keigo_category_judgement",
+                        difficulty: "easy",
+                        word: "取る",
+                        prompt: "「お取りになる」属于哪一类敬语？",
+                        options: [
+                            { key: "A", text: "郑重" },
+                            { key: "B", text: "尊他" },
+                            { key: "C", text: "自谦" }
+                        ],
+                        answerKey: "B",
+                        explanation: "「お取りになる」属于尊他语。结构为「お＋第一连用形＋になる」，由动词「取る」的第一连用形「取り」套用该公式变化而成。"
+                    },
+                    {
+                        id: "T017",
+                        type: "keigo_category_judgement",
+                        difficulty: "easy",
+                        word: "伝える",
+                        prompt: "「お伝えする」属于哪一类敬语？",
+                        options: [
+                            { key: "A", text: "尊他" },
+                            { key: "B", text: "郑重" },
+                            { key: "C", text: "自谦" }
+                        ],
+                        answerKey: "C",
+                        explanation: "「お伝えする」属于自谦语。结构为「お＋第一连用形＋する」，由动词「伝える」的第一连用形「伝え」套用该公式变化而成。"
+                    },
+                    {
+                        id: "T018",
+                        type: "keigo_category_judgement",
+                        difficulty: "easy",
+                        word: "作る",
+                        prompt: "「作ります」属于哪一类敬语？",
+                        options: [
+                            { key: "A", text: "自谦" },
+                            { key: "B", text: "尊他" },
+                            { key: "C", text: "郑重" }
+                        ],
+                        answerKey: "C",
+                        explanation: "「作ります」属于郑重语。结构为动词接续助动词「ます」，由动词「作る」的第一连用形「作り」接续郑重助动词「ます」变化而成。"
+                    },
+                    {
+                        id: "T019",
+                        type: "keigo_category_judgement",
+                        difficulty: "normal",
+                        word: "乗る",
+                        prompt: "「乗られる」属于哪一类敬语？",
+                        options: [
+                            { key: "A", text: "尊他" },
+                            { key: "B", text: "自谦" },
+                            { key: "C", text: "郑重" }
+                        ],
+                        answerKey: "A",
+                        explanation: "「乗られる」属于尊他语。此处直接使用动词的被动态作为尊他表达，由动词「乗る」变形为被动态「乗られる」构成。"
+                    },
+                    {
+                        id: "T020",
+                        type: "keigo_category_judgement",
+                        difficulty: "normal",
+                        word: "願う",
+                        prompt: "「お願いいたす」属于哪一类敬语？",
+                        options: [
+                            { key: "A", text: "郑重" },
+                            { key: "B", text: "自谦" },
+                            { key: "C", text: "尊他" }
+                        ],
+                        answerKey: "B",
+                        explanation: "「お願いいたす」属于自谦语。结构为「お＋第一连用形＋いたす」，由动词「願う」的第一连用形「願い」套用该公式变化而成。"
+                    },
+                    {
+                        id: "T021",
+                        type: "keigo_category_judgement",
+                        difficulty: "easy",
+                        word: "貸す",
+                        prompt: "「お貸しになる」属于哪一类敬语？",
+                        options: [
+                            { key: "A", text: "郑重" },
+                            { key: "B", text: "尊他" },
+                            { key: "C", text: "自谦" }
+                        ],
+                        answerKey: "B",
+                        explanation: "「お貸しになる」属于尊他语。结构为「お＋第一连用形＋になる」，由动词「貸す」的第一连用形「貸し」套用该公式变化而成。"
+                    },
+                    {
+                        id: "T022",
+                        type: "keigo_category_judgement",
+                        difficulty: "easy",
+                        word: "払う",
+                        prompt: "「払います」属于哪一类敬语？",
+                        options: [
+                            { key: "A", text: "自谦" },
+                            { key: "B", text: "尊他" },
+                            { key: "C", text: "郑重" }
+                        ],
+                        answerKey: "C",
+                        explanation: "「払います」属于郑重语。结构为动词接续助动词「ます」，由动词「払う」的第一连用形「払い」接续郑重助动词「ます」变化而成。"
+                    },
+                    {
+                        id: "T023",
+                        type: "keigo_category_judgement",
+                        difficulty: "easy",
+                        word: "預かる",
+                        prompt: "「お預かりする」属于哪一类敬语？",
+                        options: [
+                            { key: "A", text: "尊他" },
+                            { key: "B", text: "郑重" },
+                            { key: "C", text: "自谦" }
+                        ],
+                        answerKey: "C",
+                        explanation: "「お預かりする」属于自谦语。结构为「お＋第一连用形＋する」，由动词「預かる」的第一连用形「預かり」套用该公式变化而成。"
+                    },
+                    {
+                        id: "T024",
+                        type: "keigo_category_judgement",
+                        difficulty: "normal",
+                        word: "考える",
+                        prompt: "「考えられる」属于哪一类敬语？",
+                        options: [
+                            { key: "A", text: "郑重" },
+                            { key: "B", text: "自谦" },
+                            { key: "C", text: "尊他" }
+                        ],
+                        answerKey: "C",
+                        explanation: "「考えられる」属于尊他语。此处直接使用动词的被动态作为尊他表达，由动词「考える」变形为被动态「考えられる」构成。"
+                    },
+                    {
+                        id: "T025",
+                        type: "keigo_category_judgement",
+                        difficulty: "normal",
+                        word: "渡す",
+                        prompt: "「お渡しいたす」属于哪一类敬语？",
+                        options: [
+                            { key: "A", text: "自谦" },
+                            { key: "B", text: "郑重" },
+                            { key: "C", text: "尊他" }
+                        ],
+                        answerKey: "A",
+                        explanation: "「お渡しいたす」属于自谦语。结构为「お＋第一连用形＋いたす」，由动词「渡す」的第一连用形「渡し」套用该公式变化而成。"
+                    },
+                    {
+                        id: "T026",
+                        type: "keigo_category_judgement",
+                        difficulty: "easy",
+                        word: "続ける",
+                        prompt: "「続けます」属于哪一类敬语？",
+                        options: [
+                            { key: "A", text: "郑重" },
+                            { key: "B", text: "自谦" },
+                            { key: "C", text: "尊他" }
+                        ],
+                        answerKey: "A",
+                        explanation: "「続けます」属于郑重语。结构为动词接续助动词「ます」，由动词「続ける」的第一连用形「続け」接续郑重助动词「ます」变化而成。"
+                    },
+                    {
+                        id: "T027",
+                        type: "keigo_category_judgement",
+                        difficulty: "easy",
+                        word: "止める",
+                        prompt: "「お止めになる」属于哪一类敬语？",
+                        options: [
+                            { key: "A", text: "自谦" },
+                            { key: "B", text: "郑重" },
+                            { key: "C", text: "尊他" }
+                        ],
+                        answerKey: "C",
+                        explanation: "「お止めになる」属于尊他语。结构为「お＋第一连用形＋になる」，由动词「止める」的第一连用形「止め」套用该公式变化而成。"
+                    },
+                    {
+                        id: "T028",
+                        type: "keigo_category_judgement",
+                        difficulty: "easy",
+                        word: "頼む",
+                        prompt: "「お頼みする」属于哪一类敬语？",
+                        options: [
+                            { key: "A", text: "尊他" },
+                            { key: "B", text: "自谦" },
+                            { key: "C", text: "郑重" }
+                        ],
+                        answerKey: "B",
+                        explanation: "「お頼みする」属于自谦语。结构为「お＋第一连用形＋する」，由动词「頼む」的第一连用形「頼み」套用该公式变化而成。"
+                    },
+                    {
+                        id: "T029",
+                        type: "keigo_category_judgement",
+                        difficulty: "normal",
+                        word: "忘れる",
+                        prompt: "「忘れられる」属于哪一类敬语？",
+                        options: [
+                            { key: "A", text: "郑重" },
+                            { key: "B", text: "自谦" },
+                            { key: "C", text: "尊他" }
+                        ],
+                        answerKey: "C",
+                        explanation: "「忘れられる」属于尊他语。此处直接使用动词的被动态作为尊他表达，由动词「忘れる」变形为被动态「忘れられる」构成。"
+                    },
+                    {
+                        id: "T030",
+                        type: "keigo_category_judgement",
+                        difficulty: "normal",
+                        word: "断る",
+                        prompt: "「お断りいたす」属于哪一类敬语？",
+                        options: [
+                            { key: "A", text: "尊他" },
+                            { key: "B", text: "郑重" },
+                            { key: "C", text: "自谦" }
+                        ],
+                        answerKey: "C",
+                        explanation: "「お断りいたす」属于自谦语。结构为「お＋第一连用形＋いたす」，由动词「断る」的第一连用形「断り」套用该公式变化而成。"
+                    },
+                    {
+                        id: "T031",
+                        type: "keigo_category_judgement",
+                        difficulty: "easy",
+                        word: "読む",
+                        prompt: "「お読みになる」属于哪一类敬语？",
+                        options: [
+                            { key: "A", text: "自谦" },
+                            { key: "B", text: "尊他" },
+                            { key: "C", text: "郑重" }
+                        ],
+                        answerKey: "B",
+                        explanation: "「お読みになる」属于尊他语。结构为「お＋第一连用形＋になる」，由动词「読む」的第一连用形「読み」套用该公式变化而成。"
+                    },
+                    {
+                        id: "T032",
+                        type: "keigo_category_judgement",
+                        difficulty: "easy",
+                        word: "持つ",
+                        prompt: "「お持ちする」属于哪一类敬语？",
+                        options: [
+                            { key: "A", text: "尊他" },
+                            { key: "B", text: "郑重" },
+                            { key: "C", text: "自谦" }
+                        ],
+                        answerKey: "C",
+                        explanation: "「お持ちする」属于自谦语。结构为「お＋第一连用形＋する」，由动词「持つ」的第一连用形「持ち」套用该公式变化而成。"
+                    },
+                    {
+                        id: "T033",
+                        type: "keigo_category_judgement",
+                        difficulty: "normal",
+                        word: "使う",
+                        prompt: "「使われる」属于哪一类敬语？",
+                        options: [
+                            { key: "A", text: "郑重" },
+                            { key: "B", text: "自谦" },
+                            { key: "C", text: "尊他" }
+                        ],
+                        answerKey: "C",
+                        explanation: "「使われる」属于尊他语。此处直接使用动词的被动态作为尊他表达，由动词「使う」变形为被动态「使われる」构成。"
+                    },
+                    {
+                        id: "T034",
+                        type: "keigo_category_judgement",
+                        difficulty: "normal",
+                        word: "届ける",
+                        prompt: "「お届けいたす」属于哪一类敬语？",
+                        options: [
+                            { key: "A", text: "自谦" },
+                            { key: "B", text: "尊他" },
+                            { key: "C", text: "郑重" }
+                        ],
+                        answerKey: "A",
+                        explanation: "「お届けいたす」属于自谦语。结构为「お＋第一连用形＋いたす」，由动词「届ける」的第一连用形「届け」套用该公式变化而成。"
+                    },
+                    {
+                        id: "T035",
+                        type: "keigo_category_judgement",
+                        difficulty: "easy",
+                        word: "待つ",
+                        prompt: "「お待ちになる」属于哪一类敬语？",
+                        options: [
+                            { key: "A", text: "尊他" },
+                            { key: "B", text: "郑重" },
+                            { key: "C", text: "自谦" }
+                        ],
+                        answerKey: "A",
+                        explanation: "「お待ちになる」属于尊他语。结构为「お＋第一连用形＋になる」，由动词「待つ」的第一连用形「待ち」套用该公式变化而成。"
+                    },
+                    {
+                        id: "T036",
+                        type: "keigo_category_judgement",
+                        difficulty: "easy",
+                        word: "休む",
+                        prompt: "「お休みになる」属于哪一类敬语？",
+                        options: [
+                            { key: "A", text: "自谦" },
+                            { key: "B", text: "尊他" },
+                            { key: "C", text: "郑重" }
+                        ],
+                        answerKey: "B",
+                        explanation: "「お休みになる」属于尊他语。结构为「お＋第一连用形＋になる」，由动词「休む」的第一连用形「休み」套用该公式变化而成。"
+                    },
+                    {
+                        id: "T037",
+                        type: "keigo_category_judgement",
+                        difficulty: "easy",
+                        word: "借りる",
+                        prompt: "「お借りする」属于哪一类敬语？",
+                        options: [
+                            { key: "A", text: "郑重" },
+                            { key: "B", text: "自谦" },
+                            { key: "C", text: "尊他" }
+                        ],
+                        answerKey: "B",
+                        explanation: "「お借りする」属于自谦语。结构为「お＋第一连用形＋する」，由动词「借りる」的第一连用形「借り」套用该公式变化而成。"
+                    },
+                    {
+                        id: "T038",
+                        type: "keigo_category_judgement",
+                        difficulty: "normal",
+                        word: "飲む",
+                        prompt: "「飲まれる」属于哪一类敬语？",
+                        options: [
+                            { key: "A", text: "尊他" },
+                            { key: "B", text: "郑重" },
+                            { key: "C", text: "自谦" }
+                        ],
+                        answerKey: "A",
+                        explanation: "「飲まれる」属于尊他语。此处直接使用动词的被动态作为尊他表达，由动词「飲む」变形为被动态「飲まれる」构成。"
+                    },
+                    {
+                        id: "T039",
+                        type: "keigo_category_judgement",
+                        difficulty: "normal",
+                        word: "知らせる",
+                        prompt: "「お知らせいたす」属于哪一类敬语？",
+                        options: [
+                            { key: "A", text: "自谦" },
+                            { key: "B", text: "尊他" },
+                            { key: "C", text: "郑重" }
+                        ],
+                        answerKey: "A",
+                        explanation: "「お知らせいたす」属于自谦语。结构为「お＋第一连用形＋いたす」，由动词「知らせる」的第一连用形「知らせ」套用该公式变化而成。"
+                    },
+                    {
+                        id: "T040",
+                        type: "keigo_category_judgement",
+                        difficulty: "easy",
+                        word: "探す",
+                        prompt: "「お探しになる」属于哪一类敬语？",
+                        options: [
+                            { key: "A", text: "郑重" },
+                            { key: "B", text: "自谦" },
+                            { key: "C", text: "尊他" }
+                        ],
+                        answerKey: "C",
+                        explanation: "「お探しになる」属于尊他语。结构为「お＋第一连用形＋になる」，由动词「探す」的第一连用形「探し」套用该公式变化而成。"
+                    },
+                    {
+                        id: "T041",
+                        type: "keigo_category_judgement",
+                        difficulty: "easy",
+                        word: "運ぶ",
+                        prompt: "「お運びする」属于哪一类敬语？",
+                        options: [
+                            { key: "A", text: "尊他" },
+                            { key: "B", text: "郑重" },
+                            { key: "C", text: "自谦" }
+                        ],
+                        answerKey: "C",
+                        explanation: "「お運びする」属于自谦语。结构为「お＋第一连用形＋する」，由动词「運ぶ」的第一连用形「運び」套用该公式变化而成。"
+                    },
+                    {
+                        id: "T042",
+                        type: "keigo_category_judgement",
+                        difficulty: "easy",
+                        word: "払う",
+                        prompt: "「お払いになる」属于哪一类敬语？",
+                        options: [
+                            { key: "A", text: "自谦" },
+                            { key: "B", text: "尊他" },
+                            { key: "C", text: "郑重" }
+                        ],
+                        answerKey: "B",
+                        explanation: "「お払いになる」属于尊他语。结构为「お＋第一连用形＋になる」，由动词「払う」的第一连用形「払い」套用该公式变化而成。"
+                    },
+                    {
+                        id: "T043",
+                        type: "keigo_category_judgement",
+                        difficulty: "normal",
+                        word: "話す",
+                        prompt: "「話される」属于哪一类敬语？",
+                        options: [
+                            { key: "A", text: "郑重" },
+                            { key: "B", text: "自谦" },
+                            { key: "C", text: "尊他" }
+                        ],
+                        answerKey: "C",
+                        explanation: "「話される」属于尊他语。此处直接使用动词的被动态作为尊他表达，由动词「話す」变形为被动态「話される」构成。"
+                    },
+                    {
+                        id: "T044",
+                        type: "keigo_category_judgement",
+                        difficulty: "normal",
+                        word: "守る",
+                        prompt: "「お守りいたす」属于哪一类敬语？",
+                        options: [
+                            { key: "A", text: "尊他" },
+                            { key: "B", text: "郑重" },
+                            { key: "C", text: "自谦" }
+                        ],
+                        answerKey: "C",
+                        explanation: "「お守りいたす」属于自谦语。结构为「お＋第一连用形＋いたす」，由动词「守る」的第一连用形「守り」套用该公式变化而成。"
+                    },
+                    {
+                        id: "T045",
+                        type: "keigo_category_judgement",
+                        difficulty: "easy",
+                        word: "書く",
+                        prompt: "「お書きになる」属于哪一类敬语？",
+                        options: [
+                            { key: "A", text: "尊他" },
+                            { key: "B", text: "郑重" },
+                            { key: "C", text: "自谦" }
+                        ],
+                        answerKey: "A",
+                        explanation: "「お書きになる」属于尊他语。结构为「お＋第一连用形＋になる」，由动词「書く」的第一连用形「書き」套用该公式变化而成。"
+                    },
+                    {
+                        id: "T046",
+                        type: "keigo_category_judgement",
+                        difficulty: "easy",
+                        word: "帰る",
+                        prompt: "「お帰りになる」属于哪一类敬语？",
+                        options: [
+                            { key: "A", text: "自谦" },
+                            { key: "B", text: "尊他" },
+                            { key: "C", text: "郑重" }
+                        ],
+                        answerKey: "B",
+                        explanation: "「お帰りになる」属于尊他语。结构为「お＋第一连用形＋になる」，由动词「帰る」的第一连用形「帰り」套用该公式变化而成。"
+                    },
+                    {
+                        id: "T047",
+                        type: "keigo_category_judgement",
+                        difficulty: "easy",
+                        word: "預かる",
+                        prompt: "「お預かりする」属于哪一类敬语？",
+                        options: [
+                            { key: "A", text: "郑重" },
+                            { key: "B", text: "自谦" },
+                            { key: "C", text: "尊他" }
+                        ],
+                        answerKey: "B",
+                        explanation: "「お預かりする」属于自谦语。结构为「お＋第一连用形＋する」，由动词「預かる」的第一连用形「預かり」套用该公式变化而成。"
+                    },
+                    {
+                        id: "T048",
+                        type: "keigo_category_judgement",
+                        difficulty: "normal",
+                        word: "考える",
+                        prompt: "「考えられる」属于哪一类敬语？",
+                        options: [
+                            { key: "A", text: "尊他" },
+                            { key: "B", text: "郑重" },
+                            { key: "C", text: "自谦" }
+                        ],
+                        answerKey: "A",
+                        explanation: "「考えられる」属于尊他语。此处直接使用动词的被动态作为尊他表达，由动词「考える」变形为被动态「考えられる」构成。"
+                    },
+                    {
+                        id: "T049",
+                        type: "keigo_category_judgement",
+                        difficulty: "normal",
+                        word: "願う",
+                        prompt: "「お願いいたす」属于哪一类敬语？",
+                        options: [
+                            { key: "A", text: "自谦" },
+                            { key: "B", text: "尊他" },
+                            { key: "C", text: "郑重" }
+                        ],
+                        answerKey: "A",
+                        explanation: "「お願いいたす」属于自谦语。结构为「お＋第一连用形＋いたす」，由动词「願う」的第一连用形「願い」套用该公式变化而成。"
+                    },
+                    {
+                        id: "T050",
+                        type: "keigo_category_judgement",
+                        difficulty: "easy",
+                        word: "助ける",
+                        prompt: "「お助けする」属于哪一类敬语？",
+                        options: [
+                            { key: "A", text: "郑重" },
+                            { key: "B", text: "自谦" },
+                            { key: "C", text: "尊他" }
+                        ],
+                        answerKey: "B",
+                        explanation: "「お助けする」属于自谦语。结构为「お＋第一连用形＋する」，由动词「助ける」的第一连用形「助け」套用该公式变化而成。"
+                    },
+                    {
+                        id: "T051",
+                        type: "keigo_category_judgement",
+                        difficulty: "easy",
+                        word: "座る",
+                        prompt: "「お座りになる」属于哪一类敬语？",
+                        options: [
+                            { key: "A", text: "尊他" },
+                            { key: "B", text: "郑重" },
+                            { key: "C", text: "自谦" }
+                        ],
+                        answerKey: "A",
+                        explanation: "「お座りになる」属于尊他语。结构为「お＋第一连用形＋になる」，由动词「座る」的第一连用形「座り」套用该公式变化而成。"
+                    },
+                    {
+                        id: "T052",
+                        type: "keigo_category_judgement",
+                        difficulty: "easy",
+                        word: "送る",
+                        prompt: "「お送りする」属于哪一类敬语？",
+                        options: [
+                            { key: "A", text: "自谦" },
+                            { key: "B", text: "尊他" },
+                            { key: "C", text: "郑重" }
+                        ],
+                        answerKey: "A",
+                        explanation: "「お送りする」属于自谦语。结构为「お＋第一连用形＋する」，由动词「送る」的第一连用形「送り」套用该公式变化而成。"
+                    },
+                    {
+                        id: "T053",
+                        type: "keigo_category_judgement",
+                        difficulty: "normal",
+                        word: "迎える",
+                        prompt: "「お迎えいたす」属于哪一类敬语？",
+                        options: [
+                            { key: "A", text: "郑重" },
+                            { key: "B", text: "自谦" },
+                            { key: "C", text: "尊他" }
+                        ],
+                        answerKey: "B",
+                        explanation: "「お迎えいたす」属于自谦语。结构为「お＋第一连用形＋いたす」，由动词「迎える」的第一连用形「迎え」套用该公式变化而成。"
+                    },
+                    {
+                        id: "T054",
+                        type: "keigo_category_judgement",
+                        difficulty: "normal",
+                        word: "洗う",
+                        prompt: "「洗われる」属于哪一类敬语？",
+                        options: [
+                            { key: "A", text: "尊他" },
+                            { key: "B", text: "郑重" },
+                            { key: "C", text: "自谦" }
+                        ],
+                        answerKey: "A",
+                        explanation: "「洗われる」属于尊他语。此处直接使用动词的被动态作为尊他表达，由动词「洗う」变形为被动态「洗われる」构成。"
+                    },
+                    {
+                        id: "T055",
+                        type: "keigo_category_judgement",
+                        difficulty: "easy",
+                        word: "答える",
+                        prompt: "「お答えになる」属于哪一类敬语？",
+                        options: [
+                            { key: "A", text: "自谦" },
+                            { key: "B", text: "尊他" },
+                            { key: "C", text: "郑重" }
+                        ],
+                        answerKey: "B",
+                        explanation: "「お答えになる」属于尊他语。结构为「お＋第一连用形＋になる」，由动词「答える」的第一连用形「答え」套用该公式变化而成。"
+                    },
+                    {
+                        id: "T056",
+                        type: "keigo_category_judgement",
+                        difficulty: "easy",
+                        word: "選ぶ",
+                        prompt: "「お選びになる」属于哪一类敬语？",
+                        options: [
+                            { key: "A", text: "郑重" },
+                            { key: "B", text: "自谦" },
+                            { key: "C", text: "尊他" }
+                        ],
+                        answerKey: "C",
+                        explanation: "「お選びになる」属于尊他语。结构为「お＋第一连用形＋になる」，由动词「選ぶ」的第一连用形「選び」套用该公式变化而成。"
+                    },
+                    {
+                        id: "T057",
+                        type: "keigo_category_judgement",
+                        difficulty: "easy",
+                        word: "調べる",
+                        prompt: "「お調べする」属于哪一类敬语？",
+                        options: [
+                            { key: "A", text: "尊他" },
+                            { key: "B", text: "郑重" },
+                            { key: "C", text: "自谦" }
+                        ],
+                        answerKey: "C",
+                        explanation: "「お調べする」属于自谦语。结构为「お＋第一连用形＋する」，由动词「調べる」的第一连用形「調べ」套用该公式变化而成。"
+                    },
+                    {
+                        id: "T058",
+                        type: "keigo_category_judgement",
+                        difficulty: "normal",
+                        word: "決める",
+                        prompt: "「決められる」属于哪一类敬语？",
+                        options: [
+                            { key: "A", text: "自谦" },
+                            { key: "B", text: "尊他" },
+                            { key: "C", text: "郑重" }
+                        ],
+                        answerKey: "B",
+                        explanation: "「決められる」属于尊他语。此处直接使用动词的被动态作为尊他表达，由动词「決める」变形为被动态「決められる」构成。"
+                    },
+                    {
+                        id: "T059",
+                        type: "keigo_category_judgement",
+                        difficulty: "normal",
+                        word: "集める",
+                        prompt: "「お集めいたす」属于哪一类敬语？",
+                        options: [
+                            { key: "A", text: "郑重" },
+                            { key: "B", text: "自谦" },
+                            { key: "C", text: "尊他" }
+                        ],
+                        answerKey: "B",
+                        explanation: "「お集めいたす」属于自谦语。结构为「お＋第一连用形＋いたす」，由动词「集める」的第一连用形「集め」套用该公式变化而成。"
+                    },
+                    {
+                        id: "T060",
+                        type: "keigo_category_judgement",
+                        difficulty: "easy",
+                        word: "泊まる",
+                        prompt: "「お泊まりになる」属于哪一类敬语？",
+                        options: [
+                            { key: "A", text: "尊他" },
+                            { key: "B", text: "郑重" },
+                            { key: "C", text: "自谦" }
+                        ],
+                        answerKey: "A",
+                        explanation: "「お泊まりになる」属于尊他语。结构为「お＋第一连用形＋になる」，由动词「泊まる」的第一连用形「泊まり」套用该公式变化而成。"
+                    }
+                ]
+            },
+            special: {
+                title: "特殊敬语分辨",
+                advice: "这里需要一点记忆力！有些高频词汇有自己专属的尊他或自谦表达。<br><br>例如「行く」、「食べる」、「言う」。如果它有特殊形式，一般优先使用特殊形式，尽量避免生硬套用规则哦！",
+                questions: [
+                    { q: "明日、そちらへ（行く）＿＿＿＿＿。", options: ["伺います", "いらっしゃいます", "おいでになります", "行かれます"], answer: 0, hint: "「行く」的自谦语专用词汇是「伺う」或「参る」。" },
+                    { q: "お茶を（飲む）＿＿＿＿＿か。", options: ["召し上がります", "いただきます", "お飲みします", "飲まさせます"], answer: 0, hint: "「飲む/食べる」的尊他专用词是「召し上がる」。" },
+                    { q: "お名前を（聞く）＿＿＿＿＿。", options: ["伺う", "おっしゃる", "申し上げる", "お聞きになる"], answer: 0, hint: "「聞く」的自谦语专用词汇是「伺う」或「拝聴する」。" },
+                    { q: "これを（見る）＿＿＿＿＿か。", options: ["ご覧になります", "拝見します", "見られます", "お見せします"], answer: 0, hint: "「見る」的尊他语是「ご覧になる」。" },
+                    { q: "以下表达中，哪一个是「ある」的特殊郑重表达？", options: ["いらっしゃる", "おる", "ございます", "なさる"], answer: 2, hint: "「ある」的特殊郑重表达是「ございます」。它属于郑重语，比普通的「あります」郑重程度更高，常用于商务或服务场景。A和D属于尊他语，B属于自谦语（丁重语）。" },
+                    { q: "以下表达中，哪一个是断定助动词「だ / です」的更高级别的郑重表达？", options: ["でいらっしゃる", "でございます", "でおる", "になる"], answer: 1, hint: "「だ」或「です」的特殊郑重表达是「でございます」。它属于郑重语，常用于在正式场合介绍事物或表明身份。A属于尊他语，C属于自谦语。" },
+                    { q: "以下表达中，哪一个是形容词「いい（よい）」的郑重表达？", options: ["よろしい", "よくなさる", "およくなる", "おいい"], answer: 0, hint: "「いい（よい）」的郑重表达是「よろしい」。在向对方确认情况或征求许可时（如：～てもよろしいでしょうか），使用该词能体现出高度的郑重感。" },
+                    { q: "以下表达中，哪一个是疑问词「どう」的郑重表达？", options: ["どうして", "なぜ", "いかが", "どんな"], answer: 2, hint: "疑问词「どう」的郑重表达是「いかが」。在询问对方的意见、情况或进行劝诱时（如：いかがですか / いかがでしょうか），使用该词作为郑重语。" },
+                    { q: "在商务或服务场合，以下哪一个是副词「ちょっと」的郑重表达？", options: ["少々（しょうしょう）", "少し（すこし）", "わずか", "ちっとも"], answer: 0, hint: "「ちょっと」在正式场合下的郑重表达为「少々」。如「少々お待ちください」，属于商务敬语体系中常用的郑重词汇。" },
+                    { q: "在商务场合，以下哪一个是第一人称代词「私（わたし）」的郑重表达？", options: ["わたくし", "あたし", "われ", "ぼく"], answer: 0, hint: "「私（わたし）」的特殊郑重表达是「わたくし」。它属于郑重语（特殊代词），在商务或正式场合替代普通的「わたし」以体现专业和礼貌。" },
+                    { q: "在向客人或上级提问时，以下哪一个是疑问词「誰（だれ）」的郑重表达？", options: ["どいつ", "どちら", "どなた", "なにもの"], answer: 2, hint: "疑问词「誰（だれ）」的特殊郑重表达是「どなた」。它属于郑重语（特殊疑问词），在正式场合替代「だれ」以体现敬意。" },
+                    { q: "在商务邮件或正式致辞中，以下哪一个是「今日（きょう）」的郑重表达？", options: ["こんにち", "当日（とうじつ）", "先日（せんじつ）", "本日（ほんじつ）"], answer: 3, hint: "「今日（きょう）」的特殊郑重表达是「本日（ほんじつ）」。它属于郑重语（改まった表現），在商务信函或正式致辞中替代普通的「きょう」使用。" },
+                    { q: "在商务会话中，以下哪一个是时间词「さっき（刚才）」的郑重表达？", options: ["いつか", "さきほど", "この間", "今さっき"], answer: 1, hint: "「さっき」的特殊郑重表达是「さきほど（先程）」。它属于郑重语（特殊时间词），在正式会话中替代口语化的「さっき」使用。" },
+                    { q: "在表达深切的歉意或谢意时，以下哪一个是「本当に（ほんとうに）」的郑重表达？", options: ["まことに", "ぜひ", "ちゃんと", "けっこう"], answer: 0, hint: "「本当に（ほんとうに）」的特殊郑重表达是「まことに（誠に）」。它属于郑重语（特殊副词），常用于正式的道谢或致歉表达中以替代「本当に」。" },
+                    { q: "在向客人或上级询问地点时，以下哪一个是疑问词「どこ」的郑重表达？", options: ["こちら", "どなた", "どちら", "あちら"], answer: 2, hint: "「どこ」的特殊郑重表达是「どちら」。它属于郑重语（特殊代词），在正式场合替代普通的场所疑问词「どこ」以体现敬意。" },
+                    { q: "在商务会话中，以下哪一个是时间词「後で（あとで）」的郑重表达？", options: ["のちほど", "あとから", "そのうち", "今度（こんど）"], answer: 0, hint: "「後で（あとで）」的特殊郑重表达是「のちほど（後程）」。它属于郑重语（特殊时间词），在正式会话或邮件中替代口语化的「あとで」使用。" },
+                    { q: "在向客人介绍物品时，以下哪一个是指示代词「これ」的郑重表达？", options: ["ここ", "こちら", "この", "これら"], answer: 1, hint: "「これ」的特殊郑重表达是「こちら」。它属于郑重语（特殊代词），在商务或服务场合替代普通的指示代词「これ」以体现专业和礼貌。" },
+                    { q: "在商务邮件或正式致辞中，以下哪一个是「明日（あした）」的郑重表达？", options: ["翌日（よくじつ）", "昨日（きのう）", "後日（ごじつ）", "みょうにち"], answer: 3, hint: "「明日（あした）」的特殊郑重表达是「みょうにち（明日）」。它属于郑重语（改まった表現），在商务信函或正式场合中替代口语化的「あした」使用。" },
+                    { q: "在商务场合表达深切谢意或歉意时，以下哪一个是副词「とても / すごく（非常）」的郑重表达？", options: ["いっぱい", "たいへん", "だいぶ", "けっこう"], answer: 1, hint: "「とても / すごく」的特殊郑重表达是「たいへん（大変）」。它属于郑重语（特殊副词），常用于正式场合（如：たいへん感謝しております）以替代日常口语中的程度副词。" },
+                    { q: "在商务或正式场合表达歉意时，以下哪一个是「すみません」的更高级别的郑重表达？", options: ["失礼します", "申し訳ございません", "お許しください", "恐れ入ります"], answer: 1, hint: "「すみません」的特殊郑重表达是「申し訳ございません」。它属于郑重语（改まった表現），在商务或正式场合替代日常的「すみません」或「ごめんなさい」使用，以表达更深切的歉意。" },
+                    { q: "在正式会话中表示肯定或同意时，以下哪一个是「そうです」的郑重表达？", options: ["さようでございます", "そのようであります", "おそうです", "そうであります"], answer: 0, hint: "「そうです」的特殊郑重表达是「さようでございます」。结构上由表示状态的「さよう（左様）」和特殊郑重语「でございます」构成，常用于正式场合替代「そうです」。" },
+                    { q: "在商务会话或接打电话时，以下哪一个是时间词「今（いま）」的郑重表达？", options: ["現代（げんだい）", "ただ今（ただいま）", "現在（げんざい）", "今ほど（いまほど）"], answer: 1, hint: "「今（いま）」的特殊郑重表达是「ただ今（ただいま）」。它属于郑重语（特殊时间词），在正式会话（如：ただ今戻りました）中替代口语化的「いま」使用。" },
+                    { q: "在商务邮件或正式会话中，以下哪一个是时间词「この間（このあいだ）」的郑重表达？", options: ["この前（このまえ）", "以前（いぜん）", "先日（せんじつ）", "昔（むかし）"], answer: 2, hint: "「この間（このあいだ）」的特殊郑重表达是「先日（せんじつ）」。它属于郑重语（特殊时间词），在正式场合中替代口语化的「このあいだ」使用。" },
+                    { q: "在商务致辞或新年贺卡中，以下哪一个是时间词「今年（ことし）」的郑重表达？", options: ["本年（ほんねん）", "当年（とうねん）", "今年度（こんねんど）", "今期（こんき）"], answer: 0, hint: "「今年（ことし）」的郑重表达是「本年（ほんねん）」。它属于郑重语（改まった表現），在正式场合、信函或致辞（如：本年もよろしくお願いいたします）中替代口语化的「ことし」使用。" },
+                    { q: "以下表达中，哪一个是「行く」的尊他表达？", options: ["お行きになる", "行かれる", "いらっしゃる", "お行きする"], answer: 2, hint: "「行く」的尊他表达是「いらっしゃる」。该词属于特殊的尊他动词，不套用规则变形公式，直接替换原词使用。" },
+                    { q: "以下表达中，哪一个是「行く」的自谦表达？", options: ["参る", "お行きする", "いらっしゃる", "行かれる"], answer: 0, hint: "「行く」的自谦表达是「参る」（或「伺う」）。该词属于特殊的自谦动词，不套用规则变形公式，直接替换原词使用。" },
+                    { q: "以下表达中，哪一个是「食べる」的尊他表达？", options: ["お食べになる", "食べられる", "いただく", "召し上がる"], answer: 3, hint: "「食べる」的尊他表达是「召し上がる」。该词属于特殊的尊他动词，不套用规则变形公式，直接替换原词使用。" },
+                    { q: "以下表达中，哪一个是「食べる」的自谦表达？", options: ["いただく", "召し上がる", "お食べする", "お食べいたす"], answer: 0, hint: "「食べる」的自谦表达是「いただく」。该词属于特殊的自谦动词，不套用规则变形公式，直接替换原词使用。" },
+                    { q: "以下表达中，哪一个是「する」的尊他表达？", options: ["おするになる", "される", "なさる", "いたす"], answer: 2, hint: "「する」的尊他表达是「なさる」。该词属于特殊的尊他动词，不套用规则变形公式，直接替换原词使用。" },
+                    { q: "以下表达中，哪一个是「見る」的尊他表达？", options: ["お見になる", "拝見する", "ご覧になる", "見られる"], answer: 2, hint: "「見る」的尊他表达是「ご覧になる」。该词属于特殊的尊他动词，不套用规则变形公式，直接替换原词使用。" },
+                    { q: "以下表达中，哪一个是「見る」的自谦表达？", options: ["ご覧になる", "拝見する", "お見する", "見られます"], answer: 1, hint: "「見る」的自谦表达是「拝見する」。该词属于特殊的自谦动词，不套用规则变形公式，直接替换原词使用。" },
+                    { q: "以下表达中，哪一个是「言う」的尊他表达？", options: ["おっしゃる", "申す", "お言いになる", "言われる"], answer: 0, hint: "「言う」的尊他表达是「おっしゃる」。该词属于特殊的尊他动词，不套用规则变形公式，直接替换原词使用。" },
+                    { q: "以下表达中，哪一个是「言う」的自谦表达？", options: ["おっしゃる", "お言いする", "申し上げる", "言われます"], answer: 2, hint: "「言う」的自谦表达是「申し上げる」（或「申す」）。该词属于特殊的自谦动词，不套用规则变形公式，直接替换原词使用。" },
+                    { q: "以下表达中，哪一个是「もらう」的自谦表达？", options: ["いただく", "くださる", "おもらいする", "もらわれます"], answer: 0, hint: "「もらう」的自谦表达是「いただく」。该词属于特殊的自谦动词，不套用规则变形公式，直接替换原词使用。" },
+                    { q: "以下表达中，哪一个是「する」的自谦表达？", options: ["なさる", "される", "いたす", "おする"], answer: 2, hint: "「する」的自谦表达是「いたす」。该词属于特殊的自谦动词，不套用规则变形公式，直接替换原词使用。" },
+                    { q: "以下表达中，哪一个是「来る」的尊他表达？", options: ["参る", "いらっしゃる", "来られる", "伺う"], answer: 1, hint: "「来る」的尊他表达是「いらっしゃる」（或「おいでになる / お越しになる」）。该词属于特殊的尊他动词，不套用规则变形公式，直接替换原词使用。" },
+                    { q: "以下表达中，哪一个是「いる」的自谦表达？", options: ["いらっしゃる", "ござる", "おる", "おいでになる"], answer: 2, hint: "「いる」的自谦表达是「おる」。该词属于特殊的自谦动词，不套用规则变形公式，直接替换原词使用。" },
+                    { q: "以下表达中，哪一个是「くれる」的尊他表达？", options: ["いただく", "差し上げる", "おくれになる", "くださる"], answer: 3, hint: "「くれる」的尊他表达是「くださる」。该词属于特殊的尊他动词，不套用规则变形公式，直接替换原词使用。" },
+                    { q: "以下表达中，哪一个是「あげる」的自谦表达？", options: ["差し上げる", "くださる", "いただく", "おあげする"], answer: 0, hint: "「あげる」的自谦表达是「差し上げる」。该词属于特殊的自谦动词，不套用规则变形公式，直接替换原词使用。" },
+                    { q: "以下表达中，哪一个是「知る」的尊他表达？", options: ["お知りになる", "ご存じだ", "知られる", "存じる"], answer: 1, hint: "「知る」的尊他表达是「ご存じだ」。该词属于特殊的尊他动词，不套用规则变形公式，直接替换原词使用。" },
+                    { q: "以下表达中，哪一个是「会う」的自谦表达？", options: ["お会いになる", "会われる", "お目にかかる", "拝見する"], answer: 2, hint: "「会う」的自谦表达是「お目にかかる」。该词属于特殊的自谦动词，不套用规则变形公式，直接替换原词使用。" },
+                    { q: "以下表达中，哪一个是「着る」的尊他表达？", options: ["お着になる", "着られる", "お召しになる", "お召しする"], answer: 2, hint: "「着る」的尊他表达是「お召しになる」。该词属于特殊的尊他动词，不套用规则变形公式，直接替换原词使用。" },
+                    { q: "以下表达中，哪一个是「借りる」的自谦表达？", options: ["お借りになる", "拝借する", "借りられる", "拝読する"], answer: 1, hint: "「借りる」的自谦表达是「拝借する」。该词属于特殊的自谦动词，不套用规则变形公式，直接替换原词使用。" },
+                    { q: "以下表达中，哪一个是「聞く」的自谦表达？", options: ["お聞きになる", "聞かれる", "伺う", "申し上げる"], answer: 2, hint: "「聞く」的自谦表达是「伺う」（或「拝聴する」）。该词属于特殊的自谦动词，不套用规则变形公式，直接替换原词使用。" },
+                    { q: "尊他动词「いらっしゃる」对应的基础词汇（原形）是以下哪一组？", options: ["言う・話す", "食べる・飲む", "行く・来る・いる", "見る・聞く"], answer: 2, hint: "「いらっしゃる」是动词「行く」、「来る」和「いる」的特殊尊他动词。它作为独立的敬语词汇，用于替代这三个基础动词以表达对动作主体的敬意。" },
+                    { q: "自谦动词「参る」对应的基础词汇（原形）是以下哪一组？", options: ["行く・来る", "いる・ある", "食べる・飲む", "思う・考える"], answer: 0, hint: "「参る」是动词「行く」和「来る」的特殊自谦动词。它作为独立的敬语词汇，用于降低自身的动作地位，从而向对方表达敬意。" },
+                    { q: "尊他动词「召し上がる」对应的基础词汇（原形）是以下哪一组？", options: ["着る・脱ぐ", "食べる・飲む", "言う・話す", "読む・書く"], answer: 1, hint: "「召し上がる」是动词「食べる」和「飲む」的特殊尊他动词。它作为独立的敬语词汇，不遵循规则变形公式，直接替代原词使用。" },
+                    { q: "自谦动词「拝見する」对应的基础词汇（原形）是什么？", options: ["聞く", "会う", "読む", "見る"], answer: 3, hint: "「拝見する」是动词「見る」的特殊自谦动词。它作为独立的敬语词汇，用于替代「見る」以体现自身的谦卑。" },
+                    { q: "尊他动词「おっしゃる」对应的基础词汇（原形）是什么？", options: ["言う", "思う", "知る", "聞く"], answer: 0, hint: "「おっしゃる」是动词「言う」的特殊尊他动词。它作为独立的敬语词汇，用于抬高对方的发言动作，直接替代原词「言う」使用。" },
+                    { q: "自谦动词「おる」对应的基础词汇（原形）是什么？", options: ["ある", "行く", "来る", "いる"], answer: 3, hint: "「おる」是动词「いる」的特殊自谦动词。它作为独立的敬语词汇，用于降低自身的动作地位，直接替代原词「いる」使用。" },
+                    { q: "尊他动词「ご覧になる」对应的基础词汇（原形）是什么？", options: ["読む", "見る", "探す", "聞く"], answer: 1, hint: "「ご覧になる」是动词「見る」的特殊尊他动词。它作为独立的敬语词汇，用于抬高对方的动作，直接替代原词「見る」使用。" },
+                    { q: "自谦动词「伺う」对应的基础词汇（原形）是以下哪一组？", options: ["聞く・訪ねる", "言う・話す", "思う・考える", "読む・書く"], answer: 0, hint: "「伺う」是动词「聞く（听/问）」和「訪ねる（拜访）」的特殊自谦动词。它作为独立的敬语词汇，在特定的语境下替代这两个基础动词使用。" },
+                    { q: "尊他动词「なさる」对应的基础词汇（原形）是什么？", options: ["なる", "ある", "する", "いる"], answer: 2, hint: "「なさる」是动词「する」的特殊尊他动词。它作为独立的敬语词汇，用于抬高动作主体，直接替代原词「する」使用。" },
+                    { q: "自谦动词「申し上げる」对应的基础词汇（原形）是什么？", options: ["読む", "知る", "思う", "言う"], answer: 3, hint: "「申し上げる」是动词「言う」的特殊自谦动词。它作为独立的敬语词汇，用于替代原词「言う」以体现自身的谦卑。" },
+                    { q: "自谦动词「いただく」对应的基础词汇（原形）是以下哪一组？", options: ["行く・来る", "もらう・食べる・飲む", "言う・話す", "見る・聞く"], answer: 1, hint: "「いただく」是动词「もらう」、「食べる」和「飲む」的特殊自谦动词。它作为独立的敬语词汇，用于降低自身的动作地位，直接替代这三个原词使用。" },
+                    { q: "尊他表达「おいでになる」对应的基础词汇（原形）是以下哪一组？", options: ["言う・思う", "着る・脱ぐ", "行く・来る・いる", "する・なる"], answer: 2, hint: "「おいでになる」是动词「行く」、「来る」和「いる」的特殊尊他表达。它作为独立的敬语词汇，用于抬高对方的动作，直接替代这些原词使用。" },
+                    { q: "自谦动词「存じる」对应的基础词汇（原形）是以下哪一组？", options: ["思う・知る", "聞く・話す", "見る・会う", "待つ・探す"], answer: 0, hint: "「存じる」是动词「思う（想）」和「知る（知道）」的特殊自谦动词。它作为独立的敬语词汇，在特定的语境下替代这两个基础动词以体现自身的谦卑。" },
+                    { q: "自谦动词「承る（うけたまわる）」对应的基础词汇（原形）是以下哪一组？", options: ["言う・伝える", "聞く・受ける", "見る・見せる", "読む・書く"], answer: 1, hint: "「承る」是动词「聞く（听）」和「受ける（接受）」的特殊自谦动词。它作为独立的敬语词汇，常用于商务或服务场合替代原词，表示恭敬地听取或接受。" },
+                    { q: "尊他表达「お越しになる」对应的基础词汇（原形）是什么？", options: ["行く", "いる", "来る", "帰る"], answer: 2, hint: "「お越しになる」是动词「来る」的特殊尊他表达。它作为独立的敬语词汇，常用于抬高对方“来”的动作，直接替代原词「来る」使用。" },
+                    { q: "作为特殊的尊他表达时，「お休みになる」对应的基础词汇（原形）是什么？", options: ["疲れる", "帰る", "座る", "寝る"], answer: 3, hint: "「お休みになる」是动词「寝る（睡觉）」的特殊尊他表达。它作为独立的敬语词汇，常用于抬高对方就寝的动作，在特定语境下替代原词「寝る」使用。" },
+                    { q: "自谦动词「お目にかかる」对应的基础词汇（原形）是什么？", options: ["会う", "見る", "見せる", "探す"], answer: 0, hint: "「お目にかかる」是动词「会う（见面）」的特殊自谦动词。它作为独立的敬语词汇，用于替代原词「会う」，从而降低自身的动作地位以表达对对方的敬意。" },
+                    { q: "尊他动词「お召しになる」对应的基础词汇（原形）是什么？", options: ["呼ぶ", "買う", "着る", "持つ"], answer: 2, hint: "「お召しになる」是动词「着る（穿）」的特殊尊他动词。它作为独立的敬语词汇，用于抬高对方穿戴的动作，直接替代原词「着る」使用。" },
+                    { q: "自谦动词「申す」对应的基础词汇（原形）是什么？", options: ["言う", "思う", "聞く", "考える"], answer: 0, hint: "「申す」是动词「言う（说）」的特殊自谦动词。它作为独立的敬语词汇，用于降低自身的发言动作，直接替代原词「言う」使用（常用于自我介绍或表明自身行为）。" },
+                    { q: "自谦动词「拝借する」对应的基础词汇（原形）是什么？", options: ["貸す", "あげる", "もらう", "借りる"], answer: 3, hint: "「拝借する」是动词「借りる（借入）」的特殊自谦动词。它作为独立的敬语词汇，用于替代原词「借りる」，表示恭敬地向对方借用某物。" }
+                ]
+            },
+            relationship: {
+                title: "关系判断特训",
+                advice: "记住【内外关系】的铁则！<br><br>当你在跟外部的客户或外人交谈时，只要提到自己公司的人（哪怕是你们的社长），因为算作“内圈”，都应该使用自谦语将他们压低，借此抬高对方！",
+                questions: [
+                    { q: "【对客户说话】弊社の田中はただいま席を（外す）＿＿＿＿＿。", options: ["外しております", "外していらっしゃいます", "外しておられます", "外されています"], answer: 0, hint: "对外人提到己方人员（田中），需作为整体压低，使用【ている形】的自谦「ております」。" },
+                    { q: "【对社长说话】山田部長が（来る）＿＿＿＿＿。", options: ["見えました", "参りました", "伺いました", "来させました"], answer: 0, hint: "在社内交流，部长比自己级别高，所以动作主体是部长时，需使用尊他语「見える/いらっしゃる」。" },
+                    { q: "【对老师说话】母がよろしくと（言う）＿＿＿＿＿。", options: ["申しておりました", "おっしゃっていました", "言われました", "申し上げていました"], answer: 0, hint: "对老师提到自己的母亲，母亲属于“内圈”，需用自谦语「申す」。" },
+                    { q: "【对客户说话】部長の山田は、午後３時に（戻る）＿＿＿＿＿。", options: ["お戻りになります", "戻られます", "戻ってまいります", "戻っていらっしゃいます"], answer: 2, hint: "本题要先判断人物关系。「部長の山田」是动作主体，客户是说话对象。因为「部長の山田」属于我方人员，在对外沟通时应统一压低己方，所以这里应使用自谦方向的表达。因此正确答案是「戻ってまいります」。" },
+                    { q: "【部下对上司说话】課長、先ほどの会議の資料はもう（読む）＿＿＿＿＿か。", options: ["拝見しました", "お読みになりました", "読ませていただきました", "お読みしました"], answer: 1, hint: "本题要先判断人物关系。「課長」是动作主体，「課長」是说话对象。因为「課長」属于上位者，且动作由对方发出，所以这里应使用尊他方向的表达。选项A、C、D均为压低动作主体的自谦形式，不符合此处的人物关系。因此正确答案是「お読みになりました」。" },
+                    { q: "【对客户说话】弊社の社長は、明日東京へ（行く）＿＿＿＿＿。", options: ["お行きになります", "行かれます", "いらっしゃいます", "参ります"], answer: 3, hint: "本题要先判断人物关系。「弊社の社長」是动作主体，客户是说话对象。对外提及己方人员时，即使在公司内部是上位者，面对外部客户时也应统一压低己方，因此这里应使用自谦方向的表达。所以正确答案是「参ります」。" },
+                    { q: "【店员对顾客说话】お客様、こちらの書類にお名前を（書く）＿＿＿＿＿か。", options: ["お書きします", "お書きになります", "書かせていただきます", "お書きいたします"], answer: 1, hint: "本题要先判断人物关系。「お客様」是动作主体，「お客様」也是说话对象。因为顾客属于绝对的上位者（外部人员），且动作由对方发出，应抬高对方，因此这里应使用尊他方向的表达。选项A、C、D均为压低己方的自谦形式，立场错误。所以正确答案是「お書きになります」。" },
+                    { q: "【对老师说话】私の妹も、先生がお書きになった本を（読む）＿＿＿＿＿。", options: ["読んでいらっしゃいます", "読まれております", "拝読しております", "お読みになっております"], answer: 2, hint: "本题要先判断人物关系。「私の妹」是动作主体，老师是说话对象。对上位者提及自己的家人时，家人属于己方人员，应压低己方以表示对老师的敬意，因此这里应使用自谦方向的表达。选项A、B、D均为尊他形式。所以正确答案是「拝読しております」。" },
+                    { q: "【社内同事之间说话】社長はもう会議室へ（入る）＿＿＿＿＿よ。", options: ["お入りになりました", "お入りしました", "入らせていただきました", "入ってまいりました"], answer: 0, hint: "本题要先判断人物关系。「社長」是动作主体，同事是说话对象。在公司内部沟通时，无需考虑对外的“内外关系”，直接根据“上下关系”进行判断。「社長」属于上位者，因此这里应使用尊他方向的表达。选项B、C、D均为自谦形式。所以正确答案是「お入りになりました」。" },
+                    { q: "【部下对上司说话】部長、その重そうなお荷物は私が（持つ）＿＿＿＿＿。", options: ["お持ちになります", "持たれます", "お持ちします", "お持ちくださいます"], answer: 2, hint: "本题要先判断人物关系。「私」是动作主体，「部長」是说话对象。动作由作为下属的自己发出，面对上位者时，应压低自己的动作以抬高对方，因此这里应使用自谦方向的表达。选项A、B、D均为抬高动作主体的尊他形式。所以正确答案是「お持ちします」。" },
+                    { q: "【对客户说话】私の父は、いつも御社の製品を（使う）＿＿＿＿＿。", options: ["使っております", "使っていらっしゃいます", "お使いになります", "使われます"], answer: 0, hint: "本题要先判断人物关系。「私の父」是动作主体，客户是说话对象。对外提及自己的家人时，家人属于己方人员，应压低己方以表示对客户的敬意，因此这里应使用自谦方向的表达。选项B、C、D均为尊他形式。所以正确答案是「使っております」。" },
+                    { q: "【对老师说话】先生、昨日のニュースはもう（見る）＿＿＿＿＿か。", options: ["拝見しました", "ご覧になりました", "見せていただきました", "お見せしました"], answer: 1, hint: "本题要先判断人物关系。「先生」是动作主体，「先生」也是说话对象。因为「先生」属于上位者，且动作由对方发出，应抬高对方，因此这里应使用尊他方向的表达。选项A、C、D均为压低动作主体的自谦形式。所以正确答案是「ご覧になりました」。" },
+                    { q: "【部下对上司说话】部長、明日の会議の準備は私が（する）＿＿＿＿＿。", options: ["なさいます", "されます", "いたします", "おっしゃいます"], answer: 2, hint: "本题要先判断人物关系。「私」是动作主体，「部長」是说话对象。动作由作为下属的自己发出，面对上位者时，应压低自己的动作以抬高对方，因此这里应使用自谦方向的表达。选项A、B均为抬高动作主体的尊他形式。所以正确答案是「いたします」。" },
+                    { q: "【对客户说话】担当の鈴木は、後ほどそちらへ（電話する）＿＿＿＿＿。", options: ["お電話なさいます", "お電話されます", "お電話いたします", "電話をおかけになります"], answer: 2, hint: "本题要先判断人物关系。「担当の鈴木」是动作主体，客户是说话对象。对外提及己方人员时，无论该人员在公司内部职位如何，面对外部客户都应统一压低己方，因此这里应使用自谦方向的表达。选项A、B、D均为尊他形式。所以正确答案是「お電話いたします」。" },
+                    { q: "【社内同事之间说话】課長は、今日の午後から出張に（行く）＿＿＿＿＿よ。", options: ["いらっしゃいます", "参ります", "伺います", "行かせていただきます"], answer: 0, hint: "本题要先判断人物关系。「課長」是动作主体，同事是说话对象。在公司内部沟通时，仅根据“上下关系”进行判断。「課長」属于上位者，动作由上位者发出，因此这里应使用尊他方向的表达。选项B、C、D均为压低动作主体的自谦形式。所以正确答案是「いらっしゃいます」。" },
+                    { q: "【店员对顾客说话】お客様は、こちらの新商品をもう（知る）＿＿＿＿＿か。", options: ["存じております", "ご存じです", "承知しております", "存じ上げております"], answer: 1, hint: "本题要先判断人物关系。「お客様」是动作主体，「お客様」是说话对象。因为顾客属于对方（上位者），动作由对方发出，所以这里应使用尊他方向的表达。选项A、C、D均为压低己方的自谦形式。因此正确答案是「ご存じです」。" },
+                    { q: "【对老师说话】母も、先生にぜひお会いしたいと（言う）＿＿＿＿＿。", options: ["おっしゃっております", "申しております", "言われております", "お言いになっております"], answer: 1, hint: "本题要先判断人物关系。「母」是动作主体，老师是说话对象。因为「母」属于己方人员，面对作为上位者的老师提及家人时，应压低己方，所以这里应使用自谦方向的表达。选项A、C、D均为尊他形式。因此正确答案是「申しております」。" },
+                    { q: "【部下对上司说话】部長、私が会議室まで（案内する）＿＿＿＿＿。", options: ["ご案内になります", "ご案内なさいます", "ご案内いたします", "案内されます"], answer: 2, hint: "本题要先判断人物关系。「私」是动作主体，「部長」是说话对象。因为动作由作为下属的「私」发出，面对上位者时应压低自己以抬高对方，所以这里应使用自谦方向的表达。选项A、B、D均为抬高动作主体的尊他形式。因此正确答案是「ご案内いたします」。" },
+                    { q: "【对客户说话】明日の午後、資料をお持ちして御社へ（行く）＿＿＿＿＿。", options: ["いらっしゃいます", "伺います", "おいでになります", "行かれます"], answer: 1, hint: "本题要先判断人物关系。「私」（省略的主语）是动作主体，客户是说话对象。因为动作主体属于我方人员，面对外部客户时应压低己方的动作，所以这里应使用自谦方向的表达。选项A、C、D均为抬高动作主体的尊他形式。因此正确答案是「伺います」。" },
+                    { q: "【店员对顾客说话】お客様、こちらのケーキはもう（食べる）＿＿＿＿＿か。", options: ["いただきました", "頂戴しました", "召し上がりました", "お食べしました"], answer: 2, hint: "本题要先判断人物关系。「お客様」是动作主体，「お客様」是说话对象。因为顾客属于对方（上位者），动作由对方发出，应抬高对方，所以这里应使用尊他方向的表达。选项A、B、D均为压低动作主体的自谦形式。因此正确答案是「召し上がりました」。" },
+                    { q: "【对客户说话】弊社の林は、いただいた資料をすでに（読む）＿＿＿＿＿。", options: ["ご覧になりました", "お読みになりました", "拝読いたしました", "読まれました"], answer: 2, hint: "本题要先判断人物关系。「弊社の林」是动作主体，客户是说话对象。对外提及己方人员时，应统一压低己方以表示对客户的敬意，因此这里应使用自谦方向的表达。选项A、B、D均为尊他形式。所以正确答案是「拝読いたしました」。" },
+                    { q: "【对老师说话】昨日、私の弟が先生のご著書を（借りる）＿＿＿＿＿。", options: ["お借りになりました", "お借りしました", "借りられました", "お借りなさいました"], answer: 1, hint: "本题要先判断人物关系。「私の弟」是动作主体，老师是说话对象。面对作为上位者的老师提及自己的家人时，家人属于己方人员，应压低己方，因此这里应使用自谦方向的表达。选项A、C、D均为尊他形式。所以正确答案是「お借りしました」。" },
+                    { q: "【部下对上司说话】課長、先ほどの会議で（言う）＿＿＿＿＿ことは、こういう意味でしょうか。", options: ["申した", "おっしゃった", "申し上げた", "言わせていただいた"], answer: 1, hint: "本题要先判断人物关系。「課長」是动作主体，「課長」也是说话对象。因为「課長」属于上位者，动作由对方发出，应抬高对方，因此这里应使用尊他方向的表达。选项A、C、D均为压低动作主体的自谦形式。所以正确答案是「おっしゃった」。" },
+                    { q: "【店员对顾客说话】お客様、別のサイズの商品を私が（探す）＿＿＿＿＿。", options: ["お探しになります", "探されます", "お探しいたします", "探していらっしゃいます"], answer: 2, hint: "本题要先判断人物关系。「私」是动作主体，「お客様」是说话对象。动作由作为店员的自己发出，面对作为上位者（外部人员）的顾客，应压低自己的动作以抬高对方，因此这里应使用自谦方向的表达。选项A、B、D均为抬高动作主体的尊他形式。所以正确答案是「お探しいたします」。" },
+                    { q: "【对客户说话】お客様からのご要望は、必ず弊社の社長に（伝える）＿＿＿＿＿。", options: ["お伝えになります", "お伝えします", "伝えられます", "お伝えくださいます"], answer: 1, hint: "本题要先判断人物关系。「私」（省略的动作发出者）是动作主体，客户是说话对象。动作由我方人员发出，面对外部客户应压低己方的动作以抬高对方，因此这里应使用自谦方向的表达。选项A、C、D均为抬高动作主体的尊他形式。所以正确答案是「お伝えします」。" },
+                    { q: "【对审计人员说话】弊社の経理担当は、後ほどその資料をそちらへ（届ける）＿＿＿＿＿。", options: ["お届けになります", "届けられます", "お届けいたします", "お届けくださいます"], answer: 2, hint: "本题要先判断人物关系。「弊社の経理担当」是动作主体，外部的审计人员是说话对象。对外提及己方人员的动作时，应压低己方以抬高对方，因此这里应使用自谦方向的表达。选项A、B、D均为抬高动作主体的尊他形式。所以正确答案是「お届けいたします」。" },
+                    { q: "【社内同事之间说话】部長は、来月の予算案をもう（確認する）＿＿＿＿＿か。", options: ["確認いたしました", "ご確認になりました", "ご確認しました", "確認させていただきました"], answer: 1, hint: "本题要先判断人物关系。「部長」是动作主体，同事是说话对象。在公司内部沟通时，直接根据“上下关系”进行判断。「部長」属于上位者，动作由上位者发出，因此应使用尊他方向的表达。选项A、C、D均为压低动作主体的自谦形式。所以正确答案是「ご確認になりました」。" },
+                    { q: "【对客户说话】その件につきましては、弊社の社長が現在（検討する）＿＿＿＿＿。", options: ["ご検討なさっております", "検討されております", "検討いたしております", "ご検討になっております"], answer: 2, hint: "本题要先判断人物关系。「弊社の社長」是动作主体，客户是说话对象。对外沟通时，即使动作主体在公司内部是上位者，面对外部人员也应统一压低己方，因此这里应使用自谦方向的表达。选项A、B、D均为抬高动作主体的尊他形式。所以正确答案是「検討いたしております」。" },
+                    { q: "【部下对上司说话】課長、明日行われる会議の議事録は、私が（作成する）＿＿＿＿＿。", options: ["ご作成になります", "作成してくださいます", "作成させていただきます", "お作りになります"], answer: 2, hint: "本题要先判断人物关系。「私」是动作主体，「課長」是说话对象。动作由作为下属的自己发出，面对上位者时，应压低自己的动作以抬高对方，因此这里应使用自谦方向的表达。选项A、B、D均为抬高动作主体的尊他形式。所以正确答案是「作成させていただきます」。" },
+                    { q: "【店员对顾客说话】お客様、当店の新しいサービスはもう（利用する）＿＿＿＿＿か。", options: ["ご利用しました", "ご利用になりました", "利用させていただきました", "利用いたしました"], answer: 1, hint: "本题要先判断人物关系。「お客様」是动作主体，「お客様」也是说话对象。顾客属于绝对的上位者（外部人员），动作由对方发出，应抬高对方，因此这里应使用尊他方向的表达。选项A、C、D均为压低动作主体的自谦形式。所以正确答案是「ご利用になりました」。" },
+                    { q: "【对客户说话】弊社の担当が、１階のロビーで社長を（待つ）＿＿＿＿＿。", options: ["お待ちになっております", "お待ちしております", "待たれております", "お待ちくださいます"], answer: 1, hint: "本题要先判断人物关系。「弊社の担当」是动作主体，客户（社長的代表或客户本人）是说话对象。对外提及己方人员的动作时，应压低己方以抬高外部的对方，因此这里应使用自谦方向的表达。选项A、C、D均为抬高动作主体的尊他形式。所以正确答案是「お待ちしております」。" },
+                    { q: "【店员对顾客说话】お子様は、こちらのりんごジュースを（飲む）＿＿＿＿＿か。", options: ["いただきます", "召し上がります", "お飲みします", "頂戴します"], answer: 1, hint: "本题要先判断人物关系。「お子様」是动作主体，「お客様」是说话对象。顾客的家人或同行者属于对方（上位者）阵营，动作由对方阵营发出，应抬高对方，因此这里应使用尊他方向的表达。选项A、C、D均为压低动作主体的自谦形式。所以正确答案是「召し上がります」。" },
+                    { q: "【部下对上司说话】部長、奥様も明日の創立記念パーティーに（来る）＿＿＿＿＿か。", options: ["参ります", "いらっしゃいます", "伺います", "来させていただきます"], answer: 1, hint: "本题要先判断人物关系。「奥様」是动作主体，「部長」是说话对象。上司的家人属于上位者阵营，动作由上位者阵营发出，应抬高对方，因此这里应使用尊他方向的表达。选项A、C、D均为压低动作主体的自谦形式。所以正确答案是「いらっしゃいます」。" },
+                    { q: "【对客户说话】先ほど、御社の山田部長がそのように（言う）＿＿＿＿＿。", options: ["申しました", "おっしゃいました", "申し上げました", "お言いしました"], answer: 1, hint: "本题要先判断人物关系。「御社の山田部長」是动作主体，客户是说话对象。对方公司的人员均属于外部上位者阵营，动作由对方发出，应抬高对方，因此这里应使用尊他方向的表达。选项A、C、D均为压低动作主体的自谦形式。所以正确答案是「おっしゃいました」。" },
+                    { q: "【社内同事之间说话】昨日、出張から戻られた課長が私にこのお土産を（くれる）＿＿＿＿＿。", options: ["いただきました", "差し上げました", "くださいました", "お与えしました"], answer: 2, hint: "本题要先判断人物关系。「課長」是动作主体，同事是说话对象。在公司内部沟通时，仅根据“上下关系”判断。「課長」属于上位者，动作（给）由上位者发出，应抬高动作主体，因此这里应使用尊他方向的表达。选项A、B、D均为自谦形式（站在“我”或压低主体的立场）。所以正确答案是「くださいました」。" },
+                    { q: "【部下对上司说话】部長、私の妻も部長の新しいご著書を（読む）＿＿＿＿＿。", options: ["読まれております", "お読みになっております", "拝読しております", "拝読なさっております"], answer: 2, hint: "本题要先判断人物关系。「私の妻」是动作主体，「部長」是说话对象。上司是上位者，面对上司提及自己的家人时，家人属于己方人员，应压低己方，因此这里应使用自谦方向的表达。选项A、B为尊他形式，选项D的「なさる」为尊他成分，立场错误。所以正确答案是「拝読しております」。" },
+                    { q: "【店员对顾客说话】お客様、こちらの新しいペンを（使う）＿＿＿＿＿か。", options: ["お使いします", "お使いになります", "使わせていただきます", "お使いいたします"], answer: 1, hint: "本题要先判断人物关系。「お客様」是动作主体，「お客様」也是说话对象。顾客属于绝对的上位者（外部人员），动作由对方发出，应抬高对方，因此这里应使用尊他方向的表达。选项A、C、D均为压低动作主体的自谦形式。所以正确答案是「お使いになります」。" },
+                    { q: "【对客户说话】ご送付いただいた資料は、弊社の田中が確かに（受け取る）＿＿＿＿＿。", options: ["拝受いたしました", "お受け取りになりました", "受け取られました", "お受け取りくださいました"], answer: 0, hint: "本题要先判断人物关系。「弊社の田中」是动作主体，客户是说话对象。对外提及己方人员的动作时，应压低己方以抬高对方，因此这里应使用自谦方向的表达。选项B、C、D均为抬高动作主体的尊他形式。所以正确答案是「拝受いたしました」。" },
+                    { q: "【社内同事之间说话】さきほど、社長がこの新しいプロジェクトの企画書を（見る）＿＿＿＿＿よ。", options: ["拝見しました", "見せていただきました", "ご覧になりました", "お見せしました"], answer: 2, hint: "本题要先判断人物关系。「社長」是动作主体，同事是说话对象。在公司内部沟通时，直接根据“上下关系”判断。「社長」属于上位者，动作由上位者发出，应抬高动作主体，因此这里应使用尊他方向的表达。选项A、B、D均为压低动作主体的自谦形式。所以正确答案是「ご覧になりました」。" },
+                    { q: "【部下对上司说话】課長、その重そうな資料は私が（預かる）＿＿＿＿＿。", options: ["お預かりになります", "お預かりいたします", "預かられます", "お預かりくださいます"], answer: 1, hint: "本题要先判断人物关系。「私」是动作主体，「課長」是说话对象。动作由作为下属的自己发出，面对上位者时，应压低自己的动作以抬高对方，因此这里应使用自谦方向的表达。选项A、C、D均为抬高动作主体的尊他形式。所以正确答案是「お預かりいたします」。" },
+                    { q: "【对客户说话】弊社の山田は、ただいま別の電話に（出る）＿＿＿＿＿。", options: ["お出になっております", "出られております", "出ていらっしゃいます", "出ております"], answer: 3, hint: "本题要先判断人物关系。「弊社の山田」是动作主体，客户是说话对象。对外提及己方人员的状态时，应压低己方以抬高外部的对方，因此这里应使用自谦方向的表达。选项A、B、C均为抬高动作主体的尊他形式。所以正确答案是「出ております」。" },
+                    { q: "【部下对上司说话】部長、息子さんは今年から中学生に（なる）＿＿＿＿＿ね。", options: ["なさいます", "おなりになります", "ならせていただきます", "おなりします"], answer: 1, hint: "本题要先判断人物关系。「息子さん」是动作主体，「部長」是说话对象。上司的家人属于上位者阵营，动作由上位者阵营发出，应抬高对方，因此这里应使用尊他方向的表达。选项A通常用于代替「する」，选项C、D均为压低动作主体的自谦形式。所以正确答案是「おなりになります」。" },
+                    { q: "【店员对顾客说话】お客様のお荷物は、こちらのレジにて（預かる）＿＿＿＿＿。", options: ["お預かりになります", "お預かりいたします", "預かられます", "預かってくださいます"], answer: 1, hint: "本题要先判断人物关系。「私（店员）」是动作主体，「お客様」是说话对象。动作由我方发出，面对作为外部上位者的顾客时，应压低自己的动作以抬高对方，因此这里应使用自谦方向的表达。选项A、C、D均为抬高动作主体的尊他形式。所以正确答案是「お預かりいたします」。" },
+                    { q: "【对客户说话】その件につきましては、後ほど弊社の課長から（連絡する）＿＿＿＿＿。", options: ["ご連絡なさいます", "ご連絡されます", "ご連絡申し上げます", "ご連絡くださいます"], answer: 2, hint: "本题要先判断人物关系。「弊社の課長」是动作主体，客户是说话对象。对外沟通时，即使动作主体是公司内部的上司，面对外部人员也应统一压低己方，因此这里应使用自谦方向的表达。选项A、B、D均为抬高动作主体的尊他形式。所以正确答案是「ご連絡申し上げます」。" },
+                    { q: "【社内同事之间说话】社長は今、応接室で先方のお客様を（待つ）＿＿＿＿＿よ。", options: ["お待ちしております", "待たせていただいております", "お待ちになっております", "お待ち申し上げております"], answer: 2, hint: "本题要先判断人物关系。「社長」是动作主体，同事是说话对象。在公司内部沟通时，直接根据“上下关系”判断。「社長」属于上位者，动作由上位者发出，应抬高动作主体，因此这里应使用尊他方向的表达。选项A、B、D均为压低动作主体的自谦形式。所以正确答案是「お待ちになっております」。" },
+                    { q: "【对客户说话】弊社の技術担当が、後ほど御社のシステムを（調べる）＿＿＿＿＿。", options: ["お調べになります", "お調べいたします", "調べられます", "お調べくださいます"], answer: 1, hint: "本题要先判断人物关系。「弊社の技術担当」是动作主体，客户是说话对象。对外提及己方人员的动作时，应压低己方以抬高外部的对方，因此这里应使用自谦方向的表达。选项A、C、D均为抬高动作主体的尊他形式。所以正确答案是「お調べいたします」。" },
+                    { q: "【部下对上司说话】部長、来週の大阪出張には、いつ出発（する）＿＿＿＿＿か。", options: ["なさいます", "いたします", "させていただきます", "おさせになります"], answer: 0, hint: "本题要先判断人物关系。「部長」是动作主体，「部長」也是说话对象。动作由上位者（上司）发出，应抬高对方，因此这里应使用尊他方向的表达。选项B、C均为压低动作主体的自谦形式，选项D为错误的变形。所以正确答案是「なさいます」。" },
+                    { q: "【社内同事之间说话】課長は、Ａ社に関する昨日のニュースをもう（聞く）＿＿＿＿＿か。", options: ["お聞きしました", "伺いました", "お聞きになりました", "聞かせていただきました"], answer: 2, hint: "本题要先判断人物关系。「課長」是动作主体，同事是说话对象。在公司内部沟通时，直接根据“上下关系”判断。「課長」属于上位者，动作由上位者发出，应抬高动作主体，因此这里应使用尊他方向的表达。选项A、B、D均为压低动作主体的自谦形式。所以正确答案是「お聞きになりました」。" },
+                    { q: "【对老师说话】父は、先生からいただいたお手紙を何度も（読む）＿＿＿＿＿。", options: ["拝読しております", "お読みになっております", "読まれております", "ご覧になっております"], answer: 0, hint: "本题要先判断人物关系。「父」是动作主体，老师是说话对象。面对作为上位者的老师提及自己的家人时，家人属于己方人员，应压低己方以表示对老师的敬意，因此这里应使用自谦方向的表达。选项B、C、D均为抬高动作主体的尊他形式。所以正确答案是「拝読しております」。" },
+                    { q: "【店员对顾客说话】お客様、こちらのアンケート用紙は私がレジへ（持っていく）＿＿＿＿＿。", options: ["お持っていきになります", "持っていかれます", "お持ちいたします", "お持ちになってくださいます"], answer: 2, hint: "本题要先判断人物关系。「私（店员）」是动作主体，「お客様」是说话对象。动作由我方人员发出，面对作为外部上位者的顾客时，应压低自己的动作以抬高对方，因此这里应使用自谦方向的表达。选项A、B、D均包含抬高动作主体的尊他成分。所以正确答案是「お持ちいたします」。" },
+                    { q: "【对客户说话】弊社の部長も、御社の新製品は素晴らしいと（言う）＿＿＿＿＿。", options: ["おっしゃっておりました", "言われておりました", "申しておりました", "お話しになっておりました"], answer: 2, hint: "本题要先判断人物关系。「弊社の部長」是动作主体，客户是说话对象。对外提及己方人员时，即使在公司内部是上位者，面对外部客户也应统一压低己方，因此这里应使用自谦方向的表达。选项A、B、D均为抬高动作主体的尊他形式，「申す」是「言う」的自谦特殊敬语。所以正确答案是「申しておりました」。" },
+                    { q: "【店员对顾客说话】お客様、こちらの秋の新作カタログはもう（見る）＿＿＿＿＿か。", options: ["拝見しました", "ご覧になりました", "見せていただきました", "お見せになりました"], answer: 1, hint: "本题要先判断人物关系。「お客様」是动作主体，「お客様」也是说话对象。顾客属于绝对的上位者（外部人员），动作由对方发出，应抬高对方，因此这里应使用尊他方向的表达。选项A、C均为压低动作主体的自谦形式，选项D形式错误。「ご覧になる」是「見る」的尊他特殊敬语。所以正确答案是「ご覧になりました」。" },
+                    { q: "【部下对上司说话】課長、そのプロジェクトの進捗状況につきましては、私もよく（知っている）＿＿＿＿＿。", options: ["ご存じです", "存じております", "承知されております", "お知りになっております"], answer: 1, hint: "本题要先判断人物关系。「私」是动作主体，「課長」是说话对象。状态由作为下属的自己维持，面对上位者时，应压低自己以抬高对方，因此这里应使用自谦方向的表达。选项A、C、D均为抬高动作主体的尊他形式。「存じる」是「知っている」的自谦特殊敬语。所以正确答案是「存じております」。" },
+                    { q: "【对客户说话】明日の午後３時に、弊社の担当者がそちらへ（行く）＿＿＿＿＿。", options: ["いらっしゃいます", "行かれます", "おいでになります", "伺います"], answer: 3, hint: "本题要先判断人物关系。「弊社の担当者」是动作主体，客户是说话对象。对外提及己方人员的动作时，应压低己方以抬高外部的对方，因此这里应使用自谦方向的表达。选项A、B、C均为抬高动作主体的尊他形式。「伺う」是「行く」的自谦特殊敬语。所以正确答案是「伺います」。" },
+                    { q: "【社内同事之间说话】社長は、今は２階の会議室に（いる）＿＿＿＿＿よ。", options: ["おられます", "おります", "いらっしゃいます", "参ります"], answer: 2, hint: "本题要先判断人物关系。「社長」是动作主体，同事是说话对象。在公司内部沟通时，直接根据“上下关系”判断。「社長」属于上位者，状态的主体是上位者，应抬高动作主体，因此这里应使用尊他方向的表达。选项B、D均为压低动作主体的自谦形式，选项A不符合标准特殊敬语规范。「いらっしゃる」是「いる」的尊他特殊敬语。所以正确答案是「いらっしゃいます」。" },
+                    { q: "【部下对上司说话】部長、その件の詳しい事情は、後ほど私が（聞く）＿＿＿＿＿。", options: ["お聞きになります", "伺います", "聞かれます", "お聞きくださいます"], answer: 1, hint: "本题要先判断人物关系。「私」是动作主体，「部長」是说话对象。动作由作为下属的自己发出，面对上位者时，应压低自己的动作以抬高对方，因此这里应使用自谦方向的表达。选项A、C、D均为抬高动作主体的尊他形式。「伺う」是「聞く」的自谦特殊敬语。所以正确答案是「伺います」。" },
+                    { q: "【对客户说话】先日の会議で、御社の社長がそのように（言う）＿＿＿＿＿ね。", options: ["申しました", "申し上げました", "おっしゃいました", "お話ししました"], answer: 2, hint: "本题要先判断人物关系。「御社の社長」是动作主体，客户是说话对象。对方公司的人员均属于外部上位者阵营，动作由对方发出，应抬高动作主体，因此这里应使用尊他方向的表达。选项A、B均为压低动作主体的自谦形式，选项D为不含尊他成分的礼貌语。「おっしゃる」是「言う」的尊他特殊敬语。所以正确答案是「おっしゃいました」。" },
+                    { q: "【对老师说话】先生、昨日お送りいただいた資料は、すでに（見る）＿＿＿＿＿。", options: ["ご覧になりました", "拝見いたしました", "見ていらっしゃいました", "お見せしました"], answer: 1, hint: "本题要先判断人物关系。「私」（省略的动作发出者）是动作主体，老师是说话对象。动作由我方发出，面对作为上位者的老师时，应压低自己的动作以抬高对方，因此这里应使用自谦方向的表达。选项A、C均为抬高动作主体的尊他形式，选项D虽然是谦让语，但意思是“给对方看”，动作方向错误。「拝見する」是「見る」的自谦特殊敬语。所以正确答案是「拝見いたしました」。" },
+                    { q: "【对客户说话】私の兄も、明日の展示会に（行く）＿＿＿＿＿。", options: ["いらっしゃいます", "行かれます", "おいでになります", "参ります"], answer: 3, hint: "本题要先判断人物关系。「私の兄」是动作主体，客户是说话对象。对外提及自己的家人时，家人属于己方人员，应压低己方以表示对客户的敬意，因此这里应使用自谦方向的表达。选项A、B、C均为抬高动作主体的尊他形式。「参る」是「行く」的自谦特殊敬语。所以正确答案是「参ります」。" },
+                    { q: "【店员对顾客说话】お客様、お支払いはクレジットカードに（する）＿＿＿＿＿か。", options: ["いたします", "なさいます", "させていただきます", "おさせになります"], answer: 1, hint: "本题要先判断人物关系。「お客様」是动作主体，「お客様」也是说话对象。顾客属于绝对的上位者（外部人员），动作由对方发出，应抬高对方，因此这里应使用尊他方向的表达。选项A、C均为压低动作主体的自谦形式，选项D形式错误。「なさる」是「する」的尊他特殊敬语。所以正确答案是「なさいます」。" },
+                    { q: "【对客户说话】弊社のシステム担当が、明日の午後に御社のネットワークを（確認する）＿＿＿＿＿。", options: ["ご確認になります", "ご確認いたします", "確認されます", "確認してくださいます"], answer: 1, hint: "本题要先判断人物关系。「弊社のシステム担当」是动作主体，客户是说话对象。对外提及己方人员的动作时，应压低己方以抬高外部的对方，因此这里应使用自谦方向的表达。选项A、C、D均为抬高动作主体的尊他形式。所以正确答案是「ご確認いたします」。" },
+                    { q: "【部下对上司说话】部長、お嬢様は来月、アメリカへ留学（する）＿＿＿＿＿そうですね。", options: ["いたします", "なさいます", "させていただきます", "おさせになります"], answer: 1, hint: "本题要先判断人物关系。「お嬢様」是动作主体，「部長」是说话对象。上司的家人属于上位者阵营，动作由上位者阵营发出，应抬高对方，因此这里应使用尊他方向的表达。选项A、C均为压低动作主体的自谦形式，选项D形式错误。「なさる」是「する」的尊他特殊敬语。所以正确答案是「なさいます」。" },
+                    { q: "【店员对顾客说话】お客様、こちらのサイズでよろしいか、一度（着る）＿＿＿＿＿か。", options: ["お召しになります", "お着せします", "着させていただきます", "お着けになります"], answer: 0, hint: "本题要先判断人物关系。「お客様」是动作主体，「お客様」也是说话对象。顾客属于绝对的上位者（外部人员），动作由对方发出，应抬高对方，因此这里应使用尊他方向的表达。选项B、C均为压低动作主体的自谦形式，选项D不符合该动词的敬语规范。「お召しになる」是「着る」的尊他特殊敬语。所以正确答案是「お召しになります」。" },
+                    { q: "【社内同事之间说话】さきほど、部長が会議室でこの資料を（読む）＿＿＿＿＿よ。", options: ["お読みしました", "拝読しました", "お読みになりました", "読ませていただきました"], answer: 2, hint: "本题要先判断人物关系。「部長」是动作主体，同事是说话对象。在公司内部沟通时，直接根据“上下关系”判断。「部長」属于上位者，动作由上位者发出，应抬高动作主体，因此这里应使用尊他方向的表达。选项A、B、D均为压低动作主体的自谦形式。所以正确答案是「お読みになりました」。" },
+                    { q: "【对老师说话】母が、先生にこのお菓子をぜひ（渡す）＿＿＿＿＿と申しておりました。", options: ["お渡しになりたい", "渡されたい", "お渡ししたい", "お渡しくださりたい"], answer: 2, hint: "本题要先判断人物关系。「母」是动作主体，老师是说话对象。面对作为上位者的老师提及自己的家人时，家人属于己方人员，应压低己方以表示对老师的敬意，因此这里应使用自谦方向的表达。选项A、B、D均为抬高动作主体的尊他形式。所以正确答案是「お渡ししたい」。" },
+                    { q: "【部下对上司说话】部長、昨日の歓迎会で出されたお寿司はもう（食べる）＿＿＿＿＿か。", options: ["いただきました", "召し上がりました", "お食べしました", "頂戴しました"], answer: 1, hint: "本题要先判断人物关系。「部長」是动作主体，「部長」也是说话对象。动作由上位者发出，面对上位者应抬高对方，因此这里应使用尊他方向的表达。选项A、C、D均为压低动作主体的自谦形式。「召し上がる」是「食べる」的尊他特殊敬语。所以正确答案是「召し上がりました」。" },
+                    { q: "【对客户说话】その件の詳細につきましては、弊社の担当者もよく（知っている）＿＿＿＿＿。", options: ["ご存じです", "存じております", "お知りになっております", "承知されております"], answer: 1, hint: "本题要先判断人物关系。「弊社の担当者」是动作主体，客户是说话对象。对外提及己方人员的状态时，应压低己方以抬高外部的对方，因此这里应使用自谦方向的表达。选项A、C、D均为抬高动作主体的尊他形式。「存じる」是「知っている」的自谦特殊敬语。所以正确答案是「存じております」。" },
+                    { q: "【社内同事之间说话】先ほどの会議で、社長が（言う）＿＿＿＿＿ことについて、どう思いますか。", options: ["申した", "申し上げた", "おっしゃった", "言わせていただいた"], answer: 2, hint: "本题要先判断人物关系。「社長」是动作主体，同事是说话对象。在公司内部沟通时，直接根据“上下关系”判断。「社長」属于上位者，动作由上位者发出，应抬高动作主体，因此这里应使用尊他方向的表达。选项A、B、D均为压低动作主体的自谦形式。「おっしゃる」是「言う」的尊他特殊敬语。所以正确答案是「おっしゃった」。" },
+                    { q: "【对客户说话】お送りいただいた新しいパンフレットは、昨日のうちに（見る）＿＿＿＿＿。", options: ["ご覧になりました", "拝見いたしました", "お見せいたしました", "見ていらっしゃいました"], answer: 1, hint: "本题要先判断人物关系。「私」（省略的动作发出者）是动作主体，客户是说话对象。动作由我方发出，面对外部客户应压低己方的动作以抬高对方，因此这里应使用自谦方向的表达。选项A、D均为抬高动作主体的尊他形式，选项C虽然是谦让语但意思是“出示给对方看”，动作方向错误。「拝見する」是「見る」的自谦特殊敬语。所以正确答案是「拝見いたしました」。" },
+                    { q: "【店员对顾客说话】お客様は、来月オープンする新しい店舗へはもう（行く）＿＿＿＿＿か。", options: ["伺います", "参ります", "いらっしゃいます", "行かせていただきます"], answer: 2, hint: "本题要先判断人物关系。「お客様」是动作主体，「お客様」也是说话对象。顾客属于绝对的上位者（外部人员），动作由对方发出，应抬高对方，因此这里应使用尊他方向的表达。选项A、B、D均为压低动作主体的自谦形式。「いらっしゃる」是「行く」的尊他特殊敬语。所以正确答案是「いらっしゃいます」。" }
+                ]
+            },
+            scenario: {
+                title: "场景分辨特训",
+                advice: "在这类实战场景中，不仅要注意敬语的升降，还要考虑“委婉度”和“得体性”。<br><br>比如请求别人做事时，利用【使役态】和授受动词的组合（させて+いただく）常常能表达出非常礼貌的请示语气！",
+                questions: [
+                    { q: "【服务员对客人】ご注文は以上で（いい）＿＿＿＿＿でしょうか。", options: ["よろしい", "いい", "結構", "大丈夫"], answer: 0, hint: "服务业确认时的特殊郑重语，使用「よろしい」替代「いい」。" },
+                    { q: "【商务致谢】ご足労（もらう）＿＿＿＿＿、感謝いたします。", options: ["いただき", "くださり", "もらい", "あげて"], answer: 0, hint: "承蒙对方做某事，我方获益，使用「（お/ご）～いただく」。" },
+                    { q: "【商务电话】はい、お電話ありがとうございます。エイペックス（　　）。", options: ["でございます", "にございます", "でいらっしゃいます", "でおられます"], answer: 0, hint: "公司名后接「でございます」。用于电话中的郑重自报。" },
+                    { q: "【商务办公】申し訳ありません、今日は少し早く（　　）よろしいでしょうか。", options: ["帰らせていただいても", "お帰りしても", "帰られても", "帰らせてくださっても"], answer: 0, hint: "请求允许自己先离开，用「Vさせていただいてもよろしいでしょうか」。" },
+                    { q: "【商务接待】それでは、会議室へ（　　）。どうぞこちらへ。", options: ["ご案内いたします", "ご案内になります", "案内してあげます", "ご案内くださいます"], answer: 0, hint: "为客户带路时，用「ご案内いたします」。表示我方动作的自谦。" },
+                    { q: "【商务邮件】先ほど、お送りいただいた明細データを確かに（　　）。", options: ["受領いたしました", "拝受されました", "もらいました", "受領されました"], answer: 0, hint: "正式确认收到文件，用「受領いたしました」。" },
+                    { q: "【商务接待】大変（　　）。", options: ["お待たせいたしました", "お待ちいたしました", "待たせましたね", "待ってくださいました"], answer: 0, hint: "让客户久等后的固定说法是「お待たせいたしました」。" },
+                    { q: "【正式道歉邮件】昨日の発送ミスの件につきまして、ご迷惑をおかけし、心より（　　）。", options: ["お詫び申し上げます", "謝らせていただきます", "謝ります", "お詫びくださいます"], answer: 0, hint: "正式书面道歉时，用「お詫び申し上げます」。" },
+                    { q: "【商务办公】課長、来週の金曜日ですが、病院の検査がありまして、お休みを（　　）。", options: ["取らせていただけませんか", "お取りになりませんか", "取ってくれませんか", "お取りいただけませんか"], answer: 0, hint: "请假属于请求允许自己行为，用「Vさせていただけませんか」。" },
+                    { q: "【商务会议】それでは、これより弊社の新製品の機能について（　　）。", options: ["説明させていただきます", "ご説明になります", "説明していただきます", "説明してあげます"], answer: 0, hint: "会议开场宣告自己接下来说明，用「説明させていただきます」。" },
+                    { q: "【商务办公】先輩、お忙しいところ申し訳ありません。こちらの企画書を（　　）。", options: ["ご確認いただけませんか", "確認させていただけませんか", "ご確認になりますか", "確認してあげませんか"], answer: 0, hint: "请求对方帮忙确认时，用「ご確認いただけませんか」。" },
+                    { q: "【商务洽谈】弊社からの新しい提案につきまして、社内で（　　）。", options: ["ご検討いただければと思います", "ご検討願います", "検討させていただきます", "ご検討になります"], answer: 0, hint: "对客户最委婉的请求，用「ご検討いただければと思います」。" },
+                    { q: "【正式致辞】皆様の温かいご支援に対し、心より厚く御礼（　　）。", options: ["申し上げます", "されます", "してくださいます", "させられます"], answer: 0, hint: "郑重致谢常用「厚く御礼申し上げます」。" },
+                    { q: "【发表会】それでは、本日のスケジュールにつきまして、私から（　　）。", options: ["説明させていただきます", "ご説明になります", "お説明なさいます", "説明していただきます"], answer: 0, hint: "正式宣告自己将进行说明，用「説明させていただきます」。" },
+                    { q: "【初次营销邮件】お忙しいとは存じますが、お手すきの際に添付のパンフレットを（　　）。", options: ["ご覧いただければと思います", "ご覧ください", "拝見してください", "ご覧にならせてください"], answer: 0, hint: "初次联系时的委婉请求，用「ご覧いただければと思います」。" },
+                    { q: "【银行柜台】恐れ入りますが、こちらにフルネームで（　　）。", options: ["ご署名ください", "署名させていただきます", "ご署名になります", "署名してあげてください"], answer: 0, hint: "办理手续时的明确指示，用「ご署名ください」。" },
+                    { q: "【办公室借用】すみません、急ぎの資料がありまして、こちらのコピー機を（　　）。", options: ["使わせていただけませんか", "使っていただけませんか", "お使いになりませんか", "使わせてくださいます"], answer: 0, hint: "想借用对方设备时，用「使わせていただけませんか」。" },
+                    { q: "【服务业待客】お客様、その重そうなお荷物、私がフロントまで（　　）。", options: ["お持ちいたします", "お持ちになります", "持たれます", "持っていただきます"], answer: 0, hint: "主动帮客人拿行李，用「お持ちいたします」。我方动作要用自谦。" },
+                    { q: "【商务汇报】部長、昨日お渡しいただいた業界分析のレポート、しっかりと（　　）。", options: ["拝見いたしました", "ご覧になりました", "お見せしました", "見られました"], answer: 0, hint: "向上司汇报自己已看完资料，用「拝見いたしました」。" },
+                    { q: "【餐饮服务】お待たせいたしました。温かいうちに、どうぞ（　　）。", options: ["召し上がってください", "いただいてください", "食べてあげてください", "お食べしてください"], answer: 0, hint: "请客人用餐时，要抬高对方动作，用「召し上がってください」。" },
+                    { q: "【前台接待】遠いところを、よく（　　）。社長は応接室でお待ちです。", options: ["いらっしゃいました", "参りました", "伺いました", "来てやりましたね"], answer: 0, hint: "欢迎客户到来时，用「いらっしゃいました」。" },
+                    { q: "【商场导购】お客様、何か特定のものを（　　）か。", options: ["お探しでしょうか", "お探ししますか", "探させていただきますか", "お探しくださいますか"], answer: 0, hint: "询问顾客是否在找东西，用「お探しでしょうか」。" },
+                    { q: "【商务拜访】恐れ入りますが、ペンを一本（　　）。", options: ["お借りになりませんか", "貸していただけませんか", "貸させていただけませんか", "お貸しいたしましょうか"], answer: 1, hint: "这里是请求对方把笔借给自己。对方动作用「～ていただけませんか」。" },
+                    { q: "【电话应对】担当の山田はただいま外出しております。午後３時には（　　）。", options: ["お戻りになります", "戻られます", "戻ってまいります", "戻ってくださいます"], answer: 2, hint: "对外说明己方人员的动作，要压低己方。这里用自谦表达「戻ってまいります」。" },
+                    { q: "【职场沟通】部長、今、少々お時間（　　）でしょうか。", options: ["いただいても", "くださいます", "よろしい", "なさいます"], answer: 2, hint: "确认对方现在是否方便，固定说法是「お時間よろしいでしょうか」。" },
+                    { q: "【餐饮服务】お皿が大変熱くなっておりますので、（　　）。", options: ["ご注意してください", "ご注意ください", "注意させていただきます", "ご注意になります"], answer: 1, hint: "提醒顾客注意时，用「ご注意ください」。这是明确请求对方注意的说法。" },
+                    { q: "【商务洽谈】せっかくのご提案ですが、今回は（　　）。", options: ["お断りになります", "見送らせていただきます", "見送っていただきます", "お断りくださいます"], answer: 1, hint: "商务上委婉表达暂不采用，常用「見送らせていただきます」。" },
+                    { q: "【职场汇报】部長、午前中にＡ社の社長に（　　）。", options: ["お会いになりました", "お目にかかりました", "会われました", "ご覧になりました"], answer: 1, hint: "向上司汇报自己见了客户，动作主体是自己。这里用「会う」的自谦语「お目にかかる」。" },
+                    { q: "【商务邮件】この度は、貴重な資料をお送りいただき、誠に（　　）。", options: ["感謝してあげます", "感謝申し上げます", "ご感謝になります", "感謝させられます"], answer: 1, hint: "正式书面致谢时，用「感謝申し上げます」。" },
+                    { q: "【拜访客户】本日はお忙しい中、ありがとうございました。それでは、これで（　　）。", options: ["お失礼になります", "失礼いたします", "失礼していただきます", "失礼させます"], answer: 1, hint: "告辞离开时，宣告自己的动作，用「失礼いたします」。" },
+                    { q: "【会议主持】皆様、ほかに何かご意見は（　　）でしょうか。", options: ["ございます", "いらっしゃいます", "なさいます", "申します"], answer: 0, hint: "询问是否还有意见，是问“有无”。这里用「ございますでしょうか」。" },
+                    { q: "【商店服务】お包みいたしますので、少々（　　）。", options: ["待たせてください", "お待ちします", "お待ちください", "待たせていただきます"], answer: 2, hint: "请顾客稍等时，用「少々お待ちください」。动作主体是对方。" },
+                    { q: "【商务接待】本日はお足元の悪い中、よく（　　）。", options: ["伺いました", "いらっしゃいました", "参りました", "来させられました"], answer: 1, hint: "欢迎客户到来，要抬高对方动作。这里用「いらっしゃいました」。" },
+                    { q: "【商务办公】課長、家庭の事情で申し訳ありませんが、本日は30分ほど早く（　　）。", options: ["帰らせていただけませんか", "お帰りになりませんか", "帰ってくださいませんか", "帰らせてあげますか"], answer: 0, hint: "请求允许自己先下班，用「Vさせていただけませんか」。" },
+                    { q: "【商务邮件】恐れ入りますが、明日の午前中までに契約書を（　　）。", options: ["送らせていただきます", "お送りいたします", "お送りください", "送ってあげてください"], answer: 2, hint: "要求对方发送合同时，动作主体是对方。这里用「お送りください」。" },
+                    { q: "【线上会议】画面を共有いたしました。皆様、こちらの資料は問題なく（　　）か。", options: ["ご覧になれます", "拝見できます", "お見せになれます", "見せていただけます"], answer: 0, hint: "询问对方能否看见，用「ご覧になれますか」。" },
+                    { q: "【服装店服务】お客様、よろしければご試着（　　）か。", options: ["いたします", "なさいます", "させていただきます", "させられます"], answer: 1, hint: "试穿是顾客的动作。对方动作用「なさいますか」。" },
+                    { q: "【电话应对】申し訳ございません。あいにく部長の鈴木は会議中でして、ご迷惑を（　　）。", options: ["おかけいたします", "おかけになります", "おかけくださいます", "かけられます"], answer: 0, hint: "为己方给对方添麻烦而道歉，用自谦「おかけいたします」。" },
+                    { q: "【商务拜访】（お茶を出されて）ありがとうございます。それでは、（　　）。", options: ["お飲みになります", "召し上がります", "頂戴いたします", "飲ませてあげます"], answer: 2, hint: "自己接受对方端来的茶，要用自谦「頂戴いたします」。" },
+                    { q: "【职场沟通】部長、明日のスケジュールが変更されましたので、一度（　　）。", options: ["ご確認いたします", "確認させていただきます", "ご確認ください", "確認してあげてください"], answer: 2, hint: "提醒上司去确认时，对方动作用「ご確認ください」。" },
+                    { q: "【商务洽谈】貴重なご提案をありがとうございます。社に持ち帰り、慎重に（　　）。", options: ["検討させていただきます", "ご検討いただきます", "ご検討なさいます", "検討させられます"], answer: 0, hint: "宣告我方接下来会讨论，用「検討させていただきます」。" },
+                    { q: "【商务邮件】納品先変更の件、確かに（　　）。社内の関係者に共有いたします。", options: ["ご存じです", "おわかりになりました", "承知いたしました", "承知していただきました"], answer: 2, hint: "回复已知悉对方通知，用「承知いたしました」。" }
+                ]
+            }
+        };
+
+        const challengeOnlyData = {
+            bossFinal: {
+                title: "真题",
+                advice: "这一组为 N3 真题 Boss 题库。题干保留原题完整对话与场景标记，重点考查尊他语、自谦语、郑重语、授受表达，以及电话、服务场景中的固定敬语说法。",
+                questions: [
+                    { id: "JS001", q: "「かばん売り場はどこ?」「5階に（　　）」", options: ["ございます", "いらっしゃいます", "いる", "おります"], answer: 0, hint: "场所存在用「ございます」。" },
+                    { id: "JS002", q: "わたしたちは、先生にプレゼントを用意して、最後の授業の日に（　）計画を立ています。", options: ["くださる", "なさる", "さしあげる", "いただく"], answer: 2, hint: "把礼物送给老师，用「さしあげる」。" },
+                    { id: "JS003", q: "山口「中川先生。」\n中川先生「あ、山口さん。偶然ですね。」\n山口「はい。わたしもこのパーティーで先生に（　）とは思いませんでした。」", options: ["お見えになる", "拝見できる", "お目にかかる", "ご覧になる"], answer: 2, hint: "自己见老师，用自谦语「お目にかかる」。" },
+                    { id: "JS004", q: "学生「先生、ご相談したいことがあるのですが、授業の後、先生の研究室に（　　）よろしいでしょうか。」\n先生「はい、いいですよ。」", options: ["来られても", "いらっしゃっても", "うかがっても", "行かれても"], answer: 2, hint: "去老师研究室，用自谦语「うかがう」。" },
+                    { id: "JS005", q: "学生「申し訳ありません。先週、本田先生に貸して（　）本を家に忘れてきてしまって」\n本田先生「ああ、あしたでも大丈夫ですよ。」", options: ["さしあげた", "いただいた", "いらっしゃった", "くださった"], answer: 1, hint: "从老师那里借到的书，用「いただいた」。" },
+                    { id: "JS006", q: "先輩「西田さん、先生が西田さんの論文がのっている雑誌を（　）、よくがんばっているねとおっしゃっていましたよ。」\n西田「え、先輩、本当ですか。」", options: ["拝見する", "おめにかかる", "ご覧になる", "お読みする"], answer: 2, hint: "老师看的动作，用尊他语「ご覧になる」。" },
+                    { id: "JS007", q: "（電話で）\nＡ「はい、みなみ図書館です。」\nＢ「すみません、そちらの図書館は、だれでも本を借りることができますか。」\nＡ「みなみ市に住んでいる方なら、どなたでも（　）よ。」", options: ["借りられます", "借りてくださいます", "お借りいたします", "お借りいただきます"], answer: 0, hint: "表示“谁都能借”，用可能形「借りられます」。" },
+                    { id: "JS008", q: "（電話で）\nA「すみません、そちらのアルバイトの募集についてちょっと（　）んですが。」\nB「はい。どんなことでしょうか。」", options: ["伺いたい", "いただきたい", "ご覧になりたい", "お聞きになりたい"], answer: 0, hint: "打电话想咨询，用「伺いたい」。" },
+                    { id: "JS009", q: "（電話で）\nA「はい。Mサッカークラブです。」\nB「もしもし。そちらのサッカークラブに入りたいのですが、一度そちらの練習を（　）」\nA「ええ、いいですよ」。", options: ["見学してはいけませんよ", "見学しましょうよ", "見学させていただけませんか", "見学ではどうですか"], answer: 2, hint: "请求允许自己参观，用「見学させていただけませんか」。" },
+                    { id: "JS010", q: "（デパートで）\n客「すみません、トイレはどこですか。」\n店員「はい。あちらの（　）ございます。」", options: ["階段の近く", "階段の近くに", "階段に近くて", "階段は近くて"], answer: 1, hint: "说明地点位置，用「場所＋にございます」。" },
+                    { id: "JS011", q: "（講演会で）「みなさんは、インターネットに40年以上の歴史があることを（　）か。」", options: ["なさいます", "ご存じです", "申します", "お目にかかります"], answer: 1, hint: "问对方是否知道，用「ご存じですか」。" },
+                    { id: "JS012", q: "客「あのう、この赤いのは何のアイスクリームですか。」\n店員「トマトのアイスクリーム（　）。」", options: ["ございます", "がございます", "でございます", "はございます"], answer: 2, hint: "说明内容时，用「〜でございます」。" },
+                    { id: "JS013", q: "（レストランで）\n山田「7時に予約をした山田ですが。」\n店員「山田様ですね。お席にご案内（　）。どうぞこちらへ。」", options: ["参ります", "いたします", "なさいます", "くださいます"], answer: 1, hint: "带客人入座，用「ご案内いたします」。" },
+                    { id: "JS014", q: "客「すみません。お手洗いはどこですか。」\n店員「あちらのエレベーターの横に（　）。」", options: ["おります", "ございます", "いたします", "いらっしゃいます"], answer: 1, hint: "设施所在位置，用「ございます」。" },
+                    { id: "JS015", q: "（電話で）\n店員「はい、田村美容院です」\n西川「あ、3時に予約している西川です。すみませんが、急に用事が入ってしまったので、今日の予約をキャンセル（　）。」\n店員「はい、わかりました。ご連絡ありがとうございました。」", options: ["でございますか", "をくださいませんか", "したいんでしょうか", "させてください"], answer: 3, hint: "请求允许自己取消预约，用「キャンセルさせてください」。" },
+                    { id: "JS016", q: "学生「先生、ご相談したいことがあるんですが、明日の午後は研究室に（　）か。」\n先生「明日ですか、明日から出張なんですが。」", options: ["おります", "お会いになります", "いらっしゃいます", "お目にかかります"], answer: 2, hint: "问老师是否在研究室，用「いらっしゃいますか」。" },
+                    { id: "JS017", q: "（靴屋で）\n客「すみません。この靴のもう一つ大きいサイズはありますか。」\n店員「あ、はい、確認しますので、少々（　）。」", options: ["お待ちしております", "お待ちください", "お待ちできます", "お待ちしましょう"], answer: 1, hint: "请顾客稍等，用「少々お待ちください」。" },
+                    { id: "JS018", q: "（電話で）X建設の社員「はい、X建設営業部です。」\n中田「あ、私、ABC銀行の中田と（　）が、山石さんをお願いします。」", options: ["ございます", "いたします", "申します", "申し上げます"], answer: 2, hint: "电话自我介绍，用「〜と申します」。" },
+                    { id: "JS019", q: "（電話で）\n店員「ご希望のサイズのものが見つからなければ、（　）ください。」\n客「あ、ありがとうございます。」", options: ["なさって", "おっしゃって", "お聞きして", "申し上げて"], answer: 1, hint: "请顾客告诉自己，用「おっしゃってください」。" },
+                    { id: "JS020", q: "（メールで）佐藤先輩、今日はすてきなプレゼントをありがとうございました。前から欲しかったカップなので、とてもうれしかったです。大切に（　）。", options: ["使われております", "使っていらっしゃいます", "使ってくださいます", "使わせていただきます"], answer: 3, hint: "郑重表示自己会使用礼物，用「使わせていただきます」。" },
+                    { id: "JS021", q: "中村「課長、昨日（　）お土産のチョコレート、とてもおいしかったです。ありがとうございました。」\n課長「ああ、それはよかった。」", options: ["おりました", "まいりました", "なさった", "いただいた"], answer: 3, hint: "从课长那里收到土产，用「いただいた」。" },
+                    { id: "JS022", q: "（電話で）店員「お電話ありがとうございます。さくら美容院（　）」\n客「すみません、今日予約したいんですが。」\n店員「はい、ありがとうございます。何時ごろがよろしいでしょうか。」", options: ["でいらっしゃいます", "でございます", "と申し上げます", "とおっしゃいます"], answer: 1, hint: "电话接听时自报店名，用「でございます」。" },
+                    { id: "JS023", q: "（レストランで）店員「いらっしゃいませ。2名さまですか。」\n客「はい。」\n店員「こちらへどうぞ。お席にご案内（　）。」", options: ["いたします", "なさいます", "うかがいます", "いらっしゃます"], answer: 0, hint: "服务场景固定说法是「ご案内いたします」。" },
+                    { id: "JS024", q: "（レストランで）\n客「ランチセットを一つお願いします。」\n店員「AセットとBセットのどちらに（　）か。」\n客「あ、Aセットをお願いします。」", options: ["食べられます", "差し上げます", "なさいます", "ございます"], answer: 2, hint: "询问顾客选哪一个，用「どちらになさいますか」。" },
+                    { id: "JS025", q: "（会社で）\n田中「すみません、森さん。私、先週のセミナー、出張で出られなかったので、資料を（　）。」\n森「あ、いいですよ。これです。どうぞ。」", options: ["コピーさせるでしょうか", "コピーさせていただけませんか", "コピーしたらいかがですか", "コピーするのではないでしょうか"], answer: 1, hint: "请求允许自己复印资料，用「コピーさせていただけませんか」。" },
+                    { id: "JS026", q: "社長はいつも私達のために出張帰りに、お土産を買ってきて（　）。", options: ["くださいます", "いただきます", "さしあげます", "召し上がります"], answer: 0, hint: "上位者为我方做事，用「くださいます」。" },
+                    { id: "JS027", q: "学生「先生は、ふだん何かスポーツを（　）。」\n先生「ええ、ゴルフにはときどき行きます。」", options: ["いたしますか", "なさいますか", "いらっしゃいますか", "うかがいますか"], answer: 1, hint: "问老师是否做运动，用「なさいますか」。" }
+                ]
+            }
+        };
+
+        const TRAINING_OPTION_KEYS = ['A', 'B', 'C', 'D', 'E', 'F'];
+        const TRAINING_SESSION_LIMIT = 20;
+        let wrongQuestions = []; 
+        let currentTrainingSet = [];
+        let currentTrainingIndex = 0;
+        let isReviewMode = false;
+        let currentTrainingCategoryKey = null;
+        let lastTrainingRoundIdsByCategory = {};
+
+        function escapeTrainingHtml(value) {
+            return String(value || '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        }
+
+        function getTrainingOptionKey(index) {
+            return TRAINING_OPTION_KEYS[index] || String(index + 1);
+        }
+
+        function normalizeTrainingOption(option, index) {
+            if (option && typeof option === 'object' && !Array.isArray(option)) {
+                return {
+                    key: String(option.key || getTrainingOptionKey(index)),
+                    text: String(option.text || '')
+                };
+            }
+
+            return {
+                key: getTrainingOptionKey(index),
+                text: String(option || '')
+            };
+        }
+
+        function normalizeTrainingQuestion(question, moduleKey, index) {
+            const normalizedOptions = Array.isArray(question.options)
+                ? question.options.map((option, optionIndex) => normalizeTrainingOption(option, optionIndex))
+                : [];
+
+            const normalizedId = question.id
+                ? String(question.id)
+                : `legacy_${moduleKey}_${index + 1}`;
+
+            const answerKey = question.answerKey
+                ? String(question.answerKey)
+                : (normalizedOptions[Number(question.answer)] || {}).key || '';
+
+            return {
+                id: normalizedId,
+                type: question.type ? String(question.type) : 'legacy_training_question',
+                difficulty: question.difficulty ? String(question.difficulty) : 'normal',
+                word: question.word ? String(question.word) : '',
+                prompt: question.prompt ? String(question.prompt) : String(question.q || ''),
+                options: normalizedOptions,
+                answerKey: answerKey,
+                explanation: question.explanation ? String(question.explanation) : String(question.hint || '')
+            };
+        }
+
+        function normalizeTrainingQuestions(moduleKey) {
+            const categoryData = trainingData[moduleKey];
+            if (!categoryData || !Array.isArray(categoryData.questions)) {
+                return [];
+            }
+
+            return categoryData.questions.map((question, index) => normalizeTrainingQuestion(question, moduleKey, index));
+        }
+
+        function buildTrainingSessionSet(categoryKey) {
+            const allQuestions = shuffleArray(normalizeTrainingQuestions(categoryKey));
+            if (allQuestions.length <= TRAINING_SESSION_LIMIT) {
+                lastTrainingRoundIdsByCategory[categoryKey] = allQuestions.map(question => question.id);
+                return allQuestions;
+            }
+
+            const previousRoundIds = new Set(lastTrainingRoundIdsByCategory[categoryKey] || []);
+            const freshQuestions = allQuestions.filter(question => !previousRoundIds.has(question.id));
+            let sessionQuestions = freshQuestions.slice(0, TRAINING_SESSION_LIMIT);
+
+            if (sessionQuestions.length < TRAINING_SESSION_LIMIT) {
+                const needed = TRAINING_SESSION_LIMIT - sessionQuestions.length;
+                const fallbackQuestions = allQuestions.filter(question => {
+                    if (!previousRoundIds.has(question.id)) return false;
+                    return !sessionQuestions.some(sessionQuestion => sessionQuestion.id === question.id);
+                });
+                sessionQuestions = sessionQuestions.concat(fallbackQuestions.slice(0, needed));
+            }
+
+            lastTrainingRoundIdsByCategory[categoryKey] = sessionQuestions.map(question => question.id);
+            return sessionQuestions;
+        }
+
+        function prepareTrainingRound(categoryKey) {
+            currentTrainingCategoryKey = categoryKey;
+            currentTrainingSet = buildTrainingSessionSet(categoryKey);
+            currentTrainingIndex = 0;
+            isReviewMode = false;
+        }
+
+        function openTrainingSessionView() {
+            hideAll();
+            setHeaderBack(isReviewMode
+                ? {
+                    label: '返回休息室',
+                    action: showRestArea
+                }
+                : {
+                    label: '返回训练场',
+                    action: showTrainingMenu
+                });
+            document.getElementById('view-training-session').classList.remove('hidden');
+            document.getElementById('view-training-session').classList.add('flex');
+            scrollToCenter('view-training-session');
+        }
+
+        function getTrainingQuestionText(qData) {
+            return qData && qData.prompt ? qData.prompt : '';
+        }
+
+        function getTrainingDescription(qData) {
+            if (qData && qData.type === 'keigo_category_judgement') {
+                return '请选择正确的敬语类别：';
+            }
+            return '请选出合适的表达填入空白处：';
+        }
+
+        function getTrainingQuestionMarkup(qData) {
+            const questionText = getTrainingQuestionText(qData);
+            if (!qData || qData.type === 'keigo_category_judgement') {
+                return escapeTrainingHtml(questionText);
+            }
+
+            return escapeTrainingHtml(questionText).replace(/（.*?）/g, match => `<span class="text-enji">${match}</span>`);
+        }
+
+        function getTrainingOptionLabel(qData, option) {
+            if (qData && qData.type === 'keigo_category_judgement') {
+                return `${option.key}. ${option.text}`;
+            }
+            return option.text;
+        }
+
+        function showTrainingMenu() {
+            clearTimeout(trainingActionTimeout);
+            hideAll();
+            setHeaderBack({
+                label: '返回主菜单',
+                action: showMenu
+            });
+            document.getElementById('view-training-menu').classList.remove('hidden');
+            document.getElementById('wrong-count-badge').innerText = wrongQuestions.length;
+            scrollToCenter('view-training-menu');
+        }
+
+        function showTrainingIntro(categoryKey) {
+            clearTimeout(trainingActionTimeout);
+            const categoryData = trainingData[categoryKey];
+            
+            currentTrainingCategoryKey = categoryKey;
+            currentTrainingSet = [];
+            currentTrainingIndex = 0;
+            isReviewMode = false;
+            
+            document.getElementById('intro-category-title').innerText = categoryData.title;
+            document.getElementById('intro-instructor-advice').innerHTML = categoryData.advice;
+            document.getElementById('training-category-title').innerText = categoryData.title;
+
+            hideAll();
+            setHeaderBack({
+                label: '返回目录',
+                action: showTrainingMenu
+            });
+            const introView = document.getElementById('view-training-intro');
+            introView.classList.remove('hidden');
+            introView.classList.add('flex');
+            scrollToCenter('view-training-intro');
+        }
+
+        function beginTrainingSession() {
+            if (!isReviewMode) {
+                prepareTrainingRound(currentTrainingCategoryKey);
+            }
+            openTrainingSessionView();
+            renderTrainingQuestion();
+        }
+
+        function startAnotherTrainingRound() {
+            if (!currentTrainingCategoryKey) {
+                showTrainingMenu();
+                return;
+            }
+            prepareTrainingRound(currentTrainingCategoryKey);
+            openTrainingSessionView();
+            renderTrainingQuestion();
+        }
+
+        function renderTrainingQuestion() {
+            if (currentTrainingIndex >= currentTrainingSet.length) {
+                document.getElementById('training-progress').innerText = isReviewMode ? "复盘完成" : "本轮完成";
+                document.getElementById('training-desc').innerText = isReviewMode ? "错题复习完成" : "本轮练习完成";
+                document.getElementById('training-question').innerText = isReviewMode
+                    ? "这道错题已经复盘完成。"
+                    : `你已完成本轮 ${currentTrainingSet.length} 题。`;
+                document.getElementById('training-hint-box').classList.add('hidden');
+                document.getElementById('training-options').className = "grid grid-cols-1 gap-3 md:gap-4 mt-auto";
+                const retryTrainingLabel = currentTrainingSet.length >= TRAINING_SESSION_LIMIT ? "再来20题" : "再来一组";
+                setHeaderBack(isReviewMode
+                    ? {
+                        label: '返回休息室',
+                        action: showRestArea
+                    }
+                    : {
+                        label: '返回训练场',
+                        action: showTrainingMenu
+                    });
+                document.getElementById('training-options').innerHTML = isReviewMode
+                    ? `
+                        <button onclick="showTrainingMenu()" class="ui-interactive ui-secondary-border-btn bg-white border border-border text-sumi p-3 md:p-4 rounded-xl font-bold w-full text-base md:text-xl shadow-sm">返回训练场</button>
+                    `
+                    : `
+                        <button onclick="startAnotherTrainingRound()" class="ui-interactive ui-primary-enji-btn bg-enji text-white p-3 md:p-4 rounded-xl font-bold w-full text-base md:text-xl shadow-md">${retryTrainingLabel}</button>
+                    `;
+                clearInteractiveFocus();
+                return;
+            }
+
+            const qData = currentTrainingSet[currentTrainingIndex];
+            document.getElementById('training-progress').innerText = `进度: ${currentTrainingIndex + 1} / ${currentTrainingSet.length}`;
+            document.getElementById('training-desc').innerText = getTrainingDescription(qData);
+            document.getElementById('training-question').innerHTML = getTrainingQuestionMarkup(qData);
+            
+            const hintBox = document.getElementById('training-hint-box');
+            hintBox.classList.add('hidden');
+            hintBox.innerHTML = `<strong>💡 课后解析：</strong><br>${escapeTrainingHtml(qData.explanation)}`;
+
+            const container = document.getElementById('training-options');
+            container.innerHTML = '';
+
+            const displayOptions = [...qData.options].sort((a, b) => a.key.localeCompare(b.key));
+            const isTripleOptions = displayOptions.length === 3;
+            container.className = isTripleOptions
+                ? "grid grid-cols-1 md:grid-cols-3 gap-2.5 md:gap-3 mt-auto"
+                : "grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4 mt-auto";
+
+            displayOptions.forEach(opt => {
+                const btn = document.createElement('button');
+                btn.className = isTripleOptions
+                    ? "ui-interactive ui-training-option-btn text-center bg-white border border-border text-sumi p-2.5 md:p-4 rounded-lg md:rounded-xl font-serif text-sm md:text-lg whitespace-nowrap"
+                    : "ui-interactive ui-training-option-btn text-left bg-white border border-border text-sumi p-3 md:p-5 rounded-xl font-serif text-base md:text-xl";
+                btn.innerText = getTrainingOptionLabel(qData, opt);
+                btn.dataset.optionKey = opt.key;
+                btn.onclick = () => handleTrainingAnswer(opt, qData, btn);
+                container.appendChild(btn);
+            });
+            clearInteractiveFocus();
+        }
+
+        function handleTrainingAnswer(selectedOpt, qData, btnElement) {
+            const allBtns = document.getElementById('training-options').querySelectorAll('button');
+            allBtns.forEach(b => b.disabled = true);
+
+            if (selectedOpt.key === qData.answerKey) {
+                btnElement.classList.add('bg-green-50', 'border-green-500', 'text-green-800', 'font-bold');
+                document.getElementById('training-hint-box').classList.remove('hidden');
+                
+                if (isReviewMode) {
+                    wrongQuestions = wrongQuestions.filter(item => item.id !== qData.id);
+                }
+
+                trainingActionTimeout = setTimeout(() => {
+                    currentTrainingIndex++;
+                    renderTrainingQuestion();
+                }, 1500);
+
+            } else {
+                btnElement.classList.add('bg-red-50', 'border-red-500', 'text-red-800', 'line-through');
+                document.getElementById('training-hint-box').classList.remove('hidden');
+                
+                allBtns.forEach(b => {
+                    if (b.dataset.optionKey === qData.answerKey) {
+                        b.classList.add('border-green-500', 'text-green-700', 'bg-green-50');
+                    }
+                });
+
+                if (!isReviewMode) {
+                    const isExist = wrongQuestions.some(item => item.id === qData.id);
+                    if (!isExist) {
+                        wrongQuestions.push({
+                            id: qData.id,
+                            categoryKey: currentTrainingCategoryKey,
+                            qObj: qData
+                        });
+                    }
+                }
+
+                const nextBtn = document.createElement('button');
+                const nextBtnSpanClass = qData.options.length === 3 ? "col-span-1 md:col-span-3" : "col-span-1 md:col-span-2";
+                nextBtn.className = `ui-interactive ui-next-question-btn mt-5 md:mt-6 ${nextBtnSpanClass} w-full bg-sumi text-white p-3 md:p-4 rounded-xl font-bold text-base md:text-lg`;
+                nextBtn.innerText = "明白了，下一题";
+                nextBtn.onclick = () => {
+                    currentTrainingIndex++;
+                    renderTrainingQuestion();
+                };
+                document.getElementById('training-options').appendChild(nextBtn);
+                clearInteractiveFocus();
+            }
+        }
+
+        function showRestArea() {
+            hideAll();
+            setHeaderBack({
+                label: '返回训练场',
+                action: showTrainingMenu
+            });
+            document.getElementById('view-rest-area').classList.remove('hidden');
+            renderRestArea();
+            scrollToCenter('view-rest-area');
+        }
+
+        function renderRestArea() {
+            const listContainer = document.getElementById('rest-area-list');
+            const emptyMsg = document.getElementById('rest-area-empty');
+            
+            listContainer.innerHTML = '';
+            
+            if (wrongQuestions.length === 0) {
+                listContainer.classList.add('hidden');
+                emptyMsg.classList.remove('hidden');
+                return;
+            }
+            
+            listContainer.classList.remove('hidden');
+            emptyMsg.classList.add('hidden');
+
+            wrongQuestions.forEach((item, index) => {
+                const div = document.createElement('div');
+                div.className = "rest-area-item p-3 md:p-4 rounded border border-border flex flex-col md:flex-row md:justify-between md:items-center gap-3 md:gap-4 shadow-sm";
+                div.innerHTML = `
+                    <div class="font-serif text-sumi flex-grow text-base md:text-lg">${escapeTrainingHtml(getTrainingQuestionText(item.qObj))}</div>
+                    <button class="ui-interactive ui-retry-btn bg-white border border-enji text-enji px-4 md:px-6 py-2 rounded text-xs md:text-sm font-bold flex-shrink-0" onclick="startReview(${index})">重试此题</button>
+                `;
+                listContainer.appendChild(div);
+            });
+        }
+
+        function startReview(index) {
+            currentTrainingCategoryKey = wrongQuestions[index].categoryKey || null;
+            currentTrainingSet = [wrongQuestions[index].qObj];
+            currentTrainingIndex = 0;
+            isReviewMode = true;
+            
+            document.getElementById('intro-category-title').innerText = "错题复习";
+            document.getElementById('intro-instructor-advice').innerHTML = "汪！这是你在休息室的错题复盘！<br><br>静下心来仔细看看解析，弄懂了背后的逻辑，就不会在同一个地方跌倒两次啦！";
+            document.getElementById('training-category-title').innerText = "错题复习";
+
+            hideAll();
+            setHeaderBack({
+                label: '返回休息室',
+                action: showRestArea
+            });
+            const introView = document.getElementById('view-training-intro');
+            introView.classList.remove('hidden');
+            introView.classList.add('flex');
+            scrollToCenter('view-training-intro');
+        }
+
+        // ================= 历战荣耀榜 =================
+        function showLeaderboard() {
+            hideAll();
+            setHeaderBack({
+                label: '返回主菜单',
+                action: showMenu
+            });
+            document.getElementById('view-leaderboard').classList.remove('hidden');
+            renderLeaderboard();
+            scrollToCenter('view-leaderboard');
+        }
+
+        function renderLeaderboard() {
+            const tbody = document.getElementById('leaderboard-list');
+            tbody.innerHTML = '';
+            
+            const history = JSON.parse(localStorage.getItem('kiki_scoreboard') || '[]');
+            
+            if (history.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="4" class="p-6 text-center text-gray-400 italic">暂无战斗记录。去生存战磨炼一下吧！</td></tr>`;
+                return;
+            }
+
+            history.forEach(record => {
+                let rankColor = 'text-gray-500';
+                if(record.rank === 'SSS' || record.rank === 'S') rankColor = 'text-ukon font-bold';
+                else if(record.rank === 'A') rankColor = 'text-green-600 font-bold';
+                else if(record.rank === 'B') rankColor = 'text-blue-600 font-bold';
+                else if(record.rank === 'F') rankColor = 'text-red-500';
+
+                const tr = document.createElement('tr');
+                tr.className = "ui-row-hover border-b border-border";
+                tr.innerHTML = `
+                    <td class="p-3">${record.date}</td>
+                    <td class="p-3 font-serif">${record.phase}</td>
+                    <td class="p-3 text-center font-pixel text-lg">${record.score}</td>
+                    <td class="p-3 text-center ${rankColor} font-pixel text-xl">${record.rank}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function clearLeaderboard() {
+            if (confirm("确定要清空所有的战斗记录吗？此操作无法撤销。")) {
+                localStorage.removeItem('kiki_scoreboard');
+                renderLeaderboard();
+            }
+        }
+
+        function saveAndReturn() {
+            const phaseName = challengePhases[Math.min(currentPhaseIndex, challengePhases.length - 1)].name;
+            const rank = document.getElementById('summary-rank').innerText;
+            
+            const record = {
+                date: new Date().toLocaleString('zh-CN', { hour12: false }),
+                phase: phaseName,
+                score: hiddenScore,
+                rank: rank
+            };
+
+            let history = JSON.parse(localStorage.getItem('kiki_scoreboard') || '[]');
+            history.push(record);
+            history.sort((a, b) => b.score - a.score); 
+            localStorage.setItem('kiki_scoreboard', JSON.stringify(history));
+            
+            showMenu();
+        }
+
+        // ================= 挑战模式数据与阶段 =================
+        const challengePhases = [
+            {
+                name: "PHASE 1 - 变形考验", avatar: "🐶", maxHp: 100, timePerQuestion: 8000, timeCap: 10000,
+                intro: "「汪！第一阶段，只看表达形式。先把尊他、郑重、自谦分清楚！」",
+                modules: ['conjugation'],
+                weights: { conjugation: 1 },
+                questionCount: 4,
+                questionPoolSize: 6
+            },
+            {
+                name: "PHASE 2 - 特殊词汇", avatar: "🐕", maxHp: 120, timePerQuestion: 7200, timeCap: 10500,
+                intro: "「不错嘛。第二阶段开始混入特殊敬语，别只会套公式！」",
+                modules: ['conjugation', 'special'],
+                weights: { special: 0.7, conjugation: 0.3 },
+                questionCount: 4,
+                questionPoolSize: 6
+            },
+            {
+                name: "PHASE 3 - 内外抗压", avatar: "🐺", maxHp: 150, timePerQuestion: 6000, timeCap: 12000,
+                intro: "「现在加上关系判断。对外说话时，自己人可不能乱抬高！」",
+                modules: ['conjugation', 'special', 'relationship'],
+                weights: { relationship: 0.55, special: 0.25, conjugation: 0.2 },
+                questionCount: 4,
+                questionPoolSize: 6
+            },
+            {
+                name: "PHASE 4 - 实战场景", avatar: "🦊", maxHp: 200, timePerQuestion: 6000, timeCap: 13000,
+                intro: "「最后的常规战！场景、关系、形式一起上，看你还能不能稳住。」",
+                modules: ['conjugation', 'special', 'relationship', 'scenario'],
+                weights: { scenario: 0.55, relationship: 0.2, special: 0.15, conjugation: 0.1 },
+                questionCount: 4,
+                questionPoolSize: 6
+            },
+            {
+                name: "KIKI - AWAKENED", avatar: "👑", maxHp: 350, timePerQuestion: 6500, timeCap: 14000,
+                intro: "「呵... 现在进入总复习。前面所有坑，我都会一起丢给你！」",
+                modules: ['conjugation', 'special', 'relationship', 'scenario', 'bossFinal'],
+                weights: { bossFinal: 0.45, scenario: 0.22, relationship: 0.16, special: 0.1, conjugation: 0.07 },
+                questionCount: 5,
+                questionPoolSize: 8,
+                priorityModules: ['bossFinal'],
+                priorityQuestionCount: 3
+            }
+        ];
+
+        let storyTimeout;
+        let isStorySkipped = false;
+        const fullStoryText = "这里是敬语的深渊。\n\n许多初学者在此迷失，\n被『尊他』与『自谦』的锁链永远束缚。\n\n而这片领地的守门犬 Kiki，\n正冷冷地注视着你。\n\n你的『决心』... 足以打破这层枷锁吗？";
+        let currentPhaseQuestions = [];
+
+        function shuffleArray(list) {
+            const cloned = [...list];
+            for (let i = cloned.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [cloned[i], cloned[j]] = [cloned[j], cloned[i]];
+            }
+            return cloned;
+        }
+
+        function getChallengeQuestionsForModule(moduleKey) {
+            const categoryData = trainingData[moduleKey] || challengeOnlyData[moduleKey];
+            if (!categoryData || !Array.isArray(categoryData.questions)) {
+                return [];
+            }
+
+            return categoryData.questions.map((question, index) => normalizeTrainingQuestion(question, moduleKey, index)).map(question => {
+                const answerIndex = question.options.findIndex(option => option.key === question.answerKey);
+                return {
+                    id: question.id,
+                    type: question.type,
+                    difficulty: question.difficulty,
+                    word: question.word,
+                    explanation: question.explanation,
+                    sourceModule: moduleKey,
+                    q: question.prompt,
+                    options: question.options.map(option => option.text),
+                    answer: answerIndex >= 0 ? answerIndex : 0
+                };
+            });
+        }
+
+        function getPhaseQuestionPoolSize(phase) {
+            const questionCount = Number(phase.questionCount) || 0;
+            const questionPoolSize = Number(phase.questionPoolSize) || questionCount;
+            return Math.max(questionCount, questionPoolSize);
+        }
+
+        function allocateChallengeQuestionCounts(phase, totalCount = getPhaseQuestionPoolSize(phase)) {
+            const modules = Array.isArray(phase.modules) ? phase.modules : [];
+            const normalizedTotalCount = totalCount || modules.length || 0;
+            const rawWeightTotal = modules.reduce((sum, moduleKey) => sum + Number((phase.weights || {})[moduleKey] || 0), 0);
+            const normalizedWeightTotal = rawWeightTotal > 0 ? rawWeightTotal : modules.length || 1;
+
+            const entries = modules.map(moduleKey => {
+                const normalizedWeight = rawWeightTotal > 0
+                    ? Number((phase.weights || {})[moduleKey] || 0) / normalizedWeightTotal
+                    : 1 / normalizedWeightTotal;
+                const quota = normalizedWeight * normalizedTotalCount;
+                return {
+                    moduleKey,
+                    count: Math.floor(quota),
+                    remainder: quota - Math.floor(quota),
+                    weight: normalizedWeight
+                };
+            });
+
+            let remaining = normalizedTotalCount - entries.reduce((sum, entry) => sum + entry.count, 0);
+            const rankedEntries = [...entries].sort((a, b) => {
+                if (b.remainder !== a.remainder) return b.remainder - a.remainder;
+                return b.weight - a.weight;
+            });
+
+            for (let i = 0; i < rankedEntries.length && remaining > 0; i++, remaining--) {
+                rankedEntries[i].count += 1;
+            }
+
+            return entries.reduce((result, entry) => {
+                result[entry.moduleKey] = entry.count;
+                return result;
+            }, {});
+        }
+
+        function buildPhaseQuestionSet(phase) {
+            const poolSize = getPhaseQuestionPoolSize(phase);
+            const countMap = allocateChallengeQuestionCounts(phase, poolSize);
+            const usedIds = new Set();
+            const priorityPicked = [];
+            const regularPicked = [];
+            const pickedCountsByModule = {};
+            const modulePools = {};
+            const totalPickedCount = () => priorityPicked.length + regularPicked.length;
+
+            function trackPickedQuestion(question, moduleKey, targetBucket) {
+                targetBucket.push(question);
+                usedIds.add(question.id);
+                pickedCountsByModule[moduleKey] = (pickedCountsByModule[moduleKey] || 0) + 1;
+            }
+
+            (phase.modules || []).forEach(moduleKey => {
+                modulePools[moduleKey] = shuffleArray(getChallengeQuestionsForModule(moduleKey));
+            });
+
+            const priorityModules = Array.isArray(phase.priorityModules) ? phase.priorityModules : [];
+            const priorityQuestionCount = Math.min(poolSize, Math.max(0, Number(phase.priorityQuestionCount) || 0));
+
+            if (priorityModules.length && priorityQuestionCount > 0) {
+                for (const moduleKey of priorityModules) {
+                    const pool = modulePools[moduleKey] || [];
+                    for (const question of pool) {
+                        if (priorityPicked.length >= priorityQuestionCount) break;
+                        if (usedIds.has(question.id)) continue;
+                        trackPickedQuestion(question, moduleKey, priorityPicked);
+                    }
+                    if (priorityPicked.length >= priorityQuestionCount) break;
+                }
+            }
+
+            (phase.modules || []).forEach(moduleKey => {
+                const targetCount = countMap[moduleKey] || 0;
+                const remainingTargetCount = Math.max(0, targetCount - (pickedCountsByModule[moduleKey] || 0));
+                if (remainingTargetCount <= 0) return;
+                const pool = modulePools[moduleKey] || [];
+                let modulePickedCount = 0;
+
+                for (const question of pool) {
+                    if (totalPickedCount() >= poolSize) break;
+                    if (usedIds.has(question.id)) continue;
+                    trackPickedQuestion(question, moduleKey, regularPicked);
+                    modulePickedCount += 1;
+                    if (modulePickedCount >= remainingTargetCount) {
+                        break;
+                    }
+                }
+            });
+
+            if (totalPickedCount() < phase.questionCount) {
+                const fallbackOrder = [...(phase.modules || [])].sort((a, b) => {
+                    const weightA = Number((phase.weights || {})[a] || 0);
+                    const weightB = Number((phase.weights || {})[b] || 0);
+                    return weightB - weightA;
+                });
+
+                for (const moduleKey of fallbackOrder) {
+                    const pool = modulePools[moduleKey] || [];
+                    for (const question of pool) {
+                        if (totalPickedCount() >= poolSize) break;
+                        if (usedIds.has(question.id)) continue;
+                        trackPickedQuestion(question, moduleKey, regularPicked);
+                    }
+                    if (totalPickedCount() >= poolSize) break;
+                }
+            }
+
+            return [...priorityPicked, ...shuffleArray(regularPicked)].slice(0, poolSize);
+        }
+
+        function calculateBossDamage(phase, timeRatio) {
+            const normalizedTimeRatio = Math.max(0, Math.min(1, Number.isFinite(timeRatio) ? timeRatio : 0));
+            const targetDamage = Math.ceil(phase.maxHp / phase.questionCount);
+            const baseDamage = Math.max(12, Math.floor(targetDamage * 0.78));
+            const speedBonus = Math.round(normalizedTimeRatio * targetDamage * 0.22);
+            const critBonus = normalizedTimeRatio >= 0.75
+                ? Math.max(1, Math.round(targetDamage * 0.18))
+                : 0;
+
+            return {
+                totalDamage: baseDamage + speedBonus + critBonus,
+                isCrit: critBonus > 0,
+                timeRatio: normalizedTimeRatio
+            };
+        }
+
+        function calculateQuestionTimeLimit(phase, qData) {
+            const baseTime = Number(phase.timePerQuestion) || 6000;
+            const moduleBonusMap = {
+                conjugation: 0,
+                special: 400,
+                relationship: 1400,
+                scenario: 1800,
+                bossFinal: 2200
+            };
+
+            const promptLength = String(qData.q || '').length;
+            let lengthBonus = 0;
+            if (promptLength >= 59) {
+                lengthBonus = 1400;
+            } else if (promptLength >= 43) {
+                lengthBonus = 900;
+            } else if (promptLength >= 27) {
+                lengthBonus = 400;
+            }
+
+            const moduleBonus = moduleBonusMap[qData.sourceModule] || 0;
+            const timeCap = Number(phase.timeCap) || Infinity;
+            return Math.min(baseTime + moduleBonus + lengthBonus, timeCap);
+        }
+
+        function startChallengeIntro() {
+            isChallengeActive = true; 
+            hideAll();
+            setHeaderBack({ hidden: true });
+            
+            document.body.classList.add('boss-mode-active');
+            
+            const introView = document.getElementById('view-challenge-intro');
+            introView.classList.remove('hidden');
+            introView.classList.add('flex');
+            
+            isStorySkipped = false;
+            document.getElementById('start-boss-btn').classList.add('hidden');
+            document.getElementById('start-boss-btn').style.opacity = '0';
+            
+            scrollToCenter('view-challenge-intro');
+            typeStory(fullStoryText);
+        }
+
+        function typeStory(text) {
+            clearTimeout(storyTimeout);
+            const container = document.getElementById('story-container');
+            container.innerText = '';
+            let i = 0;
+            function type() {
+                if (!isChallengeActive || isStorySkipped) return;
+                if (i < text.length) {
+                    container.innerText += text.charAt(i);
+                    i++;
+                    storyTimeout = setTimeout(type, 60);
+                } else {
+                    showStartBossBtn();
+                }
+            }
+            type();
+        }
+
+        function completeStory() {
+            if (!isChallengeActive || isStorySkipped) return;
+            isStorySkipped = true;
+            clearTimeout(storyTimeout);
+            document.getElementById('story-container').innerText = fullStoryText;
+            showStartBossBtn();
+        }
+
+        function showStartBossBtn() {
+            if (!isChallengeActive) return;
+            const btn = document.getElementById('start-boss-btn');
+            btn.classList.remove('hidden');
+            setTimeout(() => { if(isChallengeActive) btn.style.opacity = '1'; }, 50);
+        }
+
+        function startBossFight() {
+            clearInteractiveFocus();
+            setHeaderBack({ hidden: true });
+            document.getElementById('view-challenge-intro').classList.add('hidden');
+            document.getElementById('view-challenge-intro').classList.remove('flex');
+            
+            const challengeView = document.getElementById('view-challenge');
+            challengeView.classList.remove('hidden');
+            challengeView.classList.add('flex');
+            
+            playerHp = 100;
+            hiddenScore = 0; 
+            updatePlayerHpUI();
+            currentPhaseIndex = 0;
+            
+            scrollToCenter('view-challenge');
+            initPhase();
+        }
+
+        let currentChallengeIndex = 0;
+        let challengeTimer;
+        let typingTimeout;
+        let timeLeft = 0;
+        let totalTime = 0;
+        let playerHp = 100;
+        let bossHp = 100;
+        let bossMaxHp = 100;
+        let hiddenScore = 0; 
+
+        function initPhase() {
+            const phase = challengePhases[currentPhaseIndex];
+            currentChallengeIndex = 0;
+            currentPhaseQuestions = buildPhaseQuestionSet(phase);
+            bossMaxHp = phase.maxHp;
+            bossHp = bossMaxHp;
+            
+            document.getElementById('boss-name').innerText = phase.name;
+            document.getElementById('boss-avatar').innerText = phase.avatar;
+            document.getElementById('timer-container').style.opacity = '0';
+            
+            updateBossHpUI();
+            updateBackgroundColor();
+            hideChallengeOptions();
+            clearInteractiveFocus();
+            
+            typeDialogue(phase.intro, () => {
+                challengeActionTimeout = setTimeout(loadChallengeQuestion, 1500);
+            });
+        }
+
+        function updatePlayerHpUI() {
+            if (playerHp < 0) playerHp = 0;
+            let hpStr = playerHp.toString().padStart(2, '0');
+            if (playerHp === 100) hpStr = "100";
+            document.getElementById('player-hp-text').innerText = `${hpStr}/100`;
+            const fill = document.getElementById('player-hp-fill');
+            fill.style.width = `${playerHp}%`;
+            if(playerHp > 50) fill.style.backgroundColor = "#FFFF00";
+            else if(playerHp > 20) fill.style.backgroundColor = "#FF9900";
+            else fill.style.backgroundColor = "#FF0000";
+        }
+
+        function updateBossHpUI() {
+            if (bossHp < 0) bossHp = 0;
+            const percentage = (bossHp / bossMaxHp) * 100;
+            const fill = document.getElementById('boss-hp-fill');
+            fill.style.width = `${percentage}%`;
+            if(percentage > 50) fill.style.backgroundColor = "#00FF00";
+            else if(percentage > 20) fill.style.backgroundColor = "#FFFF00";
+            else fill.style.backgroundColor = "#FF0000";
+        }
+
+        function updateBackgroundColor() {
+            if(document.body.classList.contains('boss-mode-active') && isChallengeActive){
+                const hpRatio = bossHp / bossMaxHp;
+                const redIntensity = Math.floor((1 - hpRatio) * 90); 
+                document.body.style.backgroundColor = `rgb(${redIntensity}, 0, 0)`;
+            }
+        }
+
+        function loadChallengeQuestion() {
+            if(!isChallengeActive || playerHp <= 0 || bossHp <= 0) return;
+            const phase = challengePhases[currentPhaseIndex];
+            if (!currentPhaseQuestions.length) return;
+            
+            const qData = currentPhaseQuestions[currentChallengeIndex % currentPhaseQuestions.length];
+            hideChallengeOptions();
+            document.getElementById('timer-container').style.opacity = '0';
+            
+            typeDialogue("「" + qData.q + "」", () => {
+                renderAndShowOptions(qData, calculateQuestionTimeLimit(phase, qData));
+            });
+        }
+
+        function renderAndShowOptions(qData, timeLimit) {
+            if (!isChallengeActive) return;
+            const container = document.getElementById('challenge-options');
+            container.innerHTML = '';
+            
+            const displayOptions = shuffleArray(
+                qData.options.map((text, index) => ({
+                    text,
+                    isCorrect: index === qData.answer
+                }))
+            );
+
+            displayOptions.forEach(opt => {
+                const btn = document.createElement('button');
+                btn.className = "ui-interactive ut-option-btn";
+                btn.innerText = opt.text;
+                btn.onclick = () => handleChallengeAnswer(opt.isCorrect);
+                container.appendChild(btn);
+            });
+            clearInteractiveFocus();
+            container.style.opacity = '1';
+            container.style.pointerEvents = 'auto';
+            document.getElementById('timer-container').style.opacity = '1';
+            startTimer(timeLimit);
+        }
+
+        function hideChallengeOptions() {
+            const container = document.getElementById('challenge-options');
+            container.style.opacity = '0';
+            container.style.pointerEvents = 'none';
+            container.innerHTML = '';
+        }
+
+        function handleChallengeAnswer(isCorrect) {
+            clearInterval(challengeTimer);
+            hideChallengeOptions();
+            document.getElementById('timer-container').style.opacity = '0';
+
+            const bossAvatarEl = document.getElementById('boss-avatar');
+            const gameBody = document.getElementById('game-body');
+            const phase = challengePhases[currentPhaseIndex];
+
+            if (isCorrect) {
+                const damageInfo = calculateBossDamage(phase, totalTime > 0 ? timeLeft / totalTime : 0);
+                const totalDmg = damageInfo.totalDamage;
+                const isCrit = damageInfo.isCrit;
+
+                hiddenScore += Math.floor(damageInfo.timeRatio * 100);
+
+                bossHp -= totalDmg;
+                updateBossHpUI();
+                updateBackgroundColor();
+
+                playSlashEffect();
+                playDamageText(totalDmg, isCrit ? 'critical' : 'normal');
+                bossAvatarEl.classList.add('animate-damage');
+                setTimeout(() => { if(isChallengeActive) bossAvatarEl.classList.remove('animate-damage'); }, 500);
+
+                if (bossHp <= 0) {
+                    typeDialogue("「呃... 竟然被你看穿了...」", () => {
+                        challengeActionTimeout = setTimeout(nextPhase, 1500);
+                    });
+                } else {
+                    currentChallengeIndex++;
+                    typeDialogue("「切... 运气不错！下一题！」", () => {
+                        challengeActionTimeout = setTimeout(loadChallengeQuestion, 1000);
+                    });
+                }
+            } else {
+                const damageToPlayer = 35;
+                playerHp -= damageToPlayer;
+                updatePlayerHpUI();
+                
+                gameBody.classList.add('animate-shake');
+                playDamageText(damageToPlayer, 'player');
+
+                if (playerHp <= 0) {
+                    typeDialogue("「破绽百出！这点敬语水平还差得远呢！」", () => {
+                        challengeActionTimeout = setTimeout(() => {
+                            gameBody.classList.remove('animate-shake');
+                            if(isChallengeActive) showChallengeSummary(false);
+                        }, 1000);
+                    });
+                } else {
+                    currentChallengeIndex++;
+                    typeDialogue("「怎么了？手抖了吗！继续！」", () => {
+                        challengeActionTimeout = setTimeout(() => {
+                            gameBody.classList.remove('animate-shake');
+                            if(isChallengeActive) loadChallengeQuestion();
+                        }, 1000);
+                    });
+                }
+            }
+        }
+
+        function nextPhase() {
+            if (!isChallengeActive) return;
+            currentPhaseIndex++;
+            
+            if (currentPhaseIndex === 4) {
+                if (hiddenScore < 800) {
+                    typeDialogue("「呼... 勉强算你及格吧汪。不过距离敬语大师还有一段路要走呢。」", () => {
+                        challengeActionTimeout = setTimeout(() => showChallengeSummary(true, false), 1500);
+                    });
+                    return;
+                }
+            } else if (currentPhaseIndex >= challengePhases.length) {
+                typeDialogue("「不可思议的敬语运用... 我彻底败给你了，你就是真正的敬语大师！」", () => {
+                    challengeActionTimeout = setTimeout(() => showChallengeSummary(true, true), 1500);
+                });
+                return;
+            }
+            
+            initPhase();
+        }
+
+        function showChallengeSummary(isVictory, isTrueEnding = false) {
+            if (!isChallengeActive) return;
+            setHeaderBack({ hidden: true });
+            
+            document.getElementById('view-challenge').classList.remove('flex');
+            document.getElementById('view-challenge').classList.add('hidden');
+            
+            const summaryView = document.getElementById('view-challenge-summary');
+            summaryView.classList.remove('hidden');
+            summaryView.classList.add('flex');
+            
+            scrollToCenter('view-challenge-summary');
+
+            const phaseName = challengePhases[Math.min(currentPhaseIndex, challengePhases.length - 1)].name;
+            const rankData = calculateRank(hiddenScore, isVictory, isTrueEnding);
+
+            document.getElementById('summary-phase').innerText = phaseName;
+            document.getElementById('summary-score').innerText = hiddenScore;
+            
+            const rankEl = document.getElementById('summary-rank');
+            rankEl.innerText = rankData.rank;
+            rankEl.className = `text-7xl font-pixel font-bold ${rankData.color}`;
+            
+            document.getElementById('summary-avatar').innerText = rankData.avatar;
+            document.getElementById('summary-eval').innerText = rankData.eval;
+        }
+
+        function calculateRank(score, isVictory, isTrueEnding) {
+            if (isVictory && isTrueEnding) {
+                if (score >= 1200) return { rank: 'SSS', color: 'text-ukon', avatar: '🌟', eval: '「深渊的统治者。你的敬语已臻化境，无需多言。」' };
+                if (score >= 800) return { rank: 'S', color: 'text-ukon', avatar: '👑', eval: '「优秀的特训者！你已完美掌握所有敬语的奥秘。」' };
+            }
+            if (isVictory && !isTrueEnding) {
+                return { rank: 'A', color: 'text-green-400', avatar: '🦊', eval: '「表现不错！基础非常扎实，但距离完美还有一步之遥。多争取时间加分！」' };
+            }
+            if (score >= 500) return { rank: 'B', color: 'text-blue-400', avatar: '🐺', eval: '「还可以，但在高压下容易手忙脚乱。继续在训练场修炼吧！」' };
+            if (score >= 200) return { rank: 'C', color: 'text-gray-400', avatar: '🐕', eval: '「马马虎虎，稍微遇到点变形就被绕进去了呢。」' };
+            return { rank: 'F', color: 'text-red-500', avatar: '🦴', eval: '「破绽百出！先回训练场把基础打牢再来挑战吧！」' };
+        }
+
+        function playSlashEffect() {
+            const slashEl = document.getElementById('slash-effect');
+            slashEl.classList.remove('animate-slash-play');
+            void slashEl.offsetWidth; 
+            slashEl.classList.add('animate-slash-play');
+        }
+
+        function playDamageText(amount, type) {
+            const textEl = document.getElementById('damage-text');
+            textEl.classList.remove('animate-float', 'normal-hit', 'player-hit');
+            if(type === 'critical') { textEl.innerText = `CRITICAL! -${amount}`; textEl.style.color = '#D4A017'; } 
+            else if(type === 'player') { textEl.innerText = `-${amount}`; textEl.classList.add('player-hit'); } 
+            else { textEl.innerText = `-${amount}`; textEl.classList.add('normal-hit'); }
+            void textEl.offsetWidth;
+            textEl.classList.add('animate-float');
+        }
+
+        function startTimer(duration) {
+            clearInterval(challengeTimer);
+            totalTime = duration;
+            timeLeft = duration;
+            const bar = document.getElementById('timer-bar');
+            bar.classList.remove('timer-warning');
+            bar.style.width = '100%';
+            
+            challengeTimer = setInterval(() => {
+                if(!isChallengeActive) { clearInterval(challengeTimer); return; }
+                timeLeft -= 50;
+                const percentage = (timeLeft / totalTime) * 100;
+                bar.style.width = `${percentage}%`;
+                if (percentage < 30) bar.classList.add('timer-warning');
+                if (timeLeft <= 0) { clearInterval(challengeTimer); if(isChallengeActive) handleChallengeAnswer(false); }
+            }, 50);
+        }
+
+        function typeDialogue(text, callback) {
+            clearTimeout(typingTimeout);
+            const el = document.getElementById('challenge-question');
+            const cursor = document.getElementById('typing-cursor');
+            if (el) el.innerText = '';
+            if (cursor) cursor.className = 'typing-cursor'; 
+            
+            let i = 0;
+            const speed = 40; 
+            function type() {
+                if (!isChallengeActive) return;
+                if (i < text.length) {
+                    if(el) el.innerText += text.charAt(i);
+                    i++;
+                    typingTimeout = setTimeout(type, speed);
+                } else {
+                    if(cursor) cursor.className = ''; 
+                    if (callback) callback();
+                }
+            }
+            type();
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const headerBackLink = document.getElementById('header-back-link');
+            if (headerBackLink) {
+                headerBackLink.addEventListener('click', handleHeaderBack);
+            }
+            showMenu();
+        });
+    </script>
+</body>
+</html>

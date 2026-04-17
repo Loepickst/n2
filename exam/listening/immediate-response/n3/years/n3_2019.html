@@ -1,0 +1,1307 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>即時応答 - 聴解練習 (N3)</title>
+    <style>
+        :root {
+            /* --- 统一配色方案 --- */
+            --bg-color: #fdfaf5;       /* 米色背景 */
+            --paper-color: #ffffff;    /* 卡片背景 */
+            --text-color: #2c2c2c;     /* 主文字 */
+            --sub-color: #787878;      /* 辅助文字 */
+            --accent-color: #b33e3e;   /* 强调色 (茜色) */
+            --accent-light: #fbe9e7;   /* 强调色淡色背景 */
+            --border-color: #e0e0e0;   /* 边框颜色 */
+            --shadow: 0 4px 20px rgba(0,0,0,0.05); /* 柔和阴影 */
+            
+            /* 功能色 */
+            --primary-btn: #2c3e50;
+            --highlight-purple: #9c27b0;
+        }
+
+        body {
+            font-family: "Hiragino Kaku Gothic ProN", "Hiragino Sans", "Meiryo", "Microsoft YaHei", -apple-system, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column; /* Allow header to stack above container */
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        /* Global Header Style */
+        header {
+            width: 100%;
+            padding: 15px 20px;
+            box-sizing: border-box;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background-color: rgba(253, 250, 245, 0.95);
+            backdrop-filter: blur(8px);
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+            margin-bottom: 0;
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--text-color);
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            white-space: nowrap;
+        }
+
+        .back-btn {
+            text-decoration: none;
+            color: var(--text-color);
+            font-size: 16px;
+            font-weight: bold;
+            opacity: 0.7;
+            transition: opacity 0.3s;
+            cursor: pointer;
+            z-index: 2;
+        }
+
+        .back-btn:hover { opacity: 1; }
+
+        /* 主容器 */
+        .practice-container {
+            margin-top: 0; /* Remove space to touch header */
+            margin-bottom: 85px; /* Space for fixed player */
+            background: var(--paper-color);
+            border-radius: 20px 20px 0 0;
+            max-width: 1000px; /* Reduced from 1200px to tighten content */
+            width: 95%;
+            padding: 30px;
+            box-shadow: var(--shadow);
+            border: 1px solid rgba(0,0,0,0.02);
+            position: relative;
+            flex: 1; /* Expand to fill vertical space */
+        }
+
+        /* 顶部 Header */
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 35px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .question-tag {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--text-color);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .question-tag::before {
+            content: "";
+            display: block;
+            width: 6px;
+            height: 24px;
+            background-color: var(--accent-color);
+            border-radius: 3px;
+        }
+
+        .question-meta {
+            font-size: 14px;
+            color: var(--sub-color);
+            font-weight: normal;
+            margin-left: 10px;
+            background: #f5f5f5;
+            padding: 4px 10px;
+            border-radius: 4px;
+        }
+
+        /* 模式切换按钮优化 */
+        .mode-switch {
+            display: flex;
+            background: #f0f0f0;
+            padding: 4px;
+            border-radius: 12px;
+        }
+
+        button {
+            padding: 8px 16px;
+            cursor: pointer;
+            border: none;
+            background-color: transparent;
+            color: #888;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 13px;
+            transition: all 0.2s ease;
+        }
+
+        button.active {
+            background-color: #fff;
+            color: var(--text-color);
+            box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+        }
+
+        /* 内容区布局 */
+        .content-wrapper {
+            display: flex;
+            gap: 40px;
+            align-items: flex-start;
+        }
+
+        /* 左侧图片 */
+        .left-panel {
+            flex: 0 0 300px;
+        }
+
+        .left-panel img {
+            width: 100%;
+            height: auto;
+            border-radius: 12px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.06);
+            display: block;
+            border: 4px solid #fff;
+        }
+
+        /* 右侧面板 */
+        .right-panel {
+            flex: 1;
+        }
+
+        /* 练习模式下的样式优化 */
+        .mode-practice .left-panel img {
+            filter: blur(20px);
+            transition: filter 0.5s ease;
+        }
+
+        .mode-practice.judged .left-panel img {
+            filter: none;
+        }
+
+        .mode-practice .right-panel {
+            /* 移除模糊，允许操作 */
+            filter: none;
+            opacity: 1;
+            pointer-events: auto;
+            user-select: auto;
+            transition: all 0.5s ease;
+        }
+
+        /* 练习模式下隐藏文本内容 */
+        .mode-practice .dialogue-block,
+        .mode-practice .option-text,
+        .mode-practice .translation {
+            display: none !important;
+        }
+
+        .placeholder-text {
+            display: none;
+            color: #ccc;
+            font-weight: bold;
+            font-size: 14px;
+        }
+        
+        .mode-practice .placeholder-text {
+            display: block;
+        }
+
+        /* 练习模式下的选中状态 */
+        .mode-practice .options-list li {
+            cursor: pointer;
+            min-height: 24px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .mode-practice .options-list li:hover {
+            background-color: #f9f9f9;
+        }
+
+        .mode-practice .options-list li.selected {
+            border-color: var(--primary-btn);
+            background-color: #f0f8ff;
+            box-shadow: 0 0 0 1px var(--primary-btn);
+        }
+
+        .mode-explanation .right-panel {
+            filter: blur(0);
+            opacity: 1;
+            pointer-events: auto;
+            transition: all 0.5s ease;
+        }
+
+        .mode-explanation .left-panel img {
+            filter: none;
+        }
+
+        /* 对话区块优化 */
+        .dialogue-block {
+            margin-bottom: 30px;
+            position: relative;
+        }
+        
+        .dialogue-label {
+            font-size: 12px;
+            color: var(--accent-color);
+            font-weight: bold;
+            margin-bottom: 8px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .dialogue-text {
+            font-size: 14px; /* Matched to option-text size */
+            line-height: 1.8;
+            color: var(--text-color);
+            font-weight: 500;
+        }
+
+        .speaker-name {
+            font-weight: bold;
+            margin-right: 4px;
+        }
+
+        .translation {
+            color: var(--sub-color);
+            font-size: 13px;
+            line-height: 1.6;
+            margin-top: 8px;
+            padding-top: 8px;
+            border-top: 1px dashed #eee;
+            display: none;
+        }
+
+        .mode-explanation .translation { display: block; }
+
+        /* 选项列表优化 */
+        .options-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .options-list li {
+            padding: 16px 20px;
+            border-radius: 12px;
+            border: 1px solid #eee;
+            background: #fff;
+            transition: all 0.2s ease;
+            position: relative;
+            padding-left: 45px; /* Space for number */
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .option-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .inline-confirm-btn {
+            margin-left: 15px;
+            padding: 6px 16px;
+            background-color: var(--primary-btn);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+            animation: fadeIn 0.2s ease;
+            white-space: nowrap;
+        }
+
+        .inline-confirm-btn:hover {
+            opacity: 0.9;
+            transform: scale(1.05);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        
+        .mode-explanation .options-list li:hover {
+            border-color: var(--accent-color);
+            background-color: #fffafa;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+        }
+
+        .options-num {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 18px;
+            height: 18px;
+            background: #f0f0f0;
+            color: #666;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 18px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .mode-explanation .correct-answer .options-num {
+            background: var(--accent-color);
+            color: #fff;
+        }
+
+        .mode-explanation .correct-answer {
+            background-color: var(--accent-light);
+            border-color: var(--accent-color);
+        }
+        
+        .option-text {
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-color);
+        }
+
+        /* 关键词样式 */
+        .keyword {
+            color: var(--accent-color);
+            border-bottom: 1px solid rgba(179, 62, 62, 0.3);
+            cursor: pointer;
+            font-weight: bold;
+            padding: 0 2px;
+            transition: all 0.2s;
+        }
+
+        .keyword:hover {
+            background-color: var(--accent-light);
+            border-bottom-color: var(--accent-color);
+        }
+
+        /* Tooltip */
+        .custom-tooltip {
+            position: absolute;
+            background-color: #333;
+            color: #fff;
+            padding: 10px 14px;
+            border-radius: 6px;
+            font-size: 13px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            pointer-events: none;
+            z-index: 1000;
+            display: none;
+            max-width: 260px;
+            line-height: 1.6;
+            --arrow-left: 50%;
+        }
+        .custom-tooltip::after {
+            content: "";
+            position: absolute;
+            top: 100%; 
+            left: var(--arrow-left);
+            margin-left: -6px;
+            border-width: 6px;
+            border-style: solid;
+            border-color: #333 transparent transparent transparent;
+        }
+
+        /* Header Controls */
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .question-select {
+            padding: 8px 16px;
+            font-size: 16px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background-color: #fff;
+            color: var(--text-color);
+            outline: none;
+            font-weight: bold;
+            cursor: pointer;
+            min-width: 120px;
+        }
+
+        /* Mark Button (Dog) */
+        .mark-btn {
+            font-size: 22px;
+            padding: 4px 10px;
+            background: none;
+            border: 2px solid transparent;
+            border-radius: 8px;
+            cursor: pointer;
+            opacity: 0.2; /* Inactive state */
+            filter: grayscale(100%);
+            transition: all 0.2s ease;
+            margin-left: 5px;
+        }
+
+        .mark-btn:hover {
+            opacity: 0.6;
+            transform: scale(1.1);
+        }
+
+        .mark-btn.active {
+            opacity: 1;
+            filter: grayscale(0%);
+            transform: scale(1.1);
+        }
+
+        .nav-controls {
+            margin-top: 30px;
+            display: flex;
+            justify-content: center; /* Center the confirm button */
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+        }
+
+        .nav-btn {
+            padding: 8px 20px;
+            background: #f0f0f0;
+            border: none;
+            border-radius: 8px;
+            color: #555;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .nav-btn:hover:not(:disabled) {
+            background: #e0e0e0;
+            color: #333;
+        }
+
+        .nav-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* Confirm Button */
+        .confirm-btn {
+            padding: 8px 24px;
+            background-color: var(--primary-btn);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            transition: all 0.2s;
+        }
+        .confirm-btn:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+            box-shadow: 0 6px 14px rgba(0,0,0,0.15);
+        }
+
+        /* Practice Mode Results */
+        .mode-practice .options-list li.judged-correct {
+            background-color: #e8f5e9 !important;
+            border-color: #4caf50 !important;
+            box-shadow: 0 0 0 1px #4caf50;
+        }
+        .mode-practice .options-list li.judged-correct::after {
+            content: "正解" !important;
+            color: #2e7d32 !important;
+        }
+
+        .mode-practice .options-list li.judged-wrong {
+            background-color: #ffebee !important;
+            border-color: #ef5350 !important;
+            box-shadow: 0 0 0 1px #ef5350;
+        }
+        .mode-practice .options-list li.judged-wrong::after {
+            content: "不正解" !important;
+            color: #ef5350 !important;
+        }
+
+        /* 响应式 */
+        @media (max-width: 768px) {
+            .practice-container {
+                width: 95%;
+                padding: 20px;
+                margin-top: 0;
+            }
+            .controls {
+                flex-direction: column;
+                gap: 20px;
+                align-items: stretch;
+            }
+            .audio-player audio { width: 100%; }
+            .mode-switch { justify-content: center; }
+            .content-wrapper {
+                flex-direction: column;
+                gap: 20px;
+                align-items: stretch;
+            }
+            .left-panel { flex: none; width: 100%; max-width: 320px; margin: 0 auto; }
+            
+            /* Mobile Font Adjustments */
+            .question-tag { font-size: 18px; }
+            .dialogue-text { font-size: 13px; } /* Matched to option-text size on mobile */
+            .option-text { font-size: 13px; }
+            .translation { font-size: 12px; }
+
+            /* Header Compact Mode for Mobile */
+            .header-left { gap: 5px; }
+            .year-display {
+                font-size: 13px;
+                padding: 6px 10px;
+            }
+            .divider { font-size: 16px; margin: 0 2px; }
+            .question-select {
+                font-size: 13px;
+                padding: 6px 10px;
+                min-width: auto;
+            }
+            .mode-switch button {
+                font-size: 12px;
+                padding: 6px 12px;
+            }
+            
+            /* Mobile Option Number Alignment */
+            .options-num {
+                width: 16px;
+                height: 16px;
+                line-height: 16px;
+                font-size: 11px;
+                /* top: 50% inherited, transform inherited */
+            }
+            .options-list li {
+                padding-left: 40px;
+            }
+
+        }
+    </style>
+        <link rel="stylesheet" href="../../../shared/audio-player-theme.css">
+    <link rel="stylesheet" href="../../../../../shared/header-back-control.css">
+</head>
+<body>
+
+    <header>
+        <a href="../index.html" class="back-btn header-back-control">戻る</a>
+        <h1 id="yearLabel">即時応答 - 2019 (N3)</h1>
+    </header>
+
+    <div class="practice-container mode-practice" id="appContainer">
+        
+        <div class="card-header">
+            <div class="header-left">
+                <select id="questionSelect" class="question-select" onchange="changeQuestion(this.value)">
+                    <!-- Options populated by JS -->
+                </select>
+                <button id="markBtn" class="mark-btn" onclick="toggleMark()" title="あとで復習する（复习标记）">🐶</button>
+            </div>
+            <div class="mode-switch">
+                <button id="btnPractice" class="active" onclick="setMode('practice')">練習</button>
+                <button id="btnExplanation" onclick="setMode('explanation')">解説</button>
+            </div>
+        </div>
+
+        <div class="content-wrapper">
+            <div class="left-panel">
+                <img src="" alt="对话场景" id="sceneImage" style="display: none;">
+            </div>
+            
+            <div class="right-panel" id="rightPanel">
+                <!-- Content populated by JS -->
+                <div class="dialogue-block" id="dialogueBlock"></div>
+                <ul class="options-list" id="optionsList"></ul>
+            </div>
+        </div>
+    </div>
+
+    <div class="audio-wrapper">
+        <div class="custom-audio-player">
+            <div class="now-playing-box">
+                <div class="track-icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="#a0a0a5"><path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/></svg>
+                </div>
+                <div class="track-info">
+                    <div class="track-title" id="trackTitle">問題 1</div>
+                    <div class="track-subtitle" id="trackSubtitle"></div>
+                </div>
+                <div class="progress-area">
+                    <div class="time-group">
+                        <span class="time-display time-current" id="timeCurrent">0:00</span>
+                        <span class="time-display time-divider"></span>
+                        <span class="time-display time-duration desktop-time" id="timeDurationDesktop">0:00</span>
+                        <span class="time-display time-duration mobile-time" id="timeDurationMobile">-0:00</span>
+                    </div>
+                    <div class="progress-container" id="progressContainer">
+                        <div class="progress-bar" id="progressBar"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="player-controls">
+                <button id="prevBtn" class="ctrl-btn nav-btn" onclick="prevQuestion()" title="前へ">
+                    <svg viewBox="0 0 24 24"><path d="M3 6h2v12H3zM13 6v12L5 12zM21 6v12L13 12z"/></svg>
+                </button>
+                <button id="rewindBtn" class="ctrl-btn skip-btn" title="6秒戻る (退回6秒)">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><text x="12" y="16.5" font-size="8.5" font-weight="bold" font-family="sans-serif" stroke-width="0" fill="currentColor" text-anchor="middle">6</text></svg>
+                </button>
+                <button class="ctrl-btn play-btn" id="playBtn">
+                    <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                </button>
+                <button id="forwardBtn" class="ctrl-btn skip-btn" title="6秒進む (快进6秒)">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><text x="12" y="16.5" font-size="8.5" font-weight="bold" font-family="sans-serif" stroke-width="0" fill="currentColor" text-anchor="middle">6</text></svg>
+                </button>
+                <button id="nextBtn" class="ctrl-btn nav-btn" onclick="nextQuestion()" title="次へ">
+                    <svg viewBox="0 0 24 24"><path d="M3 6v12L11 12zM11 6v12L19 12zM19 6h2v12H19z"/></svg>
+                </button>
+                <button id="loopBtn" class="ctrl-btn loop-btn" title="ループ再生 (循环播放)">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="17 1 21 5 17 9"></polyline><path d="M3 11V9a4 4 0 0 1 4-4h14"></path><polyline points="7 23 3 19 7 15"></polyline><path d="M21 13v2a4 4 0 0 1-4 4H3"></path></svg>
+                </button>
+                <button id="speedBtn" class="ctrl-btn speed-btn" title="再生速度 (点击切换 0.75x / 1.0x)">1.0x</button>
+            </div>
+
+            <audio id="audioElement" preload="metadata"></audio>
+        </div>
+    </div>
+
+    <div id="wordTooltip" class="custom-tooltip"></div>
+
+    <script src="../../../shared/audio-player-theme.js"></script>
+    <script>
+        // --- Data Structure ---
+        const examData = {
+            "2019-07": {
+                label: "2019年7月",
+                questions: [
+                {
+    id: 1,
+    audio: "../assets/audio/2019.7-1.mp3",
+    image: "../assets/image/2019.7-1.png",
+    dialogueHtml: `<span class="speaker-text">中田さん、今度の旅行、中田さんも行く<span class="keyword" onclick="showTooltip(event, 'でしょう：\\n助动词。接在动词基本形（终止形）之后。用于征求对方的同意、看法或进行确认。意思是“……对吧”、“……吧”。')">でしょう</span>？</span>`,
+    translation: "（中田，这次旅行你也去的吧？）",
+    options: [
+        { text: `行った<span class="keyword" onclick="showTooltip(event, 'みたい：\\n助动词。接在动词た形之后。表示根据某种迹象或传闻进行的主观推断。意思是“好像……”。')">みたい</span>だよ。`, translation: "（好像已经去了哦。）", correct: false },
+        { text: "もちろん行くよ。", translation: "（当然去啊。）", correct: true },
+        { text: "えっ？中止になったの？", translation: "（哎？取消了吗？）", correct: false }
+    ]
+},
+{
+    id: 2,
+    audio: "../assets/audio/2019.7-2.mp3",
+    image: "../assets/image/2019.7-2.png",
+    dialogueHtml: `<span class="speaker-text">リーさん、漢字は毎日練習する<span class="keyword" onclick="showTooltip(event, 'ようにしてください：\\n句型。动词基本形接「ようにする」的て形，再接「ください」。用于委婉地要求或劝告对方养成某种习惯或努力做到某事。意思是“请务必做到……”、“要记得……”。')">ようにしてください</span>ね。</span>`,
+    translation: "（小李，汉字要记得每天练习哦。）",
+    options: [
+        { text: `練習し<span class="keyword" onclick="showTooltip(event, 'なくてもいい：\\n句型。动词ない形将「ない」变为「なく」，接助词「て」，再接助词「も」和形容词「いい」。表示许可或没有必要做某事。意思是“不……也可以”。')">なくてもいい</span>んですか。`, translation: "（不练习也可以吗？）", correct: false },
+        { text: `毎日漢字教え<span class="keyword" onclick="showTooltip(event, 'てあげましょうか：\\n句型。动词的て形接「あげる」的意志形「あげましょう」和疑问助词「か」。表示主动提议为对方做某事。意思是“我为你……好吗”。')">てあげましょうか</span>。`, translation: "（每天教你写汉字好吗？）", correct: false },
+        { text: `はい、今日から、<span class="keyword" onclick="showTooltip(event, 'そうします：\\n词组。副词「そう」接动词「する」的郑重形式「します」。表示同意对方的建议或要求，并决定采取相应的行动。意思是“我会这样做的”。')">そうします</span>。`, translation: "（好的，我从今天开始每天练。）", correct: true }
+    ]
+},
+{
+    id: 3,
+    audio: "../assets/audio/2019.7-3.mp3",
+    image: "../assets/image/2019.7-3.png",
+    dialogueHtml: `<span class="speaker-text">私、今度スピーチ大会に<span class="keyword" onclick="showTooltip(event, 'ことになった：\\n句型。接在动词基本形之后。表示某种计划、安排或结果已经确定，通常强调由于外部环境或团体讨论而定下来的事实。意思是“定下来要……”、“决定了……”。')">することになった</span>んだ。</span>`,
+    translation: "（我定下来要参加这次的演讲比赛了。）",
+    options: [
+        { text: `次は参加できる<span class="keyword" onclick="showTooltip(event, 'といい：\\n句型。接在动词基本形之后。表示对他人的祝愿或对未来的期盼。意思是“……的话就好了”、“希望……”。')">といい</span>ね。`, translation: "（下次能参加就好了。）", correct: false },
+        { text: "すごいね、聞きに行くね。", translation: "（太棒了，到时候我去听哦。）", correct: true },
+        { text: "どうして、出ないの？", translation: "（为什么不参加呀？）", correct: false }
+    ]
+},
+{
+    id: 4,
+    audio: "../assets/audio/2019.7-4.mp3",
+    image: "../assets/image/2019.7-4.png",
+    dialogueHtml: `<span class="speaker-text">加藤さん、昨日頼んだ資料整理、<span class="keyword" onclick="showTooltip(event, 'あと：\\n副词。表示剩余的数量或时间。意思是“还剩下”、“还有”。')">あと</span>どのぐらい残ってる？</span>`,
+    translation: "（加藤，昨天让你整理的资料，还剩下多少？）",
+    options: [
+        { text: "３時間過ぎました。", translation: "（过去三个小时了。）", correct: false },
+        { text: "もうすぐ終わると思います。", translation: "（我觉得马上就能弄完了。）", correct: true },
+        { text: `まだ<span class="keyword" onclick="showTooltip(event, 'そんなに：\\n副词。指代前文或对方提到过的程度，带有惊讶的语气。意思是“那么”、“那种程度”。')">そんなに</span>残っている<span class="keyword" onclick="showTooltip(event, 'んですか：\\n句型。「の」的口语形式「ん」接郑重助动词「です」和疑问助词「か」。用于表达惊讶、确认或寻求解释。意思是“……吗”。')">んですか</span>。`, translation: "（居然还剩那么多吗？）", correct: false }
+    ]
+},
+{
+    id: 5,
+    audio: "../assets/audio/2019.7-5.mp3",
+    image: "../assets/image/2019.7-5.png",
+    dialogueHtml: `<span class="speaker-text">山下先輩、あのう、来週の勉強会、私も参加<span class="keyword" onclick="showTooltip(event, 'させてください：\\n句型。动词的使役态て形接「ください」。用于请求对方允许自己做某事。意思是“请让我……”。')">させてください</span>。</span>`,
+    translation: "（山下前辈，那个，下周的学习会请让我也参加吧。）",
+    options: [
+        { text: `うん、<span class="keyword" onclick="showTooltip(event, 'できるだけ：\\n副词。表示在可能的范围内尽最大努力。意思是“尽量”、“尽力”。')">できるだけ</span>行くね。`, translation: "（嗯，我尽量去哦。）", correct: false },
+        { text: `ぜひ<span class="keyword" onclick="showTooltip(event, '来て：\\n词组。动词「来る」的て形。用于向关系亲密的人提出请求。意思是“来吧”、“请来”。')">来て</span>。`, translation: "（欢迎你来。）", correct: true },
+        { text: `じゃ、<span class="keyword" onclick="showTooltip(event, 'また今度：\\n词组。副词「また」接名词「今度」。表示将某事推迟到下一次机会。意思是“下次再……”。')">また今度</span><span class="keyword" onclick="showTooltip(event, '来て：\\n词组。动词「来る」的て形。用于向关系亲密的人提出请求。意思是“来吧”、“请来”。')">来て</span>。`, translation: "（那你下次再来吧。）", correct: false }
+    ]
+},
+{
+    id: 6,
+    audio: "../assets/audio/2019.7-6.mp3",
+    image: "../assets/image/2019.7-6.png",
+    dialogueHtml: `<span class="speaker-text">リンさん、帰るとき、窓閉めるの、忘れ<span class="keyword" onclick="showTooltip(event, 'ずにね：\\n句型。动词ない形将「ない」变为「ず」，接助词「に」和终助词「ね」。用于柔和地进行指示或提醒。意思是“别忘了……哦”。')">ずにね</span>。</span>`,
+    translation: "（小林，回去的时候别忘了关窗户哦。）",
+    options: [
+        { text: "はい、閉めて帰ります。", translation: "（好的，我会关好再走的。）", correct: true },
+        { text: `いい<span class="keyword" onclick="showTooltip(event, 'んですか：\\n句型。「の」的口语形式「ん」接郑重助动词「です」和疑问助词「か」。用于表达惊讶、确认或寻求解释。意思是“……吗”。')">んですか</span>。ありがとうございます。`, translation: "（可以吗？谢谢你。）", correct: false },
+        { text: `開け<span class="keyword" onclick="showTooltip(event, 'ておきます：\\n词组。动词的て形接「おく」的郑重形式「おきます」。表示让某种状态保持下去或事先做好准备。意思是“先开着”。')">ておきます</span>。`, translation: "（我先开着。）", correct: false }
+    ]
+},
+{
+    id: 7,
+    audio: "../assets/audio/2019.7-7.mp3",
+    image: "../assets/image/2019.7-7.png",
+    dialogueHtml: `<span class="speaker-text">あの、何か<span class="keyword" onclick="showTooltip(event, '書くもの：\\n词组。动词「書く」接名词「もの」。泛指用于书写的工具，如笔等。意思是“写字的东西”、“笔”。例句：何か書くものはありますか。（有什么写字的东西吗？）')">書くもの</span>、<span class="keyword" onclick="showTooltip(event, 'お借りできますか：\\n句型。动词「借りる」的自谦语「お借りする」的能动态「お借りできる」的郑重形式「お借りできます」接疑问助词「か」。用于非常礼貌地请求借用某物。意思是“能借……吗”。例句：トイレ、お借りできますか。（能借用一下洗手间吗？）')">お借りできますか</span>。</span>`,
+    translation: "（那个，能借支笔用一下吗？）",
+    options: [
+        { text: "まだお返ししていません。", translation: "（我还没还。）", correct: false },
+        { text: `すみません。<span class="keyword" onclick="showTooltip(event, 'けっこうです：\\n词组。形容动词「けっこうだ」的郑重形式「けっこうです」。表示拒绝对方的提议或好意。意思是“不用了”。例句：お茶はもうけっこうです。（茶已经够了/不用了。）')">けっこうです</span>。`, translation: "（不好意思，不用了。）", correct: false },
+        { text: `こちらのペンを<span class="keyword" onclick="showTooltip(event, 'お使いください：\\n句型。接头词「お」接动词第一连用形，再接「ください」。为尊他语，用于礼貌地请对方使用某物。意思是“请使用”。例句：こちらのパソコンをお使いください。（请用这台电脑。）')">お使いください</span>。`, translation: "（请用这支笔。）", correct: true }
+    ]
+},
+{
+    id: 8,
+    audio: "../assets/audio/2019.7-8.mp3",
+    image: "../assets/image/2019.7-8.png",
+    dialogueHtml: `<span class="speaker-text">サッカー部の森君、マラソン選手<span class="keyword" onclick="showTooltip(event, 'としても：\\n词组。助词「として」接助词「も」。表示资格、立场等，附加“也”的意思。意思是“作为……也”。例句：彼は歌手としても活躍している。（他作为歌手也很活跃。）')">としても</span>期待されてる<span class="keyword" onclick="showTooltip(event, 'らしい：\\n助动词。接在名词或普通体之后。表示根据传闻或客观情况做出的推测。意思是“据说……”、“听说……”。例句：明日は雨が降るらしい。（听说明天会下雨。）')">らしい</span>よ。</span>`,
+    translation: "（听说足球部的森同学，作为马拉松选手也很受期待呢。）",
+    options: [
+        { text: `<span class="keyword" onclick="showTooltip(event, 'そうなんだ：\\n句型。感叹词「そう」接「な」和「んだ」。用于对新得知的信息表示理解或轻微的惊讶。意思是“这样啊”。例句：あ、そうなんだ。知らなかった。（啊，这样啊。我不知道。）')">そうなんだ</span>。マラソンもできる<span class="keyword" onclick="showTooltip(event, 'んだね：\\n句型。「の」的口语形式「ん」接断定助动词「だ」和终助词「ね」。用于确认自己得出的结论，带有感叹语气。意思是“原来是……啊”。例句：本当に美味しいんだね。（原来真的很好吃啊。）')">んだね</span>。`, translation: "（这样啊。原来他还会跑马拉松啊。）", correct: true },
+        { text: `マラソンはあまり得意じゃない<span class="keyword" onclick="showTooltip(event, 'んだね：\\n句型。「の」的口语形式「ん」接断定助动词「だ」和终助词「ね」。用于确认自己得出的结论，带有感叹语气。意思是“原来是……啊”。例句：本当に美味しいんだね。（原来真的很好吃啊。）')">んだね</span>。`, translation: "（原来他不太擅长跑马拉松啊。）", correct: false },
+        { text: `森君でも苦手なことはある<span class="keyword" onclick="showTooltip(event, 'んだね：\\n句型。「の」的口语形式「ん」接断定助动词「だ」和终助词「ね」。用于确认自己得出的结论，带有感叹语气。意思是“原来是……啊”。例句：本当に美味しいんだね。（原来真的很好吃啊。）')">んだね</span>。`, translation: "（原来连森同学也有不擅长的事情啊。）", correct: false }
+    ]
+},
+{
+    id: 9,
+    audio: "../assets/audio/2019.7-9.mp3",
+    image: "../assets/image/2019.7-9.png",
+    dialogueHtml: `<span class="speaker-text"><ruby>渡辺<rt>わたなべ</rt></ruby>さん、パーティーの<ruby>買<rt>か</rt></ruby>い<ruby>物<rt>もの</rt></ruby>、<span class="keyword" onclick="showTooltip(event, 'てほしい：\\n句型。接在动词的て形之后。表示说话人希望对方做某事。意思是“希望（对方）做……”、“想请（对方）……”。')">付き合ってほしい</span><span class="keyword" onclick="showTooltip(event, 'んだけど：\\n句型。「の」的口语形式「ん」接断定助动词「だ」，再接接续助词「けど」。用于铺垫说明情况或委婉地提出请求。意思是“……”。')">んだけど</span>。</span>`,
+    translation: "（渡边，能陪我去买一下派对要用的东西吗？）",
+    options: [
+        { text: "うん、いいよ。いつ行く？", translation: "（嗯，好啊。什么时候去？）", correct: true },
+        { text: `<ruby>えっ？<ruby>僕<rt>ぼく</rt></ruby><ruby>一<rt>ひと</rt></ruby><ruby>人<rt>り</rt></ruby>で<ruby>行<rt>い</rt></ruby>くの？`, translation: "（哎？让我一个人去吗？）", correct: false },
+        { text: `<ruby>気<rt>き</rt></ruby><ruby>持<rt>も</rt></ruby>ちはうれしいんだけど。`, translation: "（你的心意我领了。）", correct: false }
+    ]
+}    
+                ]
+            },
+        
+            "2019-12": {
+                label: "2019年12月",
+                questions: [
+                 {
+    id: 1,
+    audio: "../assets/audio/2019.12-1.mp3",
+    image: "../assets/image/2019.12-1.png",
+    dialogueHtml: `<span class="speaker-text">コーヒーの<span class="keyword" onclick="showTooltip(event, 'おかわり：\\n名词。 表示再来一杯（饮料）。意思是“续杯”。')">おかわり</span>、<span class="keyword" onclick="showTooltip(event, 'いかがですか：\\n词组。副词「いかが」接郑重助动词「です」和疑问助词「か」。 用于服务人员礼貌地向顾客询问是否需要添饮。意思是“要不要……”。')">いかがですか</span>？</span>`,
+    translation: "（咖啡要续杯吗？）",
+    options: [
+        { text: `<span class="keyword" onclick="showTooltip(event, 'じゃ：\\n接续词。「では」在口语中的发音变化。 表示承接对方的提问，顺势提出自己的决定。意思是“那”、“既然那样”。')">じゃ</span>、もう<ruby>一<rt>いっ</rt></ruby><ruby>杯<rt>ぱい</rt></ruby>。`, translation: "（那，再来一杯。）", correct: true },
+        { text: `コーヒーの<span class="keyword" onclick="showTooltip(event, 'ままで：\\n句型。名词接助词「の」再接名词「まま」和助词「で」。 表示保持原样不变，不需要更换其他种类的饮品。意思是“就照原样”。')">ままで</span>、<ruby>大<rt>だい</rt></ruby><ruby>丈<rt>じょう</rt></ruby><ruby>夫<rt>ぶ</rt></ruby>です。`, translation: "（就喝咖啡就好，没关系。）", correct: false },
+        { text: "<ruby>香<rt>かお</rt></ruby>りですか？いい<ruby>香<rt>かお</rt></ruby>りです。", translation: "（香味吗？很香呢。）", correct: false }
+    ]
+},
+{
+    id: 2,
+    audio: "../assets/audio/2019.12-2.mp3",
+    image: "../assets/image/2019.12-2.png",
+    dialogueHtml: `<span class="speaker-text">あしたから、<ruby>休<rt>やす</rt></ruby>みが<ruby>一<rt>いっ</rt></ruby><ruby>週<rt>しゅう</rt></ruby><ruby>間<rt>かん</rt></ruby><ruby>取<rt>と</rt></ruby>れる<span class="keyword" onclick="showTooltip(event, 'としたら：\\n句型。动词基本形接「としたら」。 表示假定某种情况发生。意思是“如果……的话”、“假设……”。')">としたら</span>、どうする？</span>`,
+    translation: "（如果从明天起能休一个星期的假，你要做什么？）",
+    options: [
+        { text: `じゃ、ゆっくり<span class="keyword" onclick="showTooltip(event, '休んでね：\\n词组。动词的て形接终助词「ね」。 用于向对方表达关切和轻微的嘱咐。意思是“好好休息哦”。')"><ruby>休<rt>やす</rt></ruby>んでね</span>。`, translation: "（那你要好好休息哦。）", correct: false },
+        { text: "<ruby>休<rt>やす</rt></ruby>み、<ruby>一<rt>いっ</rt></ruby><ruby>週<rt>しゅう</rt></ruby><ruby>間<rt>かん</rt></ruby>になったの？やった。", translation: "（假期变成一个星期了吗？太棒了。）", correct: false },
+        { text: `うん、<ruby>家<rt>いえ</rt></ruby>の<ruby>中<rt>なか</rt></ruby>、<ruby>片<rt>かた</rt></ruby><ruby>付<rt>づ</rt></ruby>けたい<span class="keyword" onclick="showTooltip(event, 'なあ：\\n终助词。接在表示愿望的词之后。 表示强烈的个人愿望或轻微的感叹。意思是“啊”。')">なあ</span>。`, translation: "（嗯，想把家里收拾一下啊。）", correct: true }
+    ]
+},
+{
+    id: 3,
+    audio: "../assets/audio/2019.12-3.mp3",
+    image: "../assets/image/2019.12-3.png",
+    dialogueHtml: `<span class="speaker-text"><ruby>森<rt>もり</rt></ruby>さん、わたし、<ruby>傘<rt>かさ</rt></ruby><ruby>二<rt>ふた</rt></ruby>つあるので、<span class="keyword" onclick="showTooltip(event, 'よければ：\\n词组。形容词「よい」的ば形（假定形）。 用于委婉地提出建议或提供帮助。意思是“如果不介意的话”、“如果可以的话”。')">よければ</span>、<ruby>一<rt>ひと</rt></ruby>つを<span class="keyword" onclick="showTooltip(event, 'お使いになりませんか：\\n句型。接头词「お」接动词第一连用形，再接「になる」的郑重否定疑问形式「になりませんか」。 为尊他语，用于礼貌地建议或邀请对方做某事。意思是“您要不要用……”。')">お<ruby>使<rt>つか</rt></ruby>いになりませんか</span>。</span>`,
+    translation: "（森桑，我有两把伞，如果不介意的话，你要不要借用一把？）",
+    options: [
+        { text: "ああ、<ruby>一<rt>ひと</rt></ruby>つ<ruby>壊<rt>こわ</rt></ruby>れちゃったんですね。", translation: "（啊，坏了一把是吧。）", correct: false },
+        { text: `<span class="keyword" onclick="showTooltip(event, 'すみません：\\n感叹词/动词。 用于接受他人好意或给对方添麻烦时，表达轻微的歉意与感谢。意思是“不好意思”。')">すみません</span>、お<ruby>借<rt>か</rt></ruby>りします。`, translation: "（不好意思，那我就借用一下了。）", correct: true },
+        { text: "どうぞ、<ruby>使<rt>つか</rt></ruby>ってください。", translation: "（请，拿去用吧。）", correct: false }
+    ]
+},
+{
+    id: 4,
+    audio: "../assets/audio/2019.12-4.mp3",
+    image: "../assets/image/2019.12-4.png",
+    dialogueHtml: `<span class="speaker-text"><ruby>小<rt>お</rt></ruby><ruby>田<rt>だ</rt></ruby>さん、お<ruby>客<rt>きゃく</rt></ruby><ruby>様<rt>さま</rt></ruby>が<span class="keyword" onclick="showTooltip(event, 'いらっしゃった：\\n动词。动词「いらっしゃる」的た形。 为尊他语，表示客人的到来。意思是“来了”。')">いらっしゃった</span><span class="keyword" onclick="showTooltip(event, 'んだけど：\\n句型。「の」的口语形式「ん」接断定助动词「だ」，再接接续助词「けど」。 用于铺垫情况，引出接下来的请求或询问。意思是“……”。')">んだけど</span>、クッキ<span class="keyword" onclick="showTooltip(event, 'かなにか：\\n词组。副助词「か」接疑问词「なにか」。 表示除了提到的事物之外，同类的其他事物也可以。意思是“……之类的”。')">かなにか</span>ある？</span>`,
+    translation: "（小田，有客人来了，有饼干之类的吗？）",
+    options: [
+        { text: `チョコレート<span class="keyword" onclick="showTooltip(event, 'なら：\\n助词。接在名词之后。 表示提出一个与对方要求不同但相关的替代方案。意思是“……的话”。')">なら</span>ありますけど。`, translation: "（巧克力的话倒是有。）", correct: true },
+        { text: `ありがとうございます。<span class="keyword" onclick="showTooltip(event, 'いただきます：\\n动词。动词「いただく」接郑重助动词「ます」。 为自谦语，用于接受他人提供的食物或饮料。意思是“我不客气了”。')">いただきます</span>。`, translation: "（谢谢，那我不客气了。）", correct: false },
+        { text: `クッキの<span class="keyword" onclick="showTooltip(event, 'ほかに：\\n词组。名词「ほか」接助词「に」。 表示在提到的事物之外。意思是“除……之外”。')">ほかに</span>ですか。`, translation: "（除了饼干以外的吗？）", correct: false }
+    ]
+},
+{
+    id: 5,
+    audio: "../assets/audio/2019.12-5.mp3",
+    image: "../assets/image/2019.12-5.png",
+    dialogueHtml: `<span class="speaker-text"><ruby>昨<rt>きの</rt></ruby><ruby>日<rt>う</rt></ruby>の<ruby>授<rt>じゅ</rt></ruby><ruby>業<rt>ぎょう</rt></ruby>のノート、コピー<span class="keyword" onclick="showTooltip(event, 'させてほしい：\\n句型。动词使役态的て形接「ほしい」。 用于请求对方允许自己做某事。意思是“希望能让我……”')">させてほしい</span>んだけど。<ruby>風<rt>か</rt></ruby><ruby>邪<rt>ぜ</rt></ruby>で<span class="keyword" onclick="showTooltip(event, '休んじゃって：\\n词组。动词「休む」的て形接「しまう」的て形「しまって」在口语中的缩略形式「じゃって」。 表示因为某种原因导致了遗憾或不好的结果，用作说明缺课的原因。意思是“没来”')"><ruby>休<rt>やす</rt></ruby>んじゃって</span>。</span>`,
+    translation: "（能让我复印一下昨天上课的笔记吗？我因为感冒没来。）",
+    options: [
+        { text: "どうして<ruby>自<rt>じ</rt></ruby><ruby>分<rt>ぶん</rt></ruby>でコピーしないの？", translation: "（为什么你自己不去复印？）", correct: false },
+        { text: "<ruby>僕<rt>ぼく</rt></ruby>はノートがあるから、いいよ。", translation: "（我有笔记，所以不用了。）", correct: false },
+        { text: `いいけど、<ruby>授<rt>じゅ</rt></ruby><ruby>業<rt>ぎょう</rt></ruby><span class="keyword" onclick="showTooltip(event, 'までに：\\n助词。助词「まで」接助词「に」。接在名词之后。 表示动作或状态必须完成的最后期限。意思是“在……之前”')">までに</span><ruby>返<rt>かえ</rt></ruby>してね。`, translation: "（可以是可以，但要在上课前还给我哦。）", correct: true }
+    ]
+},
+{
+    id: 6,
+    audio: "../assets/audio/2019.12-6.mp3",
+    image: "../assets/image/2019.12-6.png",
+    dialogueHtml: `<span class="speaker-text">ジョンさん、<ruby>今日<rt>きょう</rt></ruby>はこの<ruby>交<rt>こう</rt></ruby><ruby>流<rt>りゅう</rt></ruby><ruby>会<rt>かい</rt></ruby>で<span class="keyword" onclick="showTooltip(event, 'お目にかかれて：\\n动词。动词「お目にかかる」的能动态的て形。 为「会う」的自谦语，表示见到尊长或对方。意思是“能见到您”。')">お<ruby>目<rt>め</rt></ruby>にかかれて</span><span class="keyword" onclick="showTooltip(event, 'てよかった：\\n句型。动词的て形接形容词「よい」的た形「よかった」。 表示对已经发生的事情感到庆幸或高兴。意思是“……真是太好了”。')">よかったです</span>。</span>`,
+    translation: "（约翰，今天能在这次交流会上见到您真是太好了。）",
+    options: [
+        { text: `いいえ、<span class="keyword" onclick="showTooltip(event, 'こちらこそ：\\n词组。代词「こちら」接提示助词「こそ」。 用于回应对方的寒暄或道谢，强调自己也有同样的感受。意思是“哪里哪里，我才是”。')">こちらこそ</span>。`, translation: "（哪里哪里，我才是。）", correct: true },
+        { text: `ぜひ、<span class="keyword" onclick="showTooltip(event, '拝見したい：\\n词组。动词「拝見する」的第一连用形接愿望助动词「たい」。 为「見る」的自谦语，表示自己想要看对方的物品或作品。意思是“希望能拜读一下”。')"><ruby>拝<rt>はい</rt></ruby><ruby>見<rt>けん</rt></ruby>したい</span>です。`, translation: "（我非常希望能拜读一下。）", correct: false },
+        { text: `<span class="keyword" onclick="showTooltip(event, '楽しみにしております：\\n词组。词组「楽しみにする」的て形「楽しみにして」接「いる」的自谦语「おる」的郑重形式「おります」。 表示对未来的事情十分期盼。意思是“我很期待”。')"><ruby>楽<rt>たの</rt></ruby>しみにしております</span>。`, translation: "（我很期待。）", correct: false }
+    ]
+},
+{
+    id: 7,
+    audio: "../assets/audio/2019.12-7.mp3",
+    image: "../assets/image/2019.12-7.png",
+    dialogueHtml: `<span class="speaker-text"><ruby>会<rt>かい</rt></ruby><ruby>議<rt>ぎ</rt></ruby>の<ruby>日<rt>にっ</rt></ruby><ruby>程<rt>てい</rt></ruby><ruby>変<rt>か</rt></ruby>わったこと、<ruby>山<rt>やま</rt></ruby><ruby>田<rt>だ</rt></ruby>さんにも<ruby>連<rt>れん</rt></ruby><ruby>絡<rt>らく</rt></ruby>し<span class="keyword" onclick="showTooltip(event, 'ないといけない：\\n句型。动词的ない形接「といけない」。 表示基于客观情况或工作需要，有必要做某事。意思是“必须……”、“得……”。')">ないといけない</span>ね。</span>`,
+    translation: "（会议日程改变的事，也必须得联系一下山田呢。）",
+    options: [
+        { text: "<ruby>会<rt>かい</rt></ruby><ruby>議<rt>ぎ</rt></ruby>、<ruby>行<rt>い</rt></ruby>けないんですか。", translation: "（你不能去开会吗？）", correct: false },
+        { text: `<ruby>私<rt>わたし</rt></ruby>から<span class="keyword" onclick="showTooltip(event, '伝えときます：\\n词组。动词「伝える」的て形接「おく」在口语中的缩略形式「とく」，再接郑重助动词「ます」。 表示主动承担并事先做好传达的动作。意思是“我来告诉（他）”、“我会传达”。')"><ruby>伝<rt>つた</rt></ruby>えときます</span>。`, translation: "（我来跟他说吧。）", correct: true },
+        { text: "ああ、<ruby>山<rt>やま</rt></ruby><ruby>田<rt>だ</rt></ruby>さんから<ruby>聞<rt>き</rt></ruby>いたんですね。", translation: "（啊，你是听山田说的呀。）", correct: false }
+    ]
+},
+{
+    id: 8,
+    audio: "../assets/audio/2019.12-8.mp3",
+    image: "../assets/image/2019.12-8.png",
+    dialogueHtml: `<span class="speaker-text">このお<ruby>菓<rt>か</rt></ruby><ruby>子<rt>し</rt></ruby>、<ruby>甘<rt>あま</rt></ruby>くないから、<span class="keyword" onclick="showTooltip(event, 'いくら食べても：\\n词组。疑问词「いくら」接动词「食べる」的て形和助词「も」。 表示无论吃多少。意思是“怎么吃都……”。')">いくら<ruby>食<rt>た</rt></ruby>べても</span><span class="keyword" onclick="showTooltip(event, '飽きない：\\n动词。动词「飽きる」的ない形。 表示吃得再多也不觉得厌烦。意思是“不腻”。')"><ruby>飽<rt>あ</rt></ruby>きない</span>ね。</span>`,
+    translation: "（这个点心不甜，怎么吃都不腻呢。）",
+    options: [
+        { text: "そんなにやすかったの？", translation: "（有那么便宜吗？）", correct: false },
+        { text: `<span class="keyword" onclick="showTooltip(event, 'つい～ちゃう：\\n句型。副词「つい」搭配动词て形接「しまう」在口语中的缩略形式「ちゃう」。 表示由于食物好吃而控制不住自己，无意中吃多了。意思是“不知不觉就会……”。')">つい<ruby>食<rt>た</rt></ruby>べすぎちゃう</span><span class="keyword" onclick="showTooltip(event, 'よね：\\n终助词。终助词「よ」接终助词「ね」。 用于在陈述自己观点的同时，向对方寻求共鸣与赞同。意思是“对吧”。')">よね</span>。`, translation: "（不知不觉就会吃多对吧。）", correct: true },
+        { text: `それじゃ、<ruby>甘<rt>あま</rt></ruby>いのに<span class="keyword" onclick="showTooltip(event, 'にしようか：\\n句型。助词「に」接动词「する」的意志形，再接疑问助词「か」。 表示向对方提议换一种选择。意思是“咱们换成……吧？”。')">にしようか</span>。`, translation: "（那，咱们换个甜的？）", correct: false }
+    ]
+},
+{
+    id: 9,
+    audio: "../assets/audio/2019.12-9.mp3",
+    image: "../assets/image/2019.12-9.png",
+    dialogueHtml: `<span class="speaker-text">あれ、<ruby>会<rt>かい</rt></ruby><ruby>議<rt>ぎ</rt></ruby>でもらった<ruby>資<rt>し</rt></ruby><ruby>料<rt>りょう</rt></ruby>、<ruby>間<rt>ま</rt></ruby><ruby>違<rt>ちが</rt></ruby>っ<span class="keyword" onclick="showTooltip(event, 'てちゃった：\\n词组。动词的て形接「しまう」的た形「しまった」在口语中的缩略形式。 表示无意中做出了不可挽回的动作，带有懊悔或遗憾的语气。意思是“不小心……了”。')">てちゃった</span><span class="keyword" onclick="showTooltip(event, 'みたい：\\n助动词。接在普通体之后。 表示基于某种迹象做出的推测，缺乏确切把握。意思是“好像……”。')">みたい</span>。</span>`,
+    translation: "（哎呀，开会发给我的资料，好像不小心被我扔掉了。）",
+    options: [
+        { text: `えっ、<ruby>資<rt>し</rt></ruby><ruby>料<rt>りょう</rt></ruby>を<span class="keyword" onclick="showTooltip(event, '間違ってた：\\n词组。动词「間違える」的ている形の过去式「間違えていた」在口语中的缩略形式。 用于询问资料本身的状态是否存在错误。意思是“弄错了吗”。')"><ruby>間<rt>ま</rt></ruby><ruby>違<rt>ちが</rt></ruby>ってた</span>？`, translation: "（哎？资料弄错了吗？）", correct: false },
+        { text: `<ruby>待<rt>ま</rt></ruby>って、まだ<span class="keyword" onclick="showTooltip(event, '捨てないで：\\n词组。动词「捨てる」的ない形接助词「で」。 用于直接请求或指示对方不要进行某个动作。意思是“先别扔”。')"><ruby>捨<rt>す</rt></ruby>てないで</span>。`, translation: "（等等，先别扔。）", correct: false },
+        { text: `ほんとう？いっしょに<span class="keyword" onclick="showTooltip(event, '探そうか：\\n词组。动词「探す」的意志形接疑问助词「か」。 用于主动向对方提议共同行动并征求意见。意思是“找找吧？”。')"><ruby>探<rt>さが</rt></ruby>そうか</span>。`, translation: "（真的假的？我陪你一起找找吧？）", correct: true }
+    ]
+}
+
+                ]
+            }
+        };
+
+        let currentExamKey = "2019-07";
+        let currentQuestionIndex = 0;
+        let preferredMode = 'practice'; // Track user's preferred mode
+
+        // --- Initialization ---
+        function init() {
+            // 1. Get Year from URL or default
+            const urlParams = new URLSearchParams(window.location.search);
+            const yearParam = urlParams.get('year');
+            const modeParam = urlParams.get('mode');
+            
+            // Check if valid
+            if (yearParam && examData[yearParam]) {
+                currentExamKey = yearParam;
+                // Save last practice session
+                localStorage.setItem('last_n3_practice', currentExamKey);
+
+                // --- REVIEW MODE LOGIC ---
+                if (modeParam === 'review') {
+                    const marks = getMarks();
+                    if (marks.length === 0) {
+                        alert('マークされた問題はありません。(No marked questions)');
+                    } else {
+                        const originalQuestions = examData[currentExamKey].questions;
+                        const filtered = originalQuestions.filter(q => marks.includes(q.id));
+                        
+                        if (filtered.length > 0) {
+                            examData[currentExamKey].questions = filtered;
+                            setTimeout(() => {
+                                const lbl = document.getElementById('yearLabel');
+                                if(lbl) {
+                                    lbl.innerHTML += ' <span style="color:#d81b60; font-size:0.8em;">(🐶 復習モード)</span>';
+                                }
+                            }, 100);
+                        } else {
+                             alert('マークされた問題が見つかりませんでした。(Questions not found)');
+                        }
+                    }
+                }
+            } else {
+                // Default to first key if not specified or invalid
+                const keys = Object.keys(examData);
+                if (keys.length > 0) {
+                    currentExamKey = keys[0];
+                }
+            }
+
+            // 2. Set Year Label
+            const yearLabel = document.getElementById('yearLabel');
+            if (yearLabel && examData[currentExamKey]) {
+                yearLabel.textContent = examData[currentExamKey].label;
+            }
+
+            // 3. Populate Question Select
+            updateQuestionSelect();
+
+            window.setupListeningPlayer({
+                subtitle: document.title.replace(/\s*\((N1|N2|N3)\)\s*$/, '')
+            });
+
+            // 4. Initial Render
+            renderQuestion();
+        }
+
+        // --- Mark/Bookmark Logic ---
+        function getMarks() {
+            const key = `jlpt_marks_${currentExamKey}`;
+            const saved = localStorage.getItem(key);
+            return saved ? JSON.parse(saved) : [];
+        }
+
+        function saveMarks(marks) {
+            const key = `jlpt_marks_${currentExamKey}`;
+            localStorage.setItem(key, JSON.stringify(marks));
+        }
+
+        function toggleMark() {
+            // Guard clause
+            if (!examData[currentExamKey] || !examData[currentExamKey].questions[currentQuestionIndex]) return;
+
+            const marks = getMarks();
+            const qId = examData[currentExamKey].questions[currentQuestionIndex].id;
+            
+            const index = marks.indexOf(qId);
+            if (index === -1) {
+                marks.push(qId);
+            } else {
+                marks.splice(index, 1);
+            }
+            saveMarks(marks);
+            updateMarkUI();
+        }
+
+        function updateMarkUI() {
+            const marks = getMarks();
+            // Guard clause if questions aren't loaded yet
+            if (!examData[currentExamKey] || !examData[currentExamKey].questions[currentQuestionIndex]) return;
+            
+            const qId = examData[currentExamKey].questions[currentQuestionIndex].id;
+            const btn = document.getElementById('markBtn');
+            
+            if (marks.includes(qId)) {
+                btn.classList.add('active');
+            } else {
+                btn.classList.remove('active');
+            }
+        }
+
+        function updateQuestionSelect() {
+            const select = document.getElementById('questionSelect');
+            select.innerHTML = '';
+            
+            if (!examData[currentExamKey] || !examData[currentExamKey].questions) return;
+
+            const questions = examData[currentExamKey].questions;
+            questions.forEach((q, index) => {
+                const option = document.createElement('option');
+                option.value = index; // Use index as value for easier handling
+                option.textContent = `問題 ${q.id}`;
+                select.appendChild(option);
+            });
+        }
+
+        function changeQuestion(index) {
+            currentQuestionIndex = parseInt(index);
+            renderQuestion();
+        }
+
+        function selectOption(element) {
+            // Only active in practice mode
+            const container = document.getElementById('appContainer');
+            if (!container.classList.contains('mode-practice')) return;
+            
+            // Do not change selection if already judged
+            if (element.parentElement.querySelector('.judged-correct') || element.parentElement.querySelector('.judged-wrong')) return;
+
+            // Remove selected from siblings
+            const siblings = element.parentElement.children;
+            for (let i = 0; i < siblings.length; i++) {
+                siblings[i].classList.remove('selected');
+            }
+            
+            // Remove existing inline confirm button if any
+            const existingBtn = document.getElementById('inlineConfirmBtn');
+            if (existingBtn) existingBtn.remove();
+
+            // Add to clicked
+            element.classList.add('selected');
+            
+            // Create and append inline confirm button
+            const btn = document.createElement('button');
+            btn.id = 'inlineConfirmBtn';
+            btn.className = 'inline-confirm-btn';
+            btn.textContent = '確認';
+            btn.onclick = (e) => {
+                e.stopPropagation();
+                checkAnswer();
+            };
+            element.appendChild(btn);
+        }
+
+        function checkAnswer() {
+            const container = document.getElementById('appContainer');
+            const selected = container.querySelector('.options-list li.selected');
+            if (!selected) return;
+            
+            container.classList.add('judged');
+            
+            const index = parseInt(selected.getAttribute('data-index'));
+            const question = examData[currentExamKey].questions[currentQuestionIndex];
+            const options = container.querySelectorAll('.options-list li');
+            
+            const isCorrect = question.options[index].correct;
+            
+            if (isCorrect) {
+                selected.classList.add('judged-correct');
+            } else {
+                selected.classList.add('judged-wrong');
+                // Show correct answer
+                question.options.forEach((opt, i) => {
+                    if (opt.correct) {
+                        options[i].classList.add('judged-correct');
+                    }
+                });
+
+                // Auto-mark wrong answer
+                const marks = getMarks();
+                if (!marks.includes(question.id)) {
+                    marks.push(question.id);
+                    saveMarks(marks);
+                    updateMarkUI();
+                }
+            }
+            
+            // Remove inline confirm button
+            const btn = document.getElementById('inlineConfirmBtn');
+            if(btn) btn.remove();
+
+            // Auto switch to explanation mode after 1s (temporary)
+            setTimeout(() => {
+                setMode('explanation', false);
+            }, 1000);
+        }
+
+        function prevQuestion() {
+            if (currentQuestionIndex > 0) {
+                currentQuestionIndex--;
+                setMode(preferredMode, false); // Restore preferred mode
+                renderQuestion();
+            }
+        }
+
+        function nextQuestion() {
+            const questions = examData[currentExamKey].questions;
+            if (currentQuestionIndex < questions.length - 1) {
+                currentQuestionIndex++;
+                setMode(preferredMode, false); // Restore preferred mode
+                renderQuestion();
+            }
+        }
+
+        function renderQuestion() {
+            const container = document.getElementById('appContainer');
+            if (container) container.classList.remove('judged');
+
+            // Safety check for empty data
+            if (!examData[currentExamKey] || !examData[currentExamKey].questions || examData[currentExamKey].questions.length === 0) {
+                const dialogueBlock = document.getElementById('dialogueBlock');
+                if (dialogueBlock) {
+                    dialogueBlock.innerHTML = '<div class="dialogue-text" style="color:#888; text-align:center;">（この年度の問題はまだ登録されていません）</div>';
+                }
+                const optionsList = document.getElementById('optionsList');
+                if (optionsList) optionsList.innerHTML = '';
+                
+                document.getElementById('markBtn').disabled = true;
+                window.updateListeningPlayer({
+                    title: '問題 -',
+                    audioSrc: '',
+                    hasPrev: false,
+                    hasNext: false
+                });
+                
+                return;
+            }
+
+            document.getElementById('markBtn').disabled = false;
+
+            const data = examData[currentExamKey].questions[currentQuestionIndex];
+            const total = examData[currentExamKey].questions.length;
+
+            // Update Mark UI
+            updateMarkUI();
+
+            // Update Select Box
+            const select = document.getElementById('questionSelect');
+            if (select) {
+                select.value = currentQuestionIndex;
+            }
+            window.updateListeningPlayer({
+                title: `問題 ${data.id}`,
+                audioSrc: data.audio,
+                hasPrev: currentQuestionIndex > 0,
+                hasNext: currentQuestionIndex < total - 1
+            });
+
+            // Update Image
+            const img = document.getElementById('sceneImage');
+            if (data.image) {
+                img.src = data.image;
+                img.style.display = 'block';
+            } else {
+                img.style.display = 'none';
+            }
+
+            // Update Dialogue
+            const dialogueBlock = document.getElementById('dialogueBlock');
+            dialogueBlock.innerHTML = `
+                <div class="dialogue-text">${data.dialogueHtml}</div>
+                <div class="translation">${data.translation}</div>
+            `;
+
+            // Update Options
+            const optionsList = document.getElementById('optionsList');
+            optionsList.innerHTML = '';
+            data.options.forEach((opt, idx) => {
+                const li = document.createElement('li');
+                if (opt.correct) li.classList.add('correct-answer');
+                li.setAttribute('data-index', idx);
+                
+                // Add click handler for selection (Practice Mode)
+                li.onclick = () => selectOption(li);
+
+                li.innerHTML = `
+                    <span class="options-num">${idx + 1}</span>
+                    <div class="option-content">
+                        <span class="placeholder-text">選択肢</span>
+                        <div class="option-text">${opt.text}</div>
+                        <div class="translation">${opt.translation}</div>
+                    </div>
+                `;
+                optionsList.appendChild(li);
+            });
+
+        }
+
+        function setMode(mode, updatePreference = true) {
+            if (updatePreference) {
+                preferredMode = mode;
+            }
+
+            const container = document.getElementById('appContainer');
+            const btnPractice = document.getElementById('btnPractice');
+            const btnExplanation = document.getElementById('btnExplanation');
+            const tooltip = document.getElementById('wordTooltip');
+
+            // Remove inline confirm button if exists (fix bug where button persists when switching to explanation)
+            const confirmBtn = document.getElementById('inlineConfirmBtn');
+            if (confirmBtn) confirmBtn.remove();
+
+            tooltip.style.display = 'none';
+
+            if (mode === 'practice') {
+                container.classList.remove('mode-explanation');
+                container.classList.add('mode-practice');
+                btnPractice.classList.add('active');
+                btnExplanation.classList.remove('active');
+            } else {
+                container.classList.remove('mode-practice');
+                container.classList.add('mode-explanation');
+                btnExplanation.classList.add('active');
+                btnPractice.classList.remove('active');
+
+                 // Auto-scroll to show image and explanation
+                setTimeout(() => {
+                    const contentWrapper = document.querySelector('.content-wrapper');
+                    if (contentWrapper) {
+                        // Calculate offset to account for sticky header (approx 80px)
+                        const headerOffset = 100;
+                        const elementPosition = contentWrapper.getBoundingClientRect().top;
+                        const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+                    
+                        window.scrollTo({
+                            top: offsetPosition,
+                            behavior: "smooth"
+                        });
+                    }
+                }, 100);
+            }
+        }
+
+        function showTooltip(event, text) {
+            event.stopPropagation();
+            
+            const tooltip = document.getElementById('wordTooltip');
+            tooltip.innerText = text;
+            tooltip.style.display = 'block';
+            
+            const targetRect = event.target.getBoundingClientRect();
+            
+            setTimeout(() => {
+                const tooltipWidth = tooltip.offsetWidth;
+                const tooltipHeight = tooltip.offsetHeight;
+                
+                const top = targetRect.top + window.scrollY - tooltipHeight - 10; 
+                let left = targetRect.left + window.scrollX + (targetRect.width / 2) - (tooltipWidth / 2);
+                
+                // Prevent tooltip from going off-screen
+                if (left < 10) left = 10;
+                if (left + tooltipWidth > window.innerWidth - 10) {
+                    left = window.innerWidth - tooltipWidth - 10;
+                }
+
+                // Adjust arrow position to point to the target
+                const targetCenterX = targetRect.left + window.scrollX + (targetRect.width / 2);
+                const arrowLeft = targetCenterX - left;
+                tooltip.style.setProperty('--arrow-left', `${arrowLeft}px`);
+                
+                tooltip.style.top = `${top}px`;
+                tooltip.style.left = `${left}px`;
+            }, 0);
+        }
+
+        // Hide tooltip when clicking elsewhere
+        document.addEventListener('click', () => {
+            document.getElementById('wordTooltip').style.display = 'none';
+        });
+
+        // Start
+        init();
+    </script>
+</body>
+</html>

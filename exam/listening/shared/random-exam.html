@@ -1,0 +1,1776 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>听力随机考试</title>
+    <link rel="stylesheet" href="../../../shared/site-fonts.css">
+    <style>
+
+        :root {
+            --paper: #ffffff;
+            --graphite: #333333;
+            --graphite-sub: #666666;
+            --graphite-faint: #cccccc;
+            --red-pencil: #e64a4a;
+            --marker-yellow: rgba(255, 213, 79, 0.28);
+            --marker-blue: rgba(129, 212, 250, 0.30);
+            --marker-pink: rgba(244, 143, 177, 0.24);
+            --marker-green: rgba(129, 199, 132, 0.24);
+            --marker-mint: rgba(134, 239, 172, 0.32);
+            --marker-peach: rgba(253, 186, 116, 0.32);
+            --marker-lavender: rgba(196, 181, 253, 0.32);
+            --line: var(--graphite);
+            --text: var(--graphite);
+            --sub: var(--graphite-sub);
+            --card: rgba(255, 255, 255, 0.97);
+            --chip-gold: var(--marker-yellow);
+            --chip-blue: var(--marker-blue);
+            --chip-source: rgba(255, 243, 214, 0.92);
+            --status-ready: rgba(129, 212, 250, 0.16);
+            --status-recorded: rgba(255, 213, 79, 0.18);
+            --status-danger: rgba(244, 143, 177, 0.18);
+            --primary-btn-bg: var(--marker-pink);
+            --primary-btn-text: var(--graphite);
+            --shadow-sm: 3px 3px 0 var(--graphite);
+            --shadow-md: 6px 6px 0 var(--graphite);
+            --radius-lg: 2px 24px 3px 16px / 18px 3px 24px 4px;
+            --radius-md: 2px 16px 3px 12px / 12px 3px 16px 4px;
+            --radius-sm: 2px 10px 3px 8px / 8px 3px 10px 4px;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            font-family: 'Noto Serif JP', 'Noto Sans JP', 'Noto Sans SC', serif;
+            color: var(--text);
+            background-color: var(--paper);
+            position: relative;
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            inset: 0;
+            z-index: -1;
+            pointer-events: none;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.02'/%3E%3C/svg%3E");
+        }
+
+        .container {
+            width: min(95%, 920px);
+            margin: 0 auto;
+            padding: 26px 0 72px;
+        }
+
+        .meta-card,
+        .question-card,
+        .summary-card,
+        .analysis-card,
+        .error-card {
+            background: var(--card);
+            border: 1.5px solid var(--line);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-md);
+        }
+
+        .meta-card {
+            padding: 22px 26px;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            margin-bottom: 18px;
+        }
+
+        .meta-card > :first-child {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            min-height: 100%;
+        }
+
+        .meta-title {
+            margin: 0;
+            font-size: 18px;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+        }
+
+        .meta-copy {
+            margin: 10px 0 0;
+            color: var(--sub);
+            font-size: 13px;
+            font-weight: 700;
+            line-height: 1.8;
+        }
+
+        .meta-copy:empty,
+        .question-copy:empty,
+        .summary-copy:empty,
+        .analysis-copy:empty {
+            display: none;
+        }
+
+        .meta-badges {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+
+        .meta-badge,
+        .question-chip,
+        .analysis-note {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 6px 14px;
+            border-radius: 999px;
+            border: 1.5px solid var(--line);
+            box-shadow: var(--shadow-sm);
+            background: #fff;
+            font-size: 13px;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+        }
+
+        .meta-badge.is-gold { background: var(--chip-gold); }
+        .meta-badge.is-blue { background: var(--chip-blue); }
+
+        .question-card,
+        .analysis-card,
+        .summary-card,
+        .error-card {
+            padding: 24px 28px 28px;
+        }
+
+        .question-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-bottom: 18px;
+        }
+
+        .question-chip.is-source { background: var(--chip-source); }
+        .question-chip.is-count { background: var(--chip-blue); }
+
+        .question-title {
+            margin: 0 0 8px;
+            font-size: 20px;
+            font-weight: 700;
+            line-height: 1.5;
+        }
+
+        .question-copy,
+        .summary-copy,
+        .analysis-copy,
+        .error-copy {
+            margin: 0 0 14px;
+            font-size: 13px;
+            line-height: 1.8;
+            color: var(--sub);
+            font-weight: 700;
+        }
+
+        .scene-image { display: none !important; }
+
+        .audio-shell {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 16px;
+        }
+
+        .audio-shell audio {
+            width: 100%;
+            filter: saturate(0.92);
+        }
+
+        .status-banner {
+            padding: 11px 14px;
+            border-radius: var(--radius-md);
+            border: 1.5px solid var(--line);
+            background: var(--status-ready);
+            box-shadow: var(--shadow-sm);
+            color: var(--text);
+            font-size: 13px;
+            font-weight: 700;
+            line-height: 1.75;
+        }
+
+        .status-banner.is-ready { background: var(--status-ready); }
+        .status-banner.is-recorded { background: var(--status-recorded); }
+        .status-banner.is-danger { background: var(--status-danger); }
+
+        .options-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: grid;
+            gap: 12px;
+        }
+
+        .options-list.is-choice-grid {
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+
+        .option-item {
+            display: flex;
+            gap: 10px;
+            align-items: flex-start;
+            padding: 14px 16px;
+            border: 1.5px solid var(--line);
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-sm);
+            background: #fff;
+            cursor: pointer;
+            transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+        }
+
+        .option-item:hover {
+            transform: translate(-1px, -1px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .option-item.is-selected { background: var(--chip-blue); }
+        .option-item.is-choice-only {
+            justify-content: center;
+            align-items: center;
+            min-height: 92px;
+            padding: 10px;
+        }
+
+        .option-item.is-choice-only .option-index {
+            width: 56px;
+            height: 56px;
+            flex: 0 0 56px;
+            font-size: 20px;
+            border-radius: var(--radius-md);
+            background: rgba(255,255,255,0.94);
+        }
+
+        .option-item.is-locked { cursor: default; }
+        .option-item.is-correct { background: var(--marker-green); }
+        .option-item.is-choice-wrong { background: var(--marker-pink); }
+
+        .option-index {
+            width: 30px;
+            height: 30px;
+            flex: 0 0 30px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border: 1.5px solid var(--line);
+            border-radius: var(--radius-sm);
+            background: #fff;
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        .option-body {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            min-width: 0;
+        }
+
+        .option-text {
+            font-size: 16px;
+            font-weight: 700;
+            line-height: 1.75;
+        }
+
+        .option-translation,
+        .analysis-translation {
+            color: var(--sub);
+            font-size: 12px;
+            line-height: 1.8;
+            font-weight: 700;
+        }
+
+        .question-actions,
+        .analysis-actions,
+        .summary-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-top: 18px;
+        }
+
+        .action-btn {
+            appearance: none;
+            border: 1.5px solid var(--line);
+            border-radius: var(--radius-sm);
+            background: rgba(255,255,255,0.96);
+            color: var(--text);
+            box-shadow: var(--shadow-sm);
+            padding: 10px 16px;
+            font: inherit;
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+            text-decoration: none;
+        }
+
+        .action-btn.is-primary {
+            background: var(--primary-btn-bg);
+            color: var(--primary-btn-text);
+        }
+
+        .action-btn.is-blue { background: var(--chip-blue); }
+
+        .action-btn[disabled] {
+            background: #f3f4f6;
+            color: #9ca3af;
+            border-style: dashed;
+            box-shadow: none;
+            cursor: not-allowed;
+        }
+
+        .summary-title,
+        .analysis-title,
+        .error-title {
+            margin: 0 0 8px;
+            font-size: 22px;
+            font-weight: 700;
+        }
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 12px;
+            margin-bottom: 14px;
+        }
+
+        .summary-stat,
+        .analysis-block {
+            border: 1.5px solid var(--line);
+            border-radius: var(--radius-md);
+            background: rgba(255,255,255,0.96);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .summary-stat {
+            padding: 14px 10px;
+            text-align: center;
+        }
+
+        .summary-stat-label {
+            display: block;
+            margin-bottom: 6px;
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--sub);
+            letter-spacing: 0.05em;
+        }
+
+        .summary-stat-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--text);
+        }
+
+        .analysis-transcript,
+        .analysis-options {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .analysis-block {
+            padding: 14px;
+        }
+
+        .analysis-block h3 {
+            margin: 0 0 8px;
+            font-size: 16px;
+            font-weight: 700;
+        }
+
+        .analysis-line {
+            margin-bottom: 10px;
+            line-height: 1.95;
+        }
+
+        .analysis-speaker {
+            font-weight: 700;
+            margin-right: 8px;
+        }
+
+        .analysis-note.is-correct { background: var(--marker-green); color: var(--graphite); }
+        .analysis-note.is-wrong { background: var(--marker-pink); color: var(--graphite); }
+        .analysis-note.is-empty { background: rgba(255,255,255,0.96); color: var(--sub); }
+
+        .tooltip {
+            position: absolute;
+            z-index: 40;
+            min-width: 220px;
+            max-width: min(88vw, 340px);
+            padding: 12px 14px;
+            border-radius: var(--radius-md);
+            border: 1.5px solid var(--line);
+            background: #fffef8;
+            box-shadow: var(--shadow-md);
+            color: var(--text);
+            font-size: 13px;
+            font-weight: 700;
+            line-height: 1.7;
+            display: none;
+        }
+
+        .hidden { display: none !important; }
+        .keyword { cursor: pointer; color: #1d6fd8; font-weight: 700; }
+
+        body[data-exam-theme="ir-n1"] {
+            --chip-gold: var(--marker-yellow);
+            --chip-blue: var(--marker-blue);
+            --chip-source: rgba(255, 241, 214, 0.92);
+            --status-ready: rgba(129, 212, 250, 0.16);
+            --status-recorded: rgba(244, 143, 177, 0.16);
+            --status-danger: rgba(244, 143, 177, 0.18);
+            --primary-btn-bg: var(--marker-pink);
+        }
+
+        body[data-exam-theme="ir-n2"] {
+            --chip-gold: var(--marker-peach);
+            --chip-blue: var(--marker-lavender);
+            --chip-source: rgba(196, 181, 253, 0.18);
+            --status-ready: rgba(134, 239, 172, 0.18);
+            --status-recorded: rgba(253, 186, 116, 0.18);
+            --status-danger: rgba(196, 181, 253, 0.18);
+            --primary-btn-bg: var(--marker-lavender);
+        }
+
+        body[data-exam-theme="tc-n1"] {
+            --chip-gold: var(--marker-yellow);
+            --chip-blue: var(--marker-blue);
+            --chip-source: rgba(129, 212, 250, 0.18);
+            --status-ready: rgba(129, 212, 250, 0.16);
+            --status-recorded: rgba(255, 213, 79, 0.18);
+            --status-danger: rgba(244, 143, 177, 0.18);
+            --primary-btn-bg: var(--marker-blue);
+        }
+
+        @media (max-width: 720px) {
+            .container {
+                width: min(96%, 920px);
+                padding: 20px 0 44px;
+            }
+
+            .meta-card,
+            .question-card,
+            .summary-card,
+            .analysis-card,
+            .error-card {
+                border-width: 1.5px;
+                border-radius: var(--radius-md);
+                padding: 14px 14px 16px;
+                box-shadow: 4px 4px 0 #1c1c1c;
+            }
+
+            .meta-title { font-size: 14px; }
+            .meta-copy { margin-top: 6px; font-size: 12px; line-height: 1.6; }
+            .meta-badges { gap: 8px; justify-content: flex-start; }
+            .meta-badge, .question-chip, .analysis-note {
+                padding: 5px 10px;
+                font-size: 11px;
+                box-shadow: 2px 2px 0 #1c1c1c;
+            }
+
+            .question-top { gap: 8px; margin-bottom: 12px; }
+            .question-title { margin-bottom: 4px; font-size: 18px; }
+            .question-copy,
+            .summary-copy,
+            .analysis-copy,
+            .error-copy { margin-bottom: 10px; font-size: 12px; line-height: 1.6; }
+
+            .audio-shell { gap: 6px; margin-bottom: 12px; }
+            .status-banner {
+                padding: 8px 10px;
+                font-size: 12px;
+                line-height: 1.5;
+                box-shadow: 2px 2px 0 #1c1c1c;
+            }
+
+            .options-list { gap: 8px; }
+            .options-list.is-choice-grid { gap: 10px; }
+            .option-item {
+                gap: 8px;
+                padding: 10px 11px;
+                border-radius: var(--radius-md);
+                box-shadow: 3px 3px 0 #1c1c1c;
+            }
+            .option-item.is-choice-only { min-height: 72px; padding: 8px; }
+            .option-item.is-choice-only .option-index {
+                width: 48px;
+                height: 48px;
+                flex-basis: 48px;
+                font-size: 18px;
+            }
+            .option-index {
+                width: 26px;
+                height: 26px;
+                flex-basis: 26px;
+                font-size: 12px;
+            }
+            .option-text { font-size: 14px; line-height: 1.6; }
+            .option-translation,
+            .analysis-translation { font-size: 11px; line-height: 1.55; }
+
+            .question-actions,
+            .analysis-actions,
+            .summary-actions { gap: 8px; margin-top: 12px; }
+            .action-btn {
+                border-radius: var(--radius-sm);
+                box-shadow: 3px 3px 0 #1c1c1c;
+                padding: 9px 12px;
+                font-size: 12px;
+            }
+
+            .summary-title,
+            .analysis-title,
+            .error-title { margin-bottom: 6px; font-size: 20px; }
+            .summary-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin-bottom: 12px; }
+            .summary-stat { padding: 12px 8px; box-shadow: 3px 3px 0 #1c1c1c; }
+            .summary-stat-label { margin-bottom: 4px; font-size: 11px; }
+            .summary-stat-value { font-size: 21px; }
+            .analysis-transcript, .analysis-options { gap: 10px; }
+            .analysis-block { padding: 12px; box-shadow: 3px 3px 0 #1c1c1c; }
+            .analysis-block h3 { margin-bottom: 6px; font-size: 14px; }
+            .analysis-line { margin-bottom: 8px; line-height: 1.75; font-size: 13px; }
+        }
+
+        @media (max-width: 520px) {
+            .container {
+                width: min(96%, 920px);
+                padding: 16px 0 36px;
+            }
+
+            .meta-card,
+            .question-card,
+            .summary-card,
+            .analysis-card,
+            .error-card {
+                border-radius: var(--radius-md);
+                padding: 12px 12px 14px;
+                box-shadow: 3px 3px 0 #1c1c1c;
+            }
+
+            .meta-title { font-size: 13px; }
+            .meta-card > :first-child { justify-content: center; }
+            .meta-badge, .question-chip, .analysis-note { padding: 5px 8px; font-size: 10px; }
+            .question-title { font-size: 16px; }
+            .status-banner { padding: 7px 9px; font-size: 11px; }
+            .options-list { gap: 7px; }
+            .options-list.is-choice-grid { gap: 8px; }
+            .option-item {
+                padding: 9px 10px;
+                box-shadow: 2px 2px 0 #1c1c1c;
+            }
+            .option-item.is-choice-only { min-height: 62px; padding: 7px; }
+            .option-item.is-choice-only .option-index {
+                width: 42px;
+                height: 42px;
+                flex-basis: 42px;
+                font-size: 16px;
+            }
+            .option-index {
+                width: 24px;
+                height: 24px;
+                flex-basis: 24px;
+                font-size: 11px;
+            }
+            .option-text { font-size: 13px; }
+            .action-btn { padding: 8px 11px; font-size: 11px; }
+            .summary-title,
+            .analysis-title,
+            .error-title { font-size: 18px; }
+            .summary-grid { gap: 7px; }
+            .summary-stat { padding: 10px 7px; }
+            .summary-stat-label { font-size: 10px; }
+            .summary-stat-value { font-size: 18px; }
+            .analysis-block { padding: 10px; }
+            .analysis-block h3 { font-size: 13px; }
+            .analysis-line { font-size: 12px; }
+        }
+
+        /* Match current immediate-response site */
+        body {
+            font-family: "Hiragino Kaku Gothic ProN", "Hiragino Sans", "Meiryo", "Microsoft YaHei", -apple-system, sans-serif;
+            background-color: #fdfaf5;
+            color: #2c2c2c;
+            position: static;
+        }
+
+        body::before {
+            display: none;
+        }
+
+        header {
+            width: 100%;
+            padding: 15px 20px;
+            box-sizing: border-box;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background-color: rgba(253, 250, 245, 0.95);
+            backdrop-filter: blur(8px);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+            margin-bottom: 0;
+        }
+
+        .nav-btn {
+            text-decoration: none;
+            color: #2c2c2c;
+            font-size: 16px;
+            font-weight: 700;
+            opacity: 0.72;
+            transition: opacity 0.2s ease;
+            cursor: pointer;
+            z-index: 2;
+            background: none;
+            border: none;
+            box-shadow: none;
+            padding: 0;
+        }
+
+        .nav-btn:hover {
+            opacity: 1;
+            background: none;
+            color: #2c2c2c;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .page-title {
+            margin: 0;
+            font-size: 18px;
+            font-weight: 700;
+            color: #2c2c2c;
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            white-space: nowrap;
+            letter-spacing: 0;
+            display: block;
+            pointer-events: none;
+        }
+
+        .page-title span {
+            color: #787878;
+            background: none;
+            border: none;
+            padding: 0;
+            margin-left: 8px;
+            font-size: 12px;
+            box-shadow: none;
+        }
+
+        .container {
+            max-width: 1000px;
+            width: 95%;
+            margin: 0 auto;
+            padding: 30px;
+        }
+
+        .meta-card,
+        .question-card,
+        .summary-card,
+        .analysis-card,
+        .error-card {
+            background: #ffffff;
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            border-radius: 18px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+            padding: 24px 28px 28px;
+        }
+
+        .meta-card {
+            margin-bottom: 24px;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 16px;
+        }
+
+        .meta-title {
+            font-size: 18px;
+            color: #2c2c2c;
+            letter-spacing: 0;
+        }
+
+        .meta-copy,
+        .question-copy,
+        .summary-copy,
+        .analysis-copy,
+        .error-copy {
+            color: #787878;
+            font-size: 13px;
+            font-weight: 500;
+            line-height: 1.75;
+        }
+
+        .meta-badges {
+            gap: 8px;
+            justify-content: flex-start;
+        }
+
+        .meta-badge,
+        .question-chip,
+        .analysis-note {
+            padding: 6px 10px;
+            border-radius: 999px;
+            border: none;
+            box-shadow: none;
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 0;
+        }
+
+        .meta-badge.is-gold,
+        .question-chip.is-source {
+            background: rgba(179, 62, 62, 0.08);
+            color: #b33e3e;
+        }
+
+        .meta-badge.is-blue,
+        .question-chip.is-count {
+            background: #eef3f8;
+            color: #445469;
+        }
+
+        .question-top {
+            gap: 10px;
+            margin-bottom: 16px;
+        }
+
+        .question-title,
+        .summary-title,
+        .analysis-title,
+        .error-title {
+            margin: 0 0 8px;
+            font-size: 20px;
+            font-weight: 700;
+            color: #2c2c2c;
+        }
+
+        .audio-shell audio {
+            filter: none;
+        }
+
+        .status-banner {
+            padding: 11px 14px;
+            border-radius: 12px;
+            border: 1px solid #eee;
+            background: #faf7f2;
+            box-shadow: none;
+            color: #2c2c2c;
+            font-size: 13px;
+            font-weight: 600;
+            line-height: 1.7;
+        }
+
+        .status-banner.is-ready {
+            background: #f7fafc;
+        }
+
+        .status-banner.is-recorded {
+            background: #fff7e9;
+        }
+
+        .status-banner.is-danger {
+            background: #fff2f2;
+        }
+
+        .option-item {
+            padding: 14px 16px;
+            border: 1px solid #eee;
+            border-radius: 12px;
+            box-shadow: none;
+            background: #fff;
+        }
+
+        .option-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 18px rgba(0, 0, 0, 0.06);
+            border-color: rgba(179, 62, 62, 0.16);
+        }
+
+        .option-item.is-selected {
+            background: #f0f8ff;
+            border-color: rgba(44, 62, 80, 0.2);
+            box-shadow: 0 0 0 1px rgba(44, 62, 80, 0.08);
+        }
+
+        .option-item.is-correct {
+            background: #edf9ef;
+            border-color: #b8ddbf;
+        }
+
+        .option-item.is-choice-wrong {
+            background: #fff1f1;
+            border-color: #efc1c1;
+        }
+
+        .option-item.is-choice-only {
+            min-height: 88px;
+        }
+
+        .option-index {
+            border: none;
+            border-radius: 50%;
+            background: #f0f0f0;
+            color: #666;
+        }
+
+        .option-item.is-choice-only .option-index {
+            border: 1px solid #eee;
+            border-radius: 14px;
+            background: #fff;
+        }
+
+        .option-text {
+            font-size: 15px;
+            font-weight: 600;
+            line-height: 1.7;
+        }
+
+        .option-translation,
+        .analysis-translation {
+            color: #787878;
+            font-size: 12px;
+            font-weight: 500;
+            line-height: 1.7;
+        }
+
+        .action-btn {
+            border: 1px solid #eee;
+            border-radius: 10px;
+            background: #f8f8f8;
+            color: #444;
+            box-shadow: none;
+            padding: 10px 16px;
+            font-family: "Hiragino Sans", "Meiryo", "Microsoft YaHei", -apple-system, sans-serif;
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        .action-btn:hover {
+            background: #b33e3e;
+            color: #fff;
+            border-color: #b33e3e;
+        }
+
+        .action-btn.is-primary {
+            background: #2c3e50;
+            color: #fff;
+            border-color: #2c3e50;
+        }
+
+        .action-btn.is-primary:hover {
+            background: #b33e3e;
+            border-color: #b33e3e;
+        }
+
+        .action-btn.is-blue {
+            background: rgba(179, 62, 62, 0.08);
+            color: #b33e3e;
+            border-color: rgba(179, 62, 62, 0.14);
+        }
+
+        .action-btn.is-blue:hover {
+            color: #fff;
+        }
+
+        .action-btn[disabled] {
+            background: #f0f0f0;
+            color: #aaa;
+            border-color: #eee;
+            border-style: solid;
+        }
+
+        .summary-stat,
+        .analysis-block {
+            border: 1px solid #eee;
+            border-radius: 12px;
+            background: #fff;
+            box-shadow: none;
+        }
+
+        .summary-stat {
+            padding: 14px 10px;
+        }
+
+        .summary-stat-label {
+            color: #787878;
+            letter-spacing: 0;
+        }
+
+        .summary-stat-value {
+            color: #2c2c2c;
+        }
+
+        .analysis-block h3 {
+            color: #2c2c2c;
+        }
+
+        .analysis-line {
+            font-size: 14px;
+            line-height: 1.85;
+        }
+
+        .analysis-note.is-correct {
+            background: #edf9ef;
+            color: #2c2c2c;
+        }
+
+        .analysis-note.is-wrong {
+            background: #fff1f1;
+            color: #2c2c2c;
+        }
+
+        .analysis-note.is-empty {
+            background: #f5f5f5;
+            color: #787878;
+        }
+
+        .tooltip {
+            border: 1px solid #eee;
+            border-radius: 12px;
+            background: #ffffff;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        @media (max-width: 720px) {
+            header {
+                padding: 12px 14px;
+            }
+
+            .nav-btn {
+                font-size: 13px;
+            }
+
+            .page-title {
+                font-size: 16px;
+                max-width: calc(100% - 180px);
+            }
+
+            .page-title span {
+                font-size: 10px;
+            }
+
+            .container {
+                width: 96%;
+                padding: 20px 0 44px;
+            }
+
+            .meta-card,
+            .question-card,
+            .summary-card,
+            .analysis-card,
+            .error-card {
+                border-radius: 16px;
+                padding: 16px 16px 18px;
+            }
+
+            .question-title,
+            .summary-title,
+            .analysis-title,
+            .error-title {
+                font-size: 18px;
+            }
+
+            .summary-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+
+            .action-btn {
+                padding: 9px 12px;
+                font-size: 12px;
+            }
+        }
+
+        @media (max-width: 520px) {
+            header {
+                padding: 10px 12px;
+            }
+
+            .nav-btn {
+                font-size: 12px;
+            }
+
+            .page-title {
+                font-size: 14px;
+                max-width: calc(100% - 150px);
+            }
+
+            .container {
+                width: 96%;
+                padding: 16px 0 36px;
+            }
+
+            .meta-card,
+            .question-card,
+            .summary-card,
+            .analysis-card,
+            .error-card {
+                border-radius: 14px;
+                padding: 14px 14px 16px;
+            }
+
+            .meta-title {
+                font-size: 16px;
+            }
+
+            .meta-badge,
+            .question-chip,
+            .analysis-note {
+                font-size: 10px;
+                padding: 5px 8px;
+            }
+
+            .question-title,
+            .summary-title,
+            .analysis-title,
+            .error-title {
+                font-size: 17px;
+            }
+
+            .option-item {
+                padding: 11px 12px;
+            }
+
+            .option-text {
+                font-size: 13px;
+            }
+
+            .analysis-line {
+                font-size: 12px;
+            }
+        }
+
+    </style>
+</head>
+<body>
+    <header>
+        <a class="nav-btn" id="backBtn" href="../index.html">← 返回题型页</a>
+        <h1 class="page-title">随机考试 <span id="pageTitleCount">题组</span></h1>
+        <a class="nav-btn" href="../../../index.html">主页</a>
+    </header>
+
+    <main class="container">
+        <section class="meta-card" id="metaCard">
+            <div>
+                <h2 class="meta-title" id="metaTitle">听力随机考试</h2>
+                <p class="meta-copy" id="metaCopy">正在准备本次随机考试题组。</p>
+            </div>
+            <div class="meta-badges">
+                <span class="meta-badge is-gold" id="rangeBadge">年份范围 -</span>
+                <span class="meta-badge is-blue" id="countBadge">题数组 -</span>
+            </div>
+        </section>
+
+        <section class="question-card" id="practiceView">
+            <div class="question-top">
+                <span class="question-chip is-count" id="questionCounter">第 1 / 0 题</span>
+                <span class="question-chip is-source" id="questionSource">来源 -</span>
+            </div>
+            <h2 class="question-title" id="questionTitle">请听音频后作答</h2>
+            <p class="question-copy" id="questionCopy"></p>
+            <img class="scene-image hidden" id="sceneImage" alt="题目场景图">
+            <div class="audio-shell">
+                <audio id="audioElement" controls preload="metadata"></audio>
+                <div class="status-banner is-ready" id="statusBanner">播放音频后作答。</div>
+            </div>
+            <ol class="options-list" id="optionsList"></ol>
+            <div class="question-actions">
+                <button class="action-btn is-primary" id="confirmBtn" type="button" disabled>确认答案</button>
+            </div>
+        </section>
+
+        <section class="summary-card hidden" id="summaryView">
+            <h2 class="summary-title">随机考试完成</h2>
+            <p class="summary-copy" id="summaryCopy">先查看成绩，再决定是否回看解析。</p>
+            <div class="summary-grid">
+                <div class="summary-stat">
+                    <span class="summary-stat-label">正确</span>
+                    <span class="summary-stat-value" id="summaryCorrect">0</span>
+                </div>
+                <div class="summary-stat">
+                    <span class="summary-stat-label">错误</span>
+                    <span class="summary-stat-value" id="summaryWrong">0</span>
+                </div>
+                <div class="summary-stat">
+                    <span class="summary-stat-label">未答</span>
+                    <span class="summary-stat-value" id="summaryEmpty">0</span>
+                </div>
+                <div class="summary-stat">
+                    <span class="summary-stat-label">正确率</span>
+                    <span class="summary-stat-value" id="summaryAccuracy">0%</span>
+                </div>
+            </div>
+            <div class="summary-actions">
+                <button class="action-btn" id="viewAnalysisBtn" type="button">查看解析</button>
+                <button class="action-btn is-blue" id="retryBtn" type="button">再来一轮</button>
+                <a class="action-btn" id="summaryBackBtn" href="../index.html">返回题型页</a>
+            </div>
+        </section>
+
+        <section class="analysis-card hidden" id="analysisView">
+            <div class="question-top">
+                <span class="question-chip is-count" id="analysisCounter">解析 1 / 0</span>
+                <span class="question-chip is-source" id="analysisSource">来源 -</span>
+            </div>
+            <h2 class="analysis-title" id="analysisTitle">题目解析</h2>
+            <p class="analysis-copy" id="analysisCopy"></p>
+            <div class="analysis-note" id="analysisResultNote">已记录</div>
+            <img class="scene-image hidden" id="analysisImage" alt="题目场景图">
+            <div class="audio-shell">
+                <audio id="analysisAudio" controls preload="metadata"></audio>
+            </div>
+            <div class="analysis-transcript" id="analysisTranscript"></div>
+            <div class="analysis-options" id="analysisOptions"></div>
+            <div class="analysis-actions">
+                <button class="action-btn" id="analysisPrevBtn" type="button">上一题</button>
+                <button class="action-btn" id="analysisNextBtn" type="button">下一题</button>
+                <button class="action-btn is-blue" id="analysisBackBtn" type="button">回到成绩页</button>
+            </div>
+        </section>
+
+        <section class="error-card hidden" id="errorView">
+            <h2 class="error-title">暂时无法开始随机考试</h2>
+            <p class="error-copy" id="errorCopy">当前条件下没有足够题量，请返回题型页重新选择年份范围。</p>
+            <div class="summary-actions">
+                <a class="action-btn is-blue" id="errorBackBtn" href="../index.html">返回题型页</a>
+            </div>
+        </section>
+    </main>
+
+    <div class="tooltip" id="keywordTooltip"></div>
+
+    <script src="./listening-progress.js"></script>
+    <script src="./listening-question-pools.js"></script>
+    <script>
+        window.__LISTENING_RANDOM_EXAM__ = true;
+
+        const params = new URLSearchParams(window.location.search);
+        const type = String(params.get('type') || '').trim().toLowerCase();
+        const level = String(params.get('level') || '').trim().toUpperCase();
+        const fromYear = Number.parseInt(params.get('fromYear'), 10);
+        const toYear = Number.parseInt(params.get('toYear'), 10);
+        const themeKey = (() => {
+            if (type === 'task_comprehension') return 'tc-n1';
+            if (type === 'immediate_response' && level === 'N2') return 'ir-n2';
+            return 'ir-n1';
+        })();
+        document.body.dataset.examTheme = themeKey;
+        const pageTitleCount = document.getElementById('pageTitleCount');
+        const randomExamDefaults = (() => {
+            if (type === 'task_comprehension') {
+                return { questionCount: 6, autoAdvanceSeconds: 5 };
+            }
+            return { questionCount: 11, autoAdvanceSeconds: 3 };
+        })();
+        const parsedQuestionCount = Number.parseInt(params.get('count'), 10);
+        const QUESTION_COUNT = Number.isFinite(parsedQuestionCount) && parsedQuestionCount > 0
+            ? parsedQuestionCount
+            : randomExamDefaults.questionCount;
+        const parsedAutoAdvanceSeconds = Number.parseInt(params.get('autoAdvanceSeconds'), 10);
+        const AUTO_ADVANCE_SECONDS = Number.isFinite(parsedAutoAdvanceSeconds) && parsedAutoAdvanceSeconds > 0
+            ? parsedAutoAdvanceSeconds
+            : randomExamDefaults.autoAdvanceSeconds;
+        const state = {
+            questions: [],
+            index: 0,
+            answers: [],
+            selectedIndex: -1,
+            submitted: false,
+            audioEnded: false,
+            countdownTimer: null,
+            countdownInterval: null,
+            analysisUnlocked: false,
+            summaryVisible: false
+        };
+
+        const viewNodes = {
+            practice: document.getElementById('practiceView'),
+            summary: document.getElementById('summaryView'),
+            analysis: document.getElementById('analysisView'),
+            error: document.getElementById('errorView')
+        };
+
+        const ui = {
+            backBtn: document.getElementById('backBtn'),
+            pageTitleCount,
+            summaryBackBtn: document.getElementById('summaryBackBtn'),
+            errorBackBtn: document.getElementById('errorBackBtn'),
+            metaTitle: document.getElementById('metaTitle'),
+            metaCopy: document.getElementById('metaCopy'),
+            rangeBadge: document.getElementById('rangeBadge'),
+            countBadge: document.getElementById('countBadge'),
+            counter: document.getElementById('questionCounter'),
+            source: document.getElementById('questionSource'),
+            title: document.getElementById('questionTitle'),
+            copy: document.getElementById('questionCopy'),
+            image: document.getElementById('sceneImage'),
+            audio: document.getElementById('audioElement'),
+            status: document.getElementById('statusBanner'),
+            options: document.getElementById('optionsList'),
+            confirm: document.getElementById('confirmBtn'),
+            summaryCopy: document.getElementById('summaryCopy'),
+            summaryCorrect: document.getElementById('summaryCorrect'),
+            summaryWrong: document.getElementById('summaryWrong'),
+            summaryEmpty: document.getElementById('summaryEmpty'),
+            summaryAccuracy: document.getElementById('summaryAccuracy'),
+            viewAnalysis: document.getElementById('viewAnalysisBtn'),
+            retry: document.getElementById('retryBtn'),
+            analysisCounter: document.getElementById('analysisCounter'),
+            analysisSource: document.getElementById('analysisSource'),
+            analysisTitle: document.getElementById('analysisTitle'),
+            analysisCopy: document.getElementById('analysisCopy'),
+            analysisNote: document.getElementById('analysisResultNote'),
+            analysisImage: document.getElementById('analysisImage'),
+            analysisAudio: document.getElementById('analysisAudio'),
+            analysisTranscript: document.getElementById('analysisTranscript'),
+            analysisOptions: document.getElementById('analysisOptions'),
+            analysisPrev: document.getElementById('analysisPrevBtn'),
+            analysisNext: document.getElementById('analysisNextBtn'),
+            analysisBack: document.getElementById('analysisBackBtn'),
+            errorCopy: document.getElementById('errorCopy'),
+            tooltip: document.getElementById('keywordTooltip')
+        };
+
+        function htmlEscape(value) {
+            return String(value == null ? '' : value)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;');
+        }
+
+        function normalizeTypeLabel(value) {
+            return value === 'task_comprehension' ? '课题理解' : '即时应答';
+        }
+
+        function buildIndexHref() {
+            const folder = type === 'task_comprehension' ? 'task-comprehension' : 'immediate-response';
+            return `../${folder}/${level.toLowerCase()}/index.html`;
+        }
+
+        function setHidden(node, hidden) {
+            node.classList.toggle('hidden', hidden);
+        }
+
+        function showView(name) {
+            setHidden(viewNodes.practice, name !== 'practice');
+            setHidden(viewNodes.summary, name !== 'summary');
+            setHidden(viewNodes.analysis, name !== 'analysis');
+            setHidden(viewNodes.error, name !== 'error');
+        }
+
+        function stripHighlightHtml(html) {
+            if (!html) return '';
+            const wrapper = document.createElement('div');
+            wrapper.innerHTML = html;
+            wrapper.querySelectorAll('.opt-tag').forEach((node) => node.remove());
+            ['highlight-correct', 'highlight-wrong', 'explain-wrong'].forEach((className) => {
+                wrapper.querySelectorAll(`.${className}`).forEach((node) => {
+                    const parent = node.parentNode;
+                    if (!parent) return;
+                    while (node.firstChild) {
+                        parent.insertBefore(node.firstChild, node);
+                    }
+                    parent.removeChild(node);
+                });
+            });
+            wrapper.querySelectorAll('[class]').forEach((node) => {
+                node.classList.remove('highlight-correct', 'highlight-wrong', 'explain-wrong');
+                if (!node.className.trim()) {
+                    node.removeAttribute('class');
+                }
+            });
+            return wrapper.innerHTML;
+        }
+
+        function sanitizeExamHtml(html) {
+            const wrapper = document.createElement('div');
+            wrapper.innerHTML = stripHighlightHtml(html);
+            wrapper.querySelectorAll('[onclick]').forEach((node) => node.removeAttribute('onclick'));
+            wrapper.querySelectorAll('.keyword').forEach((node) => {
+                node.classList.remove('keyword');
+                if (!node.className.trim()) {
+                    node.removeAttribute('class');
+                }
+            });
+            return wrapper.innerHTML;
+        }
+
+        function getQuestionPrompt(question) {
+            if (type === 'task_comprehension' && question.script) {
+                const rawPrompt = question.script.question || '音频播放后作答。';
+                return {
+                    title: sanitizeExamHtml(rawPrompt),
+                    copy: ''
+                };
+            }
+            return {
+                title: '请听音频并选择最合适的回答。',
+                copy: ''
+            };
+        }
+
+        function getCurrentQuestion() {
+            return state.questions[state.index] || null;
+        }
+
+        function isImmediateResponseExam() {
+            return type === 'immediate_response';
+        }
+
+        function getAnswerRecord(index) {
+            return state.answers[index] || {
+                selectedIndex: -1,
+                submitted: false,
+                isCorrect: false,
+                unanswered: false
+            };
+        }
+
+        function createSourceLabel(question) {
+            return `${question.sourceLabel} · 第 ${question.questionId} 题`;
+        }
+
+        function clearCountdown() {
+            if (state.countdownTimer) {
+                window.clearTimeout(state.countdownTimer);
+                state.countdownTimer = null;
+            }
+            if (state.countdownInterval) {
+                window.clearInterval(state.countdownInterval);
+                state.countdownInterval = null;
+            }
+        }
+
+        function updateStatus(text, tone) {
+            ui.status.textContent = text;
+            ui.status.className = 'status-banner';
+            if (tone) {
+                ui.status.classList.add(tone);
+            }
+        }
+
+        function dispatchPhase() {}
+
+        function computeStats() {
+            const total = state.questions.length;
+            let correct = 0;
+            let answered = 0;
+            let empty = 0;
+            state.answers.forEach((answer) => {
+                if (!answer || !answer.submitted) {
+                    empty += 1;
+                    return;
+                }
+                answered += 1;
+                if (answer.isCorrect) {
+                    correct += 1;
+                }
+            });
+            const wrong = Math.max(0, answered - correct);
+            const accuracy = total > 0 ? Math.round((correct / total) * 100) : 0;
+            return { total, correct, wrong, empty, accuracy };
+        }
+
+        function showTooltip(event, text) {
+            event.stopPropagation();
+            ui.tooltip.textContent = text;
+            ui.tooltip.style.display = 'block';
+            const rect = event.target.getBoundingClientRect();
+            const top = rect.top + window.scrollY - ui.tooltip.offsetHeight - 12;
+            let left = rect.left + window.scrollX + rect.width / 2 - ui.tooltip.offsetWidth / 2;
+            if (left < 10) left = 10;
+            if (left + ui.tooltip.offsetWidth > window.innerWidth - 10) {
+                left = window.innerWidth - ui.tooltip.offsetWidth - 10;
+            }
+            ui.tooltip.style.top = `${Math.max(10, top)}px`;
+            ui.tooltip.style.left = `${left}px`;
+        }
+
+        window.showTooltip = showTooltip;
+        document.addEventListener('click', () => {
+            ui.tooltip.style.display = 'none';
+        });
+
+        function renderOptions(options, mode) {
+            return options.map((option, index) => {
+                const answer = getAnswerRecord(state.index);
+                const classes = ['option-item'];
+                const choiceOnly = mode === 'practice' && isImmediateResponseExam();
+                if (mode === 'practice') {
+                    if (answer.selectedIndex === index) classes.push('is-selected');
+                    if (answer.submitted && !choiceOnly) classes.push('is-locked');
+                    if (choiceOnly) classes.push('is-choice-only');
+                } else {
+                    const userPicked = answer.selectedIndex === index;
+                    if (option.correct) classes.push('is-correct');
+                    if (userPicked && !option.correct) classes.push('is-choice-wrong');
+                }
+                const optionBody = choiceOnly
+                    ? ''
+                    : `
+                        <div class="option-body">
+                            <div class="option-text">${mode === 'practice' ? sanitizeExamHtml(option.text) : option.text}</div>
+                            ${mode === 'analysis' && option.translation ? `<div class="option-translation">${htmlEscape(option.translation)}</div>` : ''}
+                        </div>
+                    `;
+                return `
+                    <li class="${classes.join(' ')}" data-option-index="${index}">
+                        <span class="option-index">${index + 1}</span>
+                        ${optionBody}
+                    </li>
+                `;
+            }).join('');
+        }
+
+        function bindOptionEvents() {
+            const answer = getAnswerRecord(state.index);
+            ui.options.querySelectorAll('.option-item').forEach((item) => {
+                item.addEventListener('click', () => {
+                    if (answer.submitted) return;
+                    state.selectedIndex = Number(item.dataset.optionIndex);
+                    answer.selectedIndex = state.selectedIndex;
+                    if (!isImmediateResponseExam()) {
+                        ui.confirm.disabled = false;
+                    }
+                    ui.options.querySelectorAll('.option-item').forEach((node) => node.classList.remove('is-selected'));
+                    item.classList.add('is-selected');
+                    if (isImmediateResponseExam()) {
+                        updateStatus(
+                            state.audioEnded ? '已选择，可在切题前重新选择。' : '已选择答案，可在音频结束前反复修改。',
+                            'is-ready'
+                        );
+                    } else {
+                        updateStatus('已选择答案。点击“确认答案”后，本题会被锁定。', 'is-ready');
+                    }
+                });
+            });
+        }
+
+        function tryAutoplayCurrentAudio() {
+            if (!isImmediateResponseExam() || state.index <= 0 || !ui.audio.src) {
+                return;
+            }
+            window.setTimeout(() => {
+                const playPromise = ui.audio.play();
+                if (playPromise && typeof playPromise.catch === 'function') {
+                    playPromise.catch(() => {});
+                }
+            }, 120);
+        }
+
+        function renderPracticeQuestion() {
+            const question = getCurrentQuestion();
+            if (!question) {
+                showSummary();
+                return;
+            }
+
+            clearCountdown();
+            state.submitted = false;
+            state.audioEnded = false;
+            state.selectedIndex = -1;
+
+            const answer = getAnswerRecord(state.index);
+            if (answer.submitted) {
+                state.submitted = true;
+                state.selectedIndex = answer.selectedIndex;
+            }
+
+            const prompt = getQuestionPrompt(question);
+            ui.counter.textContent = `第 ${state.index + 1} / ${state.questions.length} 题`;
+            ui.source.textContent = createSourceLabel(question);
+            ui.title.innerHTML = prompt.title;
+            ui.copy.textContent = prompt.copy;
+            ui.audio.src = question.audio || '';
+            ui.audio.currentTime = 0;
+            ui.image.src = '';
+            ui.image.classList.add('hidden');
+            ui.options.classList.toggle('is-choice-grid', isImmediateResponseExam());
+            ui.options.innerHTML = renderOptions(question.options, 'practice');
+            bindOptionEvents();
+            ui.confirm.classList.toggle('hidden', isImmediateResponseExam());
+            ui.confirm.disabled = state.selectedIndex < 0 || answer.submitted;
+            updateStatus(
+                isImmediateResponseExam()
+                    ? '播放音频后，从 1 / 2 / 3 中选择答案。'
+                    : '播放音频后作答。',
+                'is-ready'
+            );
+            tryAutoplayCurrentAudio();
+        }
+
+        function recordCurrentAnswer(forceEmpty = false) {
+            const question = getCurrentQuestion();
+            if (!question) return;
+            const answer = getAnswerRecord(state.index);
+            if (answer.submitted) {
+                return;
+            }
+
+            let selectedIndex = Number(state.selectedIndex);
+            if (forceEmpty || !Number.isInteger(selectedIndex) || selectedIndex < 0) {
+                answer.selectedIndex = -1;
+                answer.submitted = true;
+                answer.unanswered = true;
+                answer.isCorrect = false;
+            } else {
+                answer.selectedIndex = selectedIndex;
+                answer.submitted = true;
+                answer.unanswered = false;
+                answer.isCorrect = Boolean(question.options[selectedIndex] && question.options[selectedIndex].correct);
+            }
+            state.answers[state.index] = answer;
+            state.submitted = true;
+
+            if (!answer.isCorrect) {
+                if (window.ListeningProgress && typeof window.ListeningProgress.setMistakeIds === 'function') {
+                    const ids = window.ListeningProgress.getMistakeIds(type.replace(/_/g, '-'), level.toLowerCase(), question.sourceExamKey) || [];
+                    if (!ids.includes(question.questionId)) {
+                        ids.push(question.questionId);
+                        window.ListeningProgress.setMistakeIds(type.replace(/_/g, '-'), level.toLowerCase(), question.sourceExamKey, ids);
+                    }
+                }
+            }
+        }
+
+        function startCountdown() {
+            if (state.countdownTimer) return;
+            let remaining = AUTO_ADVANCE_SECONDS;
+            updateStatus(
+                isImmediateResponseExam()
+                    ? `${remaining} 秒后自动进入下一题，可继续改选。`
+                    : `${remaining} 秒后自动进入下一题。`,
+                'is-recorded'
+            );
+            state.countdownInterval = window.setInterval(() => {
+                remaining -= 1;
+                if (remaining > 0) {
+                    updateStatus(
+                        isImmediateResponseExam()
+                            ? `${remaining} 秒后自动进入下一题，可继续改选。`
+                            : `${remaining} 秒后自动进入下一题。`,
+                        'is-recorded'
+                    );
+                }
+            }, 1000);
+            state.countdownTimer = window.setTimeout(() => {
+                clearCountdown();
+                advanceQuestion();
+            }, AUTO_ADVANCE_SECONDS * 1000);
+        }
+
+        function advanceQuestion() {
+            recordCurrentAnswer(state.selectedIndex < 0);
+            if (state.index >= state.questions.length - 1) {
+                showSummary();
+                return;
+            }
+            state.index += 1;
+            renderPracticeQuestion();
+        }
+
+        function onAudioEnded() {
+            state.audioEnded = true;
+            startCountdown();
+        }
+
+        function onConfirmAnswer() {
+            if (isImmediateResponseExam()) {
+                return;
+            }
+            if (state.selectedIndex < 0) {
+                return;
+            }
+            recordCurrentAnswer(false);
+            ui.confirm.disabled = true;
+            ui.options.innerHTML = renderOptions(getCurrentQuestion().options, 'practice');
+            bindOptionEvents();
+            if (state.audioEnded) {
+                updateStatus('已记录，等待切题。', 'is-recorded');
+                startCountdown();
+            } else {
+                updateStatus('已记录，音频结束后自动切题。', 'is-recorded');
+            }
+        }
+
+        function showSummary() {
+            clearCountdown();
+            const stats = computeStats();
+            showView('summary');
+            ui.summaryCorrect.textContent = String(stats.correct);
+            ui.summaryWrong.textContent = String(stats.wrong);
+            ui.summaryEmpty.textContent = String(stats.empty);
+            ui.summaryAccuracy.textContent = `${stats.accuracy}%`;
+            ui.summaryCopy.textContent = '成绩已生成。';
+
+            dispatchPhase(stats.accuracy === 100 ? 'perfect_clear' : 'clear', {
+                total: stats.total,
+                correct: stats.correct
+            });
+        }
+
+        function renderImmediateAnalysis(question) {
+            return `
+                <div class="analysis-block">
+                    <h3>对话原文</h3>
+                    <div class="analysis-line">${question.dialogueHtml || '（本题暂未整理原文）'}</div>
+                    ${question.translation ? `<div class="analysis-translation">${htmlEscape(question.translation)}</div>` : ''}
+                </div>
+            `;
+        }
+
+        function renderTaskAnalysis(question) {
+            const script = question.script || {};
+            const promptHtml = script.question ? `<div class="analysis-line">${script.question}</div>` : '';
+            const promptTrans = script.questionTrans ? `<div class="analysis-translation">${htmlEscape(script.questionTrans)}</div>` : '';
+            const dialogue = Array.isArray(script.dialogue) ? script.dialogue.map((line) => `
+                <div class="analysis-line">
+                    <span class="analysis-speaker">${htmlEscape(line.speaker)}：</span>${line.text}
+                    ${line.trans ? `<div class="analysis-translation">${htmlEscape(line.trans)}</div>` : ''}
+                </div>
+            `).join('') : '（本题暂未整理对话原文）';
+            return `
+                <div class="analysis-block">
+                    <h3>题目原文</h3>
+                    ${promptHtml}
+                    ${promptTrans}
+                    ${dialogue}
+                </div>
+            `;
+        }
+
+        function renderAnalysis() {
+            const question = getCurrentQuestion();
+            const answer = getAnswerRecord(state.index);
+            if (!question) return;
+
+            ui.analysisCounter.textContent = `解析 ${state.index + 1} / ${state.questions.length}`;
+            ui.analysisSource.textContent = createSourceLabel(question);
+            ui.analysisTitle.textContent = type === 'task_comprehension' ? '课题理解解析' : '即时应答解析';
+            ui.analysisCopy.textContent = '';
+
+            ui.analysisAudio.src = question.audio || '';
+            ui.analysisImage.src = '';
+            ui.analysisImage.classList.add('hidden');
+
+            if (!answer.submitted || answer.unanswered) {
+                ui.analysisResultNote.textContent = '本题未作答';
+                ui.analysisResultNote.className = 'analysis-note is-empty';
+            } else if (answer.isCorrect) {
+                ui.analysisResultNote.textContent = '本题答对了';
+                ui.analysisResultNote.className = 'analysis-note is-correct';
+            } else {
+                ui.analysisResultNote.textContent = '本题答错了';
+                ui.analysisResultNote.className = 'analysis-note is-wrong';
+            }
+
+            ui.analysisTranscript.innerHTML = type === 'task_comprehension'
+                ? renderTaskAnalysis(question)
+                : renderImmediateAnalysis(question);
+            ui.analysisOptions.innerHTML = `
+                <div class="analysis-block">
+                    <h3>选项解析</h3>
+                    <ol class="options-list">${renderOptions(question.options, 'analysis')}</ol>
+                </div>
+            `;
+
+            ui.analysisPrev.disabled = state.index === 0;
+            ui.analysisNext.disabled = state.index >= state.questions.length - 1;
+        }
+
+        function showAnalysis() {
+            state.analysisUnlocked = true;
+            state.index = 0;
+            showView('analysis');
+            renderAnalysis();
+        }
+
+        function showError(message) {
+            showView('error');
+            ui.errorCopy.textContent = message;
+        }
+
+        function initializeMeta() {
+            const indexHref = buildIndexHref();
+            ui.backBtn.href = indexHref;
+            ui.summaryBackBtn.href = indexHref;
+            ui.errorBackBtn.href = indexHref;
+            ui.metaTitle.textContent = `${normalizeTypeLabel(type)} · ${level} 随机考试`;
+            ui.metaCopy.textContent = '';
+            ui.rangeBadge.textContent = `${fromYear} - ${toYear}`;
+            ui.countBadge.textContent = `${QUESTION_COUNT} 题挑战`;
+            if (ui.pageTitleCount) {
+                ui.pageTitleCount.textContent = `${QUESTION_COUNT}题`;
+            }
+        }
+
+        function initializeQuestions() {
+            if (!window.ListeningQuestionPools) {
+                showError('听力共享题池未加载成功，请返回题型页后重试。');
+                return false;
+            }
+
+            const count = window.ListeningQuestionPools.countQuestionsInRange(type, level, fromYear, toYear);
+            if (!count || count < QUESTION_COUNT) {
+                showError(`当前年份范围题量不足 ${QUESTION_COUNT} 题，请返回题型页扩大年份范围后再开始随机考试。`);
+                return false;
+            }
+
+            state.questions = window.ListeningQuestionPools.sampleQuestions(type, level, fromYear, toYear, QUESTION_COUNT).map((question, index) => ({
+                ...question,
+                uid: `${question.sourceExamKey}-${question.questionId}-${index}`
+            }));
+            state.answers = state.questions.map(() => ({
+                selectedIndex: -1,
+                submitted: false,
+                isCorrect: false,
+                unanswered: false
+            }));
+            return true;
+        }
+
+        ui.confirm.addEventListener('click', onConfirmAnswer);
+        ui.audio.addEventListener('ended', onAudioEnded);
+        ui.viewAnalysis.addEventListener('click', showAnalysis);
+        ui.retry.addEventListener('click', () => window.location.reload());
+        ui.analysisPrev.addEventListener('click', () => {
+            if (state.index <= 0) return;
+            state.index -= 1;
+            renderAnalysis();
+        });
+        ui.analysisNext.addEventListener('click', () => {
+            if (state.index >= state.questions.length - 1) return;
+            state.index += 1;
+            renderAnalysis();
+        });
+        ui.analysisBack.addEventListener('click', () => showView('summary'));
+
+        initializeMeta();
+        if (initializeQuestions()) {
+            showView('practice');
+            renderPracticeQuestion();
+        }
+    </script>
+</body>
+</html>

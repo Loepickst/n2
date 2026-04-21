@@ -1,10 +1,11 @@
 (function() {
-    const SKIP_SECONDS = 6;
+    const DEFAULT_SKIP_SECONDS = 6;
 
     const playerState = {
         initialized: false,
         playbackSpeed: 1.0,
-        isLooping: false
+        isLooping: false,
+        skipSeconds: DEFAULT_SKIP_SECONDS
     };
 
     const playIcon = '<svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>';
@@ -123,10 +124,15 @@
         const subtitle = options && typeof options.subtitle === 'string'
             ? options.subtitle
             : document.title.replace(/\s*\((N1|N2|N3)\)\s*$/, '');
+        const skipSeconds = options && Number.isFinite(options.skipSeconds) && options.skipSeconds > 0
+            ? options.skipSeconds
+            : DEFAULT_SKIP_SECONDS;
 
         if (!refs.audio) {
             return;
         }
+
+        playerState.skipSeconds = skipSeconds;
 
         if (refs.trackSubtitle) {
             refs.trackSubtitle.textContent = subtitle;
@@ -217,14 +223,14 @@
 
         if (refs.rewindBtn) {
             refs.rewindBtn.addEventListener('click', () => {
-                refs.audio.currentTime = Math.max(0, refs.audio.currentTime - SKIP_SECONDS);
+                refs.audio.currentTime = Math.max(0, refs.audio.currentTime - playerState.skipSeconds);
             });
         }
 
         if (refs.forwardBtn) {
             refs.forwardBtn.addEventListener('click', () => {
                 const duration = Number.isFinite(refs.audio.duration) ? refs.audio.duration : 0;
-                refs.audio.currentTime = Math.min(duration, refs.audio.currentTime + SKIP_SECONDS);
+                refs.audio.currentTime = Math.min(duration, refs.audio.currentTime + playerState.skipSeconds);
             });
         }
 

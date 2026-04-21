@@ -216,7 +216,7 @@
 <body>
 
     <header>
-        <a href="../index.html" class="back-btn header-back-control">戻る</a>
+        <a href="../index.html" class="back-btn header-back-control">← 戻る</a>
         <h1>即時応答💬 (N3)</h1>
     </header>
 
@@ -229,62 +229,73 @@
             </div>
         </div>
 
+        <div id="randomExamRoot"></div>
+
         <div class="year-grid" id="yearGrid">
             <!-- Populated by JS -->
         </div>
     </div>
 
+    <script src="../../shared/listening-progress.js"></script>
+    <script src="../../shared/listening-question-pools.js"></script>
+    <script src="../../shared/listening-random-entry.js"></script>
     <script>
+        const LISTENING_TYPE = 'immediate-response';
+        const LISTENING_LEVEL = 'n3';
         const startYear = 2018;
         const endYear = 2023;
         const grid = document.getElementById('yearGrid');
-        
-        // Fetch last practice from localStorage
-        const lastPractice = localStorage.getItem('last_n3_practice'); // Format: YYYY-MM
+        const section = document.getElementById('mistakeReview');
+        const reviewGrid = document.getElementById('reviewGrid');
+
+        const fileMap = {
+            '2018': 'years/n3_2018.html',
+            '2019': 'years/n3_2019.html',
+            '2020': 'years/n3_2020.html',
+            '2021': 'years/n3_2021.html',
+            '2022': 'years/n3_2022.html',
+        };
+
+        const available = {
+            '2018-07': 'years/n3_2018.html?year=2018-07',
+            '2018-12': 'years/n3_2018.html?year=2018-12',
+            '2019-07': 'years/n3_2019.html?year=2019-07',
+            '2019-12': 'years/n3_2019.html?year=2019-12',
+            '2020-12': 'years/n3_2020.html?year=2020-12',
+            '2021-07': 'years/n3_2021.html?year=2021-07',
+            '2021-12': 'years/n3_2021.html?year=2021-12',
+            '2022-07': 'years/n3_2022.html?year=2022-07',
+            '2022-12': 'years/n3_2022.html?year=2022-12',
+        };
+
+        const lastPractice = window.ListeningProgress
+            ? window.ListeningProgress.getLastPractice(LISTENING_TYPE, LISTENING_LEVEL)
+            : localStorage.getItem('last_n3_practice');
 
         // --- Load Mistake Review Data ---
         function loadMistakes() {
-            const reviewGrid = document.getElementById('reviewGrid');
-            const section = document.getElementById('mistakeReview');
-            let hasMistakes = false;
+            reviewGrid.innerHTML = '';
 
-            // 这里的年份对应文件名，用于错题回顾功能
-            const fileMap = {
-                '2018': 'years/n3_2018.html',
-                '2019': 'years/n3_2019.html',
-                '2020': 'years/n3_2020.html',
-                '2021': 'years/n3_2021.html',
-                '2022': 'years/n3_2022.html',
-            };
+            const reviewItems = Object.keys(available)
+                .map((examKey) => {
+                    const year = examKey.split('-')[0];
+                    const count = window.ListeningProgress
+                        ? window.ListeningProgress.getMistakeIds(LISTENING_TYPE, LISTENING_LEVEL, examKey).length
+                        : (() => {
+                            const raw = localStorage.getItem(`jlpt_marks_${examKey}`);
+                            const marks = raw ? JSON.parse(raw) : [];
+                            return Array.isArray(marks) ? marks.length : 0;
+                        })();
+                    return { examKey, year, count };
+                })
+                .filter((item) => item.count > 0 && fileMap[item.year])
+                .sort((a, b) => b.examKey.localeCompare(a.examKey));
 
-            // Iterate localStorage to find marks
-            let reviewItems = [];
-            for (let i = 0; i < localStorage.length; i++) {
-                const key = localStorage.key(i);
-                if (key && key.startsWith('jlpt_marks_')) { // Note: Might need distinct prefix for N3 if they overlap
-                    const marks = JSON.parse(localStorage.getItem(key));
-                    
-                    if (marks && marks.length > 0) {
-                        hasMistakes = true;
-                        const examKey = key.replace('jlpt_marks_', ''); // e.g., 2010-07
-                        const year = examKey.split('-')[0]; // 2010
-                        
-                        // Only show if we know the file mapping
-                        if (fileMap[year]) {
-                            reviewItems.push({
-                                examKey: examKey,
-                                year: year,
-                                count: marks.length
-                            });
-                        }
-                    }
-                }
+            if (reviewItems.length === 0) {
+                section.style.display = 'none';
+                return;
             }
 
-            // Sort descending (e.g. 2020-12, 2020-07, 2019-12...)
-            reviewItems.sort((a, b) => b.examKey.localeCompare(a.examKey));
-
-            // Render buttons
             reviewItems.forEach(item => {
                 const btn = document.createElement('a');
                 btn.className = 'review-btn';
@@ -296,30 +307,22 @@
                 reviewGrid.appendChild(btn);
             });
 
-            // Toggle section visibility
-            if (hasMistakes) {
-                section.style.display = 'block';
-            }
+            section.style.display = 'block';
         }
         loadMistakes();
+
+        if (window.ListeningRandomEntry) {
+            window.ListeningRandomEntry.mount({
+                mount: document.getElementById('randomExamRoot'),
+                type: 'immediate_response',
+                level: 'N3'
+            });
+        }
 
         // Generate cards in chronological order (oldest first)
         for (let year = startYear; year <= endYear; year++) {
             const card = document.createElement('div');
             card.className = 'year-card';
-            
-            // 这里定义哪些年份/月份是可点击的，以及跳转的目标链接
-            const available = {
-                '2018-07': 'years/n3_2018.html?year=2018-07',
-                '2018-12': 'years/n3_2018.html?year=2018-12',
-                '2019-07': 'years/n3_2019.html?year=2019-07',
-                '2019-12': 'years/n3_2019.html?year=2019-12',
-                '2020-12': 'years/n3_2020.html?year=2020-12',
-                '2021-07': 'years/n3_2021.html?year=2021-07',
-                '2021-12': 'years/n3_2021.html?year=2021-12',
-                '2022-07': 'years/n3_2022.html?year=2022-07',
-                '2022-12': 'years/n3_2022.html?year=2022-12',
-            };
 
             const julyKey = `${year}-07`;
             const decKey = `${year}-12`;

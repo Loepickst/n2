@@ -229,69 +229,91 @@
             </div>
         </div>
 
+        <div id="randomExamRoot"></div>
+
         <div class="year-grid" id="yearGrid">
             <!-- Populated by JS -->
         </div>
     </div>
 
+    <script src="../../shared/listening-progress.js"></script>
+    <script src="../../shared/listening-question-pools.js"></script>
+    <script src="../../shared/listening-random-entry.js"></script>
     <script>
+        const LISTENING_TYPE = 'immediate-response';
+        const LISTENING_LEVEL = 'n2';
         const startYear = 2010;
         const endYear = 2020;
         const grid = document.getElementById('yearGrid');
-        
-        // Fetch last practice from localStorage
-        const lastPractice = localStorage.getItem('last_n2_practice'); // Format: YYYY-MM
+        const section = document.getElementById('mistakeReview');
+        const reviewGrid = document.getElementById('reviewGrid');
+
+        const fileMap = {
+            '2010': 'years/j_2010.html',
+            '2011': 'years/j_2011.html',
+            '2012': 'years/j_2012.html',
+            '2013': 'years/j_2013.html',
+            '2014': 'years/j_2014.html',
+            '2015': 'years/j_2015.html',
+            '2016': 'years/j_2016.html',
+            '2017': 'years/j_2017.html',
+            '2018': 'years/j_2018.html',
+            '2019': 'years/j_2019.html',
+            '2020': 'years/j_2020.html'
+        };
+
+        const available = {
+            '2010-07': 'years/j_2010.html?year=2010-07',
+            '2010-12': 'years/j_2010.html?year=2010-12',
+            '2011-07': 'years/j_2011.html?year=2011-07',
+            '2011-12': 'years/j_2011.html?year=2011-12',
+            '2012-07': 'years/j_2012.html?year=2012-07',
+            '2012-12': 'years/j_2012.html?year=2012-12',
+            '2013-07': 'years/j_2013.html?year=2013-07',
+            '2013-12': 'years/j_2013.html?year=2013-12',
+            '2014-07': 'years/j_2014.html?year=2014-07',
+            '2014-12': 'years/j_2014.html?year=2014-12',
+            '2015-07': 'years/j_2015.html?year=2015-07',
+            '2015-12': 'years/j_2015.html?year=2015-12',
+            '2016-07': 'years/j_2016.html?year=2016-07',
+            '2016-12': 'years/j_2016.html?year=2016-12',
+            '2017-07': 'years/j_2017.html?year=2017-07',
+            '2017-12': 'years/j_2017.html?year=2017-12',
+            '2018-07': 'years/j_2018.html?year=2018-07',
+            '2018-12': 'years/j_2018.html?year=2018-12',
+            '2019-07': 'years/j_2019.html?year=2019-07',
+            '2019-12': 'years/j_2019.html?year=2019-12',
+            '2020-12': 'years/j_2020.html?year=2020-12'
+        };
+
+        const lastPractice = window.ListeningProgress
+            ? window.ListeningProgress.getLastPractice(LISTENING_TYPE, LISTENING_LEVEL)
+            : localStorage.getItem('last_n2_practice');
 
         // --- Load Mistake Review Data ---
         function loadMistakes() {
-            const reviewGrid = document.getElementById('reviewGrid');
-            const section = document.getElementById('mistakeReview');
-            let hasMistakes = false;
+            reviewGrid.innerHTML = '';
 
-            // Map year to filename
-            // You can expand this map as you add more files
-            const fileMap = {
-                '2010': 'years/j_2010.html',
-                '2011': 'years/j_2011.html',
-                '2012': 'years/j_2012.html',
-                '2013': 'years/j_2013.html',
-                '2014': 'years/j_2014.html',
-                '2015': 'years/j_2015.html',
-                '2016': 'years/j_2016.html',
-                '2017': 'years/j_2017.html',
-                '2018': 'years/j_2018.html',
-                '2019': 'years/j_2019.html',
-                '2020': 'years/j_2020.html'
-            };
+            const reviewItems = Object.keys(available)
+                .map((examKey) => {
+                    const year = examKey.split('-')[0];
+                    const count = window.ListeningProgress
+                        ? window.ListeningProgress.getMistakeIds(LISTENING_TYPE, LISTENING_LEVEL, examKey).length
+                        : (() => {
+                            const raw = localStorage.getItem(`jlpt_marks_${examKey}`);
+                            const marks = raw ? JSON.parse(raw) : [];
+                            return Array.isArray(marks) ? marks.length : 0;
+                        })();
+                    return { examKey, year, count };
+                })
+                .filter((item) => item.count > 0 && fileMap[item.year])
+                .sort((a, b) => b.examKey.localeCompare(a.examKey));
 
-            // Iterate localStorage to find marks
-            let reviewItems = [];
-            for (let i = 0; i < localStorage.length; i++) {
-                const key = localStorage.key(i);
-                if (key && key.startsWith('jlpt_marks_')) {
-                    const marks = JSON.parse(localStorage.getItem(key));
-                    
-                    if (marks && marks.length > 0) {
-                        hasMistakes = true;
-                        const examKey = key.replace('jlpt_marks_', ''); // e.g., 2010-07
-                        const year = examKey.split('-')[0]; // 2010
-                        
-                        // Only show if we know the file mapping
-                        if (fileMap[year]) {
-                            reviewItems.push({
-                                examKey: examKey,
-                                year: year,
-                                count: marks.length
-                            });
-                        }
-                    }
-                }
+            if (reviewItems.length === 0) {
+                section.style.display = 'none';
+                return;
             }
 
-            // Sort descending (e.g. 2020-12, 2020-07, 2019-12...)
-            reviewItems.sort((a, b) => b.examKey.localeCompare(a.examKey));
-
-            // Render buttons
             reviewItems.forEach(item => {
                 const btn = document.createElement('a');
                 btn.className = 'review-btn';
@@ -303,42 +325,22 @@
                 reviewGrid.appendChild(btn);
             });
 
-            // Toggle section visibility
-            if (hasMistakes) {
-                section.style.display = 'block';
-            }
+            section.style.display = 'block';
         }
         loadMistakes();
+
+        if (window.ListeningRandomEntry) {
+            window.ListeningRandomEntry.mount({
+                mount: document.getElementById('randomExamRoot'),
+                type: 'immediate_response',
+                level: 'N2'
+            });
+        }
 
         // Generate cards in chronological order (oldest first)
         for (let year = startYear; year <= endYear; year++) {
             const card = document.createElement('div');
             card.className = 'year-card';
-            
-            // Define available exams
-            const available = {
-                '2010-07': 'years/j_2010.html?year=2010-07',
-                '2010-12': 'years/j_2010.html?year=2010-12',
-                '2011-07': 'years/j_2011.html?year=2011-07',
-                '2011-12': 'years/j_2011.html?year=2011-12',
-                '2012-07': 'years/j_2012.html?year=2012-07',
-                '2012-12': 'years/j_2012.html?year=2012-12',
-                '2013-07': 'years/j_2013.html?year=2013-07',
-                '2013-12': 'years/j_2013.html?year=2013-12',
-                '2014-07': 'years/j_2014.html?year=2014-07',
-                '2014-12': 'years/j_2014.html?year=2014-12',
-                '2015-07': 'years/j_2015.html?year=2015-07',
-                '2015-12': 'years/j_2015.html?year=2015-12',
-                '2016-07': 'years/j_2016.html?year=2016-07',
-                '2016-12': 'years/j_2016.html?year=2016-12',
-                '2017-07': 'years/j_2017.html?year=2017-07',
-                '2017-12': 'years/j_2017.html?year=2017-12',
-                '2018-07': 'years/j_2018.html?year=2018-07',
-                '2018-12': 'years/j_2018.html?year=2018-12',
-                '2019-07': 'years/j_2019.html?year=2019-07',
-                '2019-12': 'years/j_2019.html?year=2019-12',
-                '2020-12': 'years/j_2020.html?year=2020-12'  
-            };
 
             const julyKey = `${year}-07`;
             const decKey = `${year}-12`;

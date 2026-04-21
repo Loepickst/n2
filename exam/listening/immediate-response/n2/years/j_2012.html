@@ -596,7 +596,7 @@
 <body>
 
     <header>
-        <a href="../index.html" class="back-btn header-back-control">戻る</a>
+        <a href="../index.html" class="back-btn header-back-control">← 戻る</a>
         <h1 id="yearLabel">即時応答 - 2012 (N2)</h1>
     </header>
 
@@ -680,6 +680,7 @@
     <div id="wordTooltip" class="custom-tooltip"></div>
 
     <script src="../../../shared/audio-player-theme.js"></script>
+    <script src="../../../shared/listening-progress.js"></script>
     <script>
         // --- Data Structure ---
         const examData = {
@@ -972,6 +973,9 @@
             },
         };
 
+        const LISTENING_TYPE = 'immediate-response';
+        const LISTENING_LEVEL = 'n2';
+
         let currentExamKey = "2012-07";
         let currentQuestionIndex = 0;
         let preferredMode = 'practice'; // Track user's preferred mode
@@ -987,7 +991,7 @@
             if (yearParam && examData[yearParam]) {
                 currentExamKey = yearParam;
                 // Save last practice session
-                localStorage.setItem('last_n2_practice', currentExamKey);
+                if (window.ListeningProgress) { window.ListeningProgress.setLastPractice(LISTENING_TYPE, LISTENING_LEVEL, currentExamKey); } else { localStorage.setItem('last_n2_practice', currentExamKey); }
 
                 // --- REVIEW MODE LOGIC ---
                 if (modeParam === 'review') {
@@ -1033,12 +1037,19 @@
 
         // --- Mark/Bookmark Logic ---
         function getMarks() {
+            if (window.ListeningProgress) {
+                return window.ListeningProgress.getMistakeIds(LISTENING_TYPE, LISTENING_LEVEL, currentExamKey);
+            }
             const key = `jlpt_marks_${currentExamKey}`;
             const saved = localStorage.getItem(key);
             return saved ? JSON.parse(saved) : [];
         }
 
         function saveMarks(marks) {
+            if (window.ListeningProgress) {
+                window.ListeningProgress.setMistakeIds(LISTENING_TYPE, LISTENING_LEVEL, currentExamKey, marks);
+                return;
+            }
             const key = `jlpt_marks_${currentExamKey}`;
             localStorage.setItem(key, JSON.stringify(marks));
         }

@@ -462,12 +462,29 @@
             }
         })();
 
-        const defaultFrom = storedRange && years.includes(Number(storedRange.fromYear))
-            ? Number(storedRange.fromYear)
+        const latestYear = years.length > 0 ? years[years.length - 1] : null;
+        const previousLatestYear = years.length > 1 ? years[years.length - 2] : null;
+        const storedFromYear = Number(storedRange && storedRange.fromYear);
+        const storedToYear = Number(storedRange && storedRange.toYear);
+        const storedMaxYear = Number(storedRange && storedRange.availableMaxYear);
+        const shouldExtendLegacyRange = Number.isInteger(latestYear)
+            && Number.isInteger(previousLatestYear)
+            && storedFromYear === years[0]
+            && Number.isInteger(storedToYear)
+            && storedToYear === previousLatestYear
+            && !Number.isInteger(storedMaxYear);
+        const shouldExtendStoredRange = Number.isInteger(latestYear)
+            && Number.isInteger(storedMaxYear)
+            && storedFromYear === years[0]
+            && storedMaxYear < latestYear
+            && storedToYear === storedMaxYear;
+
+        const defaultFrom = storedRange && years.includes(storedFromYear)
+            ? storedFromYear
             : years[0];
-        const defaultTo = storedRange && years.includes(Number(storedRange.toYear))
-            ? Number(storedRange.toYear)
-            : years[years.length - 1];
+        const defaultTo = storedRange && years.includes(storedToYear)
+            ? (shouldExtendLegacyRange || shouldExtendStoredRange ? latestYear : storedToYear)
+            : latestYear;
 
         if (defaultFrom != null) fromSelect.value = String(defaultFrom);
         if (defaultTo != null) toSelect.value = String(defaultTo);
@@ -504,7 +521,11 @@
             startButton.dataset.fromYear = String(fromYear);
             startButton.dataset.toYear = String(toYear);
             try {
-                localStorage.setItem(storageKey, JSON.stringify({ fromYear, toYear }));
+                localStorage.setItem(storageKey, JSON.stringify({
+                    fromYear,
+                    toYear,
+                    availableMaxYear: latestYear
+                }));
             } catch (error) {
                 console.warn('Failed to persist listening random range:', error);
             }

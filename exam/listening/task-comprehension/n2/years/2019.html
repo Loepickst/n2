@@ -1,0 +1,2123 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>N2 課題理解 - 2019</title>
+    <!-- 使用与练习页一致的书面/印刷感字体组合 -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&family=Noto+Serif+JP:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            /* 纸张与铅笔色盘 - 明亮白底版 */
+            --paper: #ffffff;          
+            --paper-light: #ffffff;    
+            
+            --graphite: #333333;       /* 深石墨灰 */
+            --graphite-sub: #666666;   
+            --graphite-faint: #cccccc; 
+            
+            --red-pencil: #e64a4a;     /* 批改用红铅笔 */
+            --red-pencil-light: rgba(230, 74, 74, 0.08); 
+
+            /* N2 专属水彩记号笔色系 (Watercolor Markers) */
+            --marker-yellow: rgba(255, 213, 79, 0.35); /* 荧光黄 - 辅助高亮/图标 */
+            --marker-blue: rgba(129, 212, 250, 0.25);  /* 水彩蓝 - 原文问题区/选中 */
+            --marker-pink: rgba(244, 143, 177, 0.25);  /* 樱花粉 - 错误解析 */
+            --marker-green: rgba(129, 199, 132, 0.25); /* 薄荷绿 - 正确解析 */
+
+            /* 铅笔排线背景 (Hatching) - 极淡 */
+            --hatching-graphite: repeating-linear-gradient(45deg, transparent, transparent 3px, rgba(51, 51, 51, 0.04) 3px, rgba(51, 51, 51, 0.04) 4px);
+
+            --transition: all 0.2s ease-out;
+        }
+
+        body {
+            font-family: 'Noto Serif JP', 'Noto Sans JP', 'Noto Sans SC', serif;
+            background-color: var(--paper);
+            color: var(--graphite);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            position: relative;
+        }
+
+        /* 极弱的纸张噪点纹理 */
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.02'/%3E%3C/svg%3E");
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        /* 工具类：手绘感不规则边框 */
+        .sketch-box {
+            border: 1.5px solid var(--graphite);
+            border-radius: 2px 255px 3px 25px / 255px 5px 225px 3px;
+            background: transparent;
+        }
+        
+        .sketch-circle {
+            border: 1.5px solid var(--graphite);
+            border-radius: 50% 45% 55% 40% / 45% 55% 40% 50%;
+        }
+
+        /* ================= Header ================= */
+        header {
+            width: 100%;
+            padding: 16px 20px;
+            box-sizing: border-box;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background-color: rgba(255, 255, 255, 0.92);
+            backdrop-filter: blur(4px);
+            border-bottom: 2px solid var(--graphite);
+            border-bottom-left-radius: 50% 2px;
+            border-bottom-right-radius: 50% 3px;
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--graphite);
+            letter-spacing: 0.1em;
+            text-align: center;
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .back-btn {
+            text-decoration: none;
+            color: var(--graphite);
+            font-size: 14px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            padding: 4px 12px;
+            transition: var(--transition);
+            cursor: pointer;
+            letter-spacing: 0.05em;
+            z-index: 2;
+            border-radius: 4px;
+        }
+
+        .back-btn:hover {
+            background: var(--marker-yellow);
+        }
+
+        /* 主容器 */
+        .practice-container {
+            margin-top: 40px;
+            margin-bottom: 140px; 
+            background: transparent;
+            max-width: 840px;
+            width: 92%;
+            padding: 20px 40px;
+            position: relative;
+            flex: 1;
+            animation: fadeIn 0.4s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 40px;
+            padding-bottom: 16px;
+            border-bottom: 1.5px dashed var(--graphite-faint);
+            gap: 20px;
+            flex-wrap: nowrap;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex: 0 1 auto;
+            min-width: 0;
+        }
+
+        /* 下拉框 */
+        .question-select {
+            padding: 4px 28px 4px 4px;
+            font-size: 16px;
+            border: none;
+            border-bottom: 1.5px solid var(--graphite);
+            background-color: transparent;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%23333333' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 4px center;
+            appearance: none;
+            -webkit-appearance: none;
+            color: var(--graphite);
+            outline: none;
+            font-family: inherit;
+            font-weight: 700;
+            cursor: pointer;
+            transition: var(--transition);
+            flex: 0 0 auto;
+        }
+        
+        .question-select:hover {
+            background-color: var(--marker-yellow);
+        }
+
+        /* Mark Button */
+        .mark-btn {
+            font-size: 22px;
+            width: 34px;
+            height: 34px;
+            padding: 0;
+            background: #fff;
+            border: 1.5px solid var(--graphite-faint);
+            border-radius: 10px;
+            cursor: pointer;
+            color: var(--graphite-faint);
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            flex: 0 0 auto;
+            line-height: 1;
+        }
+
+        .mark-btn:hover { 
+            color: var(--graphite); 
+            border-color: var(--graphite);
+            background: var(--marker-yellow);
+        }
+        .mark-btn.active { 
+            color: var(--graphite);
+            background: var(--marker-yellow);
+            border-color: var(--graphite);
+        }
+
+        /* 模式切换：记号笔涂划效果 */
+        .mode-switch {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-left: auto;
+            flex: 0 1 auto;
+            min-width: 0;
+        }
+
+        .mode-switch button {
+            border: none;
+            background: transparent;
+            color: var(--graphite-sub);
+            padding: 4px 8px;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            letter-spacing: 0.05em;
+            transition: var(--transition);
+            position: relative;
+            font-family: inherit;
+            white-space: nowrap;
+            flex: 0 0 auto;
+        }
+
+        .mode-switch button:hover:not(.active) {
+            color: var(--graphite);
+        }
+
+        .mode-switch button.active {
+            color: var(--graphite);
+            z-index: 1;
+        }
+        .mode-switch button.active::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: var(--marker-yellow);
+            border-radius: 2px 8px 2px 6px / 6px 2px 8px 2px;
+            z-index: -1;
+            transform: rotate(-1deg);
+        }
+
+        /* 内容区布局 */
+        .content-wrapper {
+            display: block;
+        }
+
+        .right-panel { width: 100%; }
+
+        /* 练习模式状态 */
+        .mode-practice .right-panel {
+            filter: none;
+            opacity: 1;
+            pointer-events: auto;
+            user-select: auto;
+            transition: all 0.5s ease;
+        }
+
+        .mode-practice .transcript-section,
+        .mode-practice .translation { display: none !important; }
+
+        /* ================= 选项列表 (添加了手绘边框特色) ================= */
+        .options-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .options-list li {
+            padding: 14px 16px 14px 50px;
+            background: #fff;
+            /* 添加淡色铅笔线框，明确选项边界 */
+            border: 1.5px solid var(--graphite-faint);
+            border-radius: 3px 255px 4px 25px / 255px 5px 225px 4px;
+            transition: var(--transition);
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            color: var(--graphite);
+            box-shadow: 2px 4px 10px rgba(0,0,0,0.02);
+        }
+
+        .options-num {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 24px;
+            height: 24px;
+            color: var(--graphite);
+            text-align: center;
+            line-height: 22px; 
+            font-size: 14px;
+            font-family: sans-serif;
+            font-weight: bold;
+            transition: var(--transition);
+            border: 1.5px solid var(--graphite);
+            border-radius: 50% 45% 55% 40% / 45% 55% 40% 50%;
+            background: #fff;
+            z-index: 2;
+        }
+
+        .mode-practice .options-list li { cursor: pointer; }
+        
+        .mode-practice .options-list li:hover {
+            background: var(--hatching-graphite);
+            border-color: var(--marker-blue);
+        }
+        
+        .mode-practice .options-list li:hover .options-num {
+            background: var(--marker-blue);
+        }
+
+        /* 选中状态：水彩蓝涂抹 */
+        .mode-practice .options-list li.selected {
+            background: var(--marker-blue);
+            border: 1.5px solid var(--graphite);
+            border-radius: 2px 255px 3px 25px / 255px 5px 225px 3px;
+        }
+
+        .mode-practice .options-list li.selected .options-num {
+            background: var(--graphite);
+            color: var(--paper);
+        }
+
+        /* 练习模式行内提交按钮 */
+        .inline-confirm-btn {
+            margin-left: 16px;
+            padding: 6px 20px;
+            background: var(--graphite);
+            color: var(--paper);
+            border: none;
+            border-radius: 3px 8px 4px 6px / 6px 4px 8px 3px;
+            font-size: 14px;
+            font-family: inherit;
+            font-weight: 700;
+            cursor: pointer;
+            animation: fadeInBtn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            white-space: nowrap;
+            letter-spacing: 0.05em;
+            transition: transform 0.1s;
+            flex-shrink: 0;
+            box-shadow: 2px 2px 0px rgba(0,0,0,0.1);
+        }
+
+        .inline-confirm-btn:active {
+            transform: translate(1px, 1px);
+            box-shadow: none;
+        }
+
+        @keyframes fadeInBtn {
+            from { opacity: 0; transform: scale(0.9) translate(10px, 0); }
+            to { opacity: 1; transform: scale(1) translate(0, 0); }
+        }
+
+        /* 判题状态：留出右侧空间 */
+        .mode-practice .options-list li.judged-correct,
+        .mode-practice .options-list li.judged-wrong {
+            padding-right: 80px;
+        }
+
+        /* 判题状态：★ 正解 (薄荷绿底 + 边框 + 红笔大圆圈圈出) */
+        .mode-practice .options-list li.judged-correct {
+            background: var(--marker-green) !important;
+            border: 1.5px solid var(--graphite) !important;
+            transform: none !important;
+            border-radius: 4px;
+        }
+        .mode-practice .options-list li.judged-correct .options-num {
+            border-color: var(--red-pencil);
+            color: var(--red-pencil);
+            background: #fff;
+        }
+        .mode-practice .options-list li.judged-correct::before {
+            content: '';
+            position: absolute;
+            left: 2px; 
+            top: 50%;
+            transform: translateY(-50%);
+            width: 44px;
+            height: 44px;
+            border: 2px solid var(--red-pencil);
+            border-radius: 40% 60% 50% 45% / 50% 45% 60% 40%;
+            pointer-events: none;
+            opacity: 0.8;
+        }
+        .mode-practice .options-list li.judged-correct::after {
+            content: "正解";
+            color: var(--red-pencil);
+            font-weight: 900;
+            font-size: 14px;
+            position: absolute;
+            right: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-family: "Noto Serif JP", serif;
+        }
+
+        /* 判题状态：× 错误 (红笔打叉) */
+        .mode-practice .options-list li.judged-wrong {
+            background: var(--red-pencil-light) !important;
+            border: 1.5px dashed var(--graphite-faint) !important;
+            opacity: 0.8;
+            border-radius: 4px;
+        }
+        .mode-practice .options-list li.judged-wrong .options-num {
+            border-color: var(--graphite-faint); 
+            color: var(--graphite-faint);
+            background: #fff;
+        }
+        .mode-practice .options-list li.judged-wrong::before {
+            content: '✕';
+            position: absolute;
+            left: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--red-pencil);
+            font-size: 28px;
+            line-height: 1;
+            font-family: sans-serif;
+            pointer-events: none;
+            opacity: 0.7;
+            z-index: 1;
+        }
+
+        /* 解析模式：显示原文与翻译 */
+        .mode-explanation .right-panel {
+            filter: blur(0);
+            opacity: 1;
+            pointer-events: auto;
+            transition: all 0.5s ease;
+        }
+        
+        .mode-explanation .translation { display: block; }
+        
+        .mode-explanation .options-list li:hover {
+            border-color: var(--graphite);
+            background: var(--hatching-graphite);
+        }
+
+        .mode-explanation .correct-answer {
+            background: var(--marker-green);
+            border-color: var(--graphite);
+            border-radius: 4px;
+        }
+        .mode-explanation .correct-answer .options-num {
+            background: var(--red-pencil);
+            color: var(--paper);
+            border-color: var(--red-pencil);
+        }
+
+        .option-content { flex: 1; display: flex; flex-direction: column; min-width: 0; word-break: break-word; }
+        .option-text { font-size: 16px; font-weight: 700; color: var(--graphite); line-height: 1.6; }
+
+        /* --- 听力原文区块排版 (水彩笔记风) --- */
+        .transcript-section {
+            margin-bottom: 40px;
+            background: transparent;
+            border: 1.5px solid var(--graphite);
+            border-radius: 2px 255px 3px 25px / 255px 5px 225px 3px;
+            padding-bottom: 20px;
+        }
+
+        .question-box {
+            background-color: var(--marker-blue); /* 水彩蓝底色强调问题 */
+            padding: 34px 22px 16px;
+            border-bottom: 1.5px dashed var(--graphite);
+            font-weight: 700;
+            font-size: 16px;
+            line-height: 1.8;
+            color: var(--graphite);
+            position: relative;
+        }
+
+        .question-box::before {
+            content: '問題';
+            position: absolute;
+            top: 8px;
+            left: 18px;
+            background: var(--paper);
+            color: var(--graphite);
+            font-weight: 900;
+            padding: 2px 10px;
+            border-radius: 50% 10% 50% 10% / 10% 50% 10% 50%;
+            border: 1.5px solid var(--graphite);
+            font-size: 12px;
+            letter-spacing: 0.1em;
+            font-family: sans-serif;
+        }
+
+        .question-image-area {
+            display: none;
+            margin: 16px 0 18px;
+            padding: 14px;
+            background: rgba(255, 255, 255, 0.92);
+            border: 1.5px dashed rgba(51, 51, 51, 0.18);
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .question-image-area img {
+            display: block;
+            width: auto;
+            max-width: 100%;
+            max-height: 320px;
+            margin: 0 auto;
+            object-fit: contain;
+            border-radius: 8px;
+        }
+
+        .conversation-box {
+            padding: 28px 22px 4px;
+            font-size: 16px;
+            line-height: 1.8;
+            color: var(--graphite);
+            font-weight: 500;
+        }
+
+        .conversation-line {
+            margin-bottom: 18px;
+            display: flex;
+        }
+
+        /* 说话人标签：记号笔荧光黄涂抹感 */
+        .speaker-name {
+            font-weight: 900;
+            color: var(--graphite);
+            background-color: var(--marker-yellow);
+            padding: 2px 8px;
+            border-radius: 2px 6px 3px 5px / 5px 3px 6px 2px;
+            margin-right: 12px;
+            white-space: nowrap;
+            height: fit-content;
+            font-size: 13px;
+            border: 1.5px solid var(--graphite);
+        }
+        
+        .speaker-text { flex: 1; }
+
+        /* 原文高亮及选项标示 (僅在解説模式下生效) */
+        .mode-practice .highlight-correct,
+        .mode-practice .highlight-wrong {
+            background-color: transparent;
+            color: inherit;
+            padding: 0;
+            font-weight: inherit;
+            border: none;
+        }
+        
+        .mode-practice .opt-tag { display: none !important; }
+
+        /* 添加可点击提示：cursor: pointer 和 hover 加深效果 */
+        .explain-wrong, .explain-correct {
+            cursor: pointer;
+            display: inline;
+        }
+
+        .mode-explanation .highlight-correct {
+            background-color: var(--marker-green);
+            color: var(--graphite);
+            padding: 2px 6px;
+            font-weight: 700;
+            border-bottom: 2px solid var(--graphite);
+            cursor: pointer;
+            transition: filter 0.2s;
+        }
+
+        .mode-explanation .highlight-wrong {
+            background-color: var(--marker-pink);
+            color: var(--graphite);
+            padding: 2px 6px;
+            font-weight: 700;
+            border-bottom: 2px dashed var(--graphite);
+            cursor: pointer;
+            transition: filter 0.2s;
+        }
+
+        .mode-explanation .highlight-correct:hover,
+        .mode-explanation .highlight-wrong:hover {
+            filter: brightness(0.9);
+        }
+
+        /* 选项序号标示样式 (手绘圆圈) */
+        .mode-explanation .opt-tag {
+            display: inline-block;
+            font-size: 11px;
+            font-weight: 900;
+            width: 18px;
+            height: 18px;
+            line-height: 16px;
+            text-align: center;
+            border-radius: 50% 45% 55% 40% / 45% 55% 40% 50%;
+            margin-right: 6px;
+            vertical-align: middle;
+            border: 1.5px solid var(--graphite);
+            background: #fff;
+            color: var(--graphite);
+            font-family: sans-serif;
+        }
+        
+        .mode-explanation .tag-wrong { background-color: var(--marker-pink); }
+        .mode-explanation .tag-correct { background-color: var(--marker-green); }
+
+        /* 翻译文字统一样式 */
+        .translation {
+            color: var(--graphite-sub);
+            font-family: 'Noto Sans SC', sans-serif;
+            font-size: 13px;
+            line-height: 1.6;
+            margin-top: 8px;
+            padding-top: 8px;
+            border-top: 1.5px dashed var(--graphite-faint);
+            display: none;
+        }
+
+        /* 关键词高亮：波浪/虚线底纹 */
+        .keyword {
+            color: var(--graphite);
+            background: linear-gradient(transparent 50%, rgba(255, 213, 79, 0.4) 50%);
+            border-bottom: 1.5px solid var(--graphite);
+            padding: 0 2px;
+            cursor: pointer;
+            font-weight: 700;
+            transition: var(--transition);
+            display: inline-block;
+        }
+
+        .keyword:hover {
+            background: var(--marker-yellow);
+            border-bottom-style: dashed;
+        }
+
+        /* Tooltip (便利贴风) */
+        .custom-tooltip {
+            position: absolute;
+            background-color: #fffde7; 
+            color: var(--graphite);
+            padding: 12px 16px;
+            border: 1px solid rgba(0,0,0,0.1);
+            box-shadow: 2px 4px 10px rgba(0,0,0,0.06);
+            font-size: 13px;
+            font-weight: 400;
+            font-family: 'Noto Sans SC', sans-serif;
+            pointer-events: none;
+            z-index: 1000;
+            display: none;
+            max-width: 260px;
+            line-height: 1.6;
+            --arrow-left: 50%;
+        }
+        .custom-tooltip::after {
+            content: "";
+            position: absolute;
+            top: 100%; 
+            left: var(--arrow-left);
+            margin-left: -6px;
+            border-width: 6px;
+            border-style: solid;
+            border-color: #fffde7 transparent transparent transparent;
+        }
+
+        /* ================= 底部音频播放器 ================= */
+        .audio-wrapper {
+            background-color: rgba(255, 255, 255, 0.92);
+            backdrop-filter: blur(4px);
+            border-top: 1.5px solid var(--graphite);
+            padding-top: 16px !important;
+            padding-bottom: max(16px, env(safe-area-inset-bottom)) !important;
+            z-index: 90 !important;
+            position: fixed !important;
+            bottom: 0 !important;
+            left: 0 !important;
+            width: 100% !important;
+        }
+        
+        .custom-audio-player {
+            max-width: 800px !important;
+            margin: 0 auto !important;
+            gap: 24px !important;
+            padding: 0 24px !important;
+            display: flex !important;
+            align-items: center !important;
+        }
+
+        .now-playing-box {
+            display: flex !important;
+            align-items: center !important;
+            gap: 16px !important;
+            flex: 1 !important;
+            min-width: 0 !important;
+        }
+
+        .track-icon {
+            background: var(--marker-yellow) !important; 
+            border: 1.5px solid var(--graphite) !important;
+            border-radius: 2px 8px 3px 6px / 6px 3px 8px 2px !important;
+            flex-shrink: 0 !important;
+            width: 44px !important;
+            height: 44px !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+        }
+        .track-icon svg { fill: var(--graphite) !important; width: 22px !important; height: 22px !important;}
+        
+        .now-playing-content {
+            flex: 1 !important;
+            display: flex !important;
+            flex-direction: column !important;
+            gap: 8px !important;
+            min-width: 0 !important;
+        }
+
+        .track-header-row {
+            display: flex !important;
+            justify-content: space-between !important;
+            align-items: flex-end !important;
+            gap: 12px !important;
+        }
+
+        .track-info { 
+            margin: 0 !important; 
+            padding: 0 !important;
+            flex: 1 !important;
+            min-width: 0 !important;
+            overflow: hidden !important;
+        }
+
+        .track-title { 
+            font-weight: 700 !important; 
+            font-size: 14px !important;
+            color: var(--graphite) !important;
+            letter-spacing: 0.1em !important;
+        }
+
+        .time-group { 
+            display: flex !important;
+            font-size: 12px !important; 
+            color: var(--graphite-sub) !important;
+            flex-shrink: 0 !important;
+            font-family: 'Courier New', Courier, monospace !important; 
+        }
+        
+        .track-subtitle { display: none !important; }
+
+        .progress-area { width: 100% !important; margin: 0 !important; }
+
+        /* 进度条：彩色水彩填充 */
+        .progress-container {
+            border: 1.5px solid var(--graphite) !important;
+            border-radius: 4px !important;
+            height: 8px !important;
+            background: transparent !important;
+            width: 100% !important;
+            overflow: hidden !important;
+            cursor: pointer !important;
+            box-shadow: none !important;
+        }
+
+        .progress-bar {
+            background: var(--marker-blue) !important;
+            border-right: 1.5px solid var(--graphite) !important;
+            height: 100% !important;
+            border-radius: 0 !important;
+        }
+
+        /* 播放控制按钮 */
+        .player-controls {
+            display: flex !important;
+            align-items: center !important;
+            gap: 8px !important;
+        }
+
+        .ctrl-btn {
+            border: 1.5px solid transparent !important;
+            background: transparent !important;
+            color: var(--graphite) !important;
+            width: 36px !important;
+            height: 36px !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            transition: var(--transition) !important;
+            cursor: pointer !important;
+            border-radius: 40% 60% 50% 45% / 50% 45% 60% 40% !important; 
+            box-shadow: none !important;
+        }
+        .ctrl-btn svg { width: 20px !important; height: 20px !important; }
+
+        .ctrl-btn:hover {
+            border: 1.5px solid var(--graphite) !important;
+            background: var(--marker-yellow) !important;
+            transform: none !important;
+            box-shadow: none !important;
+        }
+        .ctrl-btn:active { transform: translate(1px, 1px) !important; }
+        
+        .play-btn { 
+            border: 1.5px solid var(--graphite) !important;
+            background: #fff !important; 
+            color: var(--graphite) !important; 
+            width: 48px !important;
+            height: 48px !important;
+            border-radius: 50% 45% 55% 40% / 45% 55% 40% 50% !important; 
+        }
+        .play-btn:hover { background: var(--marker-pink) !important; transform: none !important; }
+        .play-btn svg { fill: var(--graphite) !important; width: 24px !important; height: 24px !important;}
+        
+        .speed-btn { font-size: 13px !important; font-weight: 700 !important; width: auto !important; padding: 0 8px !important; font-family: 'Courier New', Courier, monospace !important;}
+        
+        .desktop-time { display: inline !important; }
+        .mobile-time { display: none !important; }
+
+        /* ================= 响应式深度优化 ================= */
+        @media (max-width: 768px) {
+            .practice-container {
+                width: 100%;
+                margin-top: 10px;
+                padding: 16px;
+                margin-bottom: 140px; 
+            }
+            .card-header { margin-bottom: 24px; padding-bottom: 12px; flex-direction: row; gap: 10px; align-items: center; }
+            .header-left { gap: 8px; }
+            .question-select { font-size: 14px; }
+            .mark-btn { width: 30px; height: 30px; font-size: 18px; }
+            .mode-switch { justify-content: flex-end; width: auto; padding: 0; gap: 6px; }
+            .mode-switch button { font-size: 12px; padding: 4px 6px; letter-spacing: 0; }
+            
+            .transcript-section { margin-bottom: 24px; }
+            .question-box { font-size: 14px; padding: 30px 16px 14px; }
+            .question-box::before { top: 8px; left: 12px; font-size: 11px; padding: 2px 8px; }
+            .question-image-area { margin: 14px 0 16px; padding: 12px; }
+            .question-image-area img { max-height: 240px; }
+            .conversation-box { font-size: 14px; padding: 20px 16px 4px; }
+            .speaker-name { font-size: 12px; }
+            .translation { font-size: 12px; }
+            
+            .options-list { gap: 12px; }
+            .options-list li { padding: 12px 14px 12px 42px; flex-direction: row; align-items: center; border-width: 1.5px;}
+            .options-num { left: 10px; width: 22px; height: 22px; line-height: 18px; font-size: 12px; }
+            .option-text { font-size: 14px; }
+            
+            .mode-practice .options-list li.judged-correct,
+            .mode-practice .options-list li.judged-wrong { padding-right: 60px; }
+            .mode-practice .options-list li.judged-correct::after,
+            .mode-practice .options-list li.judged-wrong::after { font-size: 10px; right: 8px; border-width: 1.5px; padding: 2px 6px; }
+
+            .inline-confirm-btn { margin: 0 0 0 12px !important; padding: 6px 14px; font-size: 13px; }
+
+            .custom-audio-player { padding: 0 16px !important; gap: 10px !important; flex-wrap: wrap !important; }
+            .now-playing-box { width: 100% !important; flex: none !important; }
+            .player-controls { width: 100% !important; justify-content: space-between !important; gap: 0 !important; }
+            #loopBtn { order: 1 !important; } #prevBtn { order: 2 !important; } #rewindBtn { order: 3 !important; } 
+            #playBtn { order: 4 !important; } #forwardBtn { order: 5 !important; } #nextBtn { order: 6 !important; } #speedBtn { order: 7 !important; }
+            
+            .track-icon { width: 38px !important; height: 38px !important;}
+            .track-icon svg { width: 18px !important; height: 18px !important; }
+            .track-title { font-size: 14px !important; }
+            .ctrl-btn { width: 36px !important; height: 36px !important; }
+            .play-btn { width: 44px !important; height: 44px !important; flex-shrink: 0 !important; }
+            .speed-btn { width: 40px !important; padding: 0 !important;}
+        }
+    
+        @media (max-width: 520px) {
+            header { padding: 8px 10px !important; }
+            .back-btn { padding: 4px 8px !important; font-size: 12px !important; }
+            header h1, #yearLabel { font-size: 14px !important; }
+            .practice-container { padding: 12px !important; }
+
+            .card-header { gap: 8px !important; }
+            .question-select { font-size: 13px !important; padding-right: 18px !important; }
+            .mark-btn { width: 28px !important; height: 28px !important; font-size: 16px !important; }
+            .mode-switch { gap: 4px !important; }
+            .mode-switch button { font-size: 11px !important; padding: 4px 5px !important; }
+            .question-box { font-size: 13px !important; }
+            .question-image-area { margin: 12px 0 14px !important; padding: 10px !important; }
+            .question-image-area img { max-height: 190px !important; }
+            .conversation-box { font-size: 13px !important; }
+            .translation { font-size: 11px !important; }
+            
+            .options-list { gap: 10px !important; }
+            .options-list li { padding: 10px 12px 10px 38px !important; }
+            .options-num { left: 8px !important; width: 20px !important; height: 20px !important; font-size: 11px !important; line-height: 16px !important; }
+            .option-text { font-size: 13px !important; }
+            .inline-confirm-btn { padding: 4px 12px !important; font-size: 12px !important; }
+            
+            .custom-audio-player { padding: 0 10px !important; gap: 8px !important; }
+            .track-icon { width: 36px !important; height: 36px !important; }
+            .track-title { font-size: 13px !important; }
+            .ctrl-btn { width: 30px !important; height: 30px !important; }
+            .play-btn { width: 38px !important; height: 38px !important; }
+            .speed-btn { width: 36px !important; font-size: 12px !important;}
+        }
+
+    </style>
+    <link rel="stylesheet" href="../../../../../shared/site-fonts.css">
+    <link rel="stylesheet" href="../../../shared/listening-header.css">
+    <link rel="stylesheet" href="../../../shared/listening-practice-mobile.css">
+</head>
+<body>
+
+    <header>
+        <a href="../index.html" class="back-btn" id="backButton">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+            戻る
+        </a>
+        <h1 id="yearLabel">課題理解 (N2)</h1>
+        <div style="width: 60px;"></div>
+    </header>
+
+    <div class="practice-container mode-practice" id="appContainer">
+        
+        <div class="card-header">
+            <div class="header-left">
+                <select id="questionSelect" class="question-select" onchange="changeQuestion(this.value)"></select>
+                <button type="button" id="markBtn" class="mark-btn" onclick="toggleMark()" title="付箋を貼る (标记/收藏)" aria-label="付箋を貼る">🐶</button>
+            </div>
+            <div class="mode-switch">
+                <button id="btnPractice" class="active" onclick="setMode('practice')">✎ 演習ノート</button>
+                <button id="btnExplanation" onclick="setMode('explanation')">✔ 赤ペン解説</button>
+            </div>
+        </div>
+
+        <div class="content-wrapper">
+            <div class="right-panel" id="rightPanel">
+                
+                <!-- 听力原文与翻译区块 (练习模式下隐藏) -->
+                <div class="transcript-section sketch-box" id="transcriptBlock">
+                    <!-- 问题区块 -->
+                    <div class="question-box">
+                        <div id="questionText"></div>
+                        <div class="translation" id="questionTrans"></div>
+                    </div>
+
+                    <!-- 对话区块 -->
+                    <div class="conversation-box" id="conversationText">
+                        <!-- 由JS填充对话内容 -->
+                    </div>
+                </div>
+
+                <div class="question-image-area" id="questionImageArea" aria-live="polite">
+                    <img id="questionImage" alt="">
+                </div>
+
+                <!-- 选项列表 (练习模式下保持可见) -->
+                <ul class="options-list" id="optionsList"></ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- 底部音频播放器 -->
+    <div class="audio-wrapper">
+        <div class="custom-audio-player">
+            <div class="now-playing-box">
+                <div class="track-icon">
+                    <svg viewBox="0 0 24 24"><path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/></svg>
+                </div>
+                <div class="now-playing-content">
+                    <div class="track-header-row">
+                        <div class="track-info">
+                            <div class="track-title" id="trackTitle">問題 1</div>
+                            <div class="track-subtitle" id="trackSubtitle" style="display:none;"></div>
+                        </div>
+                        <div class="time-group">
+                            <span class="time-display time-current" id="timeCurrent">0:00</span>
+                            <span class="time-display time-divider" style="margin: 0 4px;">/</span>
+                            <span class="time-display time-duration desktop-time" id="timeDurationDesktop">0:00</span>
+                            <span class="time-display time-duration mobile-time" id="timeDurationMobile" style="display: none;">-0:00</span>
+                        </div>
+                    </div>
+                    <div class="progress-area">
+                        <div class="progress-container" id="progressContainer">
+                            <div class="progress-bar" id="progressBar"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 控制组 -->
+            <div class="player-controls">
+                <button id="prevBtn" class="ctrl-btn nav-btn" onclick="prevQuestion()" title="前へ">
+                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 6h2v12H3zM13 6v12L5 12zM21 6v12L13 12z"/></svg>
+                </button>
+                <button id="rewindBtn" class="ctrl-btn skip-btn" title="6秒戻る">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><text x="12" y="16.5" font-size="8.5" font-weight="900" font-family="sans-serif" stroke-width="0" fill="currentColor" text-anchor="middle">6</text></svg>
+                </button>
+                <button class="ctrl-btn play-btn" id="playBtn">
+                    <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                </button>
+                <button id="forwardBtn" class="ctrl-btn skip-btn" title="6秒進む">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><text x="12" y="16.5" font-size="8.5" font-weight="900" font-family="sans-serif" stroke-width="0" fill="currentColor" text-anchor="middle">6</text></svg>
+                </button>
+                <button id="nextBtn" class="ctrl-btn nav-btn" onclick="nextQuestion()" title="次へ">
+                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 6v12L11 12zM11 6v12L19 12zM19 6h2v12H19z"/></svg>
+                </button>
+                <button id="loopBtn" class="ctrl-btn loop-btn" title="ループ再生">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="17 1 21 5 17 9"></polyline><path d="M3 11V9a4 4 0 0 1 4-4h14"></path><polyline points="7 23 3 19 7 15"></polyline><path d="M21 13v2a4 4 0 0 1-4 4H3"></path></svg>
+                </button>
+                <button id="speedBtn" class="ctrl-btn speed-btn" title="再生速度">1.0x</button>
+            </div>
+            
+            <audio id="audioElement" preload="metadata"></audio>
+        </div>
+    </div>
+
+    <div id="wordTooltip" class="custom-tooltip"></div>
+
+    <script src="../../../shared/audio-player-theme.js"></script>
+    <script src="../../../shared/listening-progress.js"></script>
+<script>
+        // --- Data Structure ---
+        const examData = {
+        
+  "N2-2019-07": {
+    "label": "2019年7月 (N2)",
+    "questions": [
+      {
+        "id": 1,
+        "audio": "../assets/audio/2019.7-1.mp3",
+        "script": {
+          "question": "男の人と女の人が話しています。男の人はこのあと何をしますか。",
+          "questionTrans": "（男人和女人在说话。男人接下来要做什么？）",
+          "dialogue": [
+            {
+              "speaker": "男",
+              "text": "森さん。僕、来週引っ越すんだけど、今使ってる冷蔵庫いらなくなるんだ。それで、もらってくれる人探してるんだけど誰か知らない？",
+              "trans": "（森，我下周要搬家，现在用的冰箱用不上了。正找人接手呢，你认识谁需要吗？）"
+            },
+            {
+              "speaker": "女",
+              "text": "<span class=\"highlight-wrong explain-wrong\" data-explain=\"①女士明确表示“暂时想不出合适的人选”，排除了送给朋友的可能性。\">①んー、ちょっと<span class=\"keyword\" data-tooltip=\"心当たりがない：毫无头绪\">心当たりない</span>な。</span>",
+              "trans": "（嗯……暂时想不出合适的人选。）"
+            },
+            {
+              "speaker": "男",
+              "text": "そっか。冷蔵庫って確か粗大ゴミとしては出せないんだよね？",
+              "trans": "（这样啊。冰箱好像不能当成大型垃圾直接扔掉吧？）"
+            },
+            {
+              "speaker": "女",
+              "text": "<span class=\"highlight-wrong explain-wrong\" data-explain=\"②两人确认了冰箱无法作为大型垃圾直接丢弃，需要办理专门的手续。\">②うん。法律でいらなくなった冷蔵庫を出す時は手続きをすることになってるよね。</span>",
+              "trans": "（对，法律规定丢弃旧冰箱要办理相关手续。）"
+            },
+            {
+              "speaker": "男",
+              "text": "そっか。手続きってどこでするの？",
+              "trans": "（这样啊，去哪儿办呢？）"
+            },
+            {
+              "speaker": "女",
+              "text": "<span class=\"highlight-wrong explain-wrong\" data-explain=\"③联系市政府只是一个备选项，女士紧接着推荐了更省事的搬家公司方案。\">③市役所に連絡してもいいけど</span>、<span class=\"highlight-correct\">④引っ越し会社によっては<span class=\"keyword\" data-tooltip=\"事前に：事先\">事前に</span>言っとけば手続きをしてくれて引っ越し当日、冷蔵庫の<span class=\"keyword\" data-tooltip=\"回収する：回收\">回収もしてくれる</span></span>って聞いたことあるよ。",
+              "trans": "（联系市政府也行，不过我听说有些搬家公司只要提前打个招呼，就会帮你代办手续，搬家当天还能顺便回收冰箱。）"
+            },
+            {
+              "speaker": "男",
+              "text": "え、そうなんだ。",
+              "trans": "（哦，原来如此。）"
+            },
+            {
+              "speaker": "女",
+              "text": "<span class=\"highlight-correct\">④その方が簡単だから聞いてみたら？</span>来週まで時間もないでしょう？",
+              "trans": "（那样比较省事，你去问问看？下周就要搬了，时间也挺紧的吧？）"
+            },
+            {
+              "speaker": "男",
+              "text": "わかった。ありがとう。",
+              "trans": "（好，多谢。）"
+            }
+          ]
+        },
+        "options": [
+          {
+            "text": "れいぞうこを友達にあげる",
+            "translation": "（把冰箱送给朋友）",
+            "correct": false,
+            "explain": "女士开头回应“心当たりない（毫无头绪）”，说明她找不到能接手冰箱的朋友。"
+          },
+          {
+            "text": "れいぞうこをそだいごみとして出す",
+            "translation": "（把冰箱作为大型垃圾丢掉）",
+            "correct": false,
+            "explain": "两人在对话中达成共识，冰箱无法当成粗大垃圾直接丢弃，需要走专门的回收流程。"
+          },
+          {
+            "text": "市役所で手続きをする",
+            "translation": "（在市政府办手续）",
+            "correct": false,
+            "explain": "市政府只是女士提到的一个可行渠道，但她随后极力推荐了更简便的搬家公司代办方案。"
+          },
+          {
+            "text": "ひっこし会社に問い合わせる",
+            "translation": "（向搬家公司咨询）",
+            "correct": true,
+            "explain": "女士建议向搬家公司咨询代办手续和回收事宜，男士认为这个方法可行并采纳了建议。"
+          }
+        ]
+      },
+      {
+        "id": 2,
+        "audio": "../assets/audio/2019.7-2.mp3",
+        "script": {
+          "question": "日本語学校で先生が話しています。学生はこのあとスピーチの原稿をどう直しますか。",
+          "questionTrans": "（在日语学校，老师在讲话。学生接下来要怎样修改演讲稿？）",
+          "dialogue": [
+            {
+              "speaker": "女",
+              "text": "先週提出してもらったスピーチの原稿返します。<span class=\"highlight-wrong explain-wrong\" data-explain=\"①老师开头表扬了自我介绍部分大家都写得很好，无需修改。\">①始めのところに自己紹介を入れてもらいましたが、皆さんよく書けていました。</span>スピーチの内容もそれぞれとても面白かったです。授業で勉強したように<span class=\"highlight-wrong explain-wrong\" data-explain=\"②给生僻词加解释这一点同样受到了老师的认可，并非此次需要调整的重点。\">②難しい言葉には説明を付けてわかりやすくしているのもよかった</span>んですが、<span class=\"highlight-correct\">③皆さん、文と文を<span class=\"keyword\" data-tooltip=\"繋ぐ：连接\">繋ぐ</span>表現がほとんど使われていませんでした。不自然に感じるので今から<span class=\"keyword\" data-tooltip=\"見直す：重新审视\">見直して</span>入れてみましょう。</span>その他の点についてはそれぞれコメントを入れました。<span class=\"highlight-wrong explain-wrong\" data-explain=\"④老师在最后补充说明目前暂且不用操心整体篇幅长短。\">④全体的な長さは今は考えなくてもいい</span>ですよ。",
+              "trans": "（大家上周交上来的演讲稿现在发下去了。开头部分的自我介绍大家都写得不错。演讲内容也都挺有意思的。另外，能像上课教的那样给生僻词加上解释以便理解，这点也做得很好。不过，大家几乎都没怎么使用连接句子间的过渡表达。读起来不太顺畅，所以现在请大家重新审视一下稿子并把这些词加进去。其他方面我都分别写了批注。至于整体篇幅长短，目前暂且不用操心。）"
+            }
+          ]
+        },
+        "options": [
+          {
+            "text": "じこしょうかいを入れる",
+            "translation": "（加入自我介绍）",
+            "correct": false,
+            "explain": "老师一开始就对大家添加的自我介绍给予了肯定，说明这部分内容已经过关。"
+          },
+          {
+            "text": "難しい言葉に説明を加える",
+            "translation": "（给难词加说明）",
+            "correct": false,
+            "explain": "学生们已经在稿件中做好了难词解释，老师对此表示赞赏，不需要再作补充。"
+          },
+          {
+            "text": "文をつなぐ言葉を追加する",
+            "translation": "（添加连接句子的词语）",
+            "correct": true,
+            "explain": "老师指出文章缺乏连接句子的表达导致行文不自然，要求大家“现在重新审视并加进去（今から見直して入れてみましょう）”。"
+          },
+          {
+            "text": "全体的に短くする",
+            "translation": "（整体缩短）",
+            "correct": false,
+            "explain": "老师明确交代现阶段“不用考虑整体长度”，所以无需进行缩减或拉长的动作。"
+          }
+        ]
+      },
+      {
+        "id": 3,
+        "audio": "../assets/audio/2019.7-3.mp3",
+        "script": {
+          "question": "デパートの洋服売り場で店の人と男の人が話しています。店の人はズボンの裾をどのように仕上げますか。",
+          "questionTrans": "（在百货商店服装卖场，店员和男人在说话。店员会怎样处理裤脚？）",
+          "dialogue": [
+            {
+              "speaker": "女",
+              "text": "お客様、そちらのズボン、<span class=\"keyword\" data-tooltip=\"履く：穿（裤子、鞋等）\">履いて</span>みていかがですか。",
+              "trans": "（客人，那条裤子试穿感觉如何？）"
+            },
+            {
+              "speaker": "男",
+              "text": "あ、ちょうどいいです。ただズボンの裾が少し長いので短くしてもらえますか。",
+              "trans": "（啊，大小正合适。就是裤脚稍微长了点，能帮我改短些吗？）"
+            },
+            {
+              "speaker": "女",
+              "text": "かしこまりました。では長さを確認いたします。",
+              "trans": "（好的。那我来确认一下长度。）"
+            },
+            {
+              "speaker": "男",
+              "text": "あの、今これは裾が<span class=\"highlight-wrong explain-wrong\" data-explain=\"①②客人说明目前的裤脚是向内折的，他想要改掉这个样式。\">①②内側に<span class=\"keyword\" data-tooltip=\"折る：折叠\">折ってある</span></span>んですけど、<span class=\"highlight-correct\">③④外側に折るようにしてもらえますか。</span>売り場に飾ってあったののみたいに。",
+              "trans": "（那个，现在这裤脚是往里折的，能帮我改成往外折吗？就像卖场里展示的那条一样。）"
+            },
+            {
+              "speaker": "女",
+              "text": "あ、はい。",
+              "trans": "（啊，好的。）"
+            },
+            {
+              "speaker": "男",
+              "text": "できますか。よかった。で、売り場にあったのは折ったところを<span class=\"highlight-wrong explain-wrong\" data-explain=\"①③客人提到展示品是用纽扣固定，但他随即表示自己想换种方式。\">①③ボタンで<span class=\"keyword\" data-tooltip=\"留める：固定\">留める</span></span>ようになってましたが、<span class=\"highlight-correct\">②④糸で留めてもらいたい</span>んです。",
+              "trans": "（可以改是吧？太好了。还有，卖场展示的那条折角处是用纽扣扣住的，我想改成用缝线固定。）"
+            },
+            {
+              "speaker": "女",
+              "text": "<span class=\"highlight-wrong explain-wrong\" data-explain=\"①③店员试图推荐纽扣的便利性，但遭到了客人的婉拒。\">①③ボタンですと留めたり<span class=\"keyword\" data-tooltip=\"外す：取下、解开\">外したり</span>しやすいので汚れなどのお手入れがしやすいですよ。</span>",
+              "trans": "（用纽扣的话穿脱比较方便，弄脏了也容易清洗保养哦。）"
+            },
+            {
+              "speaker": "男",
+              "text": "うーん、僕には必要ないかな。",
+              "trans": "（嗯……我感觉没那个必要。）"
+            },
+            {
+              "speaker": "女",
+              "text": "承知しました。では、そのように。",
+              "trans": "（明白了。那就按您要求的办。）"
+            }
+          ]
+        },
+        "options": [
+          {
+            "text": "内側に折り、ボタンで留める",
+            "translation": "（向内折，用纽扣固定）",
+            "correct": false,
+            "explain": "客人明确要求将“向内折”改为“向外折”，同时拒绝了使用纽扣固定。"
+          },
+          {
+            "text": "内側に折り、糸で留める",
+            "translation": "（向内折，用线固定）",
+            "correct": false,
+            "explain": "虽然用线固定符合要求，但折叠方向搞错了，客人想要的是向外折。"
+          },
+          {
+            "text": "外側に折り、ボタンで留める",
+            "translation": "（向外折，用纽扣固定）",
+            "correct": false,
+            "explain": "向外折的方向没问题，但客人觉得用纽扣不必要，坚持要用线缝死。"
+          },
+          {
+            "text": "外側に折り、糸で留める",
+            "translation": "（向外折，用线固定）",
+            "correct": true,
+            "explain": "客人在对话中提出了两个具体诉求：“改成往外折（外側に折る）”和“用缝线固定（糸で留めてもらいたい）”。"
+          }
+        ]
+      },
+      {
+        "id": 4,
+        "audio": "../assets/audio/2019.7-4.mp3",
+        "script": {
+          "question": "会社で女の人と男の人が話しています。男の人はこのあとまず何をしなければなりませんか。",
+          "questionTrans": "（在公司，女人和男人在说话。男人接下来首先要做什么？）",
+          "dialogue": [
+            {
+              "speaker": "女",
+              "text": "田中さん。新製品の発売に合わせて行うイベント、あれ、やることが<span class=\"keyword\" data-tooltip=\"確定する：确定、敲定\">確定した</span>から準備始めてくれる？",
+              "trans": "（田中。配合新产品上市要办的那个活动，具体事宜已经敲定了，你着手准备一下吧？）"
+            },
+            {
+              "speaker": "男",
+              "text": "はい、わかりました。",
+              "trans": "（好的，明白了。）"
+            },
+            {
+              "speaker": "女",
+              "text": "今回は社長に挨拶をお願いしてあるから社長が来られる日じゃないといけないの。<span class=\"highlight-correct\">①秘書課に予定を聞いてくれる？</span><span class=\"highlight-wrong explain-wrong\" data-explain=\"②筛选备选日期是建立在得知社长日程之后的下一步动作。\">②イベントの候補日を<span class=\"keyword\" data-tooltip=\"絞る：筛选、缩小范围\">絞らない</span>といけないから。</span>",
+              "trans": "（这次打算请社长来致辞，所以日期要挑社长能出席的日子。你去向秘书课打听一下日程好吗？我们需要据此来筛选活动的备选日期。）"
+            },
+            {
+              "speaker": "男",
+              "text": "<span class=\"highlight-wrong explain-wrong\" data-explain=\"③预订会场需要等“日期定下来”之后再进行，属于偏后期的工作。\">③はい。日にちが決まったら会場を<span class=\"keyword\" data-tooltip=\"予約する：预约\">予約します</span>ね。</span>参加者は何人ぐらいになるでしょうか。",
+              "trans": "（好的。等日子定下来我就去预订会场。预计会有多少人参加呢？）"
+            },
+            {
+              "speaker": "女",
+              "text": "100人ぐらいかな。<span class=\"highlight-wrong explain-wrong\" data-explain=\"④整理宾客名单目前正由营业部负责处理，并非男士的工作。\">④営業部が今、招待客の名簿を作ってるところなんだけど。</span>",
+              "trans": "（大概100人左右吧。营业部现在正忙着整理宾客名单呢。）"
+            },
+            {
+              "speaker": "男",
+              "text": "じゃ、会場を予約するのは名簿が出来てからですね。",
+              "trans": "（那预订会场还得等名单出来之后再说了。）"
+            },
+            {
+              "speaker": "女",
+              "text": "うん。",
+              "trans": "（对。）"
+            }
+          ]
+        },
+        "options": [
+          {
+            "text": "社長の予定をかくにんする",
+            "translation": "（确认社长的日程）",
+            "correct": true,
+            "explain": "女士强调活动日期需要配合社长，并直接指示男士去秘书课打听日程，这是开展后续所有工作的前提和首要任务。"
+          },
+          {
+            "text": "イベントのこうほびをだす",
+            "translation": "（提出活动候选日期）",
+            "correct": false,
+            "explain": "筛选候选日期需要先拿到社长的日程表才能进行，顺序排在确认日程之后。"
+          },
+          {
+            "text": "会場を予約する",
+            "translation": "（预约会场）",
+            "correct": false,
+            "explain": "男士自己理清了思路，预订会场不仅要等日期敲定，还得等营业部出具名单，属于后期工作。"
+          },
+          {
+            "text": "しょうたいする人のめいぼを作る",
+            "translation": "（制作邀请名单）",
+            "correct": false,
+            "explain": "整理宾客名单是营业部目前正在赶工的任务，不归这位男士负责。"
+          }
+        ]
+      },
+      {
+        "id": 5,
+        "audio": "../assets/audio/2019.7-5.mp3",
+        "script": {
+          "question": "アパートの入り口で男の管理人と女の学生が話しています。女の学生は明日の朝まで何をしなければなりませんか。",
+          "questionTrans": "（在公寓入口，男管理员和女学生在说话。女学生到明天早上之前需要做什么？）",
+          "dialogue": [
+            {
+              "speaker": "男",
+              "text": "あ、リンさん。おはようございます。掲示板にお知らせを張っておいたんですけど、明日の土曜日、大丈夫ですか。",
+              "trans": "（啊，林同学。早上好。我在公告栏贴了通知，明天周六你方便吗？）"
+            },
+            {
+              "speaker": "女",
+              "text": "え？明日、何かあるんですか。すみません、掲示板ちゃんと読んでなくて。",
+              "trans": "（诶？明天有事吗？不好意思，我没仔细看公告栏。）"
+            },
+            {
+              "speaker": "男",
+              "text": "<span class=\"highlight-wrong explain-wrong\" data-explain=\"①刷漆工作已经外包给专业师傅，不需要女学生动手。\">①自転車置き場のペンキを<span class=\"keyword\" data-tooltip=\"塗り直す：重新涂刷\">塗り直す</span></span>んですよ。<span class=\"highlight-wrong explain-wrong\" data-explain=\"②打扫停放处是明天施工的内容之一，并非分派给女学生的任务。\">②ついでに自転車置き場の掃除もするんです。</span>",
+              "trans": "（是这样的，自行车停放处要重新刷漆。顺便也会打扫一下里面。）"
+            },
+            {
+              "speaker": "女",
+              "text": "ああ、そうなんですか。すみません、明日はちょっと時間が無くて。",
+              "trans": "（啊，这样啊。不好意思，我明天稍微有点忙不过来。）"
+            },
+            {
+              "speaker": "男",
+              "text": "ああ、いえ。<span class=\"highlight-correct\">③自転車をアパートの前の駐車場に<span class=\"keyword\" data-tooltip=\"移動する：移动、挪动\">移動して</span>ほしい</span>んです。今日はまだ駐車場が使えないから<span class=\"highlight-correct\">③明日の朝7時から10時の間</span>にお願いします。",
+              "trans": "（啊，不是让你干活。是希望你把自行车挪到公寓前面的停车场去。今天停车场还腾不开，所以麻烦你明早7点到10点之间去挪一下。）"
+            },
+            {
+              "speaker": "女",
+              "text": "ああ、一緒にペンキを塗るのかと思っちゃいました。",
+              "trans": "（啊，我还以为是要叫我一起刷漆呢。）"
+            },
+            {
+              "speaker": "男",
+              "text": "ははは、それはプロに頼んでありますよ。明日の朝、大丈夫そうですか。無理なら私がやっておきますが。",
+              "trans": "（哈哈，那个已经外包给专业师傅了。明早挪车有问题吗？实在不行的话我帮你挪也行。）"
+            },
+            {
+              "speaker": "女",
+              "text": "はい、出かける前にできます。",
+              "trans": "（没问题，我出门前能搞定。）"
+            },
+            {
+              "speaker": "男",
+              "text": "お願いします。動かしたらすみませんが<span class=\"highlight-wrong explain-wrong\" data-explain=\"④寄放钥匙是挪完车之后附带的一个动作，并非核心任务。\">④鍵は私に<span class=\"keyword\" data-tooltip=\"預ける：寄存、交给...保管\">預けて</span>ください</span>。自転車はこちらで<span class=\"keyword\" data-tooltip=\"戻す：放回、恢复原状\">戻しておきます</span>から。",
+              "trans": "（那就拜托了。车挪完后麻烦把钥匙交给我保管。后续我们会负责把自行车挪回原位的。）"
+            },
+            {
+              "speaker": "女",
+              "text": "わかりました。",
+              "trans": "（明白了。）"
+            }
+          ]
+        },
+        "options": [
+          {
+            "text": "ペンキぬりを手伝う",
+            "translation": "（帮忙刷油漆）",
+            "correct": false,
+            "explain": "管理员提到刷漆工作已经交给了专业人员（プロに頼んであります），女学生无需参与。"
+          },
+          {
+            "text": "自転車置き場のそうじをする",
+            "translation": "（打扫自行车停放处）",
+            "correct": false,
+            "explain": "打扫车棚是管理员对明天施工安排的补充说明，并不是要求女学生去干活。"
+          },
+          {
+            "text": "自分の自転車を駐車場に運ぶ",
+            "translation": "（把自己的自行车搬到停车场）",
+            "correct": true,
+            "explain": "管理员的核心诉求就是希望女学生在明早7点到10点之间，把个人自行车挪到公寓前的停车场腾出空间。"
+          },
+          {
+            "text": "自転車のカギを預ける",
+            "translation": "（寄放自行车钥匙）",
+            "correct": false,
+            "explain": "寄放钥匙是建立在“把车挪到停车场”完成之后的后续步骤，题干问的是明早之前的主要任务，即挪车。"
+          }
+        ]
+      }
+    ]
+  },
+          "N2-2019-12": {
+    "label": "2019年12月 (N2)",
+    "questions": [
+      {
+        "id": 1,
+        "audio": "../assets/audio/2019.12-1.mp3",
+        "script": {
+          "question": "アパートで女の人と管理人が話しています。女の人は壊れたパソコンをどうしますか。",
+          "questionTrans": "（在公寓，女人和管理员在说话。女人要怎么处理坏掉的电脑？）",
+          "dialogue": [
+            {
+              "speaker": "女",
+              "text": "<span class=\"highlight-wrong explain-wrong\" data-explain=\"①女士一开始的猜想，随后被管理员纠正，电脑不能直接按大型垃圾扔在公寓指定地点。\">①壊れたパソコンは、粗大ゴミの申し込みをして、アパートの指定の場所に出せば、収集してくれる</span>んでしたっけ。薄いノートパソコンなんですけど。",
+              "trans": "（坏掉的电脑，是不是申请按大型垃圾处理，放到公寓指定的地点就会有人来收？是个轻薄型的笔记本电脑。）"
+            },
+            {
+              "speaker": "男",
+              "text": "パソコンはメーカーに回収してもらうか、<span class=\"highlight-wrong explain-wrong\" data-explain=\"③管理员确实提到了可以拿回原购买店，但女士表示电脑是十多年前买的，已经不记得在哪买的了，此方案行不通。\">③パソコンを買ったお店に持っていく</span>かしないと、粗大ゴミとして出せないんですね。",
+              "trans": "（电脑得让厂家回收，或者拿回当初买的店里，不然没法当作大型垃圾丢掉的。）"
+            },
+            {
+              "speaker": "女",
+              "text": "そうなんですか。十何年も前のものなので、どこで買ったか。",
+              "trans": "（这样啊。都是十多年前买的了，早就不记得在哪儿买的了。）"
+            },
+            {
+              "speaker": "男",
+              "text": "でしたら、<span class=\"highlight-correct\">②メーカーに連絡すれば、専用の伝票を送ってくれますから、それを梱包したパソコンに貼って、郵送すればいい</span>んですよ。",
+              "trans": "（那样的话，联系厂家，他们会寄来专用的快递单，把它贴在打包好的电脑上寄过去就行了。）"
+            },
+            {
+              "speaker": "女",
+              "text": "意外と簡単な手続きなんですね。",
+              "trans": "（手续比想象中要简单呢。）"
+            },
+            {
+              "speaker": "男",
+              "text": "大きい自治体だと、市役所とか公共施設に<span class=\"highlight-wrong explain-wrong\" data-explain=\"④管理员解释那是其他大型地区的做法，他们所在的这片区域并没有设立这种回收箱。\">④回収箱が設置されていて、そこに入れれば</span>パソコンも回収してくれるんですけど、この地域はないんですよね。",
+              "trans": "（像大一点的行政区，市政府或者公共设施里会设有回收箱，放进去就能回收电脑，但咱们这片区域没有。）"
+            },
+            {
+              "speaker": "女",
+              "text": "そうですか。",
+              "trans": "（这样啊。）"
+            }
+          ]
+        },
+        "options": [
+          {
+            "text": "アパートの指定場所に出す",
+            "translation": "（拿到公寓指定地点）",
+            "correct": false,
+            "explain": "管理员明确否定了这种做法，表示电脑不能像普通粗大垃圾一样直接丢在公寓垃圾区。"
+          },
+          {
+            "text": "メーカーに送る",
+            "translation": "（寄给厂家）",
+            "correct": true,
+            "explain": "针对女士不记得购买店铺的情况，管理员给出了联系厂家获取专用快递单并打包寄出的方案，女士也觉得简单并准备采纳。"
+          },
+          {
+            "text": "買った店に持っていく",
+            "translation": "（拿到购买的店）",
+            "correct": false,
+            "explain": "这是管理员提出的一种可行方案，但因为女士忘记了十几年前是在哪里买的，所以被排除了。"
+          },
+          {
+            "text": "市のかいしゅう箱に入れる",
+            "translation": "（放进市里的回收箱）",
+            "correct": false,
+            "explain": "管理员补充说明这是其他大型地区的做法，当前区域并没有这种回收箱。"
+          }
+        ]
+      },
+      {
+        "id": 2,
+        "audio": "../assets/audio/2019.12-2.mp3",
+        "script": {
+          "question": "会社で部長と事務の女の人が話しています。女の人はこの後、何をしなければなりませんか。",
+          "questionTrans": "（在公司，部长和事务人员在说话。女人之后需要做什么？）",
+          "dialogue": [
+            {
+              "speaker": "男",
+              "text": "ちょっといいかな。北山食品からのプラスチックの容器の注文のことなんだけど、この<span class=\"keyword\" data-tooltip=\"せいきゅうしょ：账单、请款单\">請求書</span>を作成したのって。",
+              "trans": "（现在方便吗？关于北山食品订购塑料容器的那单，这份账单是谁做的来着？）"
+            },
+            {
+              "speaker": "女",
+              "text": "<span class=\"highlight-wrong explain-wrong\" data-explain=\"②部长并未指出账单做错了，只是来找制作人询问订单骤减的原因。\">②作ったのはわたしです。何か間違いがありましたか。</span>",
+              "trans": "（是我做的。是有哪里弄错了吗？）"
+            },
+            {
+              "speaker": "男",
+              "text": "いや、これ中村君に頼まれて作成したんだよね。<span class=\"highlight-wrong explain-wrong\" data-explain=\"④负责向部长汇报订单数量变化原因的是具体的业务对接人中村，女士只负责传话。\">④営業担当は中村君</span>だから。",
+              "trans": "（没，这是中村拜托你做的吧。毕竟这单的业务对接人是中村。）"
+            },
+            {
+              "speaker": "女",
+              "text": "はい。",
+              "trans": "（对。）"
+            },
+            {
+              "speaker": "男",
+              "text": "注文の数がこれまでよりずいぶん減ってるから、その理由が知りたいんだけど、中村君外出中みたいで、何か聞いてない？",
+              "trans": "（订单数量比之前少了一大截，我想知道原因。中村好像出外勤了，你有没有听说点什么？）"
+            },
+            {
+              "speaker": "女",
+              "text": "いいえ、何も。",
+              "trans": "（没有，什么都没听说。）"
+            },
+            {
+              "speaker": "男",
+              "text": "そうか。悪いけど、<span class=\"highlight-wrong explain-wrong\" data-explain=\"③马上要去参加会议的是部长本人，不是这位女士。\">③わたし今から会議</span>だから、<span class=\"highlight-correct\">①中村君戻ったらこの件について、わたしのところに説明にくるよう伝えといて</span>もらえるかな。五時には会議終わって戻るから、特に報告受けてなかったものだから、気になっちゃってね。",
+              "trans": "（这样啊。麻烦你一下，我马上要去开会，等中村回来后，你转告他来我这儿说明一下这个情况。我五点开完会回来。因为之前没收到报告，所以有些在意这事。）"
+            },
+            {
+              "speaker": "女",
+              "text": "わかりました。",
+              "trans": "（明白了。）"
+            }
+          ]
+        },
+        "options": [
+          {
+            "text": "中村さんに伝言をする",
+            "translation": "（给中村传话）",
+            "correct": true,
+            "explain": "部长马上要去开会，所以交代女士等中村出外勤回来后，转告他去部长那里说明订单减少的情况。"
+          },
+          {
+            "text": "せいきゅう書の間違いを直す",
+            "translation": "（修改账单错误）",
+            "correct": false,
+            "explain": "部长找来并不是因为账单有问题，而是想了解账单背后订单数量变少的理由。"
+          },
+          {
+            "text": "会議に出席する",
+            "translation": "（参加会议）",
+            "correct": false,
+            "explain": "准备去参加会议的是部长，不是女士的工作。"
+          },
+          {
+            "text": "注文数について部長に報告する",
+            "translation": "（向部长报告订单数）",
+            "correct": false,
+            "explain": "报告订单原因这件事应由业务对接人中村来做，女士的任务仅仅是负责帮部长传个话。"
+          }
+        ]
+      },
+      {
+        "id": 3,
+        "audio": "../assets/audio/2019.12-3.mp3",
+        "script": {
+          "question": "日本語のクラスで先生が留学生に話しています。留学生は主に商店街の何についてインタビューのプランを立てますか。",
+          "questionTrans": "（日语课上，老师在对留学生讲话。留学生主要要围绕商店街的什么来制定采访计划？）",
+          "dialogue": [
+            {
+              "speaker": "女",
+              "text": "来週の授業では、さくら<span class=\"keyword\" data-tooltip=\"しょうてんがい：商店街\">商店街</span>にいって、グループごとに二軒ずつ古くから続く商店を回って、お店の人にインタビューをします。ええ、さくら商店街は最近では<span class=\"highlight-wrong explain-wrong\" data-explain=\"①“人气商品”只是老师在介绍商店街近况时提到的背景信息，并非要求学生采访的核心主题。\">①魚のコロッケなどの人気商品</span>で知られ、<span class=\"highlight-wrong explain-wrong\" data-explain=\"②“不断尝试新事物”同样属于现状介绍，并不是采访计划的主线。\">②新しいことに次々とチャレンジ</span>していますが、県内で最も長く続く商店街なんです。そこで<span class=\"highlight-correct\">④商店街全体がこれまでどのように困難を乗り越え、変化、発展してきたのか</span>、話を伺います。今日はこのテーマに基づいてグループごとにインタビューのプランを立てましょう。今から、各グループに店のリストを配ります。",
+              "trans": "（下周的课上，我们会去樱花商店街，每个小组走访两家老字号商铺，采访店里的人。樱花商店街最近因为鱼肉可乐饼等人气商品走红，也正不断尝试各种新事物，但它其实是县内历史最悠久的商店街。因此，我们要去了解整个商店街一路走来是如何克服困难、经历变化并发展至今的。今天大家就围绕这个主题，分小组制定采访计划。现在我把店铺名单发给各个小组。）"
+            }
+          ]
+        },
+        "options": [
+          {
+            "text": "最近人気のある商品",
+            "translation": "（最近有人气的商品）",
+            "correct": false,
+            "explain": "鱼肉可乐饼等人气商品仅仅是开场用来介绍商店街近况的背景铺垫。"
+          },
+          {
+            "text": "これからのチャレンジ",
+            "translation": "（今后的挑战）",
+            "correct": false,
+            "explain": "同样地，“挑战新事物”也只是描述商店街现状的说明，不作为本次采访的主轴。"
+          },
+          {
+            "text": "店が困っていること",
+            "translation": "（店铺遇到的困难）",
+            "correct": false,
+            "explain": "老师让大家关注的是商店街“整体”如何克服过去的困难走到今天，而非单单去问每一家店眼下正面临什么难处。"
+          },
+          {
+            "text": "はってんのれきし",
+            "translation": "（发展的历史）",
+            "correct": true,
+            "explain": "老师明确点出了核心任务：“了解整个商店街一路走来是如何克服困难、经历变化并发展至今的”，学生需要围绕这段历史发展脉络来制定计划。"
+          }
+        ]
+      },
+      {
+        "id": 4,
+        "audio": "../assets/audio/2019.12-4.mp3",
+        "script": {
+          "question": "大学の事務所で学生と事務所の人が話しています。学生はこの後、まず何をしますか。",
+          "questionTrans": "（在大学事务所，学生和事务人员在说话。学生之后首先做什么？）",
+          "dialogue": [
+            {
+              "speaker": "男",
+              "text": "すみません。先週インフルエンザで経済学の<span class=\"keyword\" data-tooltip=\"がっきまつしけん：期末考试\">学期末試験</span>を休んでしまったんですが。病気の場合は、もう一度試験が受けられると聞きまして。",
+              "trans": "（你好。我上周得了流感，错过了经济学的期末考试。听说生病的话可以补考。）"
+            },
+            {
+              "speaker": "女",
+              "text": "経済学は西山先生ですね。<span class=\"highlight-wrong explain-wrong\" data-explain=\"①学生随后表示已经取得了西山老师的同意，所以这一步其实已经完成了。\">①まずは先生に試験が受けられるか確認して</span>、受けられるということなら、こちらの<span class=\"keyword\" data-tooltip=\"しんせいしょ：申请书\">申請書</span>を書いて、医師の診断書と一緒に出してください。申請、今日までだから、急いで西山先生に確認してくださいね。",
+              "trans": "（经济学是西山老师负责的。首先你要去向老师确认能不能补考，同意的话，就填好这份申请书，连同医生的诊断书一起交上来。申请截止到今天，你赶紧去找西山老师确认吧。）"
+            },
+            {
+              "speaker": "男",
+              "text": "あっ、先生には許可をいただきました。あのう、<span class=\"highlight-wrong explain-wrong\" data-explain=\"③因为医院今天休息，男生计划明天再去开诊断书，所以这不是今天能解决的事情。\">③診断書が必要って知らなくて、病院でもらって来なかった</span>んですけど。",
+              "trans": "（啊，老师那边已经同意了。那个，我之前不知道需要诊断书，所以没从医院开出来。）"
+            },
+            {
+              "speaker": "女",
+              "text": "病気の場合は診断書がないと。",
+              "trans": "（因病缺考的话不交诊断书是不行的。）"
+            },
+            {
+              "speaker": "男",
+              "text": "今日は病院が休みで、明日書いてもらって持ってきますので。",
+              "trans": "（今天医院休息，明天医生开好后我马上送来。）"
+            },
+            {
+              "speaker": "女",
+              "text": "ううん、仕方ないですね。<span class=\"highlight-correct\">②じゃあ、今日は申請書だけで</span>、試験の詳細は<span class=\"highlight-wrong explain-wrong\" data-explain=\"④考试的详细安排下周才会在公告栏上公布，现在去确认也看不到。\">④来週掲示板に出ます</span>から、自分で確認するようにしてくださいね。",
+              "trans": "（嗯，这也没办法。那今天你就先只交申请书吧，考试的具体安排下周会公布在公告栏上，到时候记得自己去确认。）"
+            },
+            {
+              "speaker": "男",
+              "text": "はい、ありがとうございます。",
+              "trans": "（好的，谢谢您。）"
+            }
+          ]
+        },
+        "options": [
+          {
+            "text": "西山先生に相談する",
+            "translation": "（找西山老师商量）",
+            "correct": false,
+            "explain": "男生回应说老师那边已经同意了（許可をいただきました），所以他不需要再去找老师商量。"
+          },
+          {
+            "text": "しんせい書をていしゅつする",
+            "translation": "（提交申请书）",
+            "correct": true,
+            "explain": "事务老师见医院休息无法马上拿到诊断书，于是通融让男生在截止日当天先提交申请书占个名额。"
+          },
+          {
+            "text": "病院にしんだん書をもらいに行く",
+            "translation": "（去医院拿诊断书）",
+            "correct": false,
+            "explain": "医院今天休息没开门，拿诊断书的事情被男生推迟到了明天。"
+          },
+          {
+            "text": "けいじ板をかくにんする",
+            "translation": "（确认公告板）",
+            "correct": false,
+            "explain": "考试详情下周才会在公告栏上出通知，并非今天眼下需要做的事。"
+          }
+        ]
+      },
+      {
+        "id": 5,
+        "audio": "../assets/audio/2019.12-5.mp3",
+        "script": {
+          "question": "男の人と女の人が話しています。女の人は、パーティーの日に何をしますか。",
+          "questionTrans": "（男人和女人在说话。女人在派对当天要做什么？）",
+          "dialogue": [
+            {
+              "speaker": "男",
+              "text": "山下さん、来月、松田君の結婚パーティーをレストランでやることになったんだけど、手伝ってくれない。",
+              "trans": "（山下，下个月松田的结婚派对定在一家餐厅办，你能来帮个忙吗？）"
+            },
+            {
+              "speaker": "女",
+              "text": "もちろん、何でも言って。",
+              "trans": "（没问题，有什么事你尽管说。）"
+            },
+            {
+              "speaker": "男",
+              "text": "<span class=\"highlight-wrong explain-wrong\" data-explain=\"【ア】接待任务后来因为害怕与视频拍摄产生时间冲突，被男士主动取消了。\">【ア】受付をお願いできないかな</span>、会費制でやるから、会費の受取をしてほしいんだけど。",
+              "trans": "（能拜托你负责接待吗？这次是会费制，想让你帮忙收一下钱。）"
+            },
+            {
+              "speaker": "女",
+              "text": "わかった。",
+              "trans": "（好。）"
+            },
+            {
+              "speaker": "男",
+              "text": "ねえ、もう一つ、<span class=\"highlight-wrong explain-wrong\" data-explain=\"【ウ】音乐方面男士给了选项，但女士最终认领了自己更擅长的视频制作。\">【ウ】会場の音楽担当</span>か、<span class=\"highlight-correct\">【エ】ビデオ撮影の担当</span>も頼めない？音楽係は事前に松田君と相談して曲を選んで、当日かけてほしいんだ。ダンスの曲とか、撮影係は動画の編集までやってもらいたいんだけど。",
+              "trans": "（对了，还有件事，能不能再麻烦你兼顾一下会场的音乐或者视频拍摄？负责音乐的话需要事先和松田商量选曲，当天负责播放，比如跳舞的曲子之类的。负责拍摄的话，还需要把后续的视频剪辑也包了。）"
+            },
+            {
+              "speaker": "女",
+              "text": "<span class=\"highlight-correct\">【エ】わたし、動画作るの、得意。</span>",
+              "trans": "（我很擅长做视频呢。）"
+            },
+            {
+              "speaker": "男",
+              "text": "本当、じゃあ、決まりだね、だけど、受付お願いするとなると、時間ギリギリに来場する人がいたら、撮影開始が遅れちゃうか。カメラを最初だけほかの人に任せるとしても、何か慌ただしいな、やっぱり、山下さんには<span class=\"highlight-correct\">【イ】受付やめて、会場の飾り付けグループに入ってもらおう</span>かな、当日2時間前に来られる？",
+              "trans": "（真的？那就这么定了。不过，要是还让你管接待的话，万一有人卡着点来，拍摄可能就要被耽误了。就算一开始把相机交给别人暂管，感觉也挺手忙脚乱的。要不这样，山下你就别做接待了，加入会场布置组吧。当天能提前两小时到吗？）"
+            },
+            {
+              "speaker": "女",
+              "text": "うん、大丈夫。",
+              "trans": "（嗯，没问题。）"
+            },
+            {
+              "speaker": "男",
+              "text": "<span class=\"highlight-correct\">じゃあ、係りを二つお願いする</span>ことになるけど、よろしくね。",
+              "trans": "（那就拜托你身兼两职了，麻烦啦。）"
+            }
+          ]
+        },
+        "options": [
+          {
+            "text": "受付と音楽担当",
+            "translation": "（接待＋负责音乐）",
+            "correct": false,
+            "explain": "接待任务为了迁就拍摄时间被取消了；负责音乐这个选项女士也没有选择。"
+          },
+          {
+            "text": "受付とビデオ撮影・動画編集",
+            "translation": "（接待＋视频拍摄与剪辑）",
+            "correct": false,
+            "explain": "负责视频是对的，但由于接待工作可能导致拍摄延误，所以被男士出言取消换成了别的。"
+          },
+          {
+            "text": "会場の飾り付けと音楽担当",
+            "translation": "（会场布置＋负责音乐）",
+            "correct": false,
+            "explain": "加入会场布置组是对的，但在“音乐”和“视频”的二选一中，女士挑了自己拿手的视频制作。"
+          },
+          {
+            "text": "会場の飾り付けとビデオ撮影・動画編集",
+            "translation": "（会场布置＋视频拍摄与剪辑）",
+            "correct": true,
+            "explain": "为了避免时间冲突，男士让女士放弃接待，转而加入时间更充裕的“会场布置组”，再加上她一开始接下的自己擅长的“视频拍摄与剪辑”，正好是两项安排。"
+          }
+        ]
+      }
+    ]
+    }
+  };
+
+        let currentExamKey = "N2-2019-07";
+let currentQuestionIndex = 0;
+        let preferredMode = 'practice'; 
+        const LISTENING_TYPE = 'task-comprehension';
+        const LISTENING_LEVEL = 'n2';
+        const listeningRewardHooks = null;
+
+        // --- Initialization ---
+        function init() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const yearParam = urlParams.get('year');
+            const modeParam = urlParams.get('mode');
+            
+            const targetKey = yearParam ? `N2-${yearParam}` : currentExamKey;
+
+            if (examData[targetKey]) {
+                currentExamKey = targetKey;
+                if (window.ListeningProgress) {
+                    window.ListeningProgress.setLastPractice(LISTENING_TYPE, LISTENING_LEVEL, currentExamKey);
+                }
+
+                if (modeParam === 'review') {
+                    const marks = getMarks();
+                    if (marks.length === 0) {
+                        alert('付箋を貼った問題はありません。(No marked questions)');
+                    } else {
+                        const originalQuestions = examData[currentExamKey].questions;
+                        const filtered = originalQuestions.filter(q => marks.includes(q.id));
+                        if (filtered.length > 0) {
+                            examData[currentExamKey].questions = filtered;
+                            setTimeout(() => {
+                                const lbl = document.getElementById('yearLabel');
+                                if(lbl) lbl.innerHTML += ' <span style="background:var(--marker-yellow); color:var(--graphite); font-size:12px; margin-left:8px; padding:2px 8px; border-radius:2px 8px 2px 6px / 6px 2px 8px 2px; border:1.5px solid var(--graphite);">✔ 復習ノート</span>';
+                            }, 100);
+                        } else {
+                            alert('付箋を貼った問題が見つかりませんでした。');
+                        }
+                    }
+                }
+            } else if (!examData[currentExamKey]) {
+                currentExamKey = Object.keys(examData)[0];
+            }
+
+            const yearLabel = document.getElementById('yearLabel');
+            if (yearLabel && modeParam !== 'review') {
+                yearLabel.textContent = examData[currentExamKey].label;
+            }
+
+            updateQuestionSelect();
+            if (window.setupListeningPlayer) {
+                window.setupListeningPlayer({
+                    subtitle: document.title.replace(/\s*\(N2\)\s*$/, ''),
+                    skipSeconds: 10
+                });
+            }
+            if (listeningRewardHooks) listeningRewardHooks.startRun();
+            renderQuestion();
+        }
+
+        // --- Mark Logic ---
+        function getMarks() {
+            if (!window.ListeningProgress) return [];
+            return window.ListeningProgress.getMistakeIds(LISTENING_TYPE, LISTENING_LEVEL, currentExamKey) || [];
+        }
+
+        function saveMarks(marks) {
+            if (window.ListeningProgress) {
+                window.ListeningProgress.setMistakeIds(LISTENING_TYPE, LISTENING_LEVEL, currentExamKey, marks);
+            }
+        }
+
+        function toggleMark() {
+            if (!examData[currentExamKey] || !examData[currentExamKey].questions[currentQuestionIndex]) return;
+
+            const marks = getMarks();
+            const qId = examData[currentExamKey].questions[currentQuestionIndex].id;
+            const index = marks.indexOf(qId);
+
+            if (index === -1) {
+                marks.push(qId);
+                saveMarks(marks);
+                updateMarkUI();
+                return;
+            }
+
+            marks.splice(index, 1);
+            saveMarks(marks);
+
+            updateMarkUI();
+        }
+
+        function updateMarkUI() {
+            if (!examData[currentExamKey] || !examData[currentExamKey].questions[currentQuestionIndex]) return;
+            const marks = getMarks();
+            const qId = examData[currentExamKey].questions[currentQuestionIndex].id;
+            const btn = document.getElementById('markBtn');
+            if (marks.includes(qId)) btn.classList.add('active');
+            else btn.classList.remove('active');
+        }
+
+        function updateQuestionSelect() {
+            const select = document.getElementById('questionSelect');
+            select.innerHTML = '';
+            
+            const questions = examData[currentExamKey].questions;
+            questions.forEach((q, index) => {
+                const option = document.createElement('option');
+                option.value = index; 
+                option.textContent = `問題 ${q.id}`;
+                select.appendChild(option);
+            });
+        }
+
+        function changeQuestion(index) {
+            currentQuestionIndex = parseInt(index);
+            renderQuestion();
+        }
+
+        // --- Answer Selection ---
+        function selectOption(element) {
+            const container = document.getElementById('appContainer');
+            if (!container.classList.contains('mode-practice')) return;
+            if (element.parentElement.querySelector('.judged-correct') || element.parentElement.querySelector('.judged-wrong')) return;
+
+            const siblings = element.parentElement.children;
+            for (let i = 0; i < siblings.length; i++) {
+                siblings[i].classList.remove('selected');
+                const btn = siblings[i].querySelector('.inline-confirm-btn');
+                if (btn) btn.remove();
+            }
+
+            element.classList.add('selected');
+            
+            const btn = document.createElement('button');
+            btn.id = 'inlineConfirmBtn';
+            btn.className = 'inline-confirm-btn';
+            btn.textContent = '確認';
+            btn.onclick = (e) => {
+                e.stopPropagation();
+                checkAnswer();
+            };
+            element.appendChild(btn);
+        }
+
+        function checkAnswer() {
+            const container = document.getElementById('appContainer');
+            const selected = container.querySelector('.options-list li.selected');
+            if (!selected) return;
+
+            const currentMode = new URLSearchParams(window.location.search).get('mode');
+            const isChallengeMode = currentMode === 'challenge' && window.__LISTENING_RANDOM_EXAM__ === true;
+            const index = parseInt(selected.getAttribute('data-index'));
+            const question = examData[currentExamKey].questions[currentQuestionIndex];
+            const options = container.querySelectorAll('.options-list li');
+
+            const isCorrect = question.options[index].correct;
+            if (listeningRewardHooks) listeningRewardHooks.handleAnswer(isCorrect);
+
+            if (isChallengeMode) {
+                if (!isCorrect) {
+                    const marks = getMarks();
+                    if (!marks.includes(question.id)) {
+                        marks.push(question.id);
+                        saveMarks(marks);
+                        updateMarkUI();
+                    }
+                }
+
+                const confirmBtn = document.getElementById('inlineConfirmBtn');
+                if (confirmBtn) confirmBtn.remove();
+
+                container.dataset.sqChallengeAnswered = '1';
+                container.classList.remove('judged');
+                options.forEach((opt) => {
+                    opt.style.pointerEvents = 'none';
+                });
+                return;
+            }
+
+            container.classList.add('judged');
+
+            if (isCorrect) {
+                selected.classList.add('judged-correct');
+            } else {
+                selected.classList.add('judged-wrong');
+                question.options.forEach((opt, i) => {
+                    if (opt.correct) options[i].classList.add('judged-correct');
+                });
+
+                const marks = getMarks();
+                if (!marks.includes(question.id)) {
+                    marks.push(question.id);
+                    saveMarks(marks);
+                    updateMarkUI();
+                }
+            }
+
+            const confirmBtn = document.getElementById('inlineConfirmBtn');
+            if (confirmBtn) confirmBtn.remove();
+
+            setTimeout(() => {
+                setMode('explanation', false);
+            }, 1000);
+        }
+
+        function prevQuestion() {
+            if (currentQuestionIndex > 0) {
+                currentQuestionIndex--;
+                setMode(preferredMode, false);
+                renderQuestion();
+            }
+        }
+
+        function nextQuestion() {
+            const questions = examData[currentExamKey].questions;
+            if (currentQuestionIndex < questions.length - 1) {
+                currentQuestionIndex++;
+                setMode(preferredMode, false);
+                renderQuestion();
+            }
+        }
+
+        // --- Render Content ---
+        function renderQuestion() {
+            const container = document.getElementById('appContainer');
+            if (container) container.classList.remove('judged');
+
+            const data = examData[currentExamKey].questions[currentQuestionIndex];
+            const total = examData[currentExamKey].questions.length;
+
+            updateMarkUI();
+            document.getElementById('questionSelect').value = currentQuestionIndex;
+            if (window.updateListeningPlayer) {
+                window.updateListeningPlayer({
+                    title: `問題 ${data.id}`,
+                    audioSrc: data.audio,
+                    hasPrev: currentQuestionIndex > 0,
+                    hasNext: currentQuestionIndex < total - 1
+                });
+            }
+
+            // Transcript Update (分割问题与对话内容)
+            document.getElementById('questionText').innerHTML = data.script.question;
+            document.getElementById('questionTrans').innerHTML = data.script.questionTrans;
+            const questionImageArea = document.getElementById('questionImageArea');
+            const questionImage = document.getElementById('questionImage');
+            if (questionImageArea && questionImage) {
+                if (data.image) {
+                    questionImage.src = data.image;
+                    questionImage.alt = `${examData[currentExamKey].label} 問題 ${data.id} 题图`;
+                    questionImageArea.style.display = 'block';
+                } else {
+                    questionImage.removeAttribute('src');
+                    questionImage.alt = '';
+                    questionImageArea.style.display = 'none';
+                }
+            }
+            const conversationHtml = data.script.dialogue.map(line => `
+                <div class="conversation-line">
+                    <span class="speaker-name">${line.speaker}</span>
+                    <div class="speaker-text">
+                        <div>${line.text}</div>
+                        <div class="translation">${line.trans}</div>
+                    </div>
+                </div>
+            `).join('');
+            document.getElementById('conversationText').innerHTML = conversationHtml;
+
+            // Options Update
+            const optionsList = document.getElementById('optionsList');
+            optionsList.innerHTML = '';
+            data.options.forEach((opt, idx) => {
+                const li = document.createElement('li');
+                if (opt.correct) li.classList.add('correct-answer');
+                li.setAttribute('data-index', idx);
+                li.onclick = () => selectOption(li);
+
+                li.innerHTML = `
+                    <span class="options-num">${idx + 1}</span>
+                    <div class="option-content">
+                        
+                        <div class="option-text">${opt.text}</div>
+                        <div class="translation">${opt.translation}</div>
+                    </div>
+                `;
+                optionsList.appendChild(li);
+            });
+
+            if (listeningRewardHooks) listeningRewardHooks.onQuestionRendered();
+        }
+
+        // --- Mode Switching ---
+        function setMode(mode, updatePreference = true) {
+            if (updatePreference) preferredMode = mode;
+
+            const container = document.getElementById('appContainer');
+            const btnPractice = document.getElementById('btnPractice');
+            const btnExplanation = document.getElementById('btnExplanation');
+            const tooltip = document.getElementById('wordTooltip');
+
+            const confirmBtn = document.getElementById('inlineConfirmBtn');
+            if (confirmBtn) confirmBtn.remove();
+            tooltip.style.display = 'none';
+
+            if (mode === 'practice') {
+                container.classList.remove('mode-explanation');
+                container.classList.add('mode-practice');
+                btnPractice.classList.add('active');
+                btnExplanation.classList.remove('active');
+            } else {
+                container.classList.remove('mode-practice');
+                container.classList.add('mode-explanation');
+                btnExplanation.classList.add('active');
+                btnPractice.classList.remove('active');
+
+                // 滚动至顶部以查看听力原文
+                setTimeout(() => {
+                    const transcriptSection = document.getElementById('transcriptBlock');
+                    const anchorTarget = transcriptSection || document.querySelector('.content-wrapper');
+                    if (anchorTarget) {
+                        const headerOffset = window.innerWidth <= 768 ? 112 : 132;
+                        const elementPosition = anchorTarget.getBoundingClientRect().top;
+                        const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+                        window.scrollTo({ top: offsetPosition, behavior: "smooth" });
+                    }
+                }, 100);
+            }
+        }
+
+        // --- Tooltip Logic ---
+        function showTooltip(event, text) {
+            event.stopPropagation();
+            const tooltip = document.getElementById('wordTooltip');
+            tooltip.innerText = text;
+            tooltip.style.display = 'block';
+            
+            const targetRect = event.target.getBoundingClientRect();
+            setTimeout(() => {
+                const width = tooltip.offsetWidth, height = tooltip.offsetHeight;
+                const top = targetRect.top + window.scrollY - height - 10; 
+                let left = targetRect.left + window.scrollX + (targetRect.width / 2) - (width / 2);
+                if (left < 10) left = 10;
+                if (left + width > window.innerWidth - 10) left = window.innerWidth - width - 10;
+                
+                const targetCenterX = targetRect.left + window.scrollX + (targetRect.width / 2);
+                tooltip.style.setProperty('--arrow-left', `${targetCenterX - left}px`);
+                tooltip.style.top = `${top}px`; tooltip.style.left = `${left}px`;
+            }, 0);
+        }
+
+        function getTooltipText(target) {
+            if (!target) return '';
+            if (target.dataset.tooltip) return target.dataset.tooltip;
+            if (target.dataset.explain) return target.dataset.explain;
+            if (target.classList.contains('highlight-correct')) {
+                const exam = examData[currentExamKey];
+                const data = exam && exam.questions ? exam.questions[currentQuestionIndex] : null;
+                const correctOption = data && data.options ? data.options.find(opt => opt.correct) : null;
+                return correctOption ? correctOption.explain : '';
+            }
+            return '';
+        }
+
+        document.addEventListener('click', (event) => {
+            const clickedElement = event.target instanceof Element ? event.target : event.target.parentElement;
+            const target = clickedElement ? clickedElement.closest('.keyword, .highlight-correct, .highlight-wrong, .explain-correct, .explain-wrong') : null;
+            const tooltipText = getTooltipText(target);
+
+            if (tooltipText) {
+                showTooltip(event, tooltipText);
+                return;
+            }
+
+            const tooltip = document.getElementById('wordTooltip');
+            if (tooltip.style.display === 'block') tooltip.style.display = 'none';
+        });
+
+        window.addEventListener('DOMContentLoaded', init);
+    </script>
+<script src="../../../shared/listening-tooltip-bridge.js"></script>
+</body>
+</html>

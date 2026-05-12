@@ -1,0 +1,1459 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>短文読解 - 練習と解析</title>
+    <!-- 使用书面/印刷感字体组合 -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&family=Noto+Sans+SC:wght@400;500;700;900&family=Noto+Serif+JP:wght@400;600;700;900&family=Noto+Serif+SC:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../../shared/reading-user-highlights.css">
+    <link rel="stylesheet" href="../../shared/reading-tools.css">
+    <style>
+        :root {
+            /* 纸张与铅笔色盘 */
+            --paper: #ffffff;          
+            --graphite: #333333;       
+            --graphite-sub: #666666;   
+            --graphite-faint: #cccccc; 
+            
+            /* 批改笔触颜色 */
+            --red-pencil: #e64a4a;     
+            --green-pencil: #10b981;
+            --blue-pencil: #0ea5e9;
+            --orange-pencil: #f97316;
+            
+            /* 水彩记号笔色系 (用于各题型区分) */
+            --marker-blue: rgba(14, 165, 233, 0.25);    
+            --marker-peach: rgba(249, 115, 22, 0.25);   
+            --marker-mint: rgba(16, 185, 129, 0.25);    
+            --marker-yellow: rgba(255, 213, 79, 0.35);   
+            --marker-yellow-strong: rgba(255, 213, 79, 0.8);
+            --marker-green: rgba(16, 185, 129, 0.15);
+            --marker-red: rgba(230, 74, 74, 0.1);
+
+            /* 铅笔排线背景 */
+            --hatching-graphite: repeating-linear-gradient(45deg, transparent, transparent 3px, rgba(51, 51, 51, 0.04) 3px, rgba(51, 51, 51, 0.04) 4px);
+
+            --transition: all 0.3s ease-out;
+            
+            --font-sans: 'Noto Sans SC', 'Noto Sans JP', sans-serif;
+            --font-serif: 'Noto Serif SC', 'Noto Serif JP', 'Songti SC', 'SimSun', serif;
+        }
+
+        body {
+            font-family: var(--font-sans);
+            background-color: var(--paper);
+            color: var(--graphite);
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+        }
+
+        /* 纸张噪点纹理 */
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.02'/%3E%3C/svg%3E");
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        /* 工具类：手绘感不规则边框 */
+        .sketch-box {
+            border: 1.5px solid var(--graphite);
+            border-radius: 2px 255px 3px 25px / 255px 5px 225px 3px;
+            background: transparent;
+        }
+
+        /* ================= Header ================= */
+        header {
+            width: 100%;
+            padding: 16px 20px;
+            box-sizing: border-box;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(4px);
+            border-bottom: 1.5px solid var(--graphite);
+            border-bottom-left-radius: 50% 2px;
+            border-bottom-right-radius: 50% 3px;
+        }
+
+        .header-btn {
+            text-decoration: none;
+            color: var(--graphite);
+            font-size: 14px;
+            font-weight: 700;
+            padding: 6px 12px;
+            background: transparent;
+            border: 1.5px solid var(--graphite);
+            border-radius: 2px 8px 3px 6px / 6px 3px 8px 2px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: var(--transition);
+            letter-spacing: 0.05em;
+            cursor: pointer;
+        }
+        
+        .header-btn:hover { background: var(--marker-yellow); }
+
+        h1 {
+            margin: 0;
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--graphite);
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            white-space: nowrap;
+            letter-spacing: 0.1em;
+            display: flex;
+            align-items: center;
+        }
+
+        /* ================= 布局容器 ================= */
+        .layout-container {
+            width: 95%;
+            max-width: 800px; 
+            padding: 40px 0 80px 0;
+            box-sizing: border-box;
+        }
+
+        .page-container {
+            display: none; 
+            flex-direction: column; 
+            gap: 40px;
+            animation: fadeIn 0.4s ease-out;
+        }
+
+        .page-container.active {
+            display: flex; 
+        }
+
+        /* ================= 上部文章区 ================= */
+        .article-section {
+            padding: 30px 40px;
+            background: var(--paper);
+            box-shadow: 2px 4px 15px rgba(0,0,0,0.03);
+            height: fit-content;
+        }
+
+        .article-meta {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 1.5px dashed var(--graphite-faint);
+        }
+
+        .meta-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .tag {
+            font-family: 'Noto Sans JP', sans-serif;
+            font-size: 12px;
+            color: var(--graphite);
+            background: var(--marker-peach);
+            padding: 2px 8px;
+            border: 1.5px solid var(--graphite);
+            border-radius: 2px 8px 2px 6px / 6px 2px 8px 2px;
+            font-weight: 700;
+        }
+
+        .article-title-info {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--graphite-sub);
+        }
+
+        .translate-toggle-btn {
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--graphite);
+            background: transparent;
+            border: 1.5px solid var(--graphite);
+            border-radius: 2px 8px 3px 6px / 6px 3px 8px 2px;
+            padding: 4px 10px;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .translate-toggle-btn:hover, .translate-toggle-btn.active {
+            background: var(--marker-blue);
+            box-shadow: inset 1px 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .article-content {
+            font-family: var(--font-serif);
+            font-size: 16px;
+            line-height: 2.2;
+            color: #222;
+            text-align: justify;
+            margin-top: 20px;
+        }
+
+        .paragraph-group { margin-bottom: 1.5em; }
+        
+        /* 针对日文标准排版：段落首行缩进1个字符，遇到需要顶格的则使用no-indent */
+        .article-content p { margin: 0; text-indent: 1em; }
+        .article-content p.no-indent { text-indent: 0; }
+        
+        .article-content .letter-right { text-align: right; text-indent: 0; margin-bottom: 0.5em;}
+        .article-content .letter-center { text-align: center; text-indent: 0; font-weight: 700; margin: 1.5em 0;}
+        .article-content .letter-left { text-align: left; text-indent: 0; margin-bottom: 0.5em;}
+        .article-content .letter-greet { text-align: left; text-indent: 0; margin-top: 1em;}
+        .article-content .letter-close { text-align: right; text-indent: 0; margin-top: 1em;}
+        .article-content .notice-intro { text-indent: 0; margin-bottom: 1em; font-family: var(--font-sans); color: var(--graphite-sub); font-size: 14px; font-weight: bold;}
+        .article-content .notice-box { border: 1.5px solid var(--graphite); padding: 20px; border-radius: 4px; background-color: rgba(255,255,255,0.6);}
+
+        /* 日時・場所・電話など情報を揃えるためのレイアウト（左列の長さに自動で合わせる） */
+        .info-list {
+            display: grid;
+            grid-template-columns: max-content 1fr;
+            gap: 4px 12px;
+            margin: 0.5em 0;
+            line-height: 1.8;
+            font-family: var(--font-serif);
+        }
+        .info-label {
+            text-align: left;
+            white-space: nowrap;
+        }
+
+        .article-source {
+            text-align: right;
+            font-size: 13px;
+            color: var(--graphite-sub);
+            margin-top: 15px;
+            font-family: var(--font-sans);
+        }
+
+        .article-content .vocab-word {
+            border-bottom: 1.5px dotted var(--graphite-sub);
+            cursor: pointer;
+            transition: var(--transition);
+            position: relative;
+        }
+
+        .article-content .vocab-word:hover {
+            background-color: var(--marker-yellow);
+        }
+
+        .article-notes {
+            margin-top: 20px;
+            padding: 12px 16px;
+            background-color: rgba(0,0,0,0.02);
+            border-left: 3px solid var(--graphite-faint);
+            font-size: 13.5px;
+            color: var(--graphite-sub);
+            font-family: var(--font-sans);
+        }
+        .article-notes p {
+            margin: 4px 0 !important;
+            text-indent: 0 !important;
+            line-height: 1.6 !important;
+        }
+
+        .vocab-tooltip {
+            position: absolute;
+            z-index: 1000;
+            background: #fffcf2; 
+            border: 1.5px solid var(--graphite);
+            border-radius: 2px 12px 3px 12px / 12px 3px 12px 2px;
+            padding: 8px 14px;
+            box-shadow: 2px 4px 8px rgba(0,0,0,0.1);
+            font-family: var(--font-sans);
+            font-size: 13px;
+            color: var(--graphite);
+            pointer-events: none; 
+            opacity: 0;
+            transform: translateY(5px);
+            transition: all 0.2s ease-out;
+            display: none;
+            width: max-content;
+            max-width: 220px;
+        }
+
+        .vocab-tooltip.show { opacity: 1; transform: translateY(0); display: block; }
+        .vocab-tooltip::after {
+            content: '';
+            position: absolute;
+            bottom: -6px; left: 20px;
+            width: 10px; height: 10px;
+            background: #fffcf2;
+            border-bottom: 1.5px solid var(--graphite);
+            border-right: 1.5px solid var(--graphite);
+            transform: rotate(45deg);
+        }
+
+        .vocab-tooltip .reading {
+            font-size: 11px; color: var(--graphite-sub);
+            margin-bottom: 4px; display: block; font-weight: 500;
+        }
+
+        .vocab-tooltip .meaning { font-weight: 700; line-height: 1.4; }
+
+        .article-translation {
+            display: none;
+            font-family: var(--font-sans);
+            font-size: 14px;
+            line-height: 1.8;
+            color: var(--graphite-sub);
+            background: rgba(0,0,0,0.02);
+            padding: 10px 16px;
+            margin-top: 10px;
+            border-left: 3px solid var(--marker-yellow-strong);
+            border-radius: 0 8px 8px 0;
+        }
+        .article-translation.show { display: block; animation: fadeIn 0.3s ease-out; }
+
+        .ks-target { transition: background-color 0.4s ease; border-radius: 2px; }
+        .ks-target.revealed {
+            background: linear-gradient(transparent 65%, var(--marker-blue) 65%);
+            border-bottom: 2px dashed var(--blue-pencil);
+            padding-bottom: 2px;
+        }
+        .ks-target.revealed::before {
+            content: '🔑';
+            display: inline-flex;
+            font-size: 14px;
+            margin-right: 4px;
+            text-indent: 0;
+        }
+        .ks-target.flash-focus { animation: flashHighlight 1.5s ease-out; }
+
+        /* ================= 下部题目区 ================= */
+        .question-section { display: flex; flex-direction: column; gap: 24px; }
+
+        .question-card {
+            padding: 24px;
+            background: rgba(255, 255, 255, 0.5);
+            transition: var(--transition);
+            position: relative;
+        }
+        .question-card:hover { box-shadow: 2px 4px 10px rgba(0,0,0,0.02); background: var(--paper); }
+
+        .q-header { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 16px; }
+        .q-number {
+            font-family: 'Noto Sans JP', sans-serif; font-size: 16px; font-weight: 900;
+            color: var(--graphite); background: var(--marker-yellow);
+            width: 28px; height: 28px; display: flex; align-items: center; justify-content: center;
+            border: 1.5px solid var(--graphite);
+            border-radius: 50% 45% 55% 40% / 45% 55% 40% 50%;
+            flex-shrink: 0; margin-top: 2px;
+        }
+        .q-text-wrapper { display: flex; flex-direction: column; gap: 4px; }
+        .q-text { font-size: 15px; font-weight: 700; line-height: 1.6; }
+        .q-text-trans { display: none; font-size: 13px; color: var(--graphite-sub); font-weight: normal; }
+
+        .options-group { display: flex; flex-direction: column; gap: 12px; }
+        .option-label {
+            display: flex; align-items: flex-start; padding: 12px 16px;
+            border: 1.5px solid var(--graphite);
+            border-radius: 2px 255px 3px 25px / 255px 5px 225px 3px;
+            cursor: pointer; transition: var(--transition);
+            position: relative; background: transparent; flex-wrap: wrap;
+        }
+        .option-label:hover:not(.disabled) { background: var(--hatching-graphite); }
+        .options-group.reviewed .option-label { cursor: pointer; }
+        .options-group.reviewed .option-label:hover { border-color: var(--graphite); box-shadow: 2px 2px 0 rgba(0,0,0,0.05); }
+        
+        .click-hint {
+            display: none; position: absolute; right: 12px; top: 12px;
+            font-size: 11px; color: var(--marker-yellow-strong); font-weight: 700;
+            border: 1px solid var(--marker-yellow-strong); padding: 2px 6px;
+            border-radius: 10px; background: #fff;
+        }
+        .options-group.reviewed .click-hint { display: block; animation: fadeIn 0.5s ease-out; }
+
+        .option-input { display: none; }
+        .custom-radio {
+            width: 18px; height: 18px; border: 1.5px solid var(--graphite);
+            border-radius: 50% 40% 60% 45% / 55% 45% 50% 60%;
+            margin-right: 12px; margin-top: 4px; flex-shrink: 0; position: relative;
+            display: flex; align-items: center; justify-content: center;
+            transition: var(--transition); font-weight: 900; font-size: 12px;
+            font-family: 'Noto Sans JP', sans-serif; color: var(--graphite-sub);
+        }
+        .option-input:checked + .custom-radio { background: var(--marker-yellow-strong); color: var(--graphite); }
+        .option-label.selected { background: rgba(255, 213, 79, 0.1); border-style: solid; }
+        
+        .option-content-wrapper { flex: 1; display: flex; flex-direction: column; gap: 4px; }
+        .option-content { font-size: 15px; line-height: 1.5; color: var(--graphite); padding-right: 60px; }
+        .option-input:checked ~ .option-content-wrapper .option-content { font-weight: 700; }
+        .option-trans { display: none; font-size: 13px; color: var(--graphite-sub); line-height: 1.4; }
+        
+        .question-card.reviewed .q-text-trans,
+        .question-card.reviewed .option-trans { display: block; animation: fadeIn 0.4s ease-out; }
+
+        .option-detail-analysis {
+            display: none; width: 100%; margin-top: 12px; padding: 12px 16px;
+            background: #fffcf2; border: 1px dashed var(--graphite-sub);
+            border-radius: 2px 8px 3px 6px / 6px 3px 8px 2px;
+            font-size: 13px; color: var(--graphite); line-height: 1.6; box-sizing: border-box;
+        }
+        .option-detail-analysis.show { display: block; animation: slideDown 0.3s ease-out; }
+
+        .option-label.is-correct { background: var(--marker-green); border-color: var(--green-pencil); }
+        .option-label.is-correct .custom-radio { background: var(--green-pencil); border-color: var(--green-pencil); color: white; }
+        .option-label.is-wrong { background: var(--marker-red); border-color: var(--red-pencil); border-style: dashed; }
+        .option-label.is-wrong .custom-radio { background: var(--red-pencil); border-color: var(--red-pencil); color: white; }
+
+        .explanation-box {
+            margin-top: 20px; padding: 20px; background: #fafafa;
+            border: 1.5px solid var(--graphite); border-radius: 2px 15px 3px 15px / 15px 5px 15px 3px;
+            position: relative; display: none; animation: slideDown 0.4s ease-out;
+        }
+        .explanation-box.show { display: block; }
+        .explanation-box::before {
+            content: ''; position: absolute; top: -10px; left: 50%;
+            transform: translateX(-50%) rotate(-2deg); width: 60px; height: 20px;
+            background: rgba(255, 213, 79, 0.6); border: 1px solid rgba(0,0,0,0.05);
+        }
+        .explanation-title {
+            font-size: 14px; font-weight: 700; color: var(--red-pencil);
+            margin-bottom: 12px; display: flex; align-items: center; gap: 8px;
+            border-bottom: 1.5px dashed var(--graphite-faint); padding-bottom: 8px;
+        }
+        
+        .key-sentence-box {
+            background: #fff; border-left: 3px solid var(--blue-pencil);
+            padding: 10px 12px; margin-bottom: 12px; font-size: 13.5px;
+            box-shadow: 1px 2px 5px rgba(0,0,0,0.02); position: relative;
+        }
+        .key-sentence-box .ks-label { font-weight: 700; color: var(--blue-pencil); margin-bottom: 4px; font-size: 12px; }
+        .key-sentence-box.clickable { cursor: pointer; transition: var(--transition); }
+        .key-sentence-box.clickable:hover { transform: translateY(-1px); box-shadow: 2px 4px 8px rgba(0,0,0,0.04); background: #f0f9ff; }
+        .key-sentence-box.clickable::after {
+            content: '🔗 クリックして原文に移動'; position: absolute;
+            right: 12px; top: 12px; font-size: 11px; font-weight: 700; opacity: 0.8; color: var(--blue-pencil);
+        }
+        .explanation-content { font-size: 14px; line-height: 1.8; color: var(--graphite); }
+
+        /* ================= 底部動作区 (包含翻页逻辑) ================= */
+        .action-bar {
+            grid-column: 1 / -1; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center;
+            margin-top: 10px; 
+            padding-top: 30px; 
+            border-bottom: 1.5px dashed var(--graphite-faint); 
+            padding-bottom: 30px;
+            gap: 12px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .nav-btn {
+            font-family: 'Noto Sans JP', sans-serif;
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--graphite-sub);
+            background: transparent;
+            padding: 10px 18px;
+            border: 1.5px solid var(--graphite-faint);
+            border-radius: 2px 8px 3px 6px / 6px 3px 8px 2px;
+            cursor: pointer;
+            transition: var(--transition);
+            white-space: nowrap;
+            min-width: 100px;
+            text-align: center;
+        }
+
+        .nav-btn:hover {
+            color: var(--graphite);
+            border-color: var(--graphite);
+            background: var(--marker-yellow);
+        }
+        
+        /* 当按钮不可見时阻止点击事件 */
+        .nav-btn[style*="visibility: hidden"] {
+            pointer-events: none;
+        }
+
+        .submit-btn {
+            font-family: 'Noto Sans JP', sans-serif; font-size: 16px; font-weight: 700;
+            color: var(--graphite); background: var(--marker-mint);
+            padding: 12px 50px; border: 1.5px solid var(--graphite);
+            border-radius: 3px 255px 4px 25px / 255px 5px 225px 4px;
+            cursor: pointer; letter-spacing: 0.1em; transition: var(--transition);
+            box-shadow: 2px 4px 0px rgba(51,51,51,0.1);
+            flex: 1;
+            max-width: 320px;
+        }
+        .submit-btn:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 2px 6px 0px rgba(51,51,51,0.15); }
+        .submit-btn:disabled {
+            background: var(--graphite-faint); color: var(--graphite-sub);
+            cursor: not-allowed; box-shadow: none; transform: none;
+        }
+
+        @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes flashHighlight { 0% { background-color: rgba(255, 213, 79, 0.7); } 100% { background-color: transparent; } }
+
+        /* ================= 响应式调整 ================= */
+        @media (max-width: 600px) {
+            header { padding: 12px 16px; }
+            h1 { font-size: 15px; }
+            .header-btn { font-size: 13px; padding: 6px 10px; }
+            .layout-container { width: 100%; padding: 20px 16px 60px 16px; gap: 24px; }
+            .article-section { padding: 20px 16px; border-radius: 2px 20px 3px 20px / 20px 5px 20px 3px; }
+            .article-meta { margin-bottom: 16px; padding-bottom: 12px; }
+            .article-content { font-size: 15px; line-height: 2.0; } 
+            .question-section { gap: 16px; padding-top: 16px; }
+            .question-card { padding: 20px 16px; }
+            .q-header { margin-bottom: 12px; }
+            .q-number { width: 24px; height: 24px; font-size: 14px; margin-top: 0; }
+            .q-text { font-size: 15px; line-height: 1.6; }
+            .option-label { padding: 10px 12px; }
+            .custom-radio { width: 16px; height: 16px; font-size: 11px; margin-right: 10px; margin-top: 2px; }
+            .option-content { font-size: 14px; padding-right: 0; }
+            .click-hint { position: static; margin-top: 8px; font-size: 11px; padding: 4px 8px; }
+            .options-group.reviewed .click-hint { display: inline-block; }
+            .key-sentence-box { padding: 10px; font-size: 13px; }
+            .key-sentence-box.clickable::after { position: static; display: inline-block; margin-top: 6px; font-size: 11px; padding: 4px 8px;}
+            .explanation-box { padding: 16px; }
+            .vocab-tooltip { max-width: 200px; font-size: 12px; padding: 6px 10px; }
+            
+            /* 移动端Action Bar重排版 */
+            .action-bar {
+                flex-wrap: wrap;
+                justify-content: space-between;
+                gap: 15px;
+            }
+            .submit-btn {
+                order: 1; 
+                width: 100%;
+                max-width: none;
+                flex: none;
+            }
+            .nav-btn {
+                order: 2; 
+                width: calc(50% - 8px);
+                min-width: 0;
+                padding: 12px 0;
+            }
+        }
+    </style>
+</head>
+<body id="top" class="reading-short-tools-page reading-tools-no-furigana" data-reading-highlight-root=".layout-container" data-reading-highlight-level="N2" data-reading-highlight-type="short">
+
+    <header class="top-bar">
+        <a class="header-btn" id="back-to-reading-index" href="../../index.html?level=N2&type=short">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+            戻る
+        </a>
+        <h1>短文読解演習</h1>
+        <div class="top-actions"></div>
+    </header>
+
+    <div class="layout-container">
+        
+        <!-- ================= ページ 1 (2019年12月 第1問) ================= -->
+        <div class="page-container active" id="page-1">
+            <main class="article-section sketch-box">
+                <div class="article-meta">
+                    <div class="meta-left">
+                        <span class="tag">N2 読解</span>
+                        <span class="article-title-info">2019年12月・問題 1：一人で考える時間</span>
+                    </div>
+                    <button class="translate-toggle-btn" onclick="toggleTranslation(this, 'page-1')">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 8l6 6"/><path d="M4 14l6-6 2-3"/><path d="M2 5h12"/><path d="M7 2h1"/><path d="M22 22l-5-10-5 10"/><path d="M14 18h6"/></svg>
+                        参考訳
+                    </button>
+                </div>
+                
+                <div class="article-content">
+                    <div class="paragraph-group">
+                        <p><span class="ks-target target-ks">人に何か言われて、それがどんな意味なんだろう、どうしてそんなことを言ったんだろうと、一人で考えれば考えるほど、あなたは成長します。</span></p>
+                        <div class="article-translation">当被别人说了些什么时，如果独自思考“那是什么意思呢”、“为什么会说那种话呢”，越是思考，你就越会成长。</div>
+                    </div>
+                    
+                    <div class="paragraph-group">
+                        <p><span class="ks-target target-ks">逆に言えば、自分一人で考える時間がなければ、あなたはどんなに立派な話を聞いても、どんなに役立つ本を読んでも、その考えやアイデアは、あなたのものになりません。</span><span class="vocab-word" data-reading="とってつけた" data-meaning="無理に付け加えた">取ってつけた</span>ようで、人は、それがあなたの本当の知識じゃないことを<span class="vocab-word" data-reading="みぬき" data-meaning="ここでは、～に簡単に気づく">見抜き</span>ます。</p>
+                        <div class="article-translation">反过来说，如果没有自己一个人思考的时间，无论你听了多么精彩的讲话，无论读了多么有用的书，那些想法和点子都不会成为你自己的东西。会显得像是勉强附会（生搬硬套）的，人们会看穿那并不是你真正的知识。</div>
+                    </div>
+
+                    <div class="article-notes paragraph-group">
+                        <p>（注１）取ってつけた：無理に付け加えた</p>
+                        <p>（注２）～を見抜く：ここでは、～に簡単に気づく</p>
+                    </div>
+                </div>
+            </main>
+
+            <aside class="question-section">
+                <div class="question-card sketch-box">
+                    <div class="q-header">
+                        <div class="q-number" style="background: var(--marker-blue);">1</div>
+                        <div class="q-text-wrapper">
+                            <div class="q-text">筆者の考えに合うのはどれか。</div>
+                            <div class="q-text-trans">符合作者想法的是哪一项？</div>
+                        </div>
+                    </div>
+                    <div class="options-group">
+                        <label class="option-label">
+                            <input type="radio" name="q1" value="1" class="option-input">
+                            <div class="custom-radio">1</div>
+                            <div class="option-content-wrapper">
+                                <div class="option-content">自分自身を知るには、一人で考える時間が必要だ。</div>
+                                <div class="option-trans">为了了解自己，需要一个人思考的时间。</div>
+                            </div>
+                            <span class="click-hint">詳細解説</span>
+                            <div class="option-detail-analysis"></div>
+                        </label>
+                        <label class="option-label">
+                            <input type="radio" name="q1" value="2" class="option-input">
+                            <div class="custom-radio">2</div>
+                            <div class="option-content-wrapper">
+                                <div class="option-content">人として成長するには、自分一人で考える時間が必要だ。</div>
+                                <div class="option-trans">为了作为一个人获得成长，需要自己一个人思考的时间。</div>
+                            </div>
+                            <span class="click-hint">詳細解説</span>
+                            <div class="option-detail-analysis"></div>
+                        </label>
+                        <label class="option-label">
+                            <input type="radio" name="q1" value="3" class="option-input">
+                            <div class="custom-radio">3</div>
+                            <div class="option-content-wrapper">
+                                <div class="option-content">自分一人で考える時間が長ければ、よいアイデアが浮かぶ。</div>
+                                <div class="option-trans">只要自己一个人思考的时间够长，就能想出好点子。</div>
+                            </div>
+                            <span class="click-hint">詳細解説</span>
+                            <div class="option-detail-analysis"></div>
+                        </label>
+                        <label class="option-label">
+                            <input type="radio" name="q1" value="4" class="option-input">
+                            <div class="custom-radio">4</div>
+                            <div class="option-content-wrapper">
+                                <div class="option-content">本当の知識を得るには、役立つ本や立派な話に接するべきだ。</div>
+                                <div class="option-trans">为了获得真正的知识，应该接触有用的书和精彩的讲话。</div>
+                            </div>
+                            <span class="click-hint">詳細解説</span>
+                            <div class="option-detail-analysis"></div>
+                        </label>
+                    </div>
+                    <div class="explanation-box">
+                        <div class="explanation-title">✎ 赤ペン解析</div>
+                        <div class="key-sentence-box">
+                            <div class="ks-label">【着眼点】</div>
+                            <div class="ks-text"></div>
+                        </div>
+                        <div class="explanation-content"></div>
+                    </div>
+                </div>
+                <div class="action-bar">
+                    <button type="button" class="nav-btn" style="visibility: hidden;">◀ 前の問題</button>
+                    <button type="button" class="submit-btn" onclick="submitAnswer(1)">答え合わせ</button>
+                    <button type="button" class="nav-btn" onclick="switchPage(2)">次の問題 ▶</button>
+                </div>
+            </aside>
+        </div>
+
+        <!-- ================= ページ 2 (2019年12月 第2問) ================= -->
+        <div class="page-container" id="page-2">
+            <main class="article-section sketch-box">
+                <div class="article-meta">
+                    <div class="meta-left">
+                        <span class="tag">N2 読解</span>
+                        <span class="article-title-info">2019年12月・問題 2：会費納入のお知らせ</span>
+                    </div>
+                    <button class="translate-toggle-btn" onclick="toggleTranslation(this, 'page-2')">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 8l6 6"/><path d="M4 14l6-6 2-3"/><path d="M2 5h12"/><path d="M7 2h1"/><path d="M22 22l-5-10-5 10"/><path d="M14 18h6"/></svg>
+                        参考訳
+                    </button>
+                </div>
+                <div class="article-content">
+                    <div class="notice-intro">
+                        以下は、ある市の国際交流協会から届いたメールである。
+                    </div>
+
+                    <div class="paragraph-group">
+                        <p class="letter-left">水森市国際交流協会 会員の皆様</p>
+                        <div class="article-translation">水森市国际交流协会的各位会员：</div>
+                    </div>
+                    
+                    <div class="paragraph-group">
+                        <p>今年も水森市国際交流協会の活動に参加してくださりありがとうございました。</p>
+                        <p>会員の方にはこれまで毎年１２月に会費４，０００円（翌年１月から１２月の１年分）を納めていただきましたが、<span class="ks-target target-ks">来年より４月に会費（４月から翌年３月の１年分）を納めていただくことになりました。</span></p>
+                        <div class="article-translation">感谢各位今年也参与水森市国际交流协会的活动。<br>一直以来，各位会员都是在每年的12月缴纳4,000日元会费（次年1月到12月的一年费用），但从明年开始，将改为在4月缴纳会费（4月到次年3月的一年费用）。</div>
+                    </div>
+
+                    <div class="paragraph-group">
+                        <p><span class="ks-target target-ks">今回の変更に伴い、来年１月から３月までの分の１，０００円は、１月の交流会で集めます。</span></p>
+                        <p>なお、１月の交流会に参加できない場合は、１月中に事務局にお持ちください。</p>
+                        <div class="article-translation">伴随此次变更，明年1月到3月份的1,000日元，将在1月份的交流会上收取。<br>另外，如果无法参加1月份的交流会，请在1月份以内带到事务局。</div>
+                    </div>
+
+                    <div class="paragraph-group">
+                        <p>今後ともよろしくお願いいたします。</p>
+                        <div class="article-translation">今后也请多多关照。</div>
+                    </div>
+
+                    <div class="paragraph-group">
+                        <p class="letter-left">水森市国際交流協会事務局</p>
+                        <p class="letter-left">会計担当 赤木春香 akagi@miz.or.jp</p>
+                        <p class="letter-left">電話： ０８－１５９６－４７１２</p>
+                        <div class="article-translation">水森市国际交流协会事务局<br>会计担当 赤木春香 akagi@miz.or.jp<br>电话：08-1596-4712</div>
+                    </div>
+                </div>
+            </main>
+            <aside class="question-section">
+                <div class="question-card sketch-box">
+                    <div class="q-header">
+                        <div class="q-number" style="background: var(--marker-peach);">2</div>
+                        <div class="q-text-wrapper">
+                            <div class="q-text">会員は、来年１月から再来年３月までの会費をどのように払えばいいか。</div>
+                            <div class="q-text-trans">会员应该如何缴纳从明年1月到后年3月为止的会费？</div>
+                        </div>
+                    </div>
+                    <div class="options-group">
+                        <label class="option-label">
+                            <input type="radio" name="q2" value="1" class="option-input">
+                            <div class="custom-radio">1</div>
+                            <div class="option-content-wrapper">
+                                <div class="option-content">今年１２月に４，０００円払い、来年１月に１，０００円払う。</div>
+                                <div class="option-trans">今年12月支付4,000日元，明年1月支付1,000日元。</div>
+                            </div>
+                            <span class="click-hint">詳細解説</span>
+                            <div class="option-detail-analysis"></div>
+                        </label>
+                        <label class="option-label">
+                            <input type="radio" name="q2" value="2" class="option-input">
+                            <div class="custom-radio">2</div>
+                            <div class="option-content-wrapper">
+                                <div class="option-content">来年１月に１，０００円と４，０００円を払う。</div>
+                                <div class="option-trans">明年1月支付1,000日元和4,000日元。</div>
+                            </div>
+                            <span class="click-hint">詳細解説</span>
+                            <div class="option-detail-analysis"></div>
+                        </label>
+                        <label class="option-label">
+                            <input type="radio" name="q2" value="3" class="option-input">
+                            <div class="custom-radio">3</div>
+                            <div class="option-content-wrapper">
+                                <div class="option-content">来年１月に１，０００円払い、４月に４，０００円払う。</div>
+                                <div class="option-trans">明年1月支付1,000日元，4月支付4,000日元。</div>
+                            </div>
+                            <span class="click-hint">詳細解説</span>
+                            <div class="option-detail-analysis"></div>
+                        </label>
+                        <label class="option-label">
+                            <input type="radio" name="q2" value="4" class="option-input">
+                            <div class="custom-radio">4</div>
+                            <div class="option-content-wrapper">
+                                <div class="option-content">来年４月に１，０００円と４，０００円を払う。</div>
+                                <div class="option-trans">明年4月支付1,000日元和4,000日元。</div>
+                            </div>
+                            <span class="click-hint">詳細解説</span>
+                            <div class="option-detail-analysis"></div>
+                        </label>
+                    </div>
+                    <div class="explanation-box">
+                        <div class="explanation-title">✎ 赤ペン解析</div>
+                        <div class="key-sentence-box">
+                            <div class="ks-label">【着眼点】</div>
+                            <div class="ks-text"></div>
+                        </div>
+                        <div class="explanation-content"></div>
+                    </div>
+                </div>
+                <div class="action-bar">
+                    <button type="button" class="nav-btn" onclick="switchPage(1)">◀ 前の問題</button>
+                    <button type="button" class="submit-btn" onclick="submitAnswer(2)">答え合わせ</button>
+                    <button type="button" class="nav-btn" onclick="switchPage(3)">次の問題 ▶</button>
+                </div>
+            </aside>
+        </div>
+
+        <!-- ================= ページ 3 (2019年12月 第3問) ================= -->
+        <div class="page-container" id="page-3">
+            <main class="article-section sketch-box">
+                <div class="article-meta">
+                    <div class="meta-left">
+                        <span class="tag">N2 読解</span>
+                        <span class="article-title-info">2019年12月・問題 3：ヒトと機械</span>
+                    </div>
+                    <button class="translate-toggle-btn" onclick="toggleTranslation(this, 'page-3')">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 8l6 6"/><path d="M4 14l6-6 2-3"/><path d="M2 5h12"/><path d="M7 2h1"/><path d="M22 22l-5-10-5 10"/><path d="M14 18h6"/></svg>
+                        参考訳
+                    </button>
+                </div>
+                <div class="article-content">
+                    <div class="paragraph-group">
+                        <p>ヒトと機械は違っているからこそ、<span class="vocab-word" data-reading="ほかん" data-meaning="不十分な部分を補う">補完</span>し合えるのだという考え方がある。同じであっては意味が無いとさえ言い切る人もいる。同じものが二つあっても量的な能力が<span class="vocab-word" data-reading="ばいぞう" data-meaning="二倍に増える">倍増</span>するだけであって、質的な変化は起こりえない。</p>
+                        <div class="article-translation">正因为人和机器是不同的，所以才存在能够互相补充的想法。甚至有人断言，如果一样的话就没有意义了。即使有两个相同的东西，也只是量上的能力倍增而已，不可能发生质的变化。</div>
+                    </div>
+                    <div class="paragraph-group">
+                        <p>初期のコンピュータが結構役に立ったのは人間と全く違った単純作業ができたからである。人間だと繰り返しの作業の中でどうしても思い込みが起こる。<span class="ks-target target-ks">コンピュータが得意なのは常に一定の判断である。</span><span class="vocab-word" data-reading="それであるがゆえに" data-meaning="だから">それであるがゆえに</span>人間の単純なミスを指摘できるのである。</p>
+                        <div class="article-translation">初期的计算机之所以相当有用，是因为它能做和人类完全不同的单纯作业。如果是人类，在重复的作业中无论如何都会产生主观臆断。计算机擅长的是始终保持一定的判断。正因为如此，它才能指出人类单纯的失误。</div>
+                    </div>
+                    
+                    <div class="article-notes paragraph-group">
+                        <p>（注１）補完する：不十分な部分を補う</p>
+                        <p>（注２）倍増する：二倍に増える</p>
+                        <p>（注３）それであるがゆえに：だから</p>
+                    </div>
+                </div>
+            </main>
+            <aside class="question-section">
+                <div class="question-card sketch-box">
+                    <div class="q-header">
+                        <div class="q-number" style="background: var(--marker-mint);">3</div>
+                        <div class="q-text-wrapper">
+                            <div class="q-text">筆者によると、コンピュータがヒトと違う点は何か。</div>
+                            <div class="q-text-trans">根据作者的观点，计算机与人不同的点是什么？</div>
+                        </div>
+                    </div>
+                    <div class="options-group">
+                        <label class="option-label">
+                            <input type="radio" name="q3" value="1" class="option-input">
+                            <div class="custom-radio">1</div>
+                            <div class="option-content-wrapper">
+                                <div class="option-content">ヒトの単純なミスを予測できること</div>
+                                <div class="option-trans">能预测人的单纯失误。</div>
+                            </div>
+                            <span class="click-hint">詳細解説</span>
+                            <div class="option-detail-analysis"></div>
+                        </label>
+                        <label class="option-label">
+                            <input type="radio" name="q3" value="2" class="option-input">
+                            <div class="custom-radio">2</div>
+                            <div class="option-content-wrapper">
+                                <div class="option-content">ヒトの二倍の量の仕事ができること</div>
+                                <div class="option-trans">能做人两倍量的工作。</div>
+                            </div>
+                            <span class="click-hint">詳細解説</span>
+                            <div class="option-detail-analysis"></div>
+                        </label>
+                        <label class="option-label">
+                            <input type="radio" name="q3" value="3" class="option-input">
+                            <div class="custom-radio">3</div>
+                            <div class="option-content-wrapper">
+                                <div class="option-content">常に質の高い仕事ができること</div>
+                                <div class="option-trans">能始终做高质量的工作。</div>
+                            </div>
+                            <span class="click-hint">詳細解説</span>
+                            <div class="option-detail-analysis"></div>
+                        </label>
+                        <label class="option-label">
+                            <input type="radio" name="q3" value="4" class="option-input">
+                            <div class="custom-radio">4</div>
+                            <div class="option-content-wrapper">
+                                <div class="option-content">常に同じ作業ができること</div>
+                                <div class="option-trans">能始终做相同（一定）的作业。</div>
+                            </div>
+                            <span class="click-hint">詳細解説</span>
+                            <div class="option-detail-analysis"></div>
+                        </label>
+                    </div>
+                    <div class="explanation-box">
+                        <div class="explanation-title">✎ 赤ペン解析</div>
+                        <div class="key-sentence-box">
+                            <div class="ks-label">【着眼点】</div>
+                            <div class="ks-text"></div>
+                        </div>
+                        <div class="explanation-content"></div>
+                    </div>
+                </div>
+                <div class="action-bar">
+                    <button type="button" class="nav-btn" onclick="switchPage(2)">◀ 前の問題</button>
+                    <button type="button" class="submit-btn" onclick="submitAnswer(3)">答え合わせ</button>
+                    <button type="button" class="nav-btn" onclick="switchPage(4)">次の問題 ▶</button>
+                </div>
+            </aside>
+        </div>
+
+        <!-- ================= ページ 4 (2019年12月 第4問) ================= -->
+        <div class="page-container" id="page-4">
+            <main class="article-section sketch-box">
+                <div class="article-meta">
+                    <div class="meta-left">
+                        <span class="tag">N2 読解</span>
+                        <span class="article-title-info">2019年12月・問題 4：販売中止のお知らせ</span>
+                    </div>
+                    <button class="translate-toggle-btn" onclick="toggleTranslation(this, 'page-4')">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 8l6 6"/><path d="M4 14l6-6 2-3"/><path d="M2 5h12"/><path d="M7 2h1"/><path d="M22 22l-5-10-5 10"/><path d="M14 18h6"/></svg>
+                        参考訳
+                    </button>
+                </div>
+                <div class="article-content">
+                    <div class="paragraph-group">
+                        <p class="letter-left">ビーエスカメラ＞製品情報</p>
+                        <p class="letter-left">２０１９年１０月８日</p>
+                        <p class="letter-left">デジタルカメラ「ＢＳ－ＺＧ１」に関するお知らせ</p>
+                        <div class="article-translation">BS相机＞产品信息<br>2019年10月8日<br>关于数码相机“BS-ZG1”的通知</div>
+                    </div>
+                    
+                    <div class="paragraph-group">
+                        <p>弊社のデジタルカメラ「ＢＳ－ＺＧ１」は、電源ボタンの不具合が見つかったため９月３０日より販売を一時中止しておりました。その後の調査の結果、この不具合は製造番号ＺＨ２９２００～ＺＨ２９８００の製品にのみ起きることが分かりました。</p>
+                        <div class="article-translation">我公司的数码相机“BS-ZG1”因发现电源按钮存在故障，自9月30日起暂停销售。经过随后的调查，我们发现该故障仅发生在制造编号为ZH29200～ZH29800的产品上。</div>
+                    </div>
+
+                    <div class="paragraph-group">
+                        <p><span class="ks-target target-ks">対象の製品をお持ちのお客様は現在不具合が起きていなくても無料で修理させていただきますので、お手数ですがお近くの販売店までお持ちくださいますようお願い申し上げます。</span></p>
+                        <div class="article-translation">持有对象产品的客户，即使目前尚未发生故障，我们也会为您免费修理，因此麻烦您将其带到附近的销售店。</div>
+                    </div>
+
+                    <div class="paragraph-group">
+                        <p>なお、製造番号の確認方法は、下記のホームページをご覧ください。</p>
+                        <p>ｈｔｔｐ：／／ｂｓ－ｃａｍｅｒａ．ｊｐ／ｉｎｆｏ／２０１９１００９</p>
+                        <div class="article-translation">此外，关于制造编号的确认方法，请查看以下网站。<br>http://bs-camera.jp/info/20191009</div>
+                    </div>
+
+                    <div class="paragraph-group">
+                        <p class="letter-left">ビーエスカメラ お客様サポート窓口</p>
+                        <p class="letter-left">ＴＥＬ：０２－３３８９－４２５４ （受付時間 １０：００～１９：００）</p>
+                        <div class="article-translation">BS相机 客户支持窗口<br>TEL：02-3389-4254（受理时间 10:00～19:00）</div>
+                    </div>
+                </div>
+            </main>
+            <aside class="question-section">
+                <div class="question-card sketch-box">
+                    <div class="q-header">
+                        <div class="q-number" style="background: var(--marker-yellow);">4</div>
+                        <div class="q-text-wrapper">
+                            <div class="q-text">このお知らせで最も伝えたいことは何か。</div>
+                            <div class="q-text-trans">这则通知最想传达的事情是什么？</div>
+                        </div>
+                    </div>
+                    <div class="options-group">
+                        <label class="option-label">
+                            <input type="radio" name="q4" value="1" class="option-input">
+                            <div class="custom-radio">1</div>
+                            <div class="option-content-wrapper">
+                                <div class="option-content">「ＢＳ－ＺＧ１」の電源ボタンに不具合が起きていないかどうか、確認してほしい。</div>
+                                <div class="option-trans">希望确认“BS-ZG1”的电源按钮是否发生了故障。</div>
+                            </div>
+                            <span class="click-hint">詳細解説</span>
+                            <div class="option-detail-analysis"></div>
+                        </label>
+                        <label class="option-label">
+                            <input type="radio" name="q4" value="2" class="option-input">
+                            <div class="custom-radio">2</div>
+                            <div class="option-content-wrapper">
+                                <div class="option-content">すべての「ＢＳ－ＺＧ１」を無料で修理するので、販売店に持ってきてほしい。</div>
+                                <div class="option-trans">将免费修理所有的“BS-ZG1”，希望带到销售店来。</div>
+                            </div>
+                            <span class="click-hint">詳細解説</span>
+                            <div class="option-detail-analysis"></div>
+                        </label>
+                        <label class="option-label">
+                            <input type="radio" name="q4" value="3" class="option-input">
+                            <div class="custom-radio">3</div>
+                            <div class="option-content-wrapper">
+                                <div class="option-content">対象の製造番号の「ＢＳ－ＺＧ１」を無料で修理するので、販売店に持ってきてほしい。</div>
+                                <div class="option-trans">将免费修理对象制造编号的“BS-ZG1”，希望带到销售店来。</div>
+                            </div>
+                            <span class="click-hint">詳細解説</span>
+                            <div class="option-detail-analysis"></div>
+                        </label>
+                        <label class="option-label">
+                            <input type="radio" name="q4" value="4" class="option-input">
+                            <div class="custom-radio">4</div>
+                            <div class="option-content-wrapper">
+                                <div class="option-content">不具合が起きた「ＢＳ－ＺＧ１」の製造番号をホームページに載せたので、確認してほしい。</div>
+                                <div class="option-trans">发生故障的“BS-ZG1”的制造编号已经刊登在网站上，希望进行确认。</div>
+                            </div>
+                            <span class="click-hint">詳細解説</span>
+                            <div class="option-detail-analysis"></div>
+                        </label>
+                    </div>
+                    <div class="explanation-box">
+                        <div class="explanation-title">✎ 赤ペン解析</div>
+                        <div class="key-sentence-box">
+                            <div class="ks-label">【着眼点】</div>
+                            <div class="ks-text"></div>
+                        </div>
+                        <div class="explanation-content"></div>
+                    </div>
+                </div>
+                <div class="action-bar">
+                    <button type="button" class="nav-btn" onclick="switchPage(3)">◀ 前の問題</button>
+                    <button type="button" class="submit-btn" onclick="submitAnswer(4)">答え合わせ</button>
+                    <button type="button" class="nav-btn" onclick="switchPage(5)">次の問題 ▶</button>
+                </div>
+            </aside>
+        </div>
+
+        <!-- ================= ページ 5 (2019年12月 第5問) ================= -->
+        <div class="page-container" id="page-5">
+            <main class="article-section sketch-box">
+                <div class="article-meta">
+                    <div class="meta-left">
+                        <span class="tag">N2 読解</span>
+                        <span class="article-title-info">2019年12月・問題 5：作者と詩</span>
+                    </div>
+                    <button class="translate-toggle-btn" onclick="toggleTranslation(this, 'page-5')">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 8l6 6"/><path d="M4 14l6-6 2-3"/><path d="M2 5h12"/><path d="M7 2h1"/><path d="M22 22l-5-10-5 10"/><path d="M14 18h6"/></svg>
+                        参考訳
+                    </button>
+                </div>
+                <div class="article-content">
+                    <div class="paragraph-group">
+                        <p>作者というものは、たいていの場合、自分の詩のいい読者ではありえません。<span class="vocab-word" data-reading="さくい" data-meaning="作成した意図">作意</span>や創作過程が心につよく残っていて、作品を客観的に見ることを妨げるからです。だれだって、自分のことは自分がもっともよく知っていると思うでしょう。<span class="ks-target target-ks">ですが、その反面、他人にはすぐわかるのに、本人にはいっこうにわからないような一面が人間にはあります。作者と詩の場合もこれと同じです。</span>だから、作者がこの詩についてはこう言っているのだから、これが正しいというような考え方には、僕はあまり賛成できません。</p>
+                        <div class="article-translation">作者在大多数情况下，无法成为自己诗作的好读者。这是因为创作意图和创作过程深深地留在心中，妨碍了客观地看待作品。任何人都会认为自己最了解自己吧。但是，反过来说，人类也有这样的一面：别人一眼就能看出来，但本人却完全不明白。作者和诗的关系也是如此。因此，对于“因为作者对这首诗是这么说的，所以这个解释才是对的”这种想法，我不太能赞同。</div>
+                    </div>
+                    
+                    <div class="article-notes paragraph-group">
+                        <p>（注）作意：作成した意図</p>
+                    </div>
+                </div>
+            </main>
+            <aside class="question-section">
+                <div class="question-card sketch-box">
+                    <div class="q-header">
+                        <div class="q-number" style="background: var(--marker-peach);">5</div>
+                        <div class="q-text-wrapper">
+                            <div class="q-text">あまり賛成できませんとあるが、なぜか。</div>
+                            <div class="q-text-trans">文中写道“不太能赞同”，原因是为什么？</div>
+                        </div>
+                    </div>
+                    <div class="options-group">
+                        <label class="option-label">
+                            <input type="radio" name="q5" value="1" class="option-input">
+                            <div class="custom-radio">1</div>
+                            <div class="option-content-wrapper">
+                                <div class="option-content">詩は、読者自身が意味を考えることに意義があるから</div>
+                                <div class="option-trans">因为诗歌的意义在于读者自己去思考。</div>
+                            </div>
+                            <span class="click-hint">詳細解説</span>
+                            <div class="option-detail-analysis"></div>
+                        </label>
+                        <label class="option-label">
+                            <input type="radio" name="q5" value="2" class="option-input">
+                            <div class="custom-radio">2</div>
+                            <div class="option-content-wrapper">
+                                <div class="option-content">詩の解釈は、正しいかどうかを考えても意味がないから</div>
+                                <div class="option-trans">因为思考诗歌的解释是否正确是没有意义的。</div>
+                            </div>
+                            <span class="click-hint">詳細解説</span>
+                            <div class="option-detail-analysis"></div>
+                        </label>
+                        <label class="option-label">
+                            <input type="radio" name="q5" value="3" class="option-input">
+                            <div class="custom-radio">3</div>
+                            <div class="option-content-wrapper">
+                                <div class="option-content">作者が自身の詩を他人よりわかっているとは限らないから</div>
+                                <div class="option-trans">因为作者未必比别人更了解自己的诗。</div>
+                            </div>
+                            <span class="click-hint">詳細解説</span>
+                            <div class="option-detail-analysis"></div>
+                        </label>
+                        <label class="option-label">
+                            <input type="radio" name="q5" value="4" class="option-input">
+                            <div class="custom-radio">4</div>
+                            <div class="option-content-wrapper">
+                                <div class="option-content">作者の意図や創作過程を知ることは、あまり重要ではないから</div>
+                                <div class="option-trans">因为了解作者的意图和创作过程不太重要。</div>
+                            </div>
+                            <span class="click-hint">詳細解説</span>
+                            <div class="option-detail-analysis"></div>
+                        </label>
+                    </div>
+                    <div class="explanation-box">
+                        <div class="explanation-title">✎ 赤ペン解析</div>
+                        <div class="key-sentence-box">
+                            <div class="ks-label">【着眼点】</div>
+                            <div class="ks-text"></div>
+                        </div>
+                        <div class="explanation-content"></div>
+                    </div>
+                </div>
+                <div class="action-bar">
+                    <button type="button" class="nav-btn" onclick="switchPage(4)">◀ 前の問題</button>
+                    <button type="button" class="submit-btn" onclick="submitAnswer(5)">答え合わせ</button>
+                    <button type="button" class="nav-btn" style="visibility: hidden;">次の問題 ▶</button>
+                </div>
+            </aside>
+        </div>
+
+    </div>
+
+    <!-- 词汇解释气泡 -->
+    <div id="vocabTooltip" class="vocab-tooltip"></div>
+    <script src="../../shared/reading-year-system.js"></script>
+    <script src="../../categories/index.js"></script>
+    <script src="../../shared/reading-category-system.js"></script>
+    <script src="../../../../shared/practice-feedback-system.js"></script>
+    <script>
+        // ================= データ設定 (2019年12月 新しい内容) =================
+        const answersData = {
+            1: { 
+                correct: "2", 
+                keySentence: "「一人で考えれば考えるほど、あなたは成長します。」\n「自分一人で考える時間がなければ、あなたはどんなに立派な話を聞いても、どんなに役立つ本を読んでも、その考えやアイデアは、あなたのものになりません。」",
+                explanation: "题目询问哪一项符合作者的想法。文章第一段指出，“越是独自思考……你就越会成长（一人で考えれば考えるほど、あなたは成長します）”。第二段则从反面补充，如果没有独自思考的时间，听再多、看再多也不会变成自己真正的知识。综合来看，作者认为独自思考的时间对于人的成长和获得真正的知识是非常重要的环节。选项2准确地概括了这一观点。",
+                optAnalysis: {
+                    "1": "【✖ 誤り】文章提到的是“成长（成長）”和将知识变成自己的，并没有提到为了“了解自己（自分自身を知る）”。",
+                    "2": "【✔ 正解】准确对应了文章第一段中越是独自思考越能获得成长的主张。",
+                    "3": "【✖ 誤り】文章说的是如果不独自思考，别人的点子就不会变成自己的，而不是说独自思考时间长就能“想出好点子（よいアイデアが浮かぶ）”。",
+                    "4": "【✖ 誤り】文章在第二段明确指出，如果没有独自思考的时间，就算接触了有用的书和精彩的话，也不会成为真正的知识。选项与文章逻辑相反。"
+                }
+            },
+            2: {
+                correct: "3",
+                keySentence: "「来年より４月に会費（４月から翌年３月の１年分）を納めていただくことになりました。」\n「来年１月から３月までの分の１，０００円は、１月の交流会で集めます。」",
+                explanation: "题目询问会员应该如何缴纳从明年1月到后年3月为止的会费。根据邮件内容，缴费规则发生了变更。首先，为了填补空白期，“明年1月到3月份的1,000日元，将在1月份的交流会上收取（来年１月から３月までの分の１，０００円は、１月の交流会で集めます）”。接着，新的年度会费“从明年开始，将改为在4月缴纳会费（4月到次年3月的一年费用）（来年より４月に会費（４月から翌年３月の１年分）を納めていただくことになりました）”，这部分的金额按照惯例是4,000日元。因此，会员需要在明年1月支付1,000日元，然后在4月支付4,000日元。选项3准确说明了这两个时间和对应的金额。",
+                optAnalysis: {
+                    "1": "【✖ 誤り】邮件中说明以往是每年12月交，但今年因为规则变更，“明年1月到3月的份在1月交（来年１月から３月までの分…は、１月…で集めます）”，并没有要求今年12月交4,000日元。",
+                    "2": "【✖ 誤り】明年1月只需要交1到3月份的1,000日元，新年度的4,000日元是在“4月（４月に）”缴纳。",
+                    "3": "【✔ 正解】准确对应了邮件中“明年1月交1,000日元（过渡期）”和“4月交4,000日元（新年度）”的安排。",
+                    "4": "【✖ 誤り】1,000日元是在“1月（１月）”收取的，不是在4月一起交。"
+                }
+            },
+            3: {
+                correct: "4",
+                keySentence: "「人間だと繰り返しの作業の中でどうしても思い込みが起こる。コンピュータが得意なのは常に一定の判断である。」",
+                explanation: "题目询问根据作者的观点，计算机与人不同的点是什么。文章指出，“如果是人类，在重复的作业中无论如何都会产生主观臆断（人間だと繰り返しの作業の中でどうしても思い込みが起こる）”，而相反，“计算机擅长的是始终保持一定的判断（コンピュータが得意なのは常に一定の判断である）”。这里的“始终保持一定的判断”就等同于“始终做相同的作业”。选项4准确地概括了这一点。",
+                optAnalysis: {
+                    "1": "【✖ 誤り】文章提到计算机能“指出（指摘できる）”人的失误，而不是“预测（予測できる）”。",
+                    "2": "【✖ 誤り】“两倍（二倍）”出现在说明“有两个相同的东西”时，并不是指计算机和人不同在于能做两倍的工作。",
+                    "3": "【✖ 誤り】文章说的是计算机能始终保持“一定的判断（一定の判断）”，即相同的作业，而不是指“高质量（質の高い）”。",
+                    "4": "【✔ 正解】准确对应了原文中计算机擅长“始终保持一定的判断（常に一定の判断である）”这一有别于人类的特征。"
+                }
+            },
+            4: {
+                correct: "3",
+                keySentence: "「対象の製品をお持ちのお客様は現在不具合が起きていなくても無料で修理させていただきますので、お手数ですがお近くの販売店までお持ちくださいますようお願い申し上げます。」",
+                explanation: "题目询问这则通知最想传达的事情。通知中明确提到，因电源按钮故障，特定编号（対象の製品）的相机即使目前没有故障也会提供免费修理，并请求客户将其带到附近的销售店（無料で修理させていただきますので、…販売店までお持ちくださいますようお願い申し上げます）。这正是发送此通知的核心目的。选项3准确地概括了这一点。",
+                optAnalysis: {
+                    "1": "【✖ 誤り】通知中是要求特定编号的客户直接把相机带来修理，而不是让他们自己去“确认是否发生故障（不具合が起きていないかどうか、確認してほしい）”。",
+                    "2": "【✖ 誤り】通知中明确指出故障仅发生在特定制造编号的产品上（対象の製品），并非“所有的（すべての）”产品。",
+                    "3": "【✔ 正解】准确对应了通知中针对特定编号产品提供免费修理，并请求带到销售店的内容。",
+                    "4": "【✖ 誤り】网站上刊登的是“制造编号的确认方法（製造番号の確認方法）”，而不是发生故障的编号列表；且通知的最主要目的是为了让客户把相机拿来修理。"
+                }
+            },
+            5: {
+                correct: "3",
+                keySentence: "「ですが、その反面、他人にはすぐわかるのに、本人にはいっこうにわからないような一面が人間にはあります。作者と詩の場合もこれと同じです。」",
+                explanation: "题目询问作者为什么“不太赞同（作者说的就是对的这种想法）”。文章指出，虽然人们常认为自己最了解自己，但人类存在“别人一眼就能看清，自己却完全不明白”的一面，并且“作者和诗的关系也是如此（作者と詩の場合もこれと同じです）”。这说明作者有时无法客观地看待自己的作品，不一定比别人更了解自己写的诗。选项3准确地说明了这一原因。",
+                optAnalysis: {
+                    "1": "【✖ 誤り】文章并没有提到读者自己思考的意义，偏离了作者不赞同的核心理由。",
+                    "2": "【✖ 誤り】探讨解释是否正确并不是作者不赞同的理由，理由在于作者自身的认知局限。",
+                    "3": "【✔ 正解】符合文章中关于“别人一眼就能看出来，但本人却完全不明白”的逻辑。",
+                    "4": "【✖ 誤り】文章指出创作意图会妨碍客观评价，并没有说了解它“不太重要（あまり重要ではない）”。"
+                }
+            }
+        };
+
+        // ================= ページ切り替え (Pagination) =================
+        const ARTICLE_LEVEL = 'N2';
+        const ARTICLE_TYPE = 'short';
+        const ARTICLE_YEAR = '2019.12';
+        const ARTICLE_ID = 'n2-2019-12-short';
+        const ARTICLE_LINK = 's/n2/2019.12.html';
+        const AUDIO_PREFIX = '2019.12';
+        const totalPages = document.querySelectorAll('.page-container').length;
+        const urlParams = new URLSearchParams(window.location.search);
+        const requestedPage = Number.parseInt(urlParams.get('page'), 10);
+        const categorySession = window.ReadingCategorySystem && typeof window.ReadingCategorySystem.createCategorySession === 'function'
+            ? window.ReadingCategorySystem.createCategorySession({
+                level: ARTICLE_LEVEL,
+                type: ARTICLE_TYPE,
+                examKey: urlParams.get('examKey') || ARTICLE_YEAR,
+                categoryId: urlParams.get('category') || '',
+                practiceMode: urlParams.get('practiceMode') || ''
+            })
+            : null;
+        let currentPage = Number.isInteger(requestedPage) && requestedPage >= 1 && requestedPage <= totalPages ? requestedPage : 1;
+
+        if (categorySession && categorySession.isCategoryMode) {
+            const initialTarget = categorySession.getInitialTarget(currentPage);
+            if (initialTarget.redirectUrl) {
+                window.location.replace(initialTarget.redirectUrl);
+            }
+            if (Number.isInteger(initialTarget.page)) {
+                currentPage = initialTarget.page;
+            }
+            const backLink = document.getElementById('back-to-reading-index');
+            if (backLink) {
+                backLink.href = categorySession.buildBackUrl();
+            }
+        }
+
+        window.currentPage = currentPage;
+
+        function isCategoryPracticeMode() {
+            return Boolean(categorySession && categorySession.isCategoryMode);
+        }
+
+        function syncCategoryNavigation() {
+            if (!isCategoryPracticeMode()) {
+                return;
+            }
+
+            const activePage = document.getElementById(`page-${currentPage}`);
+            if (!activePage) {
+                return;
+            }
+
+            const navButtons = Array.from(activePage.querySelectorAll('.action-bar .nav-btn'));
+            const prevButton = navButtons[0];
+            const nextButton = navButtons[1];
+            const navState = categorySession.getNavState(currentPage);
+
+            configureCategoryNavButton(prevButton, -1, navState.prevDisabled);
+            configureCategoryNavButton(nextButton, 1, navState.nextDisabled);
+        }
+
+        function configureCategoryNavButton(button, direction, disabled) {
+            if (!button) {
+                return;
+            }
+
+            button.disabled = disabled;
+            button.style.visibility = disabled ? 'hidden' : '';
+            button.onclick = disabled ? null : function() {
+                moveCategoryArticle(direction);
+            };
+        }
+
+        function showPageWithinCurrentFile(pageNumber) {
+            const targetPage = document.getElementById(`page-${pageNumber}`);
+            if (!targetPage) return;
+
+            currentPage = pageNumber;
+            window.currentPage = currentPage;
+
+            document.querySelectorAll('.page-container').forEach(container => {
+                container.classList.remove('active');
+            });
+            targetPage.classList.add('active');
+
+            if (isCategoryPracticeMode()) {
+                categorySession.rememberProgress(currentPage);
+                categorySession.replacePageUrl(currentPage);
+            }
+
+            syncCategoryNavigation();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function moveCategoryArticle(direction) {
+            if (!isCategoryPracticeMode()) {
+                return false;
+            }
+
+            const target = categorySession.getMoveTarget(currentPage, direction);
+            if (!target || !target.item) {
+                return true;
+            }
+
+            if (target.sameExamKey) {
+                showPageWithinCurrentFile(target.page);
+            } else if (target.href) {
+                window.location.href = target.href;
+            }
+            return true;
+        }
+
+        function switchPage(pageNumber) {
+            if (isCategoryPracticeMode() && pageNumber !== currentPage) {
+                const direction = pageNumber > currentPage ? 1 : -1;
+                if (moveCategoryArticle(direction)) {
+                    return;
+                }
+            }
+
+            showPageWithinCurrentFile(pageNumber);
+        }
+
+        switchPage(currentPage);
+
+        // ================= 単一ページ内の解答提出処理 =================
+        function submitAnswer(pageId) {
+            const container = document.getElementById(`page-${pageId}`);
+            const selectedOpt = container.querySelector(`input[name="q${pageId}"]:checked`);
+
+            if (!selectedOpt) {
+                alert("選択肢を選んでくださいね。（请先选择一个答案哦）");
+                return;
+            }
+
+            const data = answersData[pageId];
+            if (!data) {
+                alert("この問題のデータはまだありません。");
+                return;
+            }
+            
+            const correctVal = data.correct;
+            const userVal = selectedOpt.value;
+            let isCorrect = (userVal === correctVal);
+            if (window.N2PracticeFeedback) {
+                window.N2PracticeFeedback.trackAnswer({
+                    module: 'jlpt-reading',
+                    subType: ARTICLE_TYPE,
+                    mode: isCategoryPracticeMode() ? 'category' : 'article',
+                    isCorrect,
+                    questionId: `${ARTICLE_ID}-q${pageId}`,
+                    questionIndex: pageId,
+                    questionCount: totalPages
+                });
+            }
+
+            // 選択肢の無効化とスタイル更新
+            container.querySelectorAll('.option-input').forEach(input => {
+                input.disabled = true;
+                const label = input.closest('.option-label');
+                label.classList.add('disabled');
+                
+                const optVal = input.value;
+                if (optVal === correctVal) {
+                    label.classList.add('is-correct');
+                    label.querySelector('.custom-radio').innerHTML = '✔';
+                }
+                if (optVal === userVal && userVal !== correctVal) {
+                    label.classList.add('is-wrong');
+                    label.querySelector('.custom-radio').innerHTML = '✖';
+                }
+                
+                // 詳細解説テキストの挿入
+                label.querySelector('.option-detail-analysis').innerText = data.optAnalysis[optVal];
+            });
+            
+            container.querySelector('.options-group').classList.add('reviewed');
+            container.querySelector('.article-content').classList.add('reviewed');
+
+            // 提出ボタンの状態更新
+            const btn = container.querySelector('.submit-btn');
+            btn.disabled = true;
+            if (isCorrect) {
+                btn.innerText = "正解！素晴らしい！";
+                btn.style.background = "var(--marker-mint)";
+                btn.style.color = "var(--green-pencil)";
+            } else {
+                btn.innerText = "残念！解説をチェックしよう";
+                btn.style.background = "var(--marker-peach)";
+                btn.style.color = "var(--red-pencil)";
+            }
+
+            // 解説ボックスの表示
+            const expBox = container.querySelector('.explanation-box');
+            expBox.querySelector('.ks-text').innerText = data.keySentence;
+            expBox.querySelector('.explanation-content').innerText = data.explanation;
+            expBox.classList.add('show');
+
+            // 本文中の鍵となる文のハイライト
+            const targetSpans = container.querySelectorAll('.ks-target');
+            if (targetSpans.length > 0) {
+                targetSpans.forEach(span => span.classList.add('revealed'));
+            }
+
+            // 解説内の着眼点クリック時の動作
+            const ksBox = container.querySelector('.key-sentence-box');
+            ksBox.classList.add('clickable');
+            ksBox.onclick = function() {
+                if (targetSpans.length > 0) {
+                    targetSpans[0].scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    targetSpans.forEach(span => {
+                        span.classList.remove('flash-focus');
+                        void span.offsetWidth; 
+                        span.classList.add('flash-focus');
+                    });
+                }
+            };
+        }
+
+        // ================= 翻訳表示の切り替え (ページ独立) =================
+        function toggleTranslation(btn, containerId) {
+            const container = document.getElementById(containerId);
+            const articleContent = container.querySelector('.article-content');
+            
+            if (!articleContent.classList.contains('reviewed')) {
+                alert("問題を解いてから（「答え合わせ」をクリックしてから）訳文を確認してくださいね！\n(请在作答并提交后再查看参考译文哦！)");
+                return;
+            }
+            
+            btn.classList.toggle('active');
+            container.querySelectorAll('.article-translation').forEach(el => {
+                el.classList.toggle('show');
+            });
+        }
+
+        // ================= イベントリスナー =================
+        
+        // 選択肢クリック時のビジュアルフィードバック
+        document.addEventListener('change', function(e) {
+            if (e.target && e.target.classList.contains('option-input')) {
+                const name = e.target.name;
+                const container = e.target.closest('.page-container');
+                // そのページ内の選択肢からselectedクラスを削除
+                container.querySelectorAll(`input[name="${name}"]`).forEach(radio => {
+                    radio.closest('.option-label').classList.remove('selected');
+                });
+                if (e.target.checked) {
+                    e.target.closest('.option-label').classList.add('selected');
+                }
+            }
+        });
+
+        // 詳細解説の開閉
+        document.addEventListener('click', function(e) {
+            const label = e.target.closest('.option-label');
+            if (label) {
+                const group = label.closest('.options-group');
+                if (group && group.classList.contains('reviewed')) {
+                    const detailBox = label.querySelector('.option-detail-analysis');
+                    if (detailBox.classList.contains('show')) {
+                        detailBox.classList.remove('show');
+                    } else {
+                        // 他の解説を閉じる
+                        group.querySelectorAll('.option-detail-analysis').forEach(box => box.classList.remove('show'));
+                        detailBox.classList.add('show');
+                    }
+                }
+            }
+        });
+
+        // 語彙解説ツールチップ
+        const vocabTooltip = document.getElementById('vocabTooltip');
+        document.addEventListener('click', function(e) {
+            const word = e.target.closest('.vocab-word');
+            const article = e.target.closest('.article-content');
+            
+            if (word && article) {
+                e.stopPropagation();
+                const reading = word.getAttribute('data-reading');
+                const meaning = word.getAttribute('data-meaning');
+                
+                vocabTooltip.innerHTML = `<span class="reading">${reading}</span><span class="meaning">${meaning}</span>`;
+                
+                const rect = word.getBoundingClientRect();
+                const scrollX = window.pageXOffset || document.documentElement.scrollLeft;
+                const scrollY = window.pageYOffset || document.documentElement.scrollTop;
+                
+                vocabTooltip.style.left = `${rect.left + scrollX - 10}px`;
+                vocabTooltip.style.top = `${rect.top + scrollY - vocabTooltip.offsetHeight - 10}px`;
+                vocabTooltip.classList.add('show');
+                
+                setTimeout(() => {
+                    vocabTooltip.style.top = `${rect.top + scrollY - vocabTooltip.offsetHeight - 10}px`;
+                }, 10);
+            } else {
+                vocabTooltip.classList.remove('show');
+            }
+        });
+
+    </script>
+    <script src="../../shared/reading-tools.js"></script>
+    <script src="../../shared/reading-short-n2-runtime.js"></script>
+    <script src="../../shared/reading-user-highlights.js"></script>
+</body>
+</html>

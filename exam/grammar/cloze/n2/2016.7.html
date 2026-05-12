@@ -1,0 +1,968 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JLPT 完形填空 - 水彩笔记特训</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- 引入 Klee One 手写铅笔风字体 -->
+    <link href="https://fonts.googleapis.com/css2?family=Klee+One:wght@400;600&family=Noto+Sans+JP:wght@400;500;700;900&family=Noto+Sans+SC:wght@400;500;700;900&family=Noto+Serif+JP:wght@400;600;700;900&family=Noto+Serif+SC:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <script>
+        // 重写 Tailwind 配置表，注入水彩素描本风格配色
+        window.tailwind = window.tailwind || {};
+        window.tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        'sans': ['"Noto Sans SC"', '"Noto Sans JP"', 'sans-serif'],
+                        'serif-jp': ['"Noto Serif SC"', '"Noto Serif JP"', '"Songti SC"', '"SimSun"', 'serif'],
+                        'pencil': ['"Klee One"', '"Noto Sans JP"', '"Noto Sans SC"', 'sans-serif'], // 新增铅笔手写字体
+                    },
+                    colors: {
+                        bgMain: '#fcfbf9', // 调整为更暖的纸张底色
+                        bgCard: '#ffffff',        
+                        textMain: '#333333',      
+                        textSub: '#666666',       
+                        textMuted: '#999999',     
+                        borderMain: '#e5e5e5',    
+                        borderDark: '#cccccc',    
+                        borderStrong: '#333333',  
+                        accentRed: '#e64a4a',     
+                        markerYellow: 'rgba(255, 213, 79, 0.25)',
+                        markerBlue: 'rgba(129, 212, 250, 0.25)',
+                        markerMint: 'rgba(134, 239, 172, 0.25)',
+                        markerPink: 'rgba(244, 143, 177, 0.25)',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        :root {
+            --font-serif: 'Noto Serif SC', 'Noto Serif JP', 'Songti SC', 'SimSun', serif;
+        }
+
+        /* ==============================================================
+           基础纸张底座与工具类
+           ============================================================== */
+        body {
+            margin: 0;
+            min-height: 100vh;
+            background-color: var(--bgMain);
+            background-image: radial-gradient(#d5d5d5 1px, transparent 1px);
+            background-size: 20px 20px; /* 增加网格点阵，模仿笔记本 */
+            color: var(--textMain);
+            position: relative;
+            scroll-behavior: smooth;
+        }
+
+        /* 极弱的纸张噪点纹理 */
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.04'/%3E%3C/svg%3E");
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        /* 手绘感不规则边框 (Sketchy Border) */
+        .sketch-box {
+            border: 2px solid #333333 !important;
+            border-radius: 3px 255px 5px 25px / 255px 5px 225px 3px !important;
+            box-shadow: 3px 4px 0px rgba(51, 51, 51, 0.15) !important; /* 更硬的阴影模仿错位排线 */
+            transition: all 0.2s ease;
+        }
+
+        .sketch-btn {
+            border: 2px solid #333333 !important;
+            border-radius: 2px 8px 3px 6px / 6px 3px 8px 2px !important;
+            box-shadow: 2px 2px 0px rgba(51, 51, 51, 0.15) !important;
+            transition: all 0.2s ease;
+        }
+        
+        .sketch-btn:hover:not(:disabled) {
+            transform: translate(-1px, -1px);
+            box-shadow: 3px 3px 0px rgba(51, 51, 51, 0.2) !important;
+        }
+
+        /* ==============================================================
+           完形填空专有样式 (Cloze Specific)
+           ============================================================== */
+        
+        /* 文章排版：標準襯線体正文 */
+        .cloze-passage {
+            font-family: var(--font-serif);
+            font-size: 16px; 
+            line-height: 2.2;
+            color: #222; 
+        }
+        
+        .cloze-passage p {
+            text-indent: 2em; 
+            margin-bottom: 1em;
+        }
+
+        .cloze-passage h2,
+        .cloze-passage h3 {
+            text-indent: 0;
+        }
+
+        /* 排除译文和底部小字注释的首行缩进 */
+        .cloze-passage p.passage-translation,
+        .cloze-passage p.text-xs,
+        .cloze-passage p.text-indent-0 {
+            text-indent: 0;
+        }
+
+        /* 注释词汇：低调的铅笔点划线注释特效 */
+        .annotation-word {
+            position: relative;
+            cursor: help; /* 鼠标悬停显示帮助/问号图标 */
+            color: inherit; /* 继承原文颜色，不突兀 */
+            border-bottom: 1.5px dotted #999999; /* 灰色的点状虚线 */
+            padding-bottom: 1px;
+            transition: all 0.2s ease;
+        }
+
+        .annotation-word:hover {
+            background: rgba(255, 213, 79, 0.3); /* 悬停时轻微的黄色马克笔涂抹感 */
+            border-bottom-color: #333333; /* 悬停时虚线加深 */
+        }
+
+        /* 解释气泡：水彩素描卡片风 */
+        .annotation-bubble {
+            position: absolute;
+            z-index: 9999;
+            max-width: 280px;
+            background: #fdfdfd;
+            border: 2px solid #333333;
+            border-radius: 3px 255px 5px 25px / 255px 5px 225px 3px;
+            box-shadow: 3px 4px 0px rgba(51, 51, 51, 0.15);
+            padding: 12px 16px;
+            font-size: 0.9rem;
+            font-family: "Noto Sans SC", "Noto Sans JP", sans-serif;
+            color: #333333;
+            font-weight: 700;
+            line-height: 1.6;
+            pointer-events: none;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(5px);
+            transition: all 0.2s ease;
+        }
+
+        .annotation-bubble.is-visible {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+            pointer-events: auto;
+        }
+
+        .annotation-bubble::before {
+            content: "💡";
+            display: inline-block;
+            margin-right: 6px;
+        }
+
+        /* 文章内的填空槽位 */
+        .cloze-blank-inline {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 50px;
+            height: 28px;
+            margin: 0 4px;
+            padding: 0 12px;
+            border-bottom: 2px dashed #999999;
+            background: transparent;
+            color: #333333;
+            font-family: var(--font-serif);
+            font-weight: 700;
+            font-size: 1rem; 
+            vertical-align: baseline;
+            cursor: pointer;
+            position: relative;
+            text-indent: 0; /* 取消内部缩进 */
+            transition: all 0.2s ease;
+            border-radius: 2px 4px 0 0;
+        }
+
+        .cloze-blank-inline:hover {
+            border-bottom-color: #333333;
+            background: linear-gradient(104deg, transparent 0%, rgba(129, 212, 250, 0.2) 2%, rgba(129, 212, 250, 0.3) 98%, transparent 100%);
+        }
+
+        /* 槽位编号 (左上角小数字) */
+        .cloze-blank-num {
+            position: absolute;
+            left: 2px;
+            top: -10px;
+            font-size: 11px;
+            font-family: "Noto Sans JP", sans-serif;
+            font-weight: 900;
+            color: #666666;
+            background: var(--bgMain);
+            padding: 0 4px;
+            border: 1.5px solid #999999;
+            border-radius: 4px 8px 3px 6px / 6px 3px 8px 2px;
+            line-height: 1;
+            text-shadow: none;
+        }
+
+        /* 已填写的槽位 */
+        .cloze-blank-inline.is-filled {
+            border-bottom-style: solid;
+            border-bottom-width: 2px;
+            border-bottom-color: #333333;
+            background: linear-gradient(104deg, transparent 0%, rgba(255, 213, 79, 0.4) 2%, rgba(255, 213, 79, 0.5) 98%, transparent 100%);
+        }
+
+        /* 判题后的槽位样式 */
+        .cloze-blank-inline.judged-correct {
+            background: linear-gradient(104deg, transparent 0%, rgba(134, 239, 172, 0.4) 2%, rgba(134, 239, 172, 0.5) 98%, transparent 100%) !important;
+            border-bottom-color: #10B981 !important;
+            border-bottom-style: solid !important;
+        }
+        
+        .cloze-blank-inline.judged-wrong {
+            background: transparent !important;
+            border-bottom-color: #e64a4a !important;
+            border-bottom-style: dashed !important;
+            color: #e64a4a !important;
+            text-decoration: line-through;
+            text-decoration-color: #e64a4a;
+            text-decoration-thickness: 2px;
+        }
+
+        /* 选项卡片 */
+        .cloze-option-btn {
+            border: 2px dashed #cccccc !important;
+            background: #ffffff !important;
+            border-radius: 3px 255px 5px 25px / 255px 5px 225px 3px !important; 
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            text-align: left;
+            width: 100%;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+
+        .cloze-option-btn:hover {
+            border-style: solid !important;
+            border-color: #999999 !important;
+            background: linear-gradient(104deg, transparent 0%, rgba(129, 212, 250, 0.1) 2%, rgba(129, 212, 250, 0.15) 98%, transparent 100%) !important;
+            transform: translateY(-1px);
+        }
+
+        /* 选中的选项 */
+        .cloze-option-btn.is-selected {
+            border-style: solid !important;
+            border-color: #333333 !important;
+            background: linear-gradient(104deg, transparent 0%, rgba(255, 213, 79, 0.25) 2%, rgba(255, 213, 79, 0.35) 98%, transparent 100%) !important;
+            box-shadow: 3px 3px 0px rgba(51, 51, 51, 0.15) !important;
+            transform: translate(-1px, -1px);
+        }
+
+        /* 选项字母/数字圆圈 */
+        .option-marker {
+            background: #ffffff;
+            color: #666666;
+            border: 1.5px solid #999999;
+            border-radius: 45% 55% 40% 60% / 55% 45% 60% 40%; 
+            width: 24px;
+            height: 24px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 700;
+            margin-right: 12px;
+            flex-shrink: 0;
+            transition: all 0.2s ease;
+        }
+
+        .cloze-option-btn.is-selected .option-marker {
+            border-color: #333333;
+            color: #333333;
+            background: #ffffff;
+        }
+
+        /* ==============================================================
+           判题后的选项高亮样式 (正确绿/错误红)
+           ============================================================== */
+        .cloze-option-btn.is-correct-answer {
+            border-style: solid !important;
+            border-color: #10B981 !important;
+            background: linear-gradient(104deg, transparent 0%, rgba(134, 239, 172, 0.3) 2%, rgba(134, 239, 172, 0.4) 98%, transparent 100%) !important;
+            box-shadow: 3px 3px 0px rgba(16, 185, 129, 0.15) !important;
+            transform: translate(-1px, -1px);
+        }
+        .cloze-option-btn.is-correct-answer .option-marker {
+            border-color: #10B981 !important;
+            color: #10B981 !important;
+            font-weight: 900;
+        }
+        .cloze-option-btn.is-correct-answer .option-text {
+            color: #059669 !important; /* 深一点の绿色保证文字可读性 */
+        }
+
+        .cloze-option-btn.is-wrong-answer {
+            border-style: solid !important;
+            border-color: #e64a4a !important;
+            background: linear-gradient(104deg, transparent 0%, rgba(230, 74, 74, 0.1) 2%, rgba(230, 74, 74, 0.15) 98%, transparent 100%) !important;
+        }
+        .cloze-option-btn.is-wrong-answer .option-marker {
+            border-color: #e64a4a !important;
+            color: #e64a4a !important;
+        }
+        .cloze-option-btn.is-wrong-answer .option-text {
+            color: #e64a4a !important;
+            text-decoration: line-through;
+            text-decoration-thickness: 2px;
+        }
+
+
+        /* 提交按钮 */
+        .submit-btn {
+            background: #3a3a3a;
+            color: #ffffff;
+            border: 2px solid #333333;
+            border-radius: 2px 8px 3px 6px / 6px 3px 8px 2px;
+            box-shadow: 3px 4px 0px rgba(0,0,0,0.2);
+            transition: all 0.2s ease;
+            letter-spacing: 0.05em;
+        }
+        .submit-btn:hover:not(:disabled) {
+            background: #222222; 
+            transform: translate(-1px, -1px);
+            box-shadow: 4px 5px 0px rgba(0,0,0,0.25);
+        }
+        .submit-btn:disabled {
+            background: transparent;
+            border: 2px dashed #999999;
+            color: #999999;
+            box-shadow: none;
+            cursor: not-allowed;
+        }
+
+        /* 解析区 */
+        .explanation-box {
+            border: 2px solid #333333;
+            border-radius: 3px 255px 5px 25px / 255px 5px 225px 3px;
+            background: #fdfdfd;
+            padding: 20px;
+            margin-top: 16px;
+            display: none;
+            animation: fadeIn 0.3s ease-out forwards;
+            background-image: repeating-linear-gradient(45deg, transparent, transparent 3px, rgba(51, 51, 51, 0.02) 3px, rgba(51, 51, 51, 0.02) 4px);
+        }
+        .explanation-box.is-visible {
+            display: block;
+        }
+
+        /* 动画效果：高亮闪烁 */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes highlightFlash {
+            0% { background-color: rgba(255, 213, 79, 0.8); box-shadow: 0 0 0 4px rgba(255, 213, 79, 0.4); }
+            100% { background-color: transparent; box-shadow: 0 0 0 0 transparent; }
+        }
+        .flash-highlight {
+            animation: highlightFlash 1.5s ease-out;
+            border-radius: 4px;
+        }
+
+        .fade-in {
+            animation: fadeIn 0.4s forwards;
+        }
+
+        /* ==============================================================
+           布局壳子
+           ============================================================== */
+        .page-shell {
+            width: min(100%, 900px);
+            margin: 0 auto;
+            padding: 24px 16px 64px;
+        }
+
+        /* 顶部导航 */
+        .page-header {
+            width: 100%;
+            padding: 16px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: rgba(255, 255, 255, 0.92);
+            backdrop-filter: blur(4px);
+            border-bottom: 1.5px solid #333333;
+            border-bottom-left-radius: 50% 2px;
+            border-bottom-right-radius: 50% 3px;
+        }
+    </style>
+</head>
+<body class="font-sans antialiased">
+
+    <!-- 全局注释解释气泡 -->
+    <div id="global-annotation-bubble" class="annotation-bubble"></div>
+
+    <!-- 顶部导航条 -->
+    <header class="page-header">
+        <div class="w-[100px]"> <!-- 占位保持标题居中 -->
+            <button type="button" onclick="window.location.href='../index.html?level=N2&view=years'" class="sketch-btn px-3 py-1 text-sm font-bold flex items-center gap-1 hover:bg-yellow-50 w-max">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+                戻る
+            </button>
+        </div>
+        <h1 class="m-0 text-lg font-bold text-textMain tracking-widest text-center flex-1 flex items-center justify-center">
+            文章の文法 <span class="ml-2 text-xs border border-borderStrong sketch-btn px-2 py-0.5 font-sans">完形填空</span>
+        </h1>
+        <div class="w-[100px] flex justify-end"> <!-- 译文开关置于右上角 -->
+            <button id="translation-toggle-btn" disabled class="px-3 py-1 bg-gray-100 border border-borderStrong text-xs font-bold text-textMuted sketch-btn cursor-not-allowed transition-colors flex items-center gap-1.5 outline-none whitespace-nowrap">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="eye-icon"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+                <span>訳文：OFF</span>
+            </button>
+        </div>
+    </header>
+
+    <div class="page-shell">
+        
+        <!-- 文章阅读区 (包含填空槽位) -->
+        <div class="sketch-box bg-white p-6 md:p-8 mb-8 shadow-sm relative">
+            <h2 id="article-title" class="text-xl md:text-2xl font-bold text-textMain tracking-wide mb-4 hidden"></h2> <!-- 标题直接嵌入文章上方，这里隐藏通用的 -->
+            
+            <div id="passage-container" class="cloze-passage mt-4">
+                <!-- JS 动态注入文章 -->
+            </div>
+        </div>
+
+        <!-- 题目列表区 -->
+        <div id="questions-container" class="space-y-6 mb-12">
+            <!-- JS 动态注入单道题目 -->
+        </div>
+
+        <!-- 底部提交与結果结算区 -->
+        <div id="bottom-action-area" class="flex flex-col items-center justify-center pt-6 border-t-2 border-dashed border-borderMain">
+            <button id="submit-btn" class="submit-btn px-10 py-3 text-base font-bold w-full md:w-auto" disabled>
+                採点する（提交批改）
+            </button>
+        </div>
+        
+        <!-- 结算面板 (默认隐藏) -->
+        <div id="result-section" class="hidden sketch-box bg-white p-5 md:p-6 mt-4">
+            <!-- 内容由JS生成 -->
+        </div>
+
+    </div>
+
+    <script src="../../../../shared/practice-feedback-system.js"></script>
+    <script src="../shared/cloze-history.js"></script>
+    <script>
+        // --- 1. 模拟数据 (完形填空通常是一篇文章带有多个空) ---
+        const clozeData = {
+            id: "n2_reading_cloze_2016_07",
+            title: "２５時", // 文章标题
+            // 使用带有特定占位符的文本，并在下方预埋隐藏的中文翻译，带有点击注释功能
+            // 联动填空（一题多空）标记：使用 [[题号-后缀]] 的格式，如 [[2-a]]
+            passage: `
+                <div class="mb-5 text-center">
+                    <p class="text-sm font-bold text-textSub mb-2 text-indent-0">以下の文章は、留学生の作文である。</p>
+                </div>
+                
+                <div class="mb-5">
+                    <h3 class="text-xl md:text-2xl font-bold text-textMain mb-4 text-center">２５時</h3>
+                    <p class="text-right text-textSub text-sm mb-4">ロベズ エドガ</p>
+                    <p>先日、サッカーの日本代表が海外で試合を行い、その試合が深夜にテレビで<span class="annotation-word" data-explanation="テレビやラジオなどで、現場からそのまま放送すること">生中継</span>された。生中継が始まる前に、放送は何時からか確認しようとインターネットで調べて驚いた。あるサイトに「金曜２５時放送」と書いてあったのだ。一日は[[1]]。知人に聞いて、「金曜２５時」というのは土曜の午前１時のことだと知った。「２５時」のような表現は、店の営業時間の掲示などでも見るという。なぜ、午前１時を「２５時」と表現するのだろうか。</p>
+                    <p class="passage-translation hidden mt-2 text-textSub font-sans text-[0.95rem] font-normal leading-relaxed border-l-2 border-dashed border-borderDark pl-3 bg-gray-50/50 py-2 pr-2 rounded-r">【25点】<br>前几天，日本国家足球队在海外进行了比赛，那场比赛在深夜被电视<span class="annotation-word" data-explanation="现场直播">现场直播</span>了。在直播开始前，我为了确认从几点开始广播而在网上查了一下，结果很吃惊。某个网站上写着“周五25点广播”。一天<span class="text-accentRed font-bold">难道不是24小时吗</span>。问了熟人之后才知道，“周五25点”指的是周六的凌晨1点。据说像“25点”这样的表达，在店铺营业时间的告示等地方也能看到。为什么要把凌晨1点表达为“25点”呢。</p>
+                </div>
+
+                <div class="mb-5">
+                    <p>[[2]]表現を使い始めたのはテレビ局だとする説が有力だ。日本の多くのテレビ局では、朝４時前後に一日の放送が始まり、そこからの２４時間を一日と考える。つまり、テレビ局にとっては、夜の０時が一日の終わりではない。２２時、２３時ときたら、その次は０時ではなく２４時で、午前１時は２５時なのである。このようにして「２５時」という表現が[[3]]。</p>
+                    <p class="passage-translation hidden mt-2 text-textSub font-sans text-[0.95rem] font-normal leading-relaxed border-l-2 border-dashed border-borderDark pl-3 bg-gray-50/50 py-2 pr-2 rounded-r">认为开始使用<span class="text-accentRed font-bold">这种</span>表达的是电视台的说法比较有力。在日本的许多电视台，一天的广播从早上4点左右开始，从那开始的24小时被认为是一天。也就是说，对于电视台来说，夜晚的0点并不是一天的结束。到了22点、23点之后，接下来的不是0点而是24点，凌晨1点也就是25点了。像这样，“25点”这种表达<span class="text-accentRed font-bold">似乎就诞生了</span>。</p>
+                </div>
+
+                <div class="mb-5">
+                    <p>現代の日本社会は<span class="annotation-word" data-explanation="夜遅くまで起きている生活スタイルになること">夜型化</span>が進み、午前０時を過ぎても活動している人が多い。だから、午前０時を過ぎても「今日」は続く。[[4]]、「起きてから寝るまでが今日」だと考えれば、翌日の午前１時ではなく、その日の２５時と表現したほうが<span class="annotation-word" data-explanation="的を射ていて、確実なこと">的確</span>かもしれない。私も、土曜の午前１時に見た番組は金曜の夜に見たという感じがするので、金曜２５時と考えたほうが実際の感覚に近い気もする。生活の夜型化と「寝るまでが今日」という考え方が、２４時間しかない一日に「２５時」を[[5]]。</p>
+                    <p class="passage-translation hidden mt-2 text-textSub font-sans text-[0.95rem] font-normal leading-relaxed border-l-2 border-dashed border-borderDark pl-3 bg-gray-50/50 py-2 pr-2 rounded-r">现代日本社会的<span class="annotation-word" data-explanation="生活方式变成熬夜到很晚">夜猫子化</span>在不断发展，过了凌晨0点仍在活动的人很多。所以，即使过了凌晨0点“今天”也还在继续。<span class="text-accentRed font-bold">确实</span>，如果认为“从起床到睡觉期间是‘今天’”的话，不表达为第二天的凌晨1点，而表达为当天的25点可能更<span class="annotation-word" data-explanation="准确，恰当">准确</span>。我也有种感觉，周六凌晨1点看的节目像是在周五晚上看的，所以认为周五25点似乎更接近实际的感觉。生活方式的夜猫子化和“直到睡觉前都是今天”的这种想法，<span class="text-accentRed font-bold">大概在只有24小时的一天中创造出了“25点”吧</span>。</p>
+                </div>
+            `,
+            questions: [
+                {
+                    id: "q1",
+                    blankNum: 1,
+                    isMultiBlank: false,
+                    options: ["24時間なのか", "24時間ではないのか", "24時間といえるか", "24時間だっただろうか"],
+                    correctIndex: 1, // 24時間ではないのか
+                    explanation: "考查疑问表达。作者查到“25点”时感到吃惊（驚いた），其内心的潜台词是：“一天【难道不是24小时吗】？”。使用否定疑问句「ではないのか」来表达自己原有的常识受到冲击时的惊讶和确认。<br><br><b>【错误选项分析】</b><br>1. 「24時間なのか（是24小时吗）」疑问方向反了；<br>3. 「24時間といえるか（能说是24小时吗）」对24小时产生怀疑，而作者是坚信24小时才会对25吃惊；<br>4. 「24時間だっただろうか（曾是24小时吗）」时态错误。"
+                },
+                {
+                    id: "q2",
+                    blankNum: 2,
+                    isMultiBlank: false,
+                    options: ["こういう", "それ以外の", "同じ", "次のような"],
+                    correctIndex: 0, // こういう
+                    explanation: "考查指示代词。前文刚解释完“25点”的用法，紧接着说“开始使用【这种】表达的是电视台……”。「こういう（这种）」用于指代前文刚论述过的、作者和读者都明白的特定事物或情况。<br><br><b>【错误选项分析】</b><br>2. 「それ以外の（除此之外的）」意思相反；<br>3. 「同じ（同样的）」用法生硬；<br>4. 「次のような（像如下的）」是指代后文的内容。"
+                },
+                {
+                    id: "q3",
+                    blankNum: 3,
+                    isMultiBlank: false,
+                    options: ["生まれることになっている", "生まれたとしよう", "生まれるといわれていた", "生まれたらしい"],
+                    correctIndex: 3, // 生まれたらしい
+                    explanation: "考查文末表达及传闻/推测。本段开头说“～説が有力だ（……的说法很有力）”，表明本段的解释是一种普遍的说法或推测。段尾用「このようにして（像这样）」总结，呼应开头的推测，表示“‘25点’这种表达【似乎就是这样诞生的】”。「らしい」表示基于客观依据的推测或传闻。<br><br><b>【错误选项分析】</b><br>1. 「生まれることになっている（按规定将要诞生）」表示客观规定；<br>2. 「生まれたとしよう（就当作是诞生了吧）」表示假定；<br>3. 「生まれるといわれていた（曾被说将要诞生）」时态和语境不符。"
+                },
+                {
+                    id: "q4",
+                    blankNum: 4,
+                    isMultiBlank: false,
+                    options: ["ただ", "一方", "確かに", "それでも"],
+                    correctIndex: 2, // 確かに
+                    explanation: "考查接续词。前文说明了现代人夜猫子化，即使过了0点“今天”也还在继续。空格后作者表示认同：“【确实】，如果认为睡前都是今天的话，表达为25点可能更准确”。「確かに」用于部分承认、肯定某事，引出符合逻辑的判断。<br><br><b>【错误选项分析】</b><br>1. 「ただ（但是/仅仅）」表转折或补充；<br>2. 「一方（另一方面）」表对比；<br>4. 「それでも（尽管如此）」表让步转折，均不符合前后顺畅递进认同的逻辑。"
+                },
+                {
+                    id: "q5",
+                    blankNum: 5,
+                    isMultiBlank: false,
+                    options: ["作ったからだ", "作ったのだろう", "作ったこともある", "作ったほどだ"],
+                    correctIndex: 1, // 作ったのだろう
+                    explanation: "考查文末表达与推测结论。文章最后，作者对“25点”这一用法的成因做出了自己的推测性总结：“生活方式的夜猫子化和‘直到睡觉前都是今天’的想法，【大概创造出了】‘25点’【吧】”。「～（の）だろう」用于表达作者个人的推测性结论。<br><br><b>【错误选项分析】</b><br>1. 「作ったからだ（是因为创造了）」主谓结构不完整，前面是「～考え方が（主语）」；<br>3. 「作ったこともある（也有过创造的情况）」表过去的经历；<br>4. 「作ったほどだ（到了创造的程度）」表程度，都不符合文末下推测结论的语境。"
+                }
+            ]
+        };
+
+        // --- 2. 状态管理 ---
+        const state = {
+            answers: {}, // 存储用户的选择 { 'q1': 1, 'q2': 0, ... }
+            isSubmitted: false
+        };
+
+        // --- 3. DOM 渲染与初始化 ---
+        function initApp() {
+            renderPassage();
+            renderQuestions();
+            
+            // 绑定提交按钮事件
+            document.getElementById('submit-btn').addEventListener('click', handleSubmit);
+            // 绑定译文开关事件
+            document.getElementById('translation-toggle-btn').addEventListener('click', toggleTranslation);
+            
+            // 绑定全局点击事件，处理解释气泡
+            document.addEventListener('click', handleGlobalClicks);
+            // 滚动时隐藏气泡
+            window.addEventListener('scroll', () => {
+                const bubble = document.getElementById('global-annotation-bubble');
+                if (bubble && bubble.classList.contains('is-visible')) {
+                    bubble.classList.remove('is-visible');
+                }
+            }, { passive: true });
+        }
+
+        // 处理全局点击（包括气泡的显示与隐藏）
+        function handleGlobalClicks(e) {
+            const wordEl = e.target.closest('.annotation-word');
+            const bubble = document.getElementById('global-annotation-bubble');
+            
+            if (wordEl) {
+                // 获取自定义的解释内容
+                bubble.textContent = wordEl.dataset.explanation;
+                
+                // 暂时显示气泡以获取准确宽高
+                bubble.style.display = 'block';
+                bubble.classList.add('is-visible');
+                
+                const wordRect = wordEl.getBoundingClientRect();
+                
+                // 初步计算气泡位置（相对页面坐标）
+                let top = wordRect.bottom + window.scrollY + 8;
+                let left = wordRect.left + window.scrollX;
+                
+                // 应用临时位置获取高度
+                bubble.style.top = top + 'px';
+                bubble.style.left = left + 'px';
+                
+                const bubbleRect = bubble.getBoundingClientRect();
+                
+                // 边界检测：防止气泡超出屏幕右侧
+                if (left + bubbleRect.width > window.innerWidth - 16) {
+                    left = window.innerWidth - bubbleRect.width - 16;
+                }
+                
+                // 边界检测：防止气泡超出屏幕底部，如果超出则显示在词汇上方
+                if (wordRect.bottom + bubbleRect.height + 16 > window.innerHeight) {
+                    top = wordRect.top + window.scrollY - bubbleRect.height - 8;
+                }
+                
+                // 设置最终安全位置
+                bubble.style.top = top + 'px';
+                bubble.style.left = left + 'px';
+                
+                e.stopPropagation();
+            } else if (bubble && !bubble.contains(e.target)) {
+                // 点击到气泡以外的地方，隐藏气泡
+                bubble.classList.remove('is-visible');
+            }
+        }
+
+        // 渲染文章，并将 [[1]] 或 [[1-a]] 替换为交互式槽位
+        function renderPassage() {
+            let html = clozeData.passage;
+            
+            // 替换联动多空格式 [[3-a]]
+            html = html.replace(/\[\[(\d+)-([a-z])\]\]/g, (match, num, sub) => {
+                const qId = `q${num}`;
+                return `
+                    <span class="cloze-blank-inline" data-qid="${qId}" data-sub="${sub}" onclick="scrollToQuestion('${qId}')">
+                        <span class="cloze-blank-num">${num}-${sub}</span>
+                        <span class="blank-text" id="slot-text-${qId}-${sub}"></span>
+                    </span>
+                `;
+            });
+            
+            // 再替换普通单空格式 [[1]]
+            html = html.replace(/\[\[(\d+)\]\]/g, (match, num) => {
+                const qId = `q${num}`;
+                return `
+                    <span class="cloze-blank-inline" data-qid="${qId}" onclick="scrollToQuestion('${qId}')">
+                        <span class="cloze-blank-num">${num}</span>
+                        <span class="blank-text" id="slot-text-${qId}"></span>
+                    </span>
+                `;
+            });
+
+            document.getElementById('passage-container').innerHTML = html;
+        }
+
+        // 渲染下方的题目列表
+        function renderQuestions() {
+            const container = document.getElementById('questions-container');
+            let html = '';
+
+            clozeData.questions.forEach(q => {
+                // 生成选项
+                let optionsHtml = '';
+                q.options.forEach((opt, idx) => {
+                    optionsHtml += `
+                        <button class="cloze-option-btn focus:outline-none" data-qid="${q.id}" data-optidx="${idx}" onclick="handleOptionSelect('${q.id}', ${idx})">
+                            <span class="option-marker">${idx + 1}</span>
+                            <span class="font-bold text-textMain font-sans text-[0.95rem] option-text">${opt}</span>
+                        </button>
+                    `;
+                });
+
+                // 生成整道题の HTML，外层包裹 sketch-box
+                html += `
+                    <div id="question-block-${q.id}" class="sketch-box bg-white p-5 md:p-6 relative transition-colors duration-500">
+                        <div class="mb-4 flex items-center justify-between border-b border-dashed border-borderMain pb-3 gap-3">
+                            <h3 class="text-sm font-bold text-textSub tracking-wider flex-1">
+                                （ ${q.blankNum} ）に入れるのに最もよいものを選びなさい。
+                            </h3>
+                            
+                            <!-- 跳转回原文按钮 固定在右侧 -->
+                            <div class="flex items-center gap-2 shrink-0">
+                                <button onclick="scrollToPassageBlank('${q.id}')" class="text-xs font-bold text-textSub hover:text-textMain border border-borderMain hover:border-borderStrong px-3 py-1.5 sketch-btn bg-gray-50 transition-colors flex items-center gap-1">
+                                    ↑ 原文の（ ${q.blankNum} ）へ
+                                </button>
+                                <span id="badge-${q.id}" class="hidden text-sm font-bold tracking-widest px-2 py-1 sketch-btn"></span>
+                            </div>
+                        </div>
+                        
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-2">
+                            ${optionsHtml}
+                        </div>
+
+                        <!-- 解析区域，默认隐藏 -->
+                        <div id="explanation-${q.id}" class="explanation-box">
+                            <div>
+                                <span class="text-xs font-bold text-textSub tracking-widest bg-gray-100 px-2 py-1 sketch-btn">【题目解析】</span>
+                                <div class="mt-3 text-sm font-sans leading-relaxed text-textMain bg-yellow-50/50 p-4 sketch-box border-yellow-200">
+                                    ${q.explanation}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html;
+        }
+
+        // --- 4. 交互逻辑 ---
+
+        // 译文开关切换逻辑
+        let isTranslationVisible = false;
+        function toggleTranslation() {
+            if (!state.isSubmitted) return; // 未提交前不可切换
+
+            isTranslationVisible = !isTranslationVisible;
+            const btn = document.getElementById('translation-toggle-btn');
+            const span = btn.querySelector('span');
+            const eyeIcon = btn.querySelector('.eye-icon');
+
+            if (isTranslationVisible) {
+                span.textContent = '訳文：ON';
+                btn.classList.add('bg-blue-50');
+                btn.classList.remove('bg-yellow-50');
+                // 闭眼图标 (eye-off)
+                eyeIcon.innerHTML = `<path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"/><path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68"/><path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61"/><line x1="2" x2="22" y1="2" y2="22"/>`;
+
+                document.querySelectorAll('.passage-translation').forEach(el => {
+                    el.classList.remove('hidden');
+                    el.classList.add('fade-in');
+                });
+            } else {
+                span.textContent = '訳文：OFF';
+                btn.classList.remove('bg-blue-50');
+                btn.classList.add('bg-yellow-50');
+                // 睁眼图标 (eye)
+                eyeIcon.innerHTML = `<path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/>`;
+
+                document.querySelectorAll('.passage-translation').forEach(el => {
+                    el.classList.add('hidden');
+                    el.classList.remove('fade-in');
+                });
+            }
+        }
+
+        // 点击选项
+        function handleOptionSelect(qId, optIdx) {
+            if (state.isSubmitted) return; // 提交后不可修改
+
+            // 1. 更新状态
+            state.answers[qId] = optIdx;
+
+            // 2. 更新题目区的 UI (高亮选中项)
+            const block = document.getElementById(`question-block-${qId}`);
+            const buttons = block.querySelectorAll('.cloze-option-btn');
+            buttons.forEach(btn => btn.classList.remove('is-selected'));
+            buttons[optIdx].classList.add('is-selected');
+
+            // 3. 更新文章区填空槽位的 UI
+            const targetQuestion = clozeData.questions.find(q => q.id === qId);
+            const selectedOptText = targetQuestion.options[optIdx];
+            
+            if (targetQuestion.isMultiBlank) {
+                // 如果是多空题，如 "a 血液型 / b 性格 / c 性格"
+                // 按照 "/" 拆分，并去除前缀如 "a " 和 "b "
+                const parts = selectedOptText.split('/');
+                const fills = parts.map(p => p.trim().replace(/^[a-zａ-ｚ][\s　]+/i, ''));
+                
+                targetQuestion.subBlanks.forEach((sub, i) => {
+                    const slot = document.querySelector(`.cloze-blank-inline[data-qid="${qId}"][data-sub="${sub}"]`);
+                    const slotText = document.getElementById(`slot-text-${qId}-${sub}`);
+                    if (slot && slotText && fills[i] !== undefined) {
+                        slotText.textContent = fills[i];
+                        slot.classList.add('is-filled');
+                    }
+                });
+            } else {
+                // 普通单空题
+                const slot = document.querySelector(`.cloze-blank-inline[data-qid="${qId}"]`);
+                const slotText = document.getElementById(`slot-text-${qId}`);
+                if (slot && slotText) {
+                    slotText.textContent = selectedOptText;
+                    slot.classList.add('is-filled');
+                }
+            }
+
+            // 4. 检查是否所有题目都已作答，决定是否点亮提交按钮
+            checkSubmitStatus();
+        }
+
+        // [功能1]: 点击文章槽位 -> 滚动到对应题目
+        function scrollToQuestion(qId) {
+            const targetBlock = document.getElementById(`question-block-${qId}`);
+            if (targetBlock) {
+                // 平滑滚动并稍作偏移避免被导航栏遮挡
+                const y = targetBlock.getBoundingClientRect().top + window.scrollY - 80;
+                window.scrollTo({ top: y, behavior: 'smooth' });
+                
+                // 给予一个瞬間の背景高亮提示
+                targetBlock.classList.remove('flash-highlight');
+                void targetBlock.offsetWidth; // 触发重绘
+                targetBlock.classList.add('flash-highlight');
+            }
+        }
+
+        // [功能2]: 点击题目里的按钮 -> 滚动回文章槽位
+        function scrollToPassageBlank(qId) {
+            // 如果是多空题，滚动到第一个子空即可；如果是单空，滚动到主空
+            const targetSlot = document.querySelector(`.cloze-blank-inline[data-qid="${qId}"]`);
+            if (targetSlot) {
+                // 平滑滚动并稍作偏移避免被顶部栏遮挡
+                const y = targetSlot.getBoundingClientRect().top + window.scrollY - 150;
+                window.scrollTo({ top: y, behavior: 'smooth' });
+                
+                // 给文章空隙增加闪烁动画 (如果有多空，最好把同题号的都闪一下)
+                const allSlotsForQ = document.querySelectorAll(`.cloze-blank-inline[data-qid="${qId}"]`);
+                allSlotsForQ.forEach(slot => {
+                    slot.classList.remove('flash-highlight');
+                    void slot.offsetWidth; // 触发重绘
+                    slot.classList.add('flash-highlight');
+                });
+            }
+        }
+
+        // 检查是否全部答完
+        function checkSubmitStatus() {
+            const answeredCount = Object.keys(state.answers).length;
+            const totalCount = clozeData.questions.length;
+            const btn = document.getElementById('submit-btn');
+            
+            if (answeredCount === totalCount) {
+                btn.disabled = false;
+                btn.textContent = '採点する（批改）';
+            } else {
+                btn.disabled = true;
+                btn.textContent = `解答中 (${answeredCount}/${totalCount})`;
+            }
+        }
+
+        // 提交批改，并生成结算页面
+        function handleSubmit() {
+            state.isSubmitted = true;
+            document.getElementById('bottom-action-area').style.display = 'none'; // 隐藏提交按钮区
+            
+            let correctCount = 0;
+            const resultSection = document.getElementById('result-section');
+            let summaryGridHtml = ''; // 用于存放结算面板中的各个题目标记
+
+            clozeData.questions.forEach(q => {
+                const userAns = state.answers[q.id];
+                const isCorrect = userAns === q.correctIndex;
+                const slots = document.querySelectorAll(`.cloze-blank-inline[data-qid="${q.id}"]`);
+                const badge = document.getElementById(`badge-${q.id}`);
+                const expBox = document.getElementById(`explanation-${q.id}`);
+                const block = document.getElementById(`question-block-${q.id}`);
+
+                // 禁用所有选项按钮
+                block.querySelectorAll('.cloze-option-btn').forEach(btn => btn.style.pointerEvents = 'none');
+
+                if (isCorrect) {
+                    correctCount++;
+                    // 文章槽位变绿 (单空和多空通用)
+                    slots.forEach(slot => slot.classList.add('judged-correct'));
+                    
+                    // 题目标签变绿
+                    badge.textContent = "正解";
+                    badge.className = "text-sm font-bold tracking-widest px-2 py-1 sketch-btn border border-green-500 bg-green-50 text-green-600 inline-block";
+                    
+                    // 结算面板：绿色块 (精简版胶囊)
+                    summaryGridHtml += `
+                        <div class="px-3 py-1.5 sketch-btn border-green-500 bg-green-50 text-green-600 font-bold text-sm flex items-center gap-1 shrink-0">
+                            （${q.blankNum}） <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                        </div>
+                    `;
+
+                } else {
+                    // 文章槽位变红并画删除线
+                    slots.forEach(slot => slot.classList.add('judged-wrong'));
+                    
+                    // 题目标签变红
+                    badge.textContent = "不正解";
+                    badge.className = "text-sm font-bold tracking-widest px-2 py-1 sketch-btn border border-accentRed bg-red-50 text-accentRed inline-block";
+                    
+                    // 将选错的按钮变成错误红样式
+                    if (userAns !== undefined) {
+                        block.querySelectorAll('.cloze-option-btn')[userAns].classList.add('is-wrong-answer');
+                    }
+
+                    // 结算面板：红色可点击块 (精简版胶囊)
+                    summaryGridHtml += `
+                        <button onclick="scrollToQuestion('${q.id}')" title="点击查看解析" class="px-3 py-1.5 sketch-btn border-accentRed bg-red-50 text-accentRed font-bold text-sm hover:bg-red-100 transition-colors cursor-pointer flex items-center gap-1 shrink-0">
+                            （${q.blankNum}） <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                        </button>
+                    `;
+                }
+
+                // --- 新增：无论对错，直接将正确的选项高亮为绿色 ---
+                const correctOptionBtn = block.querySelectorAll('.cloze-option-btn')[q.correctIndex];
+                // 移除选中状态以防冲突
+                correctOptionBtn.classList.remove('is-selected'); 
+                correctOptionBtn.classList.add('is-correct-answer');
+
+                // 无论对错，都展开解析框
+                expBox.classList.add('is-visible');
+            });
+
+            // 激活右上角的译文开关
+            const transToggleBtn = document.getElementById('translation-toggle-btn');
+            if (transToggleBtn) {
+                transToggleBtn.disabled = false;
+                transToggleBtn.classList.remove('bg-gray-100', 'text-textMuted', 'cursor-not-allowed');
+                transToggleBtn.classList.add('bg-yellow-50', 'text-textMain', 'cursor-pointer', 'hover:bg-yellow-100');
+            }
+
+            // 渲染并显示底部的精简版结算面板
+            const total = clozeData.questions.length;
+            const isPerfect = correctCount === total;
+            const historyRecord = window.ClozeHistory
+                ? window.ClozeHistory.recordCurrentAttempt({
+                    clozeData,
+                    answers: state.answers,
+                    correct: correctCount,
+                    total
+                })
+                : null;
+            const petResultMessage = window.N2PracticeFeedback
+                ? window.N2PracticeFeedback.trackSummary({
+                    module: 'exam-grammar',
+                    subType: 'cloze',
+                    mode: 'article',
+                    total,
+                    correct: correctCount,
+                    accuracy: total ? correctCount / total : 0
+                })
+                : '';
+            
+            resultSection.innerHTML = `
+                <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-5">
+                    <div class="flex items-center gap-4 shrink-0">
+                        <div class="flex items-center justify-center w-10 h-10 rounded-full ${isPerfect ? 'bg-green-100 text-green-600' : 'bg-red-100 text-accentRed'}">
+                            ${isPerfect ? '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="m9 11 3 3L22 4"/></svg>' : '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/><path d="m15 9-6 6"/><path d="m9 9 6 6"/></svg>'}
+                        </div>
+                        <div>
+                            <div class="text-sm font-bold text-textSub tracking-wider mb-0.5">採点結果</div>
+                            <div class="text-3xl font-sans font-bold ${isPerfect ? 'text-green-500' : 'text-accentRed'} leading-none">
+                                ${correctCount} <span class="text-lg text-textMuted">/ ${total}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex flex-wrap items-center gap-2 border-t md:border-t-0 md:border-l border-dashed border-borderMain pt-4 md:pt-0 md:pl-6 w-full md:w-auto flex-1">
+                        ${summaryGridHtml}
+                    </div>
+                </div>
+            `;
+            
+            if (petResultMessage) {
+                const petSummary = document.createElement('div');
+                petSummary.className = 'mt-4 text-sm font-bold text-textSub leading-relaxed';
+                petSummary.textContent = petResultMessage;
+                resultSection.appendChild(petSummary);
+            }
+            if (historyRecord) {
+                const historyNote = document.createElement('div');
+                historyNote.className = 'mt-3 text-xs font-bold text-textSub leading-relaxed';
+                historyNote.textContent = `已记录到练习历史：${historyRecord.correct}/${historyRecord.total}`;
+                resultSection.appendChild(historyNote);
+            }
+            resultSection.classList.remove('hidden');
+
+            // 平滑滚动到底部的结算面板
+            setTimeout(() => {
+                const y = resultSection.getBoundingClientRect().top + window.scrollY - 100;
+                window.scrollTo({ top: y, behavior: 'smooth' });
+            }, 100);
+        }
+
+        // 页面加载完毕后初始化
+        document.addEventListener('DOMContentLoaded', initApp);
+    </script>
+</body>
+</html>

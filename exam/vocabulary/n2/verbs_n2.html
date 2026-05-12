@@ -1,0 +1,2388 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>N2 動詞 - 単語暗記</title>
+    <!-- 引入具有正式感和现代感的字体 -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Noto+Sans+SC:wght@400;500;700&family=Noto+Serif+JP:wght@400;600&family=Noto+Serif+SC:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        html {
+            -webkit-text-size-adjust: 100%;
+        }
+
+        :root {
+            /* === 暖光理性辅导 ADV / 护眼原木色调色板 === */
+            --bg-grad-start: #FDFBF7;      /* 暖白书页色 */
+            --bg-grad-end: #F6EFE9;        /* 晨光浅杏色 */
+            
+            --panel-bg: rgba(255, 255, 255, 0.9); /* 明亮半透明文本框 */
+            --panel-border: rgba(210, 195, 180, 0.6); /* 柔和纸质边框 */
+            
+            --text-strong: #3F3732;        /* 强调标题/关键正文 */
+            --text-main: #4A423E;          /* 主文本（深咖啡/墨褐，比纯黑更护眼） */
+            --text-secondary: #625851;     /* 次正文（稳定可读） */
+            --text-tertiary: #7E736B;      /* 弱提示（不再用 opacity 偷淡） */
+            --text-ruby: #726861;          /* 注音/小标注 */
+            --text-dim: var(--text-tertiary);
+            --text-accent: #C27A62;        /* 剧情高亮色（赤陶橘，温暖理性） */
+            
+            --accent-green: #5C946E;       /* 沉稳森绿（正确/成功） */
+            --accent-red: #D16B6B;         /* 柔和朱红（错误/警示） */
+            --accent-gold: #D9A05B;        /* 柔和雅金（特殊焦点） */
+            --accent-hover: rgba(194, 122, 98, 0.08); /* 暖橘悬浮背景 */
+
+            --glass-blur: blur(12px);      /* 毛玻璃滤镜 */
+            --shadow-soft: 0 8px 24px rgba(180, 160, 145, 0.15); /* 浅色暖光阴影 */
+            --shadow-glow: 0 0 12px rgba(194, 122, 98, 0.2); /* 橘色微光晕 */
+
+            --font-ui: "Noto Sans SC", "Noto Sans JP", -apple-system, sans-serif;
+            --font-serif: "Noto Serif SC", "Noto Serif JP", serif; /* 剧情主体使用衬线体 */
+            
+            --transition: 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-ui);
+            color: var(--text-main);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+            background: var(--bg-grad-end);
+        }
+
+        /* 纯 CSS 绘制的静谧氛围背景 */
+        body::before {
+            content: "";
+            position: fixed;
+            inset: 0;
+            background: radial-gradient(circle at 50% 0%, var(--bg-grad-start) 0%, var(--bg-grad-end) 80%);
+            z-index: -2;
+        }
+        
+        /* 隐约的网格背景，增加秩序感和纸张感 */
+        body::after {
+            content: "";
+            position: fixed;
+            inset: 0;
+            background-image: 
+                linear-gradient(rgba(0, 0, 0, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 0, 0, 0.03) 1px, transparent 1px);
+            background-size: 40px 40px;
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        button, input {
+            font: inherit;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        /* Header */
+        header {
+            width: 100%;
+            padding: 16px 24px;
+            box-sizing: border-box;
+            display: grid;
+            grid-template-columns: 118px minmax(0, 1fr) 118px;
+            align-items: center;
+            column-gap: 14px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background-color: rgba(253, 251, 247, 0.85);
+            backdrop-filter: var(--glass-blur);
+            border-bottom: 1px solid var(--panel-border);
+            box-shadow: 0 4px 20px rgba(180, 160, 145, 0.08);
+        }
+
+        .back-btn, .home-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 8px 16px;
+            border-radius: 6px;
+            background: rgba(255, 255, 255, 0.8);
+            border: 1px solid var(--panel-border);
+            color: var(--text-secondary);
+            font-weight: 600;
+            font-size: 14px;
+            text-decoration: none;
+            transition: all var(--transition);
+            cursor: pointer;
+            white-space: nowrap;
+        }
+
+        .back-btn {
+            justify-self: start;
+        }
+
+        .back-btn:hover, .home-btn:hover {
+            color: var(--text-accent);
+            background: #fff;
+            border-color: var(--text-accent);
+            box-shadow: var(--shadow-glow);
+            transform: translateY(-2px);
+        }
+
+        h1 { 
+            margin: 0; 
+            font-size: 16px; 
+            font-weight: 600; 
+            color: var(--text-main);
+            position: static;
+            left: auto;
+            transform: none;
+            justify-self: center;
+            min-width: 0;
+            max-width: 100%;
+            text-align: center;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            letter-spacing: 0.05em;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 14px;
+            z-index: 2;
+            min-width: 0;
+            width: 100%;
+            max-width: 100%;
+            margin-left: 0;
+        }
+
+        /* Container */
+        .container {
+            width: 95%;
+            max-width: 680px;
+            padding: 32px 0 48px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* --- Day Selection View --- */
+        .days-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        /* Active Day Card */
+        .day-card {
+            background: var(--panel-bg);
+            backdrop-filter: var(--glass-blur);
+            border-radius: 12px;
+            border: 1px solid var(--panel-border);
+            padding: 20px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: var(--shadow-soft);
+            cursor: pointer;
+            transition: all var(--transition);
+        }
+
+        .day-card:hover {
+            transform: translateY(-3px);
+            border-color: var(--text-accent);
+            box-shadow: 0 12px 30px rgba(180, 160, 145, 0.25);
+        }
+
+        .day-card:active { transform: scale(0.99); }
+
+        .day-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            min-width: 0;
+        }
+
+        .day-icon {
+            width: 40px; height: 40px;
+            background: rgba(255,255,255,0.6);
+            border: 1px solid var(--panel-border);
+            border-radius: 50%;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            color: var(--text-dim);
+        }
+
+        .day-text-group {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            min-width: 0;
+        }
+
+        .day-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-main);
+            margin: 0;
+            line-height: 1.35;
+            letter-spacing: 0.03em;
+        }
+
+        .day-title-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            min-width: 0;
+        }
+
+        .last-studied-badge {
+            font-size: 12px;
+            color: var(--text-accent);
+            background-color: transparent;
+            border: 1px solid var(--text-accent);
+            padding: 2px 7px;
+            border-radius: 999px;
+            font-weight: 600;
+            display: inline-block;
+            line-height: 1.2;
+        }
+
+        .day-subtitle {
+            font-size: 13px;
+            color: var(--text-secondary);
+            font-weight: 500;
+            line-height: 1.45;
+        }
+
+        .go-badge {
+            background: rgba(194, 122, 98, 0.05);
+            color: var(--text-accent);
+            border: 1px solid var(--text-accent);
+            font-size: 12px;
+            font-weight: 600;
+            padding: 6px 14px;
+            border-radius: 6px;
+            transition: all var(--transition);
+            line-height: 1;
+        }
+        
+        .day-card:hover .go-badge {
+            background: var(--text-accent);
+            color: #fff;
+            box-shadow: var(--shadow-glow);
+        }
+
+        /* Preparation/Empty Card */
+        .day-card.prep {
+            background: rgba(0, 0, 0, 0.02);
+            border: 1px dashed rgba(0,0,0,0.1);
+            box-shadow: none;
+            cursor: default;
+        }
+        .day-card.prep:hover { transform: none; border-color: rgba(0,0,0,0.15); box-shadow: none; }
+
+        .day-card.prep .day-icon {
+            background: transparent;
+            border-color: transparent;
+            opacity: 0.5;
+        }
+        
+        .day-card.prep .day-title { color: var(--text-secondary); }
+        
+        .construction-icon {
+            font-size: 24px;
+            opacity: 0.4;
+        }
+
+        /* --- Word List View --- */
+        .word-list-item {
+            background: var(--panel-bg);
+            backdrop-filter: var(--glass-blur);
+            padding: 18px 24px;
+            border-radius: 8px;
+            margin-bottom: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            border: 1px solid var(--panel-border);
+            box-shadow: var(--shadow-soft);
+            transition: all var(--transition);
+            gap: 12px;
+        }
+        
+        .word-list-item:hover { 
+            transform: translateY(-2px); 
+            box-shadow: 0 8px 20px rgba(180, 160, 145, 0.2); 
+            border-color: var(--text-accent);
+        }
+
+        .list-word-text { font-size: 20px; font-weight: 600; color: var(--text-strong); font-family: var(--font-serif); }
+        .list-arrow { color: var(--panel-border); font-size: 20px; font-weight: normal; transition: all var(--transition); }
+        .word-list-item:hover .list-arrow { color: var(--text-accent); transform: translateX(4px); }
+
+        ruby { ruby-position: over; }
+        rt { font-size: 0.52em; color: var(--text-ruby); font-weight: 500; font-family: var(--font-ui); }
+
+        .tone-number {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 24px;
+            line-height: 1;
+            font-size: 12px;
+            color: #fff;
+            background: var(--text-accent);
+            border-radius: 4px;
+            padding: 2px 6px;
+            font-weight: 600;
+            margin-left: 0;
+        }
+
+        .pos-tag {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 24px;
+            line-height: 1;
+            font-size: 11px;
+            background: rgba(92, 148, 110, 0.05);
+            color: var(--accent-green);
+            border: 1px solid var(--accent-green);
+            padding: 2px 6px;
+            border-radius: 4px;
+            margin-left: 0;
+            font-weight: 500;
+        }
+
+        /* Mark Button (Replaced Horse) */
+        .mark-btn {
+            font-size: 22px;
+            cursor: pointer;
+            opacity: 0.3;
+            filter: grayscale(100%);
+            transition: all var(--transition);
+            background: transparent;
+            border: none;
+            padding: 4px;
+            line-height: 1;
+            user-select: none;
+        }
+        .mark-btn.active {
+            opacity: 1;
+            filter: none;
+            transform: scale(1.1);
+        }
+        .mark-btn:hover {
+            transform: scale(1.2);
+            opacity: 0.8;
+        }
+        .mark-btn.active:hover {
+            transform: scale(1.25);
+            opacity: 1;
+        }
+        .mark-btn.review-remove {
+            opacity: 1;
+            filter: none;
+            transform: none;
+            font-size: 12px;
+            font-weight: 800;
+            color: var(--text-accent);
+            border: 1px solid rgba(194, 122, 98, 0.24);
+            border-radius: 999px;
+            padding: 6px 10px;
+            background: rgba(194, 122, 98, 0.08);
+            white-space: nowrap;
+        }
+        .mark-btn.review-remove:hover {
+            transform: translateY(-1px);
+            opacity: 1;
+            background: rgba(194, 122, 98, 0.14);
+        }
+
+        .list-actions {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            flex-shrink: 0;
+        }
+
+        /* Full Screen Flashcard Style */
+        .flashcard-main {
+            background: var(--panel-bg);
+            backdrop-filter: var(--glass-blur);
+            border-radius: 12px;
+            border: 1px solid var(--panel-border);
+            padding: 40px;
+            box-shadow: var(--shadow-soft);
+            min-height: 420px;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+            position: relative;
+        }
+
+        .fc-header { 
+            border-bottom: 1px solid rgba(0,0,0,0.06); 
+            padding-bottom: 20px; 
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) auto;
+            align-items: flex-start;
+            gap: 18px;
+        }
+
+        .fc-word-group {
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .fc-title-row {
+            display: flex;
+            align-items: flex-end;
+            gap: 10px 12px;
+            flex-wrap: wrap;
+            min-width: 0;
+        }
+
+        .fc-meta-group {
+            display: flex;
+            align-items: center;
+            align-self: flex-end;
+            gap: 8px;
+            flex-wrap: wrap;
+            padding-bottom: 3px;
+            transform: translateY(2px);
+            min-width: 0;
+        }
+        
+        .fc-word { 
+            font-size: 36px; 
+            font-weight: 600; 
+            color: var(--text-strong); 
+            margin: 0; 
+            line-height: 1.2; 
+            font-family: var(--font-serif);
+            min-width: 0;
+        }
+
+        .fc-action {
+            flex-shrink: 0;
+            align-self: flex-start;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 44px;
+            min-width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.68);
+            border: 1px solid var(--panel-border);
+            box-shadow: 0 8px 16px rgba(180, 160, 145, 0.14);
+        }
+
+        .fc-section-title { 
+            font-size: 13px; 
+            color: var(--text-secondary); 
+            font-weight: 700; 
+            margin: 16px 0 12px; 
+            letter-spacing: 0.05em; 
+        }
+
+        .def-group { margin-bottom: 24px; }
+        .def-group + .def-group { border-top: 1px dashed rgba(0,0,0,0.08); padding-top: 20px; }
+
+        .def-head {
+            display: grid;
+            grid-template-columns: auto minmax(0, 1fr);
+            column-gap: 10px;
+            align-items: flex-start;
+            margin-bottom: 8px;
+        }
+
+        .def-copy {
+            min-width: 0;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: baseline;
+            gap: 4px 8px;
+            line-height: 1.6;
+        }
+
+        .def-number {
+            color: var(--text-accent);
+            background: rgba(194, 122, 98, 0.1);
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 22px; height: 22px;
+            font-weight: 600;
+            font-size: 12px;
+            margin-right: 0;
+        }
+        
+        .def-meaning {
+            font-weight: 600;
+            color: var(--text-strong);
+            font-size: 18px;
+            letter-spacing: 0.05em;
+        }
+        
+        .def-nuance {
+            color: var(--text-secondary);
+            margin-left: 0;
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        .def-ex {
+            margin-top: 16px;
+            background: rgba(0,0,0,0.02);
+            padding: 18px 20px;
+            border-radius: 10px;
+            border-left: 3px solid var(--panel-border);
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 10px;
+        }
+
+        .def-example-label {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 4px 10px;
+            border-radius: 999px;
+            background: rgba(194, 122, 98, 0.12);
+            color: var(--text-accent);
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 0.06em;
+            user-select: none;
+        }
+
+        .def-example-body {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .ex-jp { 
+            font-size: 17px; 
+            color: var(--text-strong); 
+            font-weight: 600; 
+            margin: 0; 
+            line-height: 1.92;
+            letter-spacing: 0.02em;
+            font-family: var(--font-serif);
+        }
+        .ex-jp .ex-highlight {
+            color: var(--text-accent);
+            font-weight: 600;
+            border-bottom: 1px solid var(--text-accent);
+            padding: 0 2px;
+        }
+        .ex-jp .ex-highlight ruby,
+        .ex-jp .ex-highlight strong {
+            color: inherit;
+            font-weight: inherit;
+        }
+        .ex-jp .ex-highlight rt {
+            color: var(--text-ruby);
+            font-weight: 500;
+        }
+        .ex-cn {
+            font-size: 14px;
+            color: var(--text-secondary);
+            font-weight: 500;
+            line-height: 1.75;
+            margin: 0;
+            font-family: var(--font-ui);
+        }
+
+        .nav-controls { display: flex; justify-content: space-between; align-items: center; margin-top: 24px; border-top: 1px solid rgba(0,0,0,0.06); padding-top: 24px; }
+        .nav-progress { font-size: 13px; font-weight: 700; color: var(--text-secondary); }
+        
+        .nav-btn { 
+            background: transparent; 
+            border: 1px solid var(--panel-border); 
+            padding: 10px 20px; 
+            border-radius: 6px; 
+            cursor: pointer; 
+            font-weight: 600; 
+            color: var(--text-secondary); 
+            transition: all var(--transition); 
+            display: flex; 
+            align-items: center; 
+            gap: 8px; 
+            font-size: 14px;
+        }
+        .nav-btn:hover:not(.disabled) { border-color: var(--text-main); color: var(--text-main); background: rgba(0,0,0,0.02); }
+        .nav-btn:active:not(.disabled) { transform: scale(0.98); }
+        
+        .nav-btn.primary { background: rgba(194, 122, 98, 0.05); color: var(--text-accent); border-color: var(--text-accent); }
+        .nav-btn.primary:hover:not(.disabled) { background: var(--text-accent); color: #fff; box-shadow: var(--shadow-glow); }
+        .nav-btn.disabled { opacity: 0.4; pointer-events: none; }
+
+        /* Practice Picker Overlay */
+        .practice-picker-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(253, 251, 247, 0.85);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+            z-index: 240;
+            backdrop-filter: var(--glass-blur);
+        }
+
+        .practice-picker-overlay.is-open {
+            display: flex;
+        }
+
+        .practice-picker-panel {
+            width: min(92vw, 420px);
+            background: var(--panel-bg);
+            border-radius: 12px;
+            border: 1px solid var(--panel-border);
+            padding: 26px;
+            box-shadow: var(--shadow-soft);
+        }
+
+        .practice-picker-topline {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 16px;
+            margin-bottom: 10px;
+        }
+
+        .practice-picker-topline > :first-child {
+            min-width: 0;
+            flex: 1 1 auto;
+            padding-left: 2px;
+        }
+
+        .practice-picker-kicker {
+            display: block;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-accent);
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            line-height: 1.35;
+        }
+
+        .practice-picker-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--text-strong);
+            margin-top: 0;
+            line-height: 1.24;
+            overflow-wrap: anywhere;
+            padding-left: 1px;
+        }
+
+        .practice-picker-context {
+            color: var(--text-secondary);
+            font-size: 12.5px;
+            line-height: 1.45;
+            margin-bottom: 14px;
+            font-weight: 500;
+        }
+
+        .practice-picker-close {
+            width: 32px;
+            height: 32px;
+            border: 1px solid var(--panel-border);
+            border-radius: 50%;
+            background: transparent;
+            color: var(--text-tertiary);
+            font-size: 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all var(--transition);
+            flex-shrink: 0;
+            align-self: flex-start;
+        }
+
+        .practice-picker-close:hover {
+            background: rgba(0,0,0,0.05);
+            color: var(--text-strong);
+            transform: rotate(90deg);
+        }
+
+        .practice-picker-options {
+            display: grid;
+            gap: 10px;
+        }
+
+        .practice-picker-option {
+            width: 100%;
+            border: 1px solid var(--panel-border);
+            border-radius: 8px;
+            background: rgba(255,255,255,0.6);
+            padding: 13px 16px;
+            text-align: left;
+            cursor: pointer;
+            transition: all var(--transition);
+            position: relative;
+        }
+
+        .practice-picker-option:hover {
+            border-color: var(--text-accent);
+            background: #fff;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(194, 122, 98, 0.1);
+        }
+
+        .practice-picker-option:disabled,
+        .practice-picker-option.is-disabled {
+            cursor: not-allowed;
+            opacity: 0.55;
+            transform: none;
+            box-shadow: none;
+            border-style: dashed;
+        }
+
+        .practice-picker-option.is-last-used {
+            border-color: var(--text-accent);
+            background: #fff;
+        }
+        
+        .practice-picker-option.is-last-used::after {
+            content: '推荐';
+            position: absolute;
+            top: 14px;
+            right: 14px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(194, 122, 98, 0.1);
+            color: var(--text-accent);
+            font-size: 10px;
+            font-weight: 600;
+            padding: 2px 7px;
+            border-radius: 999px;
+            line-height: 1.25;
+        }
+
+        .practice-picker-option-title {
+            display: block;
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--text-strong);
+            margin-bottom: 0;
+            line-height: 1.35;
+        }
+
+        .practice-picker-option.is-last-used .practice-picker-option-title {
+            padding-right: 44px;
+        }
+
+        .practice-picker-option-sub {
+            display: block;
+            color: var(--text-secondary);
+            font-size: 11.5px;
+            line-height: 1.4;
+            font-weight: 500;
+            margin-top: 4px;
+        }
+
+        .practice-picker-option-count {
+            display: inline;
+            margin-top: 0;
+            color: var(--text-accent);
+            font-size: 11.5px;
+            font-weight: 600;
+            letter-spacing: 0.02em;
+        }
+
+        body.practice-picker-open {
+            overflow: hidden;
+        }
+
+        /* Mobile Responsive Adjustments */
+        @media (max-width: 768px) {
+            header {
+                padding: calc(12px + env(safe-area-inset-top)) 12px 12px;
+                display: grid;
+                grid-template-columns: 92px minmax(0, 1fr) 92px;
+                align-items: center;
+                column-gap: 8px;
+            }
+
+            h1 {
+                position: static;
+                left: auto;
+                transform: none;
+                justify-self: center;
+                min-width: 0;
+                max-width: 100%;
+                text-align: center;
+                font-size: 16px;
+                line-height: 1.1;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+
+            .header-actions {
+                min-width: 0;
+                width: 100%;
+                max-width: 100%;
+                margin-left: 0;
+                gap: 6px;
+                position: static;
+                right: auto;
+                top: auto;
+                transform: none;
+                z-index: 3;
+            }
+
+            .back-btn,
+            .home-btn {
+                flex: 0 0 auto;
+                min-height: 34px;
+                padding: 6px 10px;
+                font-size: 11.5px;
+                line-height: 1;
+                gap: 5px;
+            }
+
+            .container {
+                width: min(100%, calc(100vw - 24px));
+                padding: 16px 0 32px;
+                gap: 14px;
+            }
+
+            .day-card,
+            .word-list-item {
+                padding: 14px;
+            }
+
+            .day-card {
+                display: grid;
+                grid-template-columns: minmax(0, 1fr) auto;
+                align-items: center;
+                column-gap: 12px;
+                row-gap: 12px;
+            }
+
+            .word-list-item {
+                align-items: center;
+                gap: 12px;
+            }
+
+            .day-info {
+                flex: 1 1 auto;
+                width: 100%;
+                min-width: 0;
+                align-items: flex-start;
+            }
+
+            .day-text-group {
+                min-width: 0;
+            }
+
+            .day-title-row {
+                flex-wrap: wrap;
+                gap: 8px;
+                min-width: 0;
+            }
+
+            .day-icon {
+                width: 42px;
+                height: 42px;
+                font-size: 17px;
+            }
+
+            .day-title {
+                font-size: 15.5px;
+            }
+
+            .day-subtitle {
+                font-size: 12.5px;
+                line-height: 1.5;
+            }
+
+            .go-badge {
+                position: static;
+                top: auto;
+                right: auto;
+                transform: none;
+                justify-self: end;
+                align-self: center;
+                flex-shrink: 0;
+                margin: 0;
+                white-space: nowrap;
+                padding: 5px 10px;
+                font-size: 11px;
+            }
+
+            .list-word-text {
+                flex: 1 1 auto;
+                min-width: 0;
+                font-size: 17px;
+                line-height: 1.42;
+            }
+
+            .mark-btn {
+                font-size: 18px;
+            }
+
+            .flashcard-main {
+                min-height: 0;
+                padding: 20px 18px;
+                gap: 16px;
+            }
+
+            .fc-header {
+                gap: 10px;
+                padding-bottom: 12px;
+            }
+
+            .fc-word-group {
+                gap: 7px;
+            }
+
+            .fc-title-row {
+                gap: 6px 8px;
+            }
+
+            .fc-meta-group {
+                gap: 5px;
+                padding-bottom: 1px;
+                transform: translateY(1px);
+            }
+
+            .fc-word {
+                font-size: 27px;
+            }
+
+            .fc-action {
+                width: 36px;
+                min-width: 36px;
+                height: 36px;
+            }
+
+            .def-ex {
+                padding: 14px 14px;
+                gap: 7px;
+            }
+
+            .fc-section-title {
+                margin: 8px 0 10px;
+                font-size: 12px;
+                letter-spacing: 0.08em;
+            }
+
+            .def-group {
+                margin-bottom: 18px;
+            }
+
+            .def-group + .def-group {
+                padding-top: 16px;
+            }
+
+            .def-number {
+                width: 18px;
+                height: 18px;
+                margin-right: 0;
+                font-size: 10px;
+            }
+
+            .def-meaning {
+                font-size: 15.5px;
+                line-height: 1.58;
+            }
+
+            .def-nuance {
+                margin-left: 0;
+                font-size: 12.5px;
+                line-height: 1.58;
+            }
+
+            .def-example-label {
+                padding: 3px 8px;
+                font-size: 10px;
+                letter-spacing: 0.05em;
+            }
+
+            .ex-jp {
+                font-size: 14.5px;
+                line-height: 1.76;
+            }
+
+            .ex-cn {
+                font-size: 12.5px;
+                line-height: 1.64;
+            }
+
+            .nav-controls {
+                display: grid;
+                grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+                align-items: center;
+                gap: 8px;
+                width: 100%;
+            }
+
+            .nav-progress {
+                flex: 0 0 auto;
+                min-width: 40px;
+                font-size: 11.5px;
+                text-align: center;
+                justify-self: center;
+            }
+
+            .nav-btn {
+                flex: 0 0 auto;
+                min-width: 0;
+                min-height: 34px;
+                padding: 7px 8px;
+                gap: 3px;
+                font-size: 11px;
+                justify-content: center;
+                white-space: nowrap;
+                justify-self: start;
+            }
+
+            .nav-btn.practice-btn {
+                flex: 0 0 auto;
+                min-width: 0;
+            }
+
+            .nav-controls > .nav-btn:last-child {
+                justify-self: end;
+            }
+
+            .nav-btn svg {
+                width: 12px;
+                height: 12px;
+                flex-shrink: 0;
+            }
+
+            .practice-picker-panel {
+                width: min(100%, calc(100vw - 24px));
+                padding: 22px 18px;
+            }
+
+            .practice-picker-title {
+                font-size: 17px;
+            }
+
+            .practice-picker-context {
+                font-size: 12.5px;
+                line-height: 1.45;
+                margin-bottom: 12px;
+            }
+
+            .practice-picker-option {
+                padding: 12px 13px;
+            }
+
+            .practice-picker-option-title {
+                font-size: 14px;
+                margin-bottom: 0;
+            }
+
+            .practice-picker-option-sub {
+                font-size: 11.5px;
+                line-height: 1.4;
+            }
+        }
+
+        @media (max-width: 480px) {
+            header {
+                padding: calc(10px + env(safe-area-inset-top)) 10px 10px;
+                grid-template-columns: 84px minmax(0, 1fr) 84px;
+                column-gap: 6px;
+            }
+
+            .header-actions {
+                min-width: 0;
+                width: 100%;
+                max-width: 100%;
+                gap: 5px;
+            }
+
+            .back-btn,
+            .home-btn {
+                min-height: 34px;
+                padding: 6px 8px;
+                font-size: 11px;
+                gap: 4px;
+            }
+
+            h1 {
+                font-size: 15px;
+            }
+
+            .container {
+                width: min(100%, calc(100vw - 20px));
+                padding: 14px 0 26px;
+                gap: 12px;
+            }
+
+            .day-card,
+            .word-list-item {
+                padding: 13px;
+            }
+
+            .day-card {
+                display: grid;
+                grid-template-columns: minmax(0, 1fr) auto;
+                align-items: center;
+                column-gap: 10px;
+                row-gap: 10px;
+            }
+
+            .word-list-item {
+                align-items: center;
+                gap: 10px;
+            }
+
+            .day-icon {
+                width: 38px;
+                height: 38px;
+                font-size: 16px;
+            }
+
+            .day-title {
+                font-size: 15px;
+            }
+
+            .day-subtitle {
+                font-size: 12px;
+                line-height: 1.48;
+            }
+
+            .go-badge {
+                position: static;
+                top: auto;
+                right: auto;
+                transform: none;
+                justify-self: end;
+                align-self: center;
+                margin: 0;
+                white-space: nowrap;
+                padding: 5px 9px;
+                font-size: 10px;
+            }
+
+            .list-word-text {
+                font-size: 16.5px;
+            }
+
+            .mark-btn {
+                font-size: 17px;
+            }
+
+            .flashcard-main {
+                padding: 18px 14px;
+                gap: 14px;
+                border-radius: 14px;
+            }
+
+            .fc-header {
+                gap: 8px;
+                padding-bottom: 10px;
+            }
+
+            .fc-word {
+                font-size: 25px;
+            }
+
+            .fc-meta-group {
+                gap: 5px;
+                padding-bottom: 1px;
+                transform: translateY(1px);
+            }
+
+            .fc-action {
+                width: 32px;
+                min-width: 32px;
+                height: 32px;
+            }
+
+            .fc-section-title {
+                margin: 7px 0 9px;
+                font-size: 11px;
+            }
+
+            .def-number {
+                width: 17px;
+                height: 17px;
+                margin-right: 0;
+                font-size: 9px;
+            }
+
+            .def-group {
+                margin-bottom: 16px;
+            }
+
+            .def-group + .def-group {
+                padding-top: 14px;
+            }
+
+            .def-meaning {
+                font-size: 15px;
+                line-height: 1.56;
+            }
+
+            .def-nuance {
+                margin-left: 0;
+                font-size: 12px;
+                line-height: 1.56;
+            }
+
+            .def-example-label {
+                padding: 3px 7px;
+                font-size: 9.5px;
+                letter-spacing: 0.04em;
+            }
+
+            .ex-jp {
+                font-size: 14px;
+                line-height: 1.72;
+            }
+
+            .ex-cn {
+                font-size: 12.5px;
+                line-height: 1.62;
+            }
+
+            .def-ex {
+                padding: 11px 12px;
+                gap: 6px;
+            }
+
+            .nav-btn {
+                flex: 0 0 auto;
+                min-height: 32px;
+                padding: 6px 7px;
+                gap: 3px;
+                font-size: 10.5px;
+            }
+
+            .nav-progress {
+                min-width: 34px;
+                font-size: 10.5px;
+            }
+
+            .nav-btn.practice-btn {
+                min-width: 0;
+            }
+
+            .nav-btn svg {
+                width: 11px;
+                height: 11px;
+            }
+
+            .practice-picker-title {
+                font-size: 16px;
+                line-height: 1.25;
+            }
+
+            .practice-picker-option {
+                padding: 11px 12px;
+            }
+
+            .practice-picker-option-title {
+                font-size: 13.5px;
+            }
+
+            .practice-picker-option-sub {
+                font-size: 11.5px;
+            }
+        }
+    </style>
+    <link rel="stylesheet" href="../../../shared/site-fonts.css">
+    <link rel="stylesheet" href="../shared/vocabulary-sketch-theme.css">
+</head>
+<body>
+    <header>
+        <a id="back-btn" class="back-btn">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+            返回
+        </a>
+        <h1 id="page-title">N2 動詞</h1>
+        <div class="header-actions">
+            <a id="header-home-btn" href="../../../index.html" class="home-btn">主页</a>
+            <button type="button" id="header-practice-btn" class="home-btn" style="display: none;">今日练习</button>
+        </div>
+    </header>
+
+    <div class="container">
+        <!-- View 1: Day Selection List -->
+        <div id="days-view" class="days-grid">
+            <!-- Injected by JS -->
+        </div>
+
+        <!-- View 2: Word List (Directory) -->
+        <div id="word-list-view" class="hidden">
+            <div id="word-list-container" style="display: flex; flex-direction: column; gap: 12px;">
+                <!-- Injected by JS -->
+            </div>
+        </div>
+
+        <!-- View 3: Word Detail (Flashcard) -->
+        <div id="word-detail-view" class="hidden">
+            <!-- Injected by JS -->
+        </div>
+    </div>
+
+    <div id="practice-picker-overlay" class="practice-picker-overlay" aria-hidden="true">
+        <div class="practice-picker-panel" role="dialog" aria-modal="true" aria-labelledby="practice-picker-title">
+            <div class="practice-picker-topline">
+                <div>
+                    <div class="practice-picker-kicker">雨宮前辈的辅导室</div>
+                    <div id="practice-picker-title" class="practice-picker-title">选择练习方式</div>
+                </div>
+                <button type="button" id="practice-picker-close" class="practice-picker-close" aria-label="关闭">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                </button>
+            </div>
+            <div id="practice-picker-context" class="practice-picker-context"></div>
+            <div id="practice-picker-options" class="practice-picker-options"></div>
+        </div>
+    </div>
+
+    <script src="n2_verbs_data.js"></script>
+    <script src="n2-verbs-groups.js"></script>
+    <script src="../shared/vocabulary-sentence-review-store.js"></script>
+    <script>
+        const CURRICULUM_DAYS = Array.isArray(window.LAB_N2_VERB_DAYS) ? window.LAB_N2_VERB_DAYS : [];
+        const CURRICULUM_STAGES = Array.isArray(window.LAB_N2_VERB_STAGES) ? window.LAB_N2_VERB_STAGES : [];
+        const CURRICULUM_GROUPS = Array.isArray(window.LAB_N2_VERB_GROUPS) ? window.LAB_N2_VERB_GROUPS : [];
+        const STAR_KEY_PREFIX = 'kiki_n2_vocab_star::';
+        const LAST_DAY_STORAGE_KEY = 'kiki_n2_vocab_n2_verbs_last_day';
+        const PRACTICE_TYPE_STORAGE_KEY = 'kiki_n2_vocab_n2_verbs_practice_type';
+        const PRACTICE_TYPE_OPTIONS = Object.freeze([
+            Object.freeze({
+                id: 'reading',
+                label: '读音填空',
+                hint: '看汉字写假名。'
+            }),
+            Object.freeze({
+                id: 'meaning',
+                label: '假名选义',
+                hint: '看假名选中文意思。'
+            }),
+            Object.freeze({
+                id: 'sentence',
+                label: '句子填空',
+                hint: '按语境选动词。'
+            })
+        ]);
+        const SENTENCE_REVIEW_MODULE_KEY = 'n2_verbs';
+        const sentenceReviewStore = window.VocabularySentenceReviewStore || null;
+        const reviewStore = window.VocabularyReviewStore || null;
+
+        let currentView = 'days';
+        let currentDay = 1;
+        let currentDailyWords = [];
+        let currentWordIndex = 0;
+        let currentPracticeType = getStoredPracticeType();
+        let practicePickerContext = null;
+
+        const backBtn = document.getElementById('back-btn');
+        const pageTitle = document.getElementById('page-title');
+        const homeBtn = document.getElementById('header-home-btn');
+        const headerActions = document.querySelector('.header-actions');
+        const headerPracticeBtn = document.getElementById('header-practice-btn');
+        const daysView = document.getElementById('days-view');
+        const wordListView = document.getElementById('word-list-view');
+        const wordDetailView = document.getElementById('word-detail-view');
+        const practicePickerOverlay = document.getElementById('practice-picker-overlay');
+        const practicePickerCloseBtn = document.getElementById('practice-picker-close');
+        const practicePickerContextNode = document.getElementById('practice-picker-context');
+        const practicePickerOptionsNode = document.getElementById('practice-picker-options');
+
+        function safeGetItem(key) {
+            try {
+                return localStorage.getItem(key);
+            } catch (error) {
+                console.warn('LocalStorage access denied', error);
+                return null;
+            }
+        }
+
+        function safeSetItem(key, value) {
+            try {
+                localStorage.setItem(key, value);
+            } catch (error) {
+                console.warn('LocalStorage write denied', error);
+            }
+        }
+
+        function safeRemoveItem(key) {
+            try {
+                localStorage.removeItem(key);
+            } catch (error) {
+                console.warn('LocalStorage remove denied', error);
+            }
+        }
+
+        function syncHeaderActions() {
+            if (!headerActions) {
+                return;
+            }
+            const shouldShowHome = !!homeBtn && homeBtn.style.display !== 'none';
+            const shouldShowPractice = !!headerPracticeBtn && headerPracticeBtn.style.display !== 'none';
+            headerActions.style.visibility = shouldShowHome || shouldShowPractice ? 'visible' : 'hidden';
+            headerActions.style.pointerEvents = shouldShowHome || shouldShowPractice ? 'auto' : 'none';
+        }
+
+        function escapeHtml(value) {
+            return String(value == null ? '' : value).replace(/[&<>"']/g, (char) => ({
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#39;'
+            }[char]));
+        }
+
+        function isPlaceholderWord(word) {
+            const surface = String(word && word.word ? word.word : '').trim();
+            return !surface || surface === '（準備中）' || surface === '---';
+        }
+
+        function getVocabStarKey(wordId) {
+            return `${STAR_KEY_PREFIX}${String(wordId || '').trim()}`;
+        }
+
+        function getWordStorageId(word) {
+            return String(word && (word.id || word.word) ? (word.id || word.word) : '').trim();
+        }
+
+        function getSentenceReviewQuestionCount() {
+            return sentenceReviewStore ? sentenceReviewStore.getQuestionCount(SENTENCE_REVIEW_MODULE_KEY) : 0;
+        }
+
+        function getSentenceMistakeCountForWord(word) {
+            if (!sentenceReviewStore) return 0;
+            const storageId = getWordStorageId(word);
+            const surface = String(word && word.word ? word.word : '').trim();
+            const primaryCount = storageId ? sentenceReviewStore.getWordMistakeCount(SENTENCE_REVIEW_MODULE_KEY, storageId) : 0;
+            if (primaryCount > 0) return primaryCount;
+            return surface ? sentenceReviewStore.getWordMistakeCount(SENTENCE_REVIEW_MODULE_KEY, surface) : 0;
+        }
+
+        function findWordByReviewIdentifier(wordId) {
+            const target = String(wordId || '').trim();
+            if (!target) return null;
+            const pools = [currentDailyWords, typeof FULL_WORD_LIST !== 'undefined' && Array.isArray(FULL_WORD_LIST) ? FULL_WORD_LIST : []];
+            for (const pool of pools) {
+                const found = pool.find((word) => {
+                    if (!word || isPlaceholderWord(word)) return false;
+                    const storageId = getWordStorageId(word);
+                    const surface = String(word.word || '').trim();
+                    return storageId === target || surface === target;
+                });
+                if (found) return found;
+            }
+            return null;
+        }
+
+        function getReviewKeywordIds(wordOrId) {
+            const ids = new Set();
+            if (typeof wordOrId === 'string') ids.add(wordOrId.trim());
+            const word = typeof wordOrId === 'string' ? findWordByReviewIdentifier(wordOrId) : wordOrId;
+            if (word) {
+                const storageId = getWordStorageId(word);
+                const surface = String(word.word || '').trim();
+                if (storageId) ids.add(storageId);
+                if (surface) ids.add(surface);
+            }
+            return Array.from(ids).filter(Boolean);
+        }
+
+        function isReviewKeywordDismissed(word) {
+            if (!reviewStore || typeof reviewStore.isKeywordDismissed !== 'function') return false;
+            return getReviewKeywordIds(word).some((wordId) => reviewStore.isKeywordDismissed(SENTENCE_REVIEW_MODULE_KEY, wordId));
+        }
+
+        function dismissReviewKeyword(wordOrId) {
+            const ids = getReviewKeywordIds(wordOrId);
+            ids.forEach((wordId) => {
+                safeRemoveItem(getVocabStarKey(wordId));
+                if (!reviewStore) return;
+                if (typeof reviewStore.removeTypedWord === 'function') {
+                    reviewStore.removeTypedWord(SENTENCE_REVIEW_MODULE_KEY, 'reading', wordId);
+                    reviewStore.removeTypedWord(SENTENCE_REVIEW_MODULE_KEY, 'meaning', wordId);
+                }
+                if (typeof reviewStore.dismissKeyword === 'function') {
+                    reviewStore.dismissKeyword(SENTENCE_REVIEW_MODULE_KEY, wordId);
+                }
+            });
+        }
+
+        function refreshReviewKeywordListAfterDismiss() {
+            if (currentDay !== -1) return;
+            currentDailyWords = getReviewableWords();
+            if (currentDailyWords.length === 0) {
+                currentWordIndex = 0;
+                currentView = 'list';
+                renderWordList(currentDailyWords);
+                updateUI();
+                return;
+            }
+            if (currentView === 'detail') {
+                currentWordIndex = Math.min(currentWordIndex, currentDailyWords.length - 1);
+                renderDetailCard();
+                updateUI();
+                return;
+            }
+            renderWordList(currentDailyWords);
+            updateUI();
+        }
+
+        function getSentenceReviewWords() {
+            if (!sentenceReviewStore || typeof FULL_WORD_LIST === 'undefined' || !Array.isArray(FULL_WORD_LIST)) return [];
+            const trackedIds = new Set(sentenceReviewStore.listTrackedWordIds(SENTENCE_REVIEW_MODULE_KEY));
+            if (trackedIds.size === 0) return [];
+            return FULL_WORD_LIST.filter((word) => {
+                if (!word || isPlaceholderWord(word)) return false;
+                const storageId = getWordStorageId(word);
+                const surface = String(word.word || '').trim();
+                return trackedIds.has(storageId) || trackedIds.has(surface);
+            });
+        }
+
+        function getTypedReviewCount(type) {
+            return reviewStore ? reviewStore.getTypedCount(SENTENCE_REVIEW_MODULE_KEY, type) : 0;
+        }
+
+        function getTypedReviewSnapshots(type) {
+            return reviewStore ? reviewStore.listTypedWords(SENTENCE_REVIEW_MODULE_KEY, type) : [];
+        }
+
+        function findWordByReviewSnapshot(snapshot) {
+            if (!snapshot || typeof FULL_WORD_LIST === 'undefined' || !Array.isArray(FULL_WORD_LIST)) return null;
+            const wordId = String(snapshot.wordId || snapshot.id || '').trim();
+            const wordLabel = String(snapshot.wordLabel || snapshot.word || '').trim();
+            return FULL_WORD_LIST.find((word) => {
+                if (!word || isPlaceholderWord(word)) return false;
+                const storageId = getWordStorageId(word);
+                const surface = String(word.word || '').trim();
+                return (wordId && (storageId === wordId || surface === wordId)) || (wordLabel && surface === wordLabel);
+            }) || null;
+        }
+
+        function getTypedReviewWords(type) {
+            return getTypedReviewSnapshots(type).map(findWordByReviewSnapshot).filter(Boolean);
+        }
+
+        function getTypedReviewWordIds() {
+            const ids = new Set();
+            ['reading', 'meaning'].forEach((type) => {
+                getTypedReviewSnapshots(type).forEach((snapshot) => {
+                    const wordId = String(snapshot && snapshot.wordId || '').trim();
+                    const wordLabel = String(snapshot && (snapshot.wordLabel || snapshot.word) || '').trim();
+                    if (wordId) ids.add(wordId);
+                    if (wordLabel) ids.add(wordLabel);
+                });
+            });
+            return ids;
+        }
+
+        function getSentenceTrackedWordIds() {
+            return sentenceReviewStore ? new Set(sentenceReviewStore.listTrackedWordIds(SENTENCE_REVIEW_MODULE_KEY)) : new Set();
+        }
+
+        function getLegacyStarredWords() {
+            const typedIds = getTypedReviewWordIds();
+            const sentenceIds = getSentenceTrackedWordIds();
+            return getStarredWords().filter((word) => {
+                const storageId = getWordStorageId(word);
+                const surface = String(word && word.word || '').trim();
+                return !typedIds.has(storageId) && !typedIds.has(surface) && !sentenceIds.has(storageId) && !sentenceIds.has(surface);
+            });
+        }
+
+        function getReviewableWords() {
+            const seen = new Set();
+            return [...getTypedReviewWords('reading'), ...getTypedReviewWords('meaning'), ...getSentenceReviewWords(), ...getLegacyStarredWords()].filter((word) => {
+                const key = getWordStorageId(word) || String(word && word.word || '').trim();
+                if (!key || seen.has(key)) return false;
+                if (isReviewKeywordDismissed(word)) return false;
+                seen.add(key);
+                return true;
+            });
+        }
+
+        function getReviewWordCount() {
+            return getReviewableWords().length;
+        }
+
+        function getPendingReviewCount() {
+            return getReviewWordCount() + getSentenceReviewQuestionCount();
+        }
+
+        function getPracticeOptionReviewCount(type) {
+            if (type === 'sentence') return getSentenceReviewQuestionCount();
+            return getTypedReviewCount(type);
+        }
+
+        function getPracticeOptionReviewCountLabel(type) {
+            const count = getPracticeOptionReviewCount(type);
+            if (count <= 0) return '暂无该类错题';
+            return type === 'sentence' ? `${count} 题待回放` : `${count} 词待练`;
+        }
+
+        function getReviewCountSummary() {
+            return `看错关键词 ${getReviewWordCount()} 词 · 句子题 ${getSentenceReviewQuestionCount()} 题待回放`;
+        }
+
+        function getEmptyReviewPracticeMessage(defaultMessage) {
+            return getReviewWordCount() > 0
+                ? '这些错词先作为关键词整理出来，确认词形和意思后再回到练习。'
+                : defaultMessage;
+        }
+
+        function getLastStudiedDay() {
+            return parseInt(safeGetItem(LAST_DAY_STORAGE_KEY) || '', 10) || 0;
+        }
+
+        function setLastStudiedDay(dayId) {
+            safeSetItem(LAST_DAY_STORAGE_KEY, String(dayId));
+        }
+
+        function normalizePracticeType(value) {
+            const normalized = String(value || '').trim().toLowerCase();
+            return PRACTICE_TYPE_OPTIONS.some((option) => option.id === normalized) ? normalized : 'sentence';
+        }
+
+        function getStoredPracticeType() {
+            return normalizePracticeType(safeGetItem(PRACTICE_TYPE_STORAGE_KEY));
+        }
+
+        function setStoredPracticeType(type) {
+            currentPracticeType = normalizePracticeType(type);
+            safeSetItem(PRACTICE_TYPE_STORAGE_KEY, currentPracticeType);
+        }
+
+        function getCurrentPracticeTypeMeta() {
+            return PRACTICE_TYPE_OPTIONS.find((option) => option.id === currentPracticeType) || PRACTICE_TYPE_OPTIONS[0];
+        }
+
+        function buildPracticeUrl(params, explicitType) {
+            const searchParams = new URLSearchParams();
+            Object.entries(params || {}).forEach(([key, value]) => {
+                if (value === undefined || value === null || value === '') return;
+                searchParams.set(key, String(value));
+            });
+            searchParams.set('type', normalizePracticeType(explicitType || currentPracticeType));
+            return `practice_n2_verbs.html?${searchParams.toString()}`;
+        }
+
+        function getCurriculumDay(dayId) {
+            return CURRICULUM_DAYS.find((day) => Number(day.id) === Number(dayId)) || null;
+        }
+
+        function getCurriculumStage(stageId) {
+            return CURRICULUM_STAGES.find((stage) => Number(stage.id) === Number(stageId)) || null;
+        }
+
+        function getCurriculumGroup(groupId) {
+            return CURRICULUM_GROUPS.find((group) => Number(group.id) === Number(groupId)) || null;
+        }
+
+        function collectWordsByIndexes(indexes) {
+            if (!Array.isArray(indexes) || typeof FULL_WORD_LIST === 'undefined' || !Array.isArray(FULL_WORD_LIST)) return [];
+            const seen = new Set();
+            return indexes.map((index) => FULL_WORD_LIST[index]).filter((word) => {
+                if (!word || isPlaceholderWord(word)) return false;
+                if (seen.has(word.word)) return false;
+                seen.add(word.word);
+                return true;
+            });
+        }
+
+        function getDayWords(dayId) {
+            const day = getCurriculumDay(dayId);
+            if (day && Array.isArray(day.wordIds)) {
+                return collectWordsByIndexes(day.wordIds);
+            }
+            if (typeof FULL_WORD_LIST === 'undefined' || !Array.isArray(FULL_WORD_LIST)) return [];
+            const wordsPerDay = typeof WORDS_PER_DAY !== 'undefined' ? WORDS_PER_DAY : 20;
+            const start = (dayId - 1) * wordsPerDay;
+            const end = start + wordsPerDay;
+            return FULL_WORD_LIST.slice(start, end).filter((word) => !isPlaceholderWord(word));
+        }
+
+        function getAllCurriculumWords() {
+            if (CURRICULUM_DAYS.length > 0) {
+                return collectWordsByIndexes(CURRICULUM_DAYS.flatMap((day) => Array.isArray(day.wordIds) ? day.wordIds : []));
+            }
+            return (typeof FULL_WORD_LIST !== 'undefined' && Array.isArray(FULL_WORD_LIST)) ? FULL_WORD_LIST.filter((word) => !isPlaceholderWord(word)) : [];
+        }
+
+        function getStageWordsForPicker(stageId) {
+            const stage = getCurriculumStage(Number(stageId));
+            if (!stage || !Array.isArray(stage.dayIds)) return [];
+            return collectWordsByIndexes(stage.dayIds.flatMap((dayId) => {
+                const day = getCurriculumDay(dayId);
+                return day && Array.isArray(day.wordIds) ? day.wordIds : [];
+            }));
+        }
+
+        function getPracticeWordsForParams(params) {
+            if (!params) return [];
+            if (params.mode === 'final') return getAllCurriculumWords();
+            if (params.stage != null) return getStageWordsForPicker(params.stage);
+            if (params.day != null && Number(params.day) > 0) return getDayWords(Number(params.day));
+            return [];
+        }
+
+        function hasExplicitSentencePractice(word) {
+            if (!word || isPlaceholderWord(word)) return false;
+            const practiceItems = Array.isArray(word.practiceItems) ? word.practiceItems : [];
+            if (practiceItems.some((item) => item && item.sentence && item.answer && Array.isArray(item.options) && item.options.length >= 2)) {
+                return true;
+            }
+            const practice = word.practice || null;
+            return Boolean(practice && (practice.sentence || practice.question) && practice.answer && Array.isArray(practice.options) && practice.options.length >= 2);
+        }
+
+        function getPracticeTypeAvailability(params, type) {
+            if (Number(params && params.day) === -1) {
+                const count = getPracticeOptionReviewCount(type);
+                return {
+                    count,
+                    available: count > 0,
+                    label: getPracticeOptionReviewCountLabel(type)
+                };
+            }
+            if (type !== 'sentence') {
+                return { count: null, available: true, label: '' };
+            }
+            const count = getPracticeWordsForParams(params).filter(hasExplicitSentencePractice).length;
+            return {
+                count,
+                available: count > 0,
+                label: count > 0 ? '' : '暂无句子题'
+            };
+        }
+
+        function getStarredWords() {
+            return (typeof FULL_WORD_LIST !== 'undefined' && Array.isArray(FULL_WORD_LIST))
+                ? FULL_WORD_LIST.filter((word) => !isPlaceholderWord(word) && safeGetItem(getVocabStarKey(word.word)) === 'true')
+                : [];
+        }
+
+        function getStarredCount() {
+            return getStarredWords().length;
+        }
+
+        function buildPracticePickerMeta(params) {
+            if (params && params.mode === 'final') {
+                return {
+                    title: '综合测验',
+                    context: ''
+                };
+            }
+            if (params && Number(params.day) === -1) {
+                return {
+                    title: '错题库',
+                    context: `错词 ${getReviewWordCount()} · 句子题 ${getSentenceReviewQuestionCount()}`
+                };
+            }
+            if (params && params.stage != null) {
+                const stage = getCurriculumStage(Number(params.stage));
+                const startDay = stage && Array.isArray(stage.dayIds) ? stage.dayIds[0] : params.stage;
+                const endDay = stage && Array.isArray(stage.dayIds) ? stage.dayIds[stage.dayIds.length - 1] : params.stage;
+                return {
+                    title: `阶段 ${stage ? stage.id : params.stage}`,
+                    context: `第 ${startDay}${startDay === endDay ? '' : `-${endDay}`} 天`
+                };
+            }
+            if (params && params.day != null) {
+                const day = getCurriculumDay(Number(params.day));
+                return {
+                    title: day && day.displayTitle ? day.displayTitle : `第 ${params.day} 天`,
+                    context: ''
+                };
+            }
+            return {
+                title: '选择练习方式',
+                context: ''
+            };
+        }
+
+        function closePracticePicker() {
+            practicePickerContext = null;
+            practicePickerOverlay.classList.remove('is-open');
+            practicePickerOverlay.setAttribute('aria-hidden', 'true');
+            document.body.classList.remove('practice-picker-open');
+        }
+
+        function launchPracticeFromPicker(type) {
+            if (!practicePickerContext) {
+                closePracticePicker();
+                return;
+            }
+            if (Number(practicePickerContext.params && practicePickerContext.params.day) === -1 && getPracticeOptionReviewCount(type) <= 0) {
+                return;
+            }
+            setStoredPracticeType(type);
+            window.location.href = buildPracticeUrl(practicePickerContext.params, type);
+        }
+
+        function launchReviewActionFromPicker(action) {
+            if (!practicePickerContext) {
+                closePracticePicker();
+                return;
+            }
+            if (action === 'keywords') {
+                if (getReviewWordCount() <= 0) return;
+                closePracticePicker();
+                selectStarredWords();
+                return;
+            }
+            if (action === 'sentence') {
+                if (getSentenceReviewQuestionCount() <= 0) return;
+                setStoredPracticeType('sentence');
+                window.location.href = buildPracticeUrl(practicePickerContext.params, 'sentence');
+            }
+        }
+
+        function openPracticePicker(params) {
+            const pickerMeta = buildPracticePickerMeta(params);
+            practicePickerContext = {
+                params: { ...(params || {}) },
+                meta: pickerMeta
+            };
+            practicePickerContextNode.textContent = pickerMeta.context || '';
+            practicePickerContextNode.hidden = !pickerMeta.context;
+            document.getElementById('practice-picker-title').textContent = pickerMeta.title;
+            const isReviewPicker = Number(practicePickerContext.params.day) === -1;
+            if (isReviewPicker) {
+                const keywordCount = getReviewWordCount();
+                const sentenceCount = getSentenceReviewQuestionCount();
+                const reviewOptions = [
+                    {
+                        id: 'keywords',
+                        label: '看错关键词',
+                        countLabel: keywordCount > 0 ? `${keywordCount} 词待确认` : '暂无看错关键词',
+                        disabled: keywordCount <= 0
+                    },
+                    {
+                        id: 'sentence',
+                        label: '句子题回放',
+                        countLabel: sentenceCount > 0 ? `${sentenceCount} 题待回放` : '暂无句子错题',
+                        disabled: sentenceCount <= 0
+                    }
+                ];
+                practicePickerOptionsNode.innerHTML = reviewOptions.map((option) => {
+                    const detailHtml = option.countLabel
+                        ? `<span class="practice-picker-option-sub"><span class="practice-picker-option-count">${escapeHtml(option.countLabel)}</span></span>`
+                        : '';
+                    return `
+                <button
+                    type="button"
+                    class="practice-picker-option ${option.disabled ? 'is-disabled' : ''}"
+                    data-review-action="${option.id}"
+                    ${option.disabled ? 'disabled' : ''}
+                >
+                    <span class="practice-picker-option-title">${escapeHtml(option.label)}</span>
+                    ${detailHtml}
+                </button>
+            `;
+                }).join('');
+                practicePickerOptionsNode.querySelectorAll('[data-review-action]').forEach((node) => {
+                    node.addEventListener('click', () => launchReviewActionFromPicker(node.dataset.reviewAction));
+                });
+                practicePickerOverlay.classList.add('is-open');
+                practicePickerOverlay.setAttribute('aria-hidden', 'false');
+                document.body.classList.add('practice-picker-open');
+                return;
+            }
+            practicePickerOptionsNode.innerHTML = PRACTICE_TYPE_OPTIONS.map((option) => {
+                const availability = getPracticeTypeAvailability(practicePickerContext.params, option.id);
+                const isDisabled = !availability.available;
+                const shouldShowAvailability = isDisabled && availability.label;
+                const detailText = shouldShowAvailability ? availability.label : option.hint;
+                const detailHtml = detailText
+                    ? `<span class="practice-picker-option-sub">${shouldShowAvailability ? `<span class="practice-picker-option-count">${escapeHtml(detailText)}</span>` : escapeHtml(detailText)}</span>`
+                    : '';
+                return `
+                <button
+                    type="button"
+                    class="practice-picker-option ${option.id === currentPracticeType ? 'is-last-used' : ''} ${isDisabled ? 'is-disabled' : ''}"
+                    data-picker-type="${option.id}"
+                    ${isDisabled ? 'disabled' : ''}
+                >
+                    <span class="practice-picker-option-title">${escapeHtml(option.label)}</span>
+                    ${detailHtml}
+                </button>
+            `;
+            }).join('');
+            practicePickerOptionsNode.querySelectorAll('[data-picker-type]').forEach((node) => {
+                node.addEventListener('click', () => launchPracticeFromPicker(node.dataset.pickerType));
+            });
+            practicePickerOverlay.classList.add('is-open');
+            practicePickerOverlay.setAttribute('aria-hidden', 'false');
+            document.body.classList.add('practice-picker-open');
+        }
+
+        function startPractice(dayId) {
+            if (Number(dayId) === -1) {
+                startReviewPractice();
+                return;
+            }
+            openPracticePicker({ day: dayId });
+        }
+
+        function startStagePractice(stageId) {
+            openPracticePicker({ stage: stageId });
+        }
+
+        function startFinalPractice() {
+            openPracticePicker({ mode: 'final' });
+        }
+
+        function startReviewPractice() {
+            if (getReviewWordCount() === 0 && getSentenceReviewQuestionCount() === 0) {
+                alert('基础很扎实，错题库目前是空的哦。');
+                return;
+            }
+            openPracticePicker({ day: -1 });
+        }
+
+        function selectStarredWords() {
+            const reviewableWords = getReviewableWords();
+            if (reviewableWords.length === 0) {
+                alert('基础很扎实，错题库目前是空的哦。');
+                return;
+            }
+            currentDay = -1;
+            currentDailyWords = reviewableWords;
+            currentView = 'list';
+            renderWordList(currentDailyWords);
+            updateUI();
+        }
+
+        function renderDays() {
+            daysView.innerHTML = '';
+            const reviewWordCount = getReviewWordCount();
+            const sentenceReviewQuestionCount = getSentenceReviewQuestionCount();
+            const reviewSubtitle = `错词 ${reviewWordCount} · 句子题 ${sentenceReviewQuestionCount}`;
+
+            // Review Card
+            const reviewCard = document.createElement('div');
+            reviewCard.className = 'day-card day-card--review';
+            reviewCard.style.borderColor = 'var(--text-accent)';
+            reviewCard.style.background = 'rgba(194, 122, 98, 0.03)';
+            reviewCard.innerHTML = `
+                <div class="day-info">
+                        <div class="day-icon" style="color: var(--text-accent); border-color: var(--text-accent); background: #fff;">🔍</div>
+                        <div class="day-text-group">
+                        <div class="day-title" style="color: var(--text-accent);">错题库</div>
+                        <div class="day-subtitle">${reviewSubtitle}</div>
+                    </div>
+                </div>
+                <div class="go-badge" style="background: var(--text-accent); color: #fff;">复习</div>
+            `;
+            reviewCard.addEventListener('click', startReviewPractice);
+            daysView.appendChild(reviewCard);
+
+            const lastDay = getLastStudiedDay();
+            const stageByEndDay = new Map();
+            CURRICULUM_STAGES.forEach((stage) => {
+                if (Array.isArray(stage.dayIds) && stage.dayIds.length > 0) {
+                    stageByEndDay.set(stage.dayIds[stage.dayIds.length - 1], stage);
+                }
+            });
+
+            const totalDaysCount = CURRICULUM_DAYS.length || 13;
+            
+            for (let dayId = 1; dayId <= totalDaysCount; dayId += 1) {
+                const day = getCurriculumDay(dayId);
+                const dayTitle = day && day.displayTitle ? day.displayTitle : `第 ${dayId} 天`;
+                const badgeHtml = dayId === lastDay ? `<span class="last-studied-badge">上次</span>` : '';
+
+                const dayCard = document.createElement('div');
+                dayCard.className = 'day-card day-card--study';
+                dayCard.innerHTML = `
+                    <div class="day-info">
+                        <div class="day-icon">📝</div>
+                        <div class="day-text-group">
+                            <div class="day-title-row">
+                                <div class="day-title">${escapeHtml(dayTitle)}</div>
+                                ${badgeHtml}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="go-badge">学习</div>
+                `;
+                dayCard.addEventListener('click', () => selectDay(dayId));
+                daysView.appendChild(dayCard);
+
+                const stage = stageByEndDay.get(dayId);
+                if (stage) {
+                    const startDay = stage.dayIds[0];
+                    const endDay = stage.dayIds[stage.dayIds.length - 1];
+                    const stageCard = document.createElement('div');
+                    stageCard.className = 'day-card day-card--stage';
+                    stageCard.style.borderColor = 'var(--accent-green)';
+                    stageCard.style.background = 'rgba(92, 148, 110, 0.03)';
+                    stageCard.innerHTML = `
+                        <div class="day-info">
+                            <div class="day-icon" style="border-color: var(--accent-green); color: var(--accent-green); background: #fff;">📌</div>
+                            <div class="day-text-group">
+                                <div class="day-title" style="color: var(--accent-green);">阶段 ${stage.id}</div>
+                            </div>
+                        </div>
+                        <div class="go-badge" style="background: var(--accent-green); color: #fff;">考核</div>
+                    `;
+                    stageCard.addEventListener('click', () => startStagePractice(stage.id));
+                    daysView.appendChild(stageCard);
+                }
+            }
+
+            // Final Card
+            const finalCard = document.createElement('div');
+            finalCard.className = 'day-card day-card--final';
+            finalCard.style.borderColor = 'var(--accent-gold)';
+            finalCard.style.background = 'rgba(217, 160, 91, 0.05)';
+            finalCard.innerHTML = `
+                <div class="day-info">
+                        <div class="day-icon" style="border-color: var(--accent-gold); color: var(--accent-gold); background: #fff;">🏆</div>
+                        <div class="day-text-group">
+                        <div class="day-title" style="color: var(--accent-gold);">综合测验</div>
+                    </div>
+                </div>
+                <div class="go-badge" style="background: var(--accent-gold); color: #fff; border: none;">测验</div>
+            `;
+            finalCard.addEventListener('click', startFinalPractice);
+            daysView.appendChild(finalCard);
+
+        }
+
+        function selectDay(dayId) {
+            setLastStudiedDay(dayId);
+            currentDay = dayId;
+            currentView = 'list';
+            currentDailyWords = getDayWords(dayId);
+            renderWordList(currentDailyWords);
+            updateUI();
+        }
+
+        function renderWordList(words) {
+            const container = document.getElementById('word-list-container');
+            container.innerHTML = '';
+            const isReviewKeywordList = currentDay === -1;
+
+            if (words.length === 0) {
+                container.innerHTML = `
+                    <div style="padding:42px 20px; text-align:center; color:var(--text-dim); font-weight:700; line-height:1.8;">
+                        ${isReviewKeywordList ? '看错关键词已经清空。句子题如果还有待回放，可以从错题库入口继续复盘。' : '这一组词条还在整理中。'}
+                    </div>
+                `;
+                window.scrollTo(0, 0);
+                return;
+            }
+
+            words.forEach((wordData, index) => {
+                const item = document.createElement('div');
+                item.className = 'word-list-item';
+                const wordId = wordData.word;
+                const isStarred = safeGetItem(getVocabStarKey(wordId)) === 'true';
+                const actionClass = isReviewKeywordList ? 'active review-remove' : (isStarred ? 'active' : '');
+                const actionLabel = isReviewKeywordList ? '移出' : '🔖';
+                const actionTitle = isReviewKeywordList ? '移出错题词' : '加入错题本';
+                const sentenceMistakeCount = getSentenceMistakeCountForWord(wordData);
+                const sentenceMistakeHtml = sentenceMistakeCount > 0
+                    ? `<div style="font-size:12px; font-weight:600; color: var(--text-dim); line-height:1.5;">句子错 ${sentenceMistakeCount} 次</div>`
+                    : '';
+                item.innerHTML = `
+                    <div style="min-width:0; display:flex; flex-direction:column; gap:4px;">
+                        <div class="list-word-text">${wordData.word_html || wordData.word}</div>
+                        ${sentenceMistakeHtml}
+                    </div>
+                    <div class="list-actions">
+                        <div class="mark-btn ${actionClass}" data-word="${escapeHtml(wordId)}" title="${actionTitle}" aria-label="${actionTitle}">${actionLabel}</div>
+                        <div class="list-arrow">›</div>
+                    </div>
+                `;
+                item.addEventListener('click', (event) => {
+                    const btn = event.target.closest('.mark-btn');
+                    if (btn) {
+                        event.stopPropagation();
+                        toggleMark(btn, wordId);
+                        return;
+                    }
+                    openWordDetail(index);
+                });
+                container.appendChild(item);
+            });
+
+            window.scrollTo(0, 0);
+        }
+
+        function toggleMark(button, wordId) {
+            if (currentDay === -1) {
+                dismissReviewKeyword(wordId);
+                refreshReviewKeywordListAfterDismiss();
+                return;
+            }
+            const storageKey = getVocabStarKey(wordId);
+            const nextActive = safeGetItem(storageKey) !== 'true';
+            if (nextActive) {
+                safeSetItem(storageKey, 'true');
+                if (reviewStore && typeof reviewStore.restoreKeyword === 'function') {
+                    getReviewKeywordIds(wordId).forEach((id) => reviewStore.restoreKeyword(SENTENCE_REVIEW_MODULE_KEY, id));
+                }
+            } else {
+                safeRemoveItem(storageKey);
+            }
+            button.classList.toggle('active', nextActive);
+        }
+
+        function openWordDetail(index) {
+            currentWordIndex = index;
+            currentView = 'detail';
+            renderDetailCard();
+            updateUI();
+        }
+
+        function renderDetailCard() {
+            const container = document.getElementById('word-detail-view');
+            const wordData = currentDailyWords[currentWordIndex];
+            if (!wordData) return;
+
+            const toneHtml = wordData.tone ? `<span class="tone-number">${wordData.tone}</span>` : '';
+            const posHtml = wordData.pos ? `<span class="pos-tag">${wordData.pos}</span>` : '';
+            const meanings = wordData.mean ? wordData.mean.split(/[；;]/).map((item) => item.trim()).filter(Boolean) : [];
+            const nuances = wordData.nuance
+                ? wordData.nuance.split('\n').map((line) => line.trim().replace(/^\d+\.\s*/, '')).filter(Boolean)
+                : [];
+            const examples = Array.isArray(wordData.examples) ? wordData.examples : [];
+            const count = Math.max(meanings.length, nuances.length, examples.length);
+            const numbers = ['❶', '❷', '❸', '❹', '❺', '❻', '❼', '❽', '❾', '❿'];
+
+            let definitionsHtml = '';
+            for (let index = 0; index < count; index += 1) {
+                const meanText = meanings[index] || (meanings.length === 1 && index === 0 ? meanings[0] : '');
+                const nuanceText = nuances[index] || '';
+                const example = examples[index];
+                
+                definitionsHtml += `<div class="def-group">`;
+                if (meanText || nuanceText) {
+                    definitionsHtml += `
+                        <div class="def-head">
+                            <span class="def-number">${numbers[index] || `${index + 1}.`}</span>
+                            <div class="def-copy">
+                                ${meanText ? `<span class="def-meaning">${meanText}</span>` : ''}
+                                ${nuanceText ? `<span class="def-nuance">（${nuanceText}）</span>` : ''}
+                            </div>
+                        </div>
+                    `;
+                }
+                if (example) {
+                    definitionsHtml += `
+                        <div class="def-ex">
+                            <div class="def-example-label">例句</div>
+                            <div class="def-example-body">
+                                <div class="ex-jp" lang="ja">${example.jp}</div>
+                                <div class="ex-cn">（${example.cn}）</div>
+                            </div>
+                        </div>
+                    `;
+                }
+                definitionsHtml += `</div>`;
+            }
+
+            const isFirst = currentWordIndex === 0;
+            const isLast = currentWordIndex === currentDailyWords.length - 1;
+            const isReviewKeywordList = currentDay === -1;
+            const wordId = wordData.word;
+            const isStarred = safeGetItem(getVocabStarKey(wordId)) === 'true';
+            const actionClass = isReviewKeywordList ? 'active review-remove' : (isStarred ? 'active' : '');
+            const actionLabel = isReviewKeywordList ? '移出' : '🔖';
+            const actionTitle = isReviewKeywordList ? '移出错题词' : '加入错题本';
+            const sentenceMistakeCount = getSentenceMistakeCountForWord(wordData);
+            const metaHtml = toneHtml || posHtml
+                ? `<div class="fc-meta-group">${toneHtml}${posHtml}</div>`
+                : '';
+            const sentenceMistakeHtml = sentenceMistakeCount > 0
+                ? `<div style="margin-top:10px;"><span style="display:inline-flex; align-items:center; gap:6px; padding:4px 10px; border-radius:999px; background: rgba(166, 78, 54, 0.08); border: 1px solid rgba(166, 78, 54, 0.2); color: var(--text-accent); font-size:12px; font-weight:700; letter-spacing:0.04em;">句子错 ${sentenceMistakeCount} 次</span></div>`
+                : '';
+
+            container.innerHTML = `
+                <div class="flashcard-main">
+                    <div class="fc-header">
+                        <div class="fc-word-group">
+                            <div class="fc-title-row">
+                                <div class="fc-word">${wordData.word_html || wordData.word}</div>
+                                ${metaHtml}
+                            </div>
+                            ${sentenceMistakeHtml}
+                        </div>
+                        <div class="mark-btn fc-action ${actionClass}" onclick="toggleMark(this, '${wordId}')" title="${actionTitle}" aria-label="${actionTitle}">${actionLabel}</div>
+                    </div>
+                    
+                    <div style="flex: 1;">
+                        <div class="fc-section-title">解析与例句</div>
+                        <div>
+                            ${definitionsHtml}
+                        </div>
+                    </div>
+
+                    <div class="nav-controls">
+                        <button class="nav-btn ${isFirst ? 'disabled' : ''}" onclick="navigateWord(-1)">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+                            上一词
+                        </button>
+                        <div class="nav-progress">${currentWordIndex + 1} / ${currentDailyWords.length}</div>
+                        <button class="nav-btn primary ${isReviewKeywordList ? (isLast ? 'disabled' : '') : (isLast ? 'practice-btn' : '')}" onclick="${isReviewKeywordList ? (isLast ? '' : 'navigateWord(1)') : (isLast ? `startPractice(${currentDay})` : 'navigateWord(1)')}">
+                            ${isReviewKeywordList ? '下一词' : (isLast ? '去修行 (考核)' : '下一词')}
+                            ${isReviewKeywordList && isLast ? '' : (!isReviewKeywordList && isLast ? '' : '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>')}
+                        </button>
+                    </div>
+                </div>
+            `;
+
+            window.scrollTo(0, 0);
+        }
+
+        function navigateWord(direction) {
+            const nextIndex = currentWordIndex + direction;
+            if (nextIndex >= 0 && nextIndex < currentDailyWords.length) {
+                currentWordIndex = nextIndex;
+                renderDetailCard();
+            }
+        }
+
+        function updateUI() {
+            daysView.classList.add('hidden');
+            wordListView.classList.add('hidden');
+            wordDetailView.classList.add('hidden');
+
+            if (homeBtn) {
+                homeBtn.style.display = 'none';
+            }
+            if (headerPracticeBtn) {
+                headerPracticeBtn.style.display = 'none';
+                headerPracticeBtn.onclick = null;
+            }
+
+            if (currentView === 'days') {
+                daysView.classList.remove('hidden');
+                const totalDaysCount = CURRICULUM_DAYS.length || 13;
+                pageTitle.textContent = `N2 動詞 (全 ${totalDaysCount} 天)`;
+                backBtn.onclick = () => window.location.href = 'index.html';
+                backBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg> 返回';
+                if (homeBtn) {
+                    homeBtn.style.display = 'inline-flex';
+                }
+                syncHeaderActions();
+                return;
+            }
+
+            if (currentView === 'list') {
+                wordListView.classList.remove('hidden');
+                pageTitle.textContent = currentDay === -1 ? '错题合集' : `第 ${currentDay} 天`;
+                if (currentDailyWords.length > 0) {
+                    renderWordList(currentDailyWords);
+                }
+                if (headerPracticeBtn) {
+                    headerPracticeBtn.textContent = currentDay === -1 ? '错题练习' : '今日练习';
+                    headerPracticeBtn.onclick = () => {
+                        if (currentDay === -1) {
+                            startReviewPractice();
+                            return;
+                        }
+                        startPractice(currentDay);
+                    };
+                    headerPracticeBtn.style.display = 'inline-flex';
+                }
+                syncHeaderActions();
+                backBtn.onclick = () => {
+                    currentView = 'days';
+                    renderDays();
+                    updateUI();
+                };
+                backBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg> 返回';
+                return;
+            }
+
+            wordDetailView.classList.remove('hidden');
+            pageTitle.textContent = '细细打磨';
+            syncHeaderActions();
+            backBtn.onclick = () => {
+                currentView = 'list';
+                updateUI();
+            };
+            backBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg> 返回';
+        }
+
+        renderDays();
+        updateUI();
+
+        if (practicePickerCloseBtn) {
+            practicePickerCloseBtn.addEventListener('click', closePracticePicker);
+        }
+        if (practicePickerOverlay) {
+            practicePickerOverlay.addEventListener('click', (event) => {
+                if (event.target === practicePickerOverlay) {
+                    closePracticePicker();
+                }
+            });
+        }
+        document.addEventListener('keydown', (event) => {
+            if (event.key === 'Escape' && practicePickerOverlay.classList.contains('is-open')) {
+                closePracticePicker();
+            }
+        });
+
+        let touchStartX = 0;
+        let touchStartY = 0;
+        let touchEndX = 0;
+        let touchEndY = 0;
+        const minSwipeDistance = 50;
+
+        document.addEventListener('touchstart', (event) => {
+            touchStartX = event.changedTouches[0].screenX;
+            touchStartY = event.changedTouches[0].screenY;
+        }, false);
+
+        document.addEventListener('touchend', (event) => {
+            touchEndX = event.changedTouches[0].screenX;
+            touchEndY = event.changedTouches[0].screenY;
+            if (currentView !== 'detail') return;
+            const distanceX = touchEndX - touchStartX;
+            const distanceY = touchEndY - touchStartY;
+            if (Math.abs(distanceX) > Math.abs(distanceY) && Math.abs(distanceX) > minSwipeDistance) {
+                navigateWord(distanceX < 0 ? 1 : -1);
+            }
+        }, false);
+    </script>
+</body>
+</html>

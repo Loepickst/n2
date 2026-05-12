@@ -1,40 +1,743 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>听力练习 - 概要理解 N2</title>
-    <link rel="stylesheet" href="../../../../shared/site-fonts.css">
-    <link rel="stylesheet" href="../../shared/listening-shell.css">
-    <link rel="stylesheet" href="../../../../shared/header-back-control.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>概要理解 - N2 ステージ</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&family=Noto+Serif+JP:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+:root {
+  --paper: #ffffff;
+  --graphite: #333333;
+  --graphite-sub: #666666;
+  --graphite-faint: #cccccc;
+  --red-pencil: #e64a4a;
+  --marker-yellow: rgba(255, 213, 79, 0.35);
+  --marker-blue: rgba(129, 212, 250, 0.35);
+  --marker-peach: rgba(253, 186, 116, 0.35);
+  --marker-mint: rgba(134, 239, 172, 0.35);
+  --marker-pink: rgba(244, 143, 177, 0.35);
+  --marker-gray: rgba(200, 200, 200, 0.25);
+  --hatching-graphite: repeating-linear-gradient(45deg, transparent, transparent 3px, rgba(51, 51, 51, 0.04) 3px, rgba(51, 51, 51, 0.04) 4px);
+  --transition: all 0.2s ease-out;
+}
+* { box-sizing: border-box; }
+body {
+  font-family: 'Noto Serif JP', 'Noto Sans JP', 'Noto Sans SC', serif;
+  background: var(--paper);
+  color: var(--graphite);
+  margin: 0;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+}
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.02'/%3E%3C/svg%3E");
+  z-index: -1;
+  pointer-events: none;
+}
+.container, .vocab-container {
+  width: 95%;
+  max-width: 860px;
+  padding: 40px 0 80px;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+.intro-box {
+  text-align: center;
+  margin-bottom: 36px;
+  animation: fadeIn 0.4s ease-out;
+}
+.intro-box p {
+  color: var(--graphite);
+  font-family: 'Noto Sans JP', sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  margin: 0;
+  background: linear-gradient(transparent 50%, rgba(255, 213, 79, 0.4) 50%);
+  border-bottom: 1.5px dashed var(--graphite-faint);
+  display: inline-block;
+  padding: 4px 16px;
+  letter-spacing: 0.1em;
+}
+.practice-toolbar {
+  display: flex;
+  justify-content: center;
+  margin: -12px 0 28px;
+}
+.browse-mode-toggle {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.browse-mode-btn {
+  border: none;
+  background: transparent;
+  color: var(--graphite-sub);
+  cursor: pointer;
+  font-family: 'Noto Sans JP', sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  padding: 6px 12px;
+  position: relative;
+  transition: var(--transition);
+}
+.browse-mode-btn:hover:not(.active) {
+  color: var(--graphite);
+}
+.browse-mode-btn.active {
+  color: var(--graphite);
+  z-index: 1;
+}
+.browse-mode-btn.active::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--marker-mint);
+  border-radius: 2px 8px 2px 6px / 6px 2px 8px 2px;
+  z-index: -1;
+  transform: rotate(-1deg);
+}
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes slideUp { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+.level-grid, .year-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+  gap: 24px;
+  animation: slideUp 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+.level-card, .year-card, .empty-card {
+  background: transparent;
+  border: 1.5px solid var(--graphite);
+  border-radius: 3px 255px 4px 25px / 255px 5px 225px 4px;
+  padding: 24px;
+  color: var(--graphite);
+  text-decoration: none;
+  transition: var(--transition);
+  min-width: 0;
+}
+.level-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+}
+.level-card:hover:not(.disabled), .year-card:hover { transform: translate(-1px, -1px); background: var(--hatching-graphite); }
+.level-card:active:not(.disabled) { transform: translate(1px, 1px); }
+.level-card.disabled, .empty-card {
+  border-style: dashed;
+  border-color: var(--graphite-faint);
+  opacity: 0.82;
+}
+.level-info { min-width: 0; display: flex; flex-direction: column; align-items: flex-start; gap: 10px; }
+.level-info h2, .year-title {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--graphite);
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  letter-spacing: 0.05em;
+}
+.level-info p, .category-description, .empty-card p {
+  font-family: 'Noto Sans JP', sans-serif;
+  margin: 0;
+  color: var(--graphite-sub);
+  line-height: 1.7;
+  font-size: 14px;
+  font-weight: 600;
+}
+.category-card {
+  width: auto;
+  text-decoration: none;
+  color: var(--graphite);
+  cursor: pointer;
+  text-align: left;
+  font: inherit;
+}
+.category-card .year-title {
+  flex-wrap: wrap;
+  line-height: 1.35;
+}
+.lesson-tag, .status-tag {
+  font-family: 'Noto Sans JP', sans-serif;
+  font-size: 12px;
+  font-weight: 900;
+  color: var(--graphite);
+  padding: 2px 8px;
+  border: 1.5px solid var(--graphite);
+  border-radius: 2px 8px 2px 6px / 6px 2px 8px 2px;
+  letter-spacing: 0.08em;
+  background: var(--marker-yellow);
+}
+.level-card:nth-child(1) .lesson-tag { background: var(--marker-blue); }
+.level-card:nth-child(2) .lesson-tag { background: var(--marker-peach); }
+.level-card:nth-child(3) .lesson-tag { background: var(--marker-mint); }
+.level-card.disabled .lesson-tag { background: var(--marker-gray); border-color: var(--graphite-faint); color: var(--graphite-sub); }
+.level-icon { font-size: 42px; line-height: 1; filter: grayscale(0.1); }
+.year-card { display: flex; flex-direction: column; gap: 20px; }
+.category-card .year-info { border-bottom: 0; padding-bottom: 0; }
+.category-meta { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.category-count {
+  font-family: 'Noto Sans JP', sans-serif;
+  font-size: 12px;
+  font-weight: 900;
+  color: var(--graphite);
+  padding: 2px 8px;
+  border: 1.5px solid var(--graphite);
+  border-radius: 2px 8px 2px 6px / 6px 2px 8px 2px;
+  background: var(--marker-mint);
+}
+.category-count.pending {
+  background: var(--marker-pink);
+  color: var(--red-pencil);
+}
+.year-info {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  border-bottom: 1.5px dashed var(--graphite-faint);
+  padding-bottom: 16px;
+}
+.year-meta { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.last-practice-tag {
+  font-family: 'Noto Sans JP', sans-serif;
+  font-size: 11px;
+  font-weight: 900;
+  background: var(--marker-yellow);
+  padding: 2px 8px;
+  border: 1.5px solid var(--graphite);
+  border-radius: 2px 8px 2px 6px / 6px 2px 8px 2px;
+}
+.exam-buttons { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 14px; }
+.exam-btn {
+  text-decoration: none;
+  font-family: 'Noto Sans JP', sans-serif;
+  font-size: 14px;
+  font-weight: 900;
+  padding: 10px 16px;
+  border: 1.5px solid var(--graphite);
+  border-radius: 2px 8px 3px 6px / 6px 3px 8px 2px;
+  color: var(--graphite);
+  transition: var(--transition);
+  letter-spacing: 0.05em;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+.btn-blue { background: var(--marker-blue); }
+.btn-pink { background: var(--marker-pink); }
+.exam-btn:hover { filter: brightness(0.96); border-style: dashed; }
+.review-section {
+  background: var(--marker-yellow);
+  border: 1.5px solid var(--red-pencil);
+  border-radius: 3px 255px 5px 25px / 255px 3px 225px 5px;
+  padding: 20px;
+  margin-bottom: 32px;
+}
+.review-panel > summary { list-style: none; }
+.review-panel > summary::-webkit-details-marker { display: none; }
+.review-summary { display: flex; align-items: center; justify-content: space-between; gap: 12px; cursor: pointer; }
+.review-panel[open] .review-summary { padding-bottom: 12px; margin-bottom: 14px; border-bottom: 1.5px dashed var(--graphite-faint); }
+.review-summary-title { font-size: 18px; font-weight: 900; letter-spacing: 0.04em; }
+.review-summary-tags { display: inline-flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; }
+.review-status-pill, .review-count-pill, .review-action-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 28px;
+  padding: 4px 9px;
+  border: 1.5px solid var(--graphite);
+  border-radius: 2px 8px 3px 6px / 6px 3px 8px 2px;
+  background: #fff;
+  color: var(--graphite);
+  font-family: 'Noto Sans JP', sans-serif;
+  font-size: 12px;
+  font-weight: 900;
+  line-height: 1;
+  white-space: nowrap;
+}
+.review-status-pill.has-items { background: var(--marker-yellow); color: var(--red-pencil); }
+.review-action-pill::after { content: '展开'; }
+.review-panel[open] .review-action-pill::after { content: '收起'; }
+.review-grid { display: flex; flex-wrap: wrap; gap: 12px; }
+.review-item {
+  text-decoration: none;
+  background: #fff;
+  border: 1.5px solid var(--graphite);
+  border-radius: 2px 8px 3px 6px / 6px 3px 8px 2px;
+  padding: 8px 14px;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--graphite);
+  font-weight: 900;
+  font-family: 'Noto Sans JP', sans-serif;
+}
+.review-item:hover { border-color: var(--red-pencil); color: var(--red-pencil); }
+.review-count { color: var(--red-pencil); font-size: 12px; padding: 2px 6px; border: 1.5px solid var(--red-pencil); border-radius: 50% 45% 55% 40% / 45% 55% 40% 50%; }
+@media (max-width: 720px) {
+  .container, .vocab-container { width: calc(100% - 32px); padding: 22px 0 44px; }
+  .intro-box { margin-bottom: 24px; }
+  .intro-box p { font-size: 13px; padding: 4px 12px; }
+  .practice-toolbar { margin: -6px 0 20px; }
+  .level-grid, .year-grid { grid-template-columns: 1fr; gap: 16px; }
+  .level-card, .year-card, .empty-card { padding: 16px; }
+  .level-info h2, .year-title { font-size: 18px; gap: 8px; }
+  .level-info p, .category-description, .empty-card p { font-size: 13px; }
+  .browse-mode-toggle { gap: 8px; }
+  .browse-mode-btn { font-size: 13px; padding: 6px 10px; }
+  .level-icon { font-size: 32px; }
+  .exam-buttons { gap: 10px; }
+  .exam-btn { font-size: 13px; padding: 8px 12px; }
+  .review-section { padding: 16px; margin-bottom: 24px; }
+  .review-summary-title { font-size: 15px; }
+}
+@media (max-width: 520px) {
+  .container, .vocab-container { width: calc(100% - 24px); padding: 18px 0 36px; }
+  .intro-box p { font-size: 12px; }
+  .browse-mode-toggle { gap: 8px; }
+  .browse-mode-btn { font-size: 12px; padding: 5px 8px; }
+  .level-card, .year-card, .empty-card { padding: 14px; }
+  .exam-btn { font-size: 12px; padding: 7px 10px; }
+  .review-summary { align-items: flex-start; }
+  .review-status-pill, .review-count-pill, .review-action-pill { min-height: 24px; padding: 3px 7px; font-size: 10px; }
+}
+[hidden],
+.hidden {
+  display: none !important;
+}
+</style>
+  <link rel="stylesheet" href="../../shared/listening-header.css">
+  <link rel="stylesheet" href="../../../../shared/site-fonts.css">
 </head>
 <body>
-    <header>
-        <a href="../index.html" class="back-btn header-back-control" data-back-nav>戻る</a>
-        <h1>概要理解 · N2</h1>
-        <a href="../../../../index.html#exam" class="home-btn">ホーム</a>
-    </header>
 
-    <main class="shell-container">
-        <div class="placeholder-card">
-            <h2>目录已建立</h2>
-            <p>该等级的文件夹结构已经就位，后续只需把年份页放进 `years/`，资源放进 `assets/` 即可接入。</p>
-            <div class="pill-row">
-                <span class="pill">years/ 已预留</span>
-                <span class="pill">assets/ 已预留</span>
-                <span class="pill">N2 待补内容</span>
-            </div>
-        </div>
+<header>
+  <a href="../../index.html" class="back-btn" data-back-nav>
+    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+    戻る
+  </a>
+  <h1>概要理解 <span>N2 STAGE</span></h1>
+  <a href="../../../../index.html" class="home-btn">
+    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+    ホーム
+  </a>
+</header>
+<main class="container">
+  <div class="intro-box">
+    <p id="introText">✎ 練習する年度を選んでください</p>
+  </div>
+  <div class="practice-toolbar">
+    <div class="browse-mode-toggle" aria-label="练习方式切换">
+      <button type="button" class="browse-mode-btn active" data-browse-mode="year">年度別演習</button>
+      <button type="button" class="browse-mode-btn" data-browse-mode="category">分類別演習</button>
+    </div>
+  </div>
+  <details id="mistakeReview" class="review-section review-panel">
+    <summary class="review-summary">
+      <span class="review-summary-title">✔ 错题复习</span>
+      <span class="review-summary-tags">
+        <span id="reviewStatus" class="review-status-pill">暂无错题</span>
+        <span id="reviewTotal" class="review-count-pill">0 题</span>
+        <span class="review-action-pill" aria-hidden="true"></span>
+      </span>
+    </summary>
+    <div id="reviewGrid" class="review-grid"></div>
+  </details>
+  <div id="randomExamRoot"></div>
+  <div id="yearGrid" class="year-grid">
+    
+  </div>
+  <div id="categoryGrid" class="year-grid" hidden></div>
+</main>
+<script src="../../shared/listening-progress.js"></script>
+<script src="../../shared/listening-question-pools.js"></script>
+<script src="../../shared/listening-category-catalog.js"></script>
+<script src="../../shared/listening-category-system.js"></script>
+<script src="../../shared/listening-random-entry.js"></script>
+<script>
+const LISTENING_TYPE = "overview-comprehension";
+const LISTENING_LEVEL = "n2";
+const CATEGORY_TYPE = "overview_comprehension";
+const CATEGORY_LEVEL = "N2";
+const initialParams = new URLSearchParams(window.location.search);
+let currentBrowseMode = initialParams.get('browse') === 'category' ? 'category' : 'year';
+const YEAR_GROUPS = [
+  {
+    "year": "2010",
+    "title": "2010年",
+    "tag": "N2 概要理解",
+    "entries": [
+      {
+        "key": "2010-07",
+        "label": "7月",
+        "href": "years/2010.html?year=2010-07",
+        "tone": "blue"
+      },
+      {
+        "key": "2010-12",
+        "label": "12月",
+        "href": "years/2010.html?year=2010-12",
+        "tone": "pink"
+      }
+    ]
+  },
+  {
+    "year": "2011",
+    "title": "2011年",
+    "tag": "N2 概要理解",
+    "entries": [
+      {
+        "key": "2011-07",
+        "label": "7月",
+        "href": "years/2011.html?year=2011-07",
+        "tone": "blue"
+      },
+      {
+        "key": "2011-12",
+        "label": "12月",
+        "href": "years/2011.html?year=2011-12",
+        "tone": "pink"
+      }
+    ]
+  },
+  {
+    "year": "2012",
+    "title": "2012年",
+    "tag": "N2 概要理解",
+    "entries": [
+      {
+        "key": "2012-07",
+        "label": "7月",
+        "href": "years/2012.html?year=2012-07",
+        "tone": "blue"
+      },
+      {
+        "key": "2012-12",
+        "label": "12月",
+        "href": "years/2012.html?year=2012-12",
+        "tone": "pink"
+      }
+    ]
+  },
+  {
+    "year": "2013",
+    "title": "2013年",
+    "tag": "N2 概要理解",
+    "entries": [
+      {
+        "key": "2013-07",
+        "label": "7月",
+        "href": "years/2013.html?year=2013-07",
+        "tone": "blue"
+      },
+      {
+        "key": "2013-12",
+        "label": "12月",
+        "href": "years/2013.html?year=2013-12",
+        "tone": "pink"
+      }
+    ]
+  },
+  {
+    "year": "2014",
+    "title": "2014年",
+    "tag": "N2 概要理解",
+    "entries": [
+      {
+        "key": "2014-07",
+        "label": "7月",
+        "href": "years/2014.html?year=2014-07",
+        "tone": "blue"
+      },
+      {
+        "key": "2014-12",
+        "label": "12月",
+        "href": "years/2014.html?year=2014-12",
+        "tone": "pink"
+      }
+    ]
+  },
+  {
+    "year": "2015",
+    "title": "2015年",
+    "tag": "N2 概要理解",
+    "entries": [
+      {
+        "key": "2015-07",
+        "label": "7月",
+        "href": "years/2015.html?year=2015-07",
+        "tone": "blue"
+      },
+      {
+        "key": "2015-12",
+        "label": "12月",
+        "href": "years/2015.html?year=2015-12",
+        "tone": "pink"
+      }
+    ]
+  },
+  {
+    "year": "2016",
+    "title": "2016年",
+    "tag": "N2 概要理解",
+    "entries": [
+      {
+        "key": "2016-07",
+        "label": "7月",
+        "href": "years/2016.html?year=2016-07",
+        "tone": "blue"
+      },
+      {
+        "key": "2016-12",
+        "label": "12月",
+        "href": "years/2016.html?year=2016-12",
+        "tone": "pink"
+      }
+    ]
+  },
+  {
+    "year": "2017",
+    "title": "2017年",
+    "tag": "N2 概要理解",
+    "entries": [
+      {
+        "key": "2017-07",
+        "label": "7月",
+        "href": "years/2017.html?year=2017-07",
+        "tone": "blue"
+      },
+      {
+        "key": "2017-12",
+        "label": "12月",
+        "href": "years/2017.html?year=2017-12",
+        "tone": "pink"
+      }
+    ]
+  },
+  {
+    "year": "2018",
+    "title": "2018年",
+    "tag": "N2 概要理解",
+    "entries": [
+      {
+        "key": "2018-07",
+        "label": "7月",
+        "href": "years/2018.html?year=2018-07",
+        "tone": "blue"
+      },
+      {
+        "key": "2018-12",
+        "label": "12月",
+        "href": "years/2018.html?year=2018-12",
+        "tone": "pink"
+      }
+    ]
+  },
+  {
+    "year": "2019",
+    "title": "2019年",
+    "tag": "N2 概要理解",
+    "entries": [
+      {
+        "key": "2019-07",
+        "label": "7月",
+        "href": "years/2019.html?year=2019-07",
+        "tone": "blue"
+      },
+      {
+        "key": "2019-12",
+        "label": "12月",
+        "href": "years/2019.html?year=2019-12",
+        "tone": "pink"
+      }
+    ]
+  },
+  {
+    "year": "2020",
+    "title": "2020年",
+    "tag": "N2 概要理解",
+    "entries": [
+      {
+        "key": "2020-12",
+        "label": "12月",
+        "href": "years/2020.html?year=2020-12",
+        "tone": "pink"
+      }
+    ]
+  }
+];
+const yearGrid = document.getElementById('yearGrid');
+const categoryGrid = document.getElementById('categoryGrid');
+const reviewPanel = document.getElementById('mistakeReview');
+const reviewGrid = document.getElementById('reviewGrid');
+const reviewStatus = document.getElementById('reviewStatus');
+const reviewTotal = document.getElementById('reviewTotal');
+const introText = document.getElementById('introText');
+const browseModeButtons = Array.from(document.querySelectorAll('[data-browse-mode]'));
+const randomRoot = document.getElementById('randomExamRoot');
 
-        <a href="../index.html" class="inline-link">返回题型等级</a>
-    </main>
+function escapeHtml(value) {
+  return String(value || '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
 
-    <script src="../../../../shared/back-navigation.js"></script>
-    <script>
-        window.bindHierarchicalBack({
-            selector: "[data-back-nav]",
-            fallback: "../index.html"
+function syncBrowseUrl() {
+  const params = new URLSearchParams();
+  if (currentBrowseMode === 'category') params.set('browse', 'category');
+  const nextUrl = params.toString() ? window.location.pathname + '?' + params.toString() : window.location.pathname;
+  try {
+    window.history.replaceState({ path: nextUrl }, '', nextUrl);
+  } catch (error) {
+    console.warn('History API is restricted in this environment.');
+  }
+}
+
+function getMistakes(key) {
+  if (!window.ListeningProgress || typeof window.ListeningProgress.getMistakeIds !== 'function') return [];
+  return window.ListeningProgress.getMistakeIds(LISTENING_TYPE, LISTENING_LEVEL, key) || [];
+}
+
+function renderYears() {
+  if (!YEAR_GROUPS.length) return;
+  const lastPractice = window.ListeningProgress && typeof window.ListeningProgress.getLastPractice === 'function'
+    ? window.ListeningProgress.getLastPractice(LISTENING_TYPE, LISTENING_LEVEL)
+    : '';
+  yearGrid.innerHTML = YEAR_GROUPS.map((group) => {
+    const lastTag = group.entries.some((entry) => entry.key === lastPractice)
+      ? '<span class="last-practice-tag">前回の続き</span>'
+      : '';
+    const buttons = group.entries.map((entry) => '<a href="' + entry.href + '" class="exam-btn btn-' + (entry.tone || 'blue') + '">' + entry.label + '</a>').join('');
+    return '<section class="year-card">'
+      + '<div class="year-info">'
+      + '<h2 class="year-title">' + group.title + ' <span class="lesson-tag">' + (group.tag || '') + '</span></h2>'
+      + '<div class="year-meta">' + lastTag + '</div>'
+      + '</div>'
+      + '<div class="exam-buttons">' + buttons + '</div>'
+      + '</section>';
+  }).join('');
+}
+
+function renderCategories() {
+  if (!window.ListeningCategorySystem) {
+    categoryGrid.innerHTML = '<div class="year-card">分类系统没有加载成功。</div>';
+    return;
+  }
+
+  const categories = window.ListeningCategorySystem.getCategories(CATEGORY_TYPE, CATEGORY_LEVEL);
+  if (categories.length === 0) {
+    categoryGrid.innerHTML = '<div class="year-card">当前还没有可用分类。</div>';
+    return;
+  }
+
+  categoryGrid.innerHTML = categories.map((category) => {
+    const lastQuestion = window.ListeningCategorySystem.getLastQuestion(CATEGORY_TYPE, CATEGORY_LEVEL, category.id);
+    const playableCount = category.itemCount || 0;
+    const missingCount = category.missingCount || 0;
+    const href = window.ListeningCategorySystem.buildCategoryPracticeUrl({
+      type: CATEGORY_TYPE,
+      level: CATEGORY_LEVEL,
+      categoryId: category.id
+    });
+    const lastTag = lastQuestion ? '<span class="last-practice-tag">前回の続き</span>' : '';
+    const pendingHtml = missingCount > 0
+      ? '<span class="category-count pending">待补 ' + missingCount + ' 题</span>'
+      : '';
+
+    return '<a href="' + escapeHtml(href) + '" class="year-card category-card">'
+      + '<div class="year-info">'
+      + '<h2 class="year-title"><span class="lesson-tag">分类</span>' + escapeHtml(category.name) + ' ' + lastTag + '</h2>'
+      + '<p class="category-description">' + escapeHtml(category.description || '按分类连续练习概要理解。') + '</p>'
+      + '<div class="category-meta">'
+      + '<span class="category-count">可练习 ' + playableCount + ' 题</span>'
+      + pendingHtml
+      + '</div>'
+      + '</div>'
+      + '</a>';
+  }).join('');
+}
+
+function updateBrowseMode() {
+  const isCategory = currentBrowseMode === 'category';
+  browseModeButtons.forEach((button) => {
+    button.classList.toggle('active', button.dataset.browseMode === currentBrowseMode);
+  });
+  yearGrid.hidden = isCategory;
+  categoryGrid.hidden = !isCategory;
+  reviewPanel.hidden = isCategory;
+  randomRoot.hidden = isCategory;
+  introText.textContent = isCategory
+    ? '✎ 練習する分類を選んでください'
+    : '✎ 練習する年度を選んでください';
+  if (isCategory) renderCategories();
+}
+
+function setBrowseMode(mode) {
+  currentBrowseMode = mode === 'category' ? 'category' : 'year';
+  updateBrowseMode();
+  syncBrowseUrl();
+}
+
+function renderReview() {
+  if (!YEAR_GROUPS.length) {
+    reviewGrid.innerHTML = '';
+    return;
+  }
+  const items = [];
+  YEAR_GROUPS.forEach((group) => {
+    group.entries.forEach((entry) => {
+      const mistakes = getMistakes(entry.key);
+      if (mistakes.length > 0) {
+        const sep = entry.href.includes('?') ? '&' : '?';
+        items.push({
+          href: entry.href + sep + 'mode=review',
+          label: group.title + ' ' + entry.label,
+          count: mistakes.length,
         });
-    </script>
+      }
+    });
+  });
+  const total = items.reduce((sum, item) => sum + item.count, 0);
+  reviewStatus.textContent = total > 0 ? '有待复习' : '暂无错题';
+  reviewStatus.classList.toggle('has-items', total > 0);
+  reviewTotal.textContent = total + ' 题';
+  reviewGrid.innerHTML = items.map((item) => '<a class="review-item" href="' + item.href + '"><span>' + item.label + '</span><span class="review-count">待复习 ' + item.count + ' 题</span></a>').join('');
+}
+
+renderYears();
+renderReview();
+if (window.ListeningRandomEntry) {
+  window.ListeningRandomEntry.mount({
+    mount: randomRoot,
+    type: 'overview_comprehension',
+    level: 'N2'
+  });
+}
+updateBrowseMode();
+browseModeButtons.forEach((button) => {
+  button.addEventListener('click', () => setBrowseMode(button.dataset.browseMode));
+});
+</script>
+<script src="../../../../shared/back-navigation.js"></script>
+<script>
+if (typeof window.bindHierarchicalBack === 'function') {
+  window.bindHierarchicalBack({ selector: '[data-back-nav]', fallback: '../../index.html' });
+}
+</script>
 </body>
 </html>

@@ -592,6 +592,7 @@
     </style>
         <link rel="stylesheet" href="../../../shared/audio-player-theme.css">
     <link rel="stylesheet" href="../../../../../shared/header-back-control.css">
+    <link rel="stylesheet" href="../../../shared/immediate-response-sketch.css">
 </head>
 <body>
 
@@ -681,6 +682,7 @@
 
     <script src="../../../shared/audio-player-theme.js"></script>
     <script src="../../../shared/listening-progress.js"></script>
+    <script src="../../../../../shared/practice-feedback-system.js"></script>
     <script>
         // --- Data Structure ---
         const examData = {
@@ -990,6 +992,7 @@
         let currentExamKey = "2017-07";
         let currentQuestionIndex = 0;
         let preferredMode = 'practice'; // Track user's preferred mode
+        const practiceFeedbackStats = { answeredIds: new Set(), correct: 0, summaryShown: false };
 
         // --- Initialization ---
         function init() {
@@ -1039,7 +1042,7 @@
             updateQuestionSelect();
 
             window.setupListeningPlayer({
-                subtitle: document.title.replace(/\s*\((N1|N2|N3)\)\s*$/, '')
+                subtitle: document.title.replace(/\s*\(N2\)\s*$/, '')
             });
 
             // 4. Initial Render
@@ -1156,6 +1159,38 @@
             const options = container.querySelectorAll('.options-list li');
             
             const isCorrect = question.options[index].correct;
+            if (window.N2PracticeFeedback) {
+                window.N2PracticeFeedback.trackAnswer({
+                    module: 'listening',
+                    subType: LISTENING_TYPE,
+                    mode: 'year-practice',
+                    level: LISTENING_LEVEL,
+                    isCorrect,
+                    questionId: question.id,
+                    questionIndex: currentQuestionIndex + 1,
+                    questionCount: examData[currentExamKey].questions.length
+                });
+            }
+            if (!practiceFeedbackStats.answeredIds.has(question.id)) {
+                practiceFeedbackStats.answeredIds.add(question.id);
+                if (isCorrect) {
+                    practiceFeedbackStats.correct += 1;
+                }
+                const answeredTotal = practiceFeedbackStats.answeredIds.size;
+                const questionTotal = examData[currentExamKey].questions.length;
+                if (answeredTotal >= questionTotal && !practiceFeedbackStats.summaryShown && window.N2PracticeFeedback) {
+                    practiceFeedbackStats.summaryShown = true;
+                    window.N2PracticeFeedback.trackSummary({
+                        module: 'listening',
+                        subType: LISTENING_TYPE,
+                        mode: 'year-practice',
+                        level: LISTENING_LEVEL,
+                        correct: practiceFeedbackStats.correct,
+                        total: questionTotal,
+                        accuracy: questionTotal ? practiceFeedbackStats.correct / questionTotal : 0
+                    });
+                }
+            }
             
             if (isCorrect) {
                 selected.classList.add('judged-correct');

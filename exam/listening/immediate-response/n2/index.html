@@ -3,35 +3,60 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>听力练习 - N2</title>
+    <title>即時応答 - N2 STAGE</title>
+    <!-- 使用与练习页一致的书面/印刷感字体组合 -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&family=Noto+Serif+JP:wght@400;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg-color: #fdfaf5;
-            --text-color: #2c2c2c;
-            --accent-color: #b33e3e;
-            --card-bg: #ffffff;
-            --shadow: 0 4px 12px rgba(0,0,0,0.05);
+            /* 纸张与铅笔色盘 */
+            --paper: #ffffff;          
+            --paper-light: #ffffff;    
+            
+            --graphite: #333333;       
+            --graphite-sub: #666666;   
+            --graphite-faint: #cccccc; 
+            
+            --red-pencil: #e64a4a;     
+            --red-pencil-light: rgba(230, 74, 74, 0.04); 
+
+            /* 即時応答专属水彩记号笔色系 */
+            --marker-mint: rgba(134, 239, 172, 0.35);    /* 薄荷绿 - 错题区/高亮 */
+            --marker-peach: rgba(253, 186, 116, 0.35);   /* 蜜桃橙 - 7月 */
+            --marker-lavender: rgba(196, 181, 253, 0.35);/* 薰衣草紫 - 12月 */
+
+            /* 铅笔排线背景 */
+            --hatching-graphite: repeating-linear-gradient(45deg, transparent, transparent 3px, rgba(51, 51, 51, 0.06) 3px, rgba(51, 51, 51, 0.06) 4px);
+
+            --transition: all 0.2s ease-out;
         }
 
         body {
-            font-family: "Hiragino Kaku Gothic ProN", "Hiragino Sans", "Meiryo", sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-color);
+            font-family: 'Noto Serif JP', 'Noto Sans JP', 'Noto Sans SC', serif;
+            background-color: var(--paper);
+            color: var(--graphite);
             margin: 0;
             padding: 0;
             min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
         }
 
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 0 20px 40px 20px;
+        /* 极弱的纸张噪点纹理 */
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.02'/%3E%3C/svg%3E");
+            z-index: -1;
+            pointer-events: none;
         }
 
-        /* Header */
+        /* ================= Header ================= */
         header {
             width: 100%;
-            padding: 15px 20px;
+            padding: 16px 20px;
             box-sizing: border-box;
             display: flex;
             align-items: center;
@@ -39,214 +64,676 @@
             position: sticky;
             top: 0;
             z-index: 100;
-            background-color: rgba(253, 250, 245, 0.95);
-            backdrop-filter: blur(8px);
-            border-bottom: 1px solid rgba(0,0,0,0.05);
-            margin-bottom: 40px;
+            background: rgba(255, 255, 255, 0.92);
+            backdrop-filter: blur(4px);
+            border-bottom: 1.5px solid var(--graphite);
+            border-bottom-left-radius: 50% 2px;
+            border-bottom-right-radius: 50% 3px;
+        }
+
+        .back-btn, .home-btn {
+            text-decoration: none;
+            color: var(--graphite);
+            font-size: 14px;
+            font-weight: 700;
+            padding: 4px 12px;
+            background: transparent;
+            border: 1.5px solid var(--graphite);
+            border-radius: 2px 8px 3px 6px / 6px 3px 8px 2px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: var(--transition);
+            letter-spacing: 0.05em;
+        }
+        
+        .back-btn:hover, .home-btn:hover { 
+            background: var(--marker-mint);
         }
 
         h1 {
             margin: 0;
             font-size: 18px;
             font-weight: 700;
-            color: var(--text-color);
+            color: var(--graphite);
             position: absolute;
             left: 50%;
             transform: translateX(-50%);
             white-space: nowrap;
+            letter-spacing: 0.1em;
+            display: flex;
+            align-items: center;
+        }
+        
+        h1 span {
+            color: var(--graphite);
+            background: transparent;
+            padding: 2px 8px;
+            font-size: 12px;
+            margin-left: 8px;
+            border: 1.5px solid var(--graphite);
+            border-radius: 2px 8px 2px 6px / 6px 2px 8px 2px;
+            font-family: 'Noto Sans JP', sans-serif;
         }
 
-        p.subtitle {
-            display: none; /* Hide subtitle in new compact header */
+        .container {
+            width: 95%;
+            max-width: 860px;
+            padding: 40px 0 80px 0;
+            display: flex;
+            flex-direction: column;
+            flex: 1;
         }
 
-        .year-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 20px;
+        /* 题型提示说明块 */
+        .intro-box {
+            text-align: center;
+            margin-bottom: 40px;
+            animation: fadeIn 0.4s ease-out;
+        }
+        
+        .intro-box p {
+            color: var(--graphite);
+            font-family: 'Noto Sans JP', sans-serif;
+            font-size: 15px;
+            font-weight: 700;
+            margin: 0;
+            /* 薄荷绿下划线特效 */
+            background: linear-gradient(transparent 50%, rgba(134, 239, 172, 0.4) 50%);
+            border-bottom: 1.5px dashed var(--graphite-faint);
+            display: inline-block;
+            padding: 4px 16px;
+            letter-spacing: 0.1em;
         }
 
-        .year-card {
-            background: var(--card-bg);
-            border-radius: 12px;
-            padding: 20px;
-            box-shadow: var(--shadow);
-            transition: transform 0.2s;
+        /* ================= 模式切换 (年份 / 分类) ================= */
+        .practice-toolbar {
+            display: flex;
+            justify-content: center;
+            margin: -12px 0 28px;
         }
 
-        .year-card:hover {
-            transform: translateY(-2px);
+        .browse-mode-toggle {
+            display: flex;
+            align-items: center;
+            gap: 12px;
         }
 
-        /* Review Section */
+        .browse-mode-btn {
+            border: none;
+            background: transparent;
+            color: var(--graphite-sub);
+            padding: 6px 12px;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            letter-spacing: 0.05em;
+            transition: var(--transition);
+            position: relative;
+            font-family: 'Noto Sans JP', sans-serif;
+        }
+
+        .browse-mode-btn:hover:not(.active) {
+            color: var(--graphite);
+        }
+
+        .browse-mode-btn.active {
+            color: var(--graphite);
+            z-index: 1;
+        }
+
+        .browse-mode-btn.active::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: var(--marker-mint);
+            border-radius: 2px 8px 2px 6px / 6px 2px 8px 2px;
+            z-index: -1;
+            transform: rotate(-1deg);
+        }
+
+        /* ================= 弱点特训 (错题区) ================= */
         .review-section {
-            background: var(--card-bg);
-            border-radius: 12px;
-            padding: 20px;
-            margin-bottom: 30px;
-            display: none; /* Hidden by default */
-            box-shadow: var(--shadow);
-            border: 1px solid rgba(0,0,0,0.05);
+            /* 薄荷绿水彩铺底 */
+            background: var(--marker-mint);
+            border: 1.5px solid var(--red-pencil);
+            border-radius: 3px 255px 5px 25px / 255px 3px 225px 5px;
+            padding: 24px;
+            margin-bottom: 40px;
+            position: relative;
+            animation: slideUp 0.4s ease-out;
         }
-        .review-section h2 {
-            margin: 0 0 15px 0;
-            color: var(--accent-color);
-            font-size: 18px;
+
+        .review-header {
             display: flex;
             align-items: center;
             gap: 10px;
-            border-bottom: 1px solid #eee;
-            padding-bottom: 10px;
+            margin-bottom: 24px;
         }
-        .review-grid {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-        }
-        .review-btn {
-            background: #f8f8f8;
-            color: #555;
-            padding: 10px 20px;
-            border-radius: 8px;
-            text-decoration: none;
-            font-size: 14px;
-            border: 1px solid #eee;
-            transition: all 0.2s;
+
+        .review-header h2 {
+            margin: 0;
+            font-size: 18px;
+            color: var(--red-pencil);
+            font-weight: 700;
+            letter-spacing: 0.05em;
             display: flex;
             align-items: center;
             gap: 8px;
-            font-weight: bold;
+            background: transparent;
+            padding: 4px 12px;
+            border-bottom: 1.5px solid var(--red-pencil);
         }
-        .review-btn:hover {
-            background: var(--accent-color);
-            color: white;
-            border-color: var(--accent-color);
-            transform: translateY(-2px);
-            box-shadow: 0 4px 10px rgba(179, 62, 62, 0.2);
+
+        .review-header h2 span.sub-title {
+            font-size: 13px; 
+            color: var(--red-pencil); 
+            opacity: 0.8;
+            font-family: 'Noto Sans JP', sans-serif;
         }
+
+        .review-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+
+        .review-item {
+            text-decoration: none;
+            background: #fff;
+            border: 1.5px solid var(--graphite);
+            border-radius: 2px 8px 3px 6px / 6px 3px 8px 2px;
+            padding: 8px 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: var(--transition);
+            color: var(--graphite);
+            font-weight: 700;
+            font-family: 'Noto Sans JP', sans-serif;
+        }
+
+        .review-item:hover {
+            background: var(--paper);
+            border-color: var(--red-pencil);
+            color: var(--red-pencil);
+        }
+
+        .review-year {
+            font-size: 15px;
+            letter-spacing: 0.05em;
+        }
+
         .review-count {
-            background: rgba(0,0,0,0.05);
+            color: var(--red-pencil);
+            font-size: 13px;
+            font-weight: 900;
             padding: 2px 6px;
-            border-radius: 4px;
-            font-size: 12px;
+            border: 1.5px solid var(--red-pencil);
+            border-radius: 50% 45% 55% 40% / 45% 55% 40% 50%;
         }
-        .review-btn:hover .review-count {
-            background: rgba(255,255,255,0.2);
-            color: white;
+
+        /* ================= 笔记本列表 (年份卡片) ================= */
+        .year-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+            gap: 24px;
+            animation: slideUp 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .year-card {
+            background: transparent;
+            border: 1.5px solid var(--graphite);
+            border-radius: 3px 255px 4px 25px / 255px 5px 225px 4px;
+            padding: 24px;
+            box-sizing: border-box;
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            transition: var(--transition);
+            position: relative;
+        }
+
+        .year-card:hover {
+            background: var(--hatching-graphite);
+        }
+
+        .category-card {
+            width: auto;
+            text-decoration: none;
+            color: var(--graphite);
+            cursor: pointer;
+            text-align: left;
+            font: inherit;
+        }
+
+        .category-card .year-info {
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+
+        .category-card .year-title {
+            flex-wrap: wrap;
+            line-height: 1.35;
+        }
+
+        .category-description {
+            margin: 0;
+            color: var(--graphite-sub);
+            font-family: 'Noto Sans JP', sans-serif;
+            font-size: 13px;
+            font-weight: 700;
+            line-height: 1.7;
+        }
+
+        .category-meta {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .category-count {
+            font-family: 'Noto Sans JP', sans-serif;
+            font-size: 12px;
+            font-weight: 900;
+            color: var(--graphite);
+            background: var(--marker-peach);
+            padding: 2px 8px;
+            border: 1.5px solid var(--graphite);
+            border-radius: 2px 8px 2px 6px / 6px 2px 8px 2px;
+            letter-spacing: 0.05em;
+        }
+
+        .category-count.pending {
+            color: var(--graphite-sub);
+            background: var(--marker-lavender);
+        }
+
+        .year-info {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            border-bottom: 1.5px dashed var(--graphite-faint);
+            padding-bottom: 16px;
         }
 
         .year-title {
-            font-size: 18px;
-            font-weight: bold;
-            margin-bottom: 15px;
-            padding-bottom: 10px;
-            border-bottom: 2px solid #f0f0f0;
-            color: var(--accent-color);
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--graphite);
+            letter-spacing: 0.05em;
+            margin: 0;
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 12px;
         }
-
-        .last-practice-tag {
+        
+        .lesson-tag {
+            font-family: 'Noto Sans JP', sans-serif;
             font-size: 12px;
-            background-color: #e3f2fd;
-            color: #1976d2;
-            padding: 2px 8px;
-            border-radius: 4px;
-            font-weight: normal;
+            color: var(--graphite-sub);
+            padding: 0;
+            letter-spacing: 0.1em;
+            font-weight: 700;
         }
 
+        /* 练习中标签 */
+        .last-practice-tag {
+            font-family: 'Noto Sans JP', sans-serif;
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--graphite);
+            background: var(--marker-mint);
+            padding: 2px 8px;
+            border: 1.5px solid var(--graphite);
+            border-radius: 2px 8px 2px 6px / 6px 2px 8px 2px;
+            letter-spacing: 0.05em;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        /* ================= 素描水彩风按钮 ================= */
         .exam-buttons {
-            display: flex;
-            gap: 10px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
         }
 
         .exam-btn {
-            flex: 1;
-            display: block;
             text-decoration: none;
-            text-align: center;
-            padding: 12px;
-            border-radius: 8px;
-            background-color: #f8f8f8;
-            color: #444;
-            font-weight: bold;
+            font-family: 'Noto Sans JP', sans-serif;
             font-size: 14px;
-            transition: all 0.2s;
-            border: 1px solid #eee;
+            font-weight: 700;
+            padding: 10px 16px;
+            border: 1.5px solid var(--graphite);
+            border-radius: 2px 8px 3px 6px / 6px 3px 8px 2px;
+            color: var(--graphite);
+            transition: var(--transition);
+            letter-spacing: 0.05em;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
         }
 
-        .exam-btn:hover {
-            background-color: var(--accent-color);
-            color: white;
-            border-color: var(--accent-color);
+        /* 7月 - 蜜桃橙 */
+        .btn-peach {
+            background: var(--marker-peach);
+        }
+        .btn-peach:hover {
+            filter: brightness(0.95);
+            border-style: dashed;
+        }
+        
+        /* 12月 - 薰衣草紫 */
+        .btn-lavender {
+            background: var(--marker-lavender);
+        }
+        .btn-lavender:hover {
+            filter: brightness(0.95);
+            border-style: dashed;
         }
 
+        .exam-btn:active {
+            transform: translate(1px, 1px);
+        }
+
+        /* 未解锁状态 */
         .exam-btn.disabled {
-            background-color: #f0f0f0;
-            color: #aaa;
+            border: 1.5px dashed var(--graphite-faint);
+            color: var(--graphite-faint);
             cursor: not-allowed;
-            pointer-events: none;
-            border-color: #eee;
+            background: transparent;
         }
-
-        .back-btn {
-            text-decoration: none;
-            color: var(--text-color);
-            font-size: 16px;
-            font-weight: bold;
-            opacity: 0.7;
-            transition: opacity 0.3s;
-            cursor: pointer;
-            z-index: 2;
-        }
-
-        .back-btn:hover {
-            opacity: 1;
+        .exam-btn.disabled:hover {
+            background: transparent;
+            color: var(--graphite-faint);
+            border-style: dashed;
+            filter: none;
         }
 
         @media (max-width: 600px) {
             .year-grid {
                 grid-template-columns: 1fr;
             }
+            .year-card {
+                padding: 20px;
+            }
+            header {
+                padding: 12px 16px;
+            }
         }
+    
+        /* 手机端深度适配 */
+        @media (max-width: 720px) {
+            header { padding: 12px 14px !important; }
+            .back-btn, .home-btn { font-size: 12px !important; padding: 6px 10px !important; gap: 4px !important; }
+            h1 { font-size: 16px !important; }
+            h1 span { font-size: 10px !important; padding: 2px 6px !important; }
+            .container { width: calc(100% - 32px) !important; padding: 20px 0 40px !important; }
+            
+            .intro-box { margin-bottom: 24px !important; }
+            .intro-box p { font-size: 13px !important; padding: 4px 12px !important; }
+            .practice-toolbar { margin: -6px 0 20px !important; }
+            .browse-mode-btn { font-size: 13px !important; padding: 6px 10px !important; }
+            
+            .review-section {
+                padding: 16px !important;
+                margin-bottom: 24px !important;
+            }
+            .review-header { margin-bottom: 16px !important; }
+            .review-header h2 { font-size: 16px !important; }
+            
+            .review-grid { gap: 12px !important; }
+            .review-item {
+                padding: 6px 12px !important;
+                gap: 8px !important;
+            }
+            .review-year { font-size: 13px !important; }
+            .review-count { font-size: 11px !important; }
+            
+            .year-grid { grid-template-columns: 1fr !important; gap: 16px !important; }
+            .year-card {
+                gap: 16px !important;
+                padding: 16px !important;
+            }
+            .year-info { gap: 8px !important; padding-bottom: 12px !important; }
+            .year-title { font-size: 18px !important; gap: 8px !important; margin-bottom: 0 !important; }
+            .lesson-tag { font-size: 11px !important; }
+            .last-practice-tag { font-size: 10px !important; padding: 2px 6px !important; }
+            
+            .exam-buttons { gap: 12px !important; }
+            .exam-btn {
+                padding: 8px 12px !important;
+                font-size: 13px !important;
+            }
+        }
+        
+        @media (max-width: 520px) {
+            header { padding: 10px 12px !important; }
+            .back-btn, .home-btn { font-size: 11px !important; padding: 4px 8px !important; }
+            h1 { font-size: 15px !important; }
+            .container { width: calc(100% - 24px) !important; padding: 16px 0 32px !important; }
+            
+            .intro-box p { font-size: 12px !important; }
+            .browse-mode-toggle { gap: 8px !important; }
+            .browse-mode-btn { font-size: 12px !important; padding: 5px 8px !important; }
+            .review-section { padding: 14px !important; }
+            .review-header h2 { font-size: 15px !important; }
+            .review-year { font-size: 12px !important; }
+            
+            .year-card { padding: 14px !important; }
+            .year-title { font-size: 17px !important; }
+            .exam-buttons { gap: 10px !important; }
+            .exam-btn { font-size: 12px !important; padding: 6px 10px !important;}
+        }
+
+        /* 折叠式错题复习面板 */
+        .review-panel {
+            display: block;
+        }
+
+        .review-panel > summary {
+            list-style: none;
+        }
+
+        .review-panel > summary::-webkit-details-marker {
+            display: none;
+        }
+
+        .review-summary {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            cursor: pointer;
+            margin: 0;
+            padding: 0;
+            border-bottom: 1.5px dashed transparent;
+        }
+
+        .review-panel[open] .review-summary {
+            padding-bottom: 12px;
+            margin-bottom: 14px;
+            border-bottom-color: var(--graphite-faint, rgba(51, 51, 51, 0.25));
+        }
+
+        .review-summary-title {
+            color: var(--graphite, #333);
+            font-size: 18px;
+            font-weight: 900;
+            letter-spacing: 0.04em;
+        }
+
+        .review-summary-tags {
+            display: inline-flex;
+            align-items: center;
+            justify-content: flex-end;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .review-status-pill,
+        .review-count-pill {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 28px;
+            box-sizing: border-box;
+            padding: 4px 9px;
+            border: 1.5px solid var(--graphite, #333);
+            border-radius: 2px 8px 3px 6px / 6px 3px 8px 2px;
+            background: #fff;
+            color: var(--graphite, #333);
+            font-size: 12px;
+            font-weight: 900;
+            line-height: 1;
+            white-space: nowrap;
+        }
+
+        .review-status-pill.has-items {
+            background: var(--marker-yellow, rgba(255, 213, 79, 0.28));
+            color: var(--red-pencil, #e64a4a);
+        }
+
+        .review-summary-action::after {
+            content: "展开";
+        }
+
+        .review-panel[open] .review-summary-action::after {
+            content: "收起";
+        }
+
+        .review-panel .review-grid[hidden] {
+            display: none !important;
+        }
+
+        .review-panel .review-item,
+        .review-panel .review-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        @media (max-width: 520px) {
+            .review-summary {
+                align-items: flex-start;
+            }
+
+            .review-summary-title {
+                font-size: 14px;
+            }
+
+            .review-summary-tags {
+                gap: 6px;
+            }
+
+            .review-status-pill,
+            .review-count-pill {
+                min-height: 24px;
+                padding: 3px 7px;
+                font-size: 10px;
+            }
+        }
+
+        [hidden],
+        .hidden {
+            display: none !important;
+        }
+
     </style>
-    <link rel="stylesheet" href="../../../../shared/header-back-control.css">
+    <link rel="stylesheet" href="../../../../shared/site-fonts.css">
+    <link rel="stylesheet" href="../../shared/listening-header.css">
 </head>
 <body>
 
     <header>
-        <a href="../index.html" class="back-btn header-back-control">← 戻る</a>
-        <h1>即時応答💬 (N2)</h1>
+        <a href="../index.html" class="back-btn" data-back-nav>
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+            戻る
+        </a>
+        <h1>即時応答 <span>N2 STAGE</span></h1>
+        <a href="../../../../index.html" class="home-btn">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+            ホーム
+        </a>
     </header>
 
     <div class="container">
-        <!-- Mistake Review Section -->
-        <div id="mistakeReview" class="review-section">
-            <h2>🐶 再来一次</h2>
-            <div class="review-grid" id="reviewGrid">
-                <!-- Populated by JS -->
+        
+        <div class="intro-box">
+            <p id="introText">✎ 練習するトラックを選んでください</p>
+        </div>
+
+        <div class="practice-toolbar">
+            <div class="browse-mode-toggle" aria-label="练习方式切换">
+                <button type="button" class="browse-mode-btn active" data-browse-mode="year">年度別演習</button>
+                <button type="button" class="browse-mode-btn" data-browse-mode="category">分類別演習</button>
             </div>
         </div>
 
         <div id="randomExamRoot"></div>
 
+        <!-- ================= 错题区 (复习笔记) ================= -->
+        <details id="mistakeReview" class="review-section review-panel">
+            <summary class="review-summary">
+                <span class="review-summary-title">✔ 错题复习</span>
+                <span class="review-summary-tags">
+                    <span id="reviewStatus" class="review-status-pill">暂无错题</span>
+                    <span id="reviewTotal" class="review-count-pill">0 题</span>
+                    <span class="review-count-pill review-summary-action" aria-hidden="true"></span>
+                </span>
+            </summary>
+            <div class="review-grid" id="reviewGrid">
+                <!-- Populated by JS -->
+            </div>
+        </details>
+
+        <!-- ================= 历年测试本列表 ================= -->
         <div class="year-grid" id="yearGrid">
+            <!-- Populated by JS -->
+        </div>
+
+        <!-- ================= 分类练习列表 ================= -->
+        <div class="year-grid" id="categoryGrid" hidden>
             <!-- Populated by JS -->
         </div>
     </div>
 
     <script src="../../shared/listening-progress.js"></script>
     <script src="../../shared/listening-question-pools.js"></script>
+    <script src="../../shared/listening-category-catalog.js"></script>
+    <script src="../../shared/listening-category-system.js"></script>
     <script src="../../shared/listening-random-entry.js"></script>
     <script>
         const LISTENING_TYPE = 'immediate-response';
         const LISTENING_LEVEL = 'n2';
+        const CATEGORY_TYPE = 'immediate_response';
+        const CATEGORY_LEVEL = 'N2';
         const startYear = 2010;
         const endYear = 2020;
         const grid = document.getElementById('yearGrid');
-        const section = document.getElementById('mistakeReview');
+        const categoryGrid = document.getElementById('categoryGrid');
+        const randomRoot = document.getElementById('randomExamRoot');
         const reviewGrid = document.getElementById('reviewGrid');
+        const section = document.getElementById('mistakeReview');
+        const introText = document.getElementById('introText');
+        const browseModeButtons = Array.from(document.querySelectorAll('[data-browse-mode]'));
+        const initialParams = new URLSearchParams(window.location.search);
+        let currentBrowseMode = initialParams.get('browse') === 'category' ? 'category' : 'year';
 
         const fileMap = {
             '2010': 'years/j_2010.html',
@@ -286,92 +773,196 @@
             '2020-12': 'years/j_2020.html?year=2020-12'
         };
 
-        const lastPractice = window.ListeningProgress
-            ? window.ListeningProgress.getLastPractice(LISTENING_TYPE, LISTENING_LEVEL)
-            : localStorage.getItem('last_n2_practice');
+        const lastPractice = window.ListeningProgress ? window.ListeningProgress.getLastPractice(LISTENING_TYPE, LISTENING_LEVEL) : null;
 
-        // --- Load Mistake Review Data ---
+        function escapeHtml(value) {
+            return String(value || '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        }
+
+        function syncBrowseUrl() {
+            const params = new URLSearchParams();
+            if (currentBrowseMode === 'category') {
+                params.set('browse', 'category');
+            }
+            const nextUrl = params.toString() ? `${window.location.pathname}?${params.toString()}` : window.location.pathname;
+            try {
+                window.history.replaceState({ path: nextUrl }, '', nextUrl);
+            } catch (error) {
+                console.warn('History API is restricted in this environment.');
+            }
+        }
+
+        function renderCategories() {
+            if (!window.ListeningCategorySystem) {
+                categoryGrid.innerHTML = '<div class="year-card">分类系统没有加载成功。</div>';
+                return;
+            }
+
+            const categories = window.ListeningCategorySystem.getCategories(CATEGORY_TYPE, CATEGORY_LEVEL);
+            if (categories.length === 0) {
+                categoryGrid.innerHTML = '<div class="year-card">当前还没有可用分类。</div>';
+                return;
+            }
+
+            categoryGrid.innerHTML = categories.map((category) => {
+                const lastQuestion = window.ListeningCategorySystem.getLastQuestion(CATEGORY_TYPE, CATEGORY_LEVEL, category.id);
+                const playableCount = category.itemCount || 0;
+                const missingCount = category.missingCount || 0;
+                const href = window.ListeningCategorySystem.buildCategoryPracticeUrl({
+                    type: CATEGORY_TYPE,
+                    level: CATEGORY_LEVEL,
+                    categoryId: category.id
+                });
+                const tagHtml = lastQuestion ? '<span class="last-practice-tag">▶ 練習中</span>' : '';
+                const pendingHtml = missingCount > 0
+                    ? `<span class="category-count pending">待补 ${missingCount} 题</span>`
+                    : '';
+
+                return `
+                    <a href="${escapeHtml(href)}" class="year-card category-card">
+                        <div class="year-info">
+                            <div class="year-title">
+                                <span class="lesson-tag">分類</span>
+                                ${escapeHtml(category.name)}
+                                ${tagHtml}
+                            </div>
+                            <p class="category-description">${escapeHtml(category.description || '按分类连续练习即时应答。')}</p>
+                            <div class="category-meta">
+                                <span class="category-count">可练习 ${playableCount} 题</span>
+                                ${pendingHtml}
+                            </div>
+                        </div>
+                    </a>
+                `;
+            }).join('');
+        }
+
+        function updateBrowseMode() {
+            const isCategory = currentBrowseMode === 'category';
+            browseModeButtons.forEach((button) => {
+                button.classList.toggle('active', button.dataset.browseMode === currentBrowseMode);
+            });
+            randomRoot.hidden = isCategory;
+            section.hidden = isCategory;
+            grid.hidden = isCategory;
+            categoryGrid.hidden = !isCategory;
+            introText.textContent = isCategory
+                ? '✎ 練習する分類を選んでください'
+                : '✎ 練習するトラックを選んでください';
+            if (isCategory) {
+                renderCategories();
+            }
+        }
+
+        function setBrowseMode(mode) {
+            currentBrowseMode = mode === 'category' ? 'category' : 'year';
+            updateBrowseMode();
+            syncBrowseUrl();
+        }
+
         function loadMistakes() {
             reviewGrid.innerHTML = '';
 
             const reviewItems = Object.keys(available)
                 .map((examKey) => {
                     const year = examKey.split('-')[0];
-                    const count = window.ListeningProgress
-                        ? window.ListeningProgress.getMistakeIds(LISTENING_TYPE, LISTENING_LEVEL, examKey).length
-                        : (() => {
-                            const raw = localStorage.getItem(`jlpt_marks_${examKey}`);
-                            const marks = raw ? JSON.parse(raw) : [];
-                            return Array.isArray(marks) ? marks.length : 0;
-                        })();
-                    return { examKey, year, count };
+                    return {
+                        examKey,
+                        year,
+                        count: window.ListeningProgress ? window.ListeningProgress.getMistakeIds(
+                            LISTENING_TYPE,
+                            LISTENING_LEVEL,
+                            examKey
+                        ).length : 0
+                    };
                 })
                 .filter((item) => item.count > 0 && fileMap[item.year])
                 .sort((a, b) => b.examKey.localeCompare(a.examKey));
 
-            if (reviewItems.length === 0) {
-                section.style.display = 'none';
-                return;
+            const totalCount = reviewItems.reduce((sum, item) => sum + item.count, 0);
+            const reviewStatus = document.getElementById('reviewStatus');
+            const reviewTotal = document.getElementById('reviewTotal');
+
+            if (reviewStatus) {
+                reviewStatus.textContent = totalCount > 0 ? '有待复习' : '暂无错题';
+                reviewStatus.classList.toggle('has-items', totalCount > 0);
             }
 
-            reviewItems.forEach(item => {
+            if (reviewTotal) {
+                reviewTotal.textContent = `${totalCount} 题`;
+            }
+
+            reviewGrid.hidden = reviewItems.length === 0;
+
+            reviewItems.forEach((item) => {
                 const btn = document.createElement('a');
-                btn.className = 'review-btn';
+                btn.className = 'review-item';
                 btn.href = `${fileMap[item.year]}?year=${item.examKey}&mode=review`;
                 btn.innerHTML = `
-                    <span>${item.examKey}</span>
-                    <span class="review-count">${item.count}问</span>
+                    <span class="review-year">${item.examKey}</span>
+                    <span class="review-count">待复习 ${item.count} 题</span>
                 `;
                 reviewGrid.appendChild(btn);
             });
 
             section.style.display = 'block';
         }
+        
         loadMistakes();
 
         if (window.ListeningRandomEntry) {
             window.ListeningRandomEntry.mount({
-                mount: document.getElementById('randomExamRoot'),
+                mount: randomRoot,
                 type: 'immediate_response',
                 level: 'N2'
             });
         }
 
-        // Generate cards in chronological order (oldest first)
         for (let year = startYear; year <= endYear; year++) {
             const card = document.createElement('div');
             card.className = 'year-card';
 
             const julyKey = `${year}-07`;
             const decKey = `${year}-12`;
-            
-            // Check if this year contains the last practice session
+
             let tagHtml = '';
             if (lastPractice === julyKey || lastPractice === decKey) {
-                tagHtml = '<span class="last-practice-tag">前回練習</span>';
+                tagHtml = '<span class="last-practice-tag">▶ 練習中</span>';
             }
 
-            const getBtnHtml = (key, label) => {
+            const getBtnHtml = (key, label, colorClass) => {
                 if (available[key]) {
-                    return `<a href="${available[key]}" class="exam-btn">${label}</a>`;
-                } else {
-                    return `<span class="exam-btn disabled">${label}</span>`;
+                    return `<a href="${available[key]}&mode=study" class="exam-btn ${colorClass}">${label} 演習</a>`;
                 }
+                return `<span class="exam-btn disabled">${label} 準備中</span>`;
             };
-            
+
             card.innerHTML = `
-                <div class="year-title">
-                    ${year}年
-                    ${tagHtml}
+                <div class="year-info">
+                    <div class="year-title">
+                        <span class="lesson-tag">トラック</span> ${year}年
+                        ${tagHtml}
+                    </div>
                 </div>
                 <div class="exam-buttons">
-                    ${getBtnHtml(julyKey, '7月')}
-                    ${getBtnHtml(decKey, '12月')}
+                    ${getBtnHtml(julyKey, '7月', 'btn-peach')}
+                    ${getBtnHtml(decKey, '12月', 'btn-lavender')}
                 </div>
             `;
-            
+
             grid.appendChild(card);
         }
+
+        browseModeButtons.forEach((button) => {
+            button.addEventListener('click', () => setBrowseMode(button.dataset.browseMode));
+        });
+
+        updateBrowseMode();
     </script>
 </body>
 </html>

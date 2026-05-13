@@ -340,8 +340,20 @@
         const normalizedLevel = normalizeLevel(level);
         if (normalizedType === 'task_comprehension') {
             return {
-                questionCount: 6,
+                questionCount: 5,
                 autoAdvanceSeconds: 5
+            };
+        }
+        if (normalizedType === 'point_comprehension') {
+            return {
+                questionCount: 6,
+                autoAdvanceSeconds: 3
+            };
+        }
+        if (normalizedType === 'overview_comprehension') {
+            return {
+                questionCount: 5,
+                autoAdvanceSeconds: 3
             };
         }
         if (normalizedType === 'immediate_response' && normalizedLevel === 'N3') {

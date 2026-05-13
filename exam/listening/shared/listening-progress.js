@@ -35,10 +35,14 @@
         const seen = new Set();
 
         value.forEach((item) => {
-            const numeric = Number.parseInt(item, 10);
-            if (Number.isInteger(numeric) && numeric > 0 && !seen.has(numeric)) {
-                seen.add(numeric);
-                result.push(numeric);
+            const text = String(item || '').trim();
+            if (!text) return;
+
+            const normalized = /^\d+$/.test(text) ? Number.parseInt(text, 10) : text;
+            const signature = String(normalized);
+            if (signature && normalized && !seen.has(signature)) {
+                seen.add(signature);
+                result.push(normalized);
             }
         });
 

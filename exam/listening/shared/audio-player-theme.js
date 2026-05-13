@@ -123,7 +123,7 @@
         const refs = getRefs();
         const subtitle = options && typeof options.subtitle === 'string'
             ? options.subtitle
-            : document.title.replace(/\s*\((N1|N2|N3)\)\s*$/, '');
+            : document.title.replace(/\s*\((N2|N3)\)\s*$/, '');
         const skipSeconds = options && Number.isFinite(options.skipSeconds) && options.skipSeconds > 0
             ? options.skipSeconds
             : DEFAULT_SKIP_SECONDS;

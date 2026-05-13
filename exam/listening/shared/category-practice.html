@@ -1,0 +1,2014 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>听力分类练习</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&family=Noto+Serif+JP:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../../../shared/site-fonts.css">
+    <style>
+        :root {
+            --paper: #ffffff;
+            --graphite: #333333;
+            --graphite-sub: #666666;
+            --graphite-faint: #cccccc;
+            --red-pencil: #e64a4a;
+            --marker-mint: rgba(134, 239, 172, 0.35);
+            --marker-peach: rgba(253, 186, 116, 0.35);
+            --marker-lavender: rgba(196, 181, 253, 0.35);
+            --marker-blue: rgba(129, 212, 250, 0.35);
+            --marker-pink: rgba(244, 143, 177, 0.35);
+            --marker-yellow: rgba(255, 213, 79, 0.4);
+            --hatching-graphite: repeating-linear-gradient(45deg, transparent, transparent 3px, rgba(51, 51, 51, 0.06) 3px, rgba(51, 51, 51, 0.06) 4px);
+            --transition: all 0.2s ease-out;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            background: var(--paper);
+            color: var(--graphite);
+            font-family: 'Noto Serif JP', 'Noto Sans JP', 'Noto Sans SC', serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            inset: 0;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.02'/%3E%3C/svg%3E");
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        header {
+            width: 100%;
+            padding: 16px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: rgba(255, 255, 255, 0.92);
+            backdrop-filter: blur(4px);
+            border-bottom: 1.5px solid var(--graphite);
+            border-bottom-left-radius: 50% 2px;
+            border-bottom-right-radius: 50% 3px;
+        }
+
+        .back-btn,
+        .home-btn,
+        .action-btn {
+            text-decoration: none;
+            color: var(--graphite);
+            font-size: 14px;
+            font-weight: 700;
+            padding: 7px 13px;
+            background: transparent;
+            border: 1.5px solid var(--graphite);
+            border-radius: 2px 8px 3px 6px / 6px 3px 8px 2px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            transition: var(--transition);
+            letter-spacing: 0.05em;
+            font-family: 'Noto Sans JP', sans-serif;
+            cursor: pointer;
+        }
+
+        .back-btn:hover,
+        .home-btn:hover,
+        .action-btn:hover { background: var(--marker-mint); }
+
+        .action-btn:disabled {
+            border-color: var(--graphite-faint);
+            color: var(--graphite-faint);
+            border-style: dashed;
+            cursor: not-allowed;
+            background: transparent;
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 18px;
+            font-weight: 700;
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            white-space: nowrap;
+            letter-spacing: 0.1em;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        h1 span {
+            padding: 2px 8px;
+            font-size: 12px;
+            border: 1.5px solid var(--graphite);
+            border-radius: 2px 8px 2px 6px / 6px 2px 8px 2px;
+            font-family: 'Noto Sans JP', sans-serif;
+        }
+
+        main {
+            width: min(95%, 920px);
+            padding: 34px 0 70px;
+            display: flex;
+            flex-direction: column;
+            gap: 22px;
+        }
+
+        .meta-card,
+        .practice-card,
+        .result-panel,
+        .error-card {
+            border: 1.5px solid var(--graphite);
+            border-radius: 3px 255px 4px 25px / 255px 5px 225px 4px;
+            background: transparent;
+            padding: 22px 24px;
+            animation: slideUp 0.35s ease-out;
+        }
+
+        .meta-card {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        .meta-title {
+            margin: 0 0 6px;
+            font-size: 22px;
+            letter-spacing: 0.06em;
+        }
+
+        .meta-copy {
+            margin: 0;
+            color: var(--graphite-sub);
+            font-family: 'Noto Sans JP', sans-serif;
+            font-size: 13px;
+            line-height: 1.7;
+            font-weight: 700;
+        }
+
+        .pill-row {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .pill {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 28px;
+            padding: 4px 9px;
+            border: 1.5px solid var(--graphite);
+            border-radius: 2px 8px 3px 6px / 6px 3px 8px 2px;
+            background: #fff;
+            color: var(--graphite);
+            font-family: 'Noto Sans JP', sans-serif;
+            font-size: 12px;
+            font-weight: 900;
+            line-height: 1;
+            white-space: nowrap;
+        }
+
+        .pill.is-source { background: var(--marker-lavender); }
+        .pill.is-count { background: var(--marker-peach); }
+
+        body.is-task-comprehension .meta-card ,
+        body.is-point-comprehension .meta-card ,
+        body.is-integrated-comprehension .meta-card {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) auto;
+            grid-template-areas:
+                "title source"
+                "copy count";
+            align-items: center;
+            column-gap: 16px;
+            row-gap: 10px;
+        }
+
+        body.is-task-comprehension .meta-text,
+        body.is-point-comprehension .meta-text,
+        body.is-integrated-comprehension .meta-text,
+        body.is-task-comprehension .pill-row ,
+        body.is-point-comprehension .pill-row ,
+        body.is-integrated-comprehension .pill-row {
+            display: contents;
+        }
+
+        body.is-task-comprehension .pill-row .pill ,
+        body.is-point-comprehension .pill-row .pill ,
+        body.is-integrated-comprehension .pill-row .pill {
+            min-height: 30px;
+            padding: 5px 10px;
+            font-size: 12px;
+        }
+
+        body.is-task-comprehension .meta-title ,
+        body.is-point-comprehension .meta-title ,
+        body.is-integrated-comprehension .meta-title {
+            grid-area: title;
+            margin: 0;
+        }
+
+        body.is-task-comprehension .meta-copy ,
+        body.is-point-comprehension .meta-copy ,
+        body.is-integrated-comprehension .meta-copy {
+            grid-area: copy;
+            margin: 0;
+        }
+
+        body.is-task-comprehension #sourceBadge,
+        body.is-point-comprehension #sourceBadge,
+        body.is-integrated-comprehension #sourceBadge,
+        body.is-task-comprehension #countBadge ,
+        body.is-point-comprehension #countBadge ,
+        body.is-integrated-comprehension #countBadge {
+            justify-self: end;
+        }
+
+        body.is-task-comprehension #sourceBadge ,
+        body.is-point-comprehension #sourceBadge ,
+        body.is-integrated-comprehension #sourceBadge {
+            grid-area: source;
+        }
+
+        body.is-task-comprehension #countBadge ,
+        body.is-point-comprehension #countBadge ,
+        body.is-integrated-comprehension #countBadge {
+            grid-area: count;
+        }
+
+        body.is-task-comprehension .pill.is-count ,
+        body.is-point-comprehension .pill.is-count ,
+        body.is-integrated-comprehension .pill.is-count {
+            background: #fff;
+        }
+
+        body.is-task-comprehension #questionCounter ,
+        body.is-point-comprehension #questionCounter ,
+        body.is-integrated-comprehension #questionCounter {
+            display: none;
+        }
+
+        body.is-task-comprehension .question-topline ,
+        body.is-point-comprehension .question-topline ,
+        body.is-integrated-comprehension .question-topline {
+            display: block;
+        }
+
+        .question-topline {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            flex-wrap: wrap;
+            padding-bottom: 16px;
+            border-bottom: 1.5px dashed var(--graphite-faint);
+        }
+
+        .question-title {
+            margin: 0;
+            font-size: 20px;
+            letter-spacing: 0.06em;
+        }
+
+        .audio-box {
+            margin: 20px 0;
+            padding: 14px;
+            border: 1.5px solid var(--graphite);
+            border-radius: 2px 8px 3px 6px / 6px 3px 8px 2px;
+            background: var(--marker-mint);
+        }
+
+        audio {
+            display: block;
+            width: 100%;
+        }
+
+        .status-box {
+            margin: 0 0 16px;
+            padding: 10px 14px;
+            border: 1.5px dashed var(--graphite-faint);
+            border-radius: 2px 8px 3px 6px / 6px 3px 8px 2px;
+            color: var(--graphite-sub);
+            font-family: 'Noto Sans JP', sans-serif;
+            font-size: 13px;
+            font-weight: 700;
+            line-height: 1.6;
+        }
+
+        .status-box.is-ready { background: rgba(129, 212, 250, 0.16); color: var(--graphite); }
+        .status-box.is-correct { background: var(--marker-mint); color: var(--graphite); }
+        .status-box.is-wrong { background: var(--marker-pink); color: var(--graphite); }
+
+        .options-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 14px;
+        }
+
+        .options-list.is-paired {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .paired-question-block {
+            list-style: none;
+            margin: 0;
+            padding: 14px;
+            border: 1.5px dashed var(--graphite-faint);
+            border-radius: 3px 18px 4px 16px / 16px 4px 18px 3px;
+            background: rgba(255, 255, 255, 0.72);
+        }
+
+        .paired-question-heading {
+            margin: 0 0 12px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            color: var(--graphite);
+            font-family: 'Noto Sans JP', 'Noto Sans SC', sans-serif;
+            font-size: 14px;
+            font-weight: 900;
+            line-height: 1.45;
+        }
+
+        .paired-question-heading span {
+            color: var(--graphite-sub);
+            font-size: 12px;
+            font-weight: 800;
+        }
+
+        .paired-options-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 10px;
+        }
+
+        .paired-analysis-block {
+            border-bottom: 1.5px dashed var(--graphite-faint);
+        }
+
+        .paired-analysis-block:last-child {
+            border-bottom: 0;
+        }
+
+        .paired-analysis-label {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            margin: 0 0 10px;
+            padding: 2px 8px;
+            border: 1.5px solid var(--graphite);
+            border-radius: 2px 8px 2px 6px / 6px 2px 8px 2px;
+            background: #fff;
+            font-family: 'Noto Sans JP', 'Noto Sans SC', sans-serif;
+            font-size: 12px;
+            font-weight: 900;
+            line-height: 1.4;
+        }
+
+        .paired-analysis-label.is-correct {
+            background: var(--marker-mint);
+        }
+
+        .paired-analysis-label.is-wrong {
+            background: var(--marker-pink);
+        }
+
+        .option-item {
+            min-height: 88px;
+            border: 1.5px solid var(--graphite);
+            border-radius: 2px 8px 3px 6px / 6px 3px 8px 2px;
+            background: transparent;
+            cursor: pointer;
+            transition: var(--transition);
+            padding: 14px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .option-item:hover { background: var(--hatching-graphite); }
+        .option-item.is-selected { background: var(--marker-blue); }
+        .option-item.is-correct { background: var(--marker-mint); }
+        .option-item.is-wrong { background: var(--marker-pink); }
+        .option-item.is-locked { cursor: default; }
+
+        .option-index {
+            flex: 0 0 auto;
+            width: 34px;
+            height: 34px;
+            border: 1.5px solid var(--graphite);
+            border-radius: 50% 45% 55% 40% / 45% 55% 40% 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            font-weight: 900;
+            font-family: 'Noto Sans JP', sans-serif;
+            background: #fff;
+        }
+
+        .option-placeholder {
+            font-family: 'Noto Sans JP', sans-serif;
+            font-size: 13px;
+            font-weight: 900;
+            letter-spacing: 0.08em;
+            color: var(--graphite-sub);
+        }
+
+        .option-body {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            min-width: 0;
+        }
+
+        .option-text {
+            font-size: 15px;
+            line-height: 1.7;
+            font-weight: 700;
+        }
+
+        .option-translation,
+        .dialogue-translation {
+            color: var(--graphite-sub);
+            font-family: 'Noto Sans JP', sans-serif;
+            font-size: 12px;
+            line-height: 1.65;
+            font-weight: 700;
+        }
+
+        body.is-overview-comprehension .options-list {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 12px;
+        }
+
+        body.is-overview-comprehension .option-item {
+            min-height: 64px;
+            justify-content: flex-start;
+            padding: 12px;
+        }
+
+        body.is-overview-comprehension .option-index {
+            width: 38px;
+            height: 38px;
+            font-size: 17px;
+            background: #fff;
+        }
+
+        body.is-overview-comprehension .option-item.is-selected {
+            transform: translate(-1px, -1px);
+            box-shadow: 3px 3px 0 rgba(51, 51, 51, 0.12);
+        }
+
+        body.is-overview-comprehension .option-item.is-locked {
+            min-height: 72px;
+            justify-content: flex-start;
+        }
+
+        body.is-overview-comprehension .option-item.is-locked .option-index {
+            width: 32px;
+            height: 32px;
+            font-size: 15px;
+        }
+
+        body.is-overview-comprehension .option-text {
+            font-family: 'Noto Sans JP', 'Noto Sans SC', sans-serif;
+            font-size: 13px;
+            line-height: 1.55;
+            letter-spacing: 0.01em;
+            font-weight: 800;
+        }
+
+        body.is-overview-comprehension .option-translation {
+            font-size: 11px;
+            line-height: 1.5;
+        }
+
+        body.is-task-comprehension .question-title ,
+        body.is-point-comprehension .question-title ,
+        body.is-integrated-comprehension .question-title {
+            font-family: 'Noto Sans JP', 'Noto Sans SC', sans-serif;
+            font-size: 17px;
+            line-height: 1.55;
+            letter-spacing: 0.025em;
+            font-weight: 800;
+        }
+
+        body.is-task-comprehension .options-list ,
+        body.is-point-comprehension .options-list ,
+        body.is-integrated-comprehension .options-list {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 12px;
+        }
+
+        body.is-task-comprehension .option-item ,
+        body.is-point-comprehension .option-item ,
+        body.is-integrated-comprehension .option-item {
+            min-height: 66px;
+            padding: 10px 12px;
+            gap: 10px;
+        }
+
+        body.is-task-comprehension .option-index ,
+        body.is-point-comprehension .option-index ,
+        body.is-integrated-comprehension .option-index {
+            width: 30px;
+            height: 30px;
+            font-size: 14px;
+        }
+
+        body.is-task-comprehension .option-text ,
+        body.is-point-comprehension .option-text ,
+        body.is-integrated-comprehension .option-text {
+            font-family: 'Noto Sans JP', 'Noto Sans SC', sans-serif;
+            font-size: 13px;
+            line-height: 1.55;
+            letter-spacing: 0.01em;
+            font-weight: 800;
+        }
+
+        body.is-task-comprehension .option-translation ,
+        body.is-point-comprehension .option-translation ,
+        body.is-integrated-comprehension .option-translation {
+            font-size: 11px;
+            line-height: 1.5;
+        }
+
+        .actions-row {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-top: 18px;
+        }
+
+        .nav-actions,
+        .answer-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .result-panel[hidden] { display: none; }
+
+        .result-panel {
+            background: rgba(255, 255, 255, 0.7);
+        }
+
+        .result-title {
+            margin: 0 0 14px;
+            font-size: 18px;
+            letter-spacing: 0.06em;
+        }
+
+        .dialogue-block {
+            border: 1.5px dashed var(--graphite-faint);
+            border-radius: 2px 8px 3px 6px / 6px 3px 8px 2px;
+            padding: 14px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            line-height: 1.85;
+            font-size: 15px;
+        }
+
+        .dialogue-block-section {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        body.is-overview-comprehension .dialogue-block {
+            gap: 0;
+            padding: 0 0 16px;
+            border: 1.5px solid var(--graphite);
+            border-radius: 2px 255px 3px 25px / 255px 5px 225px 3px;
+            background: transparent;
+            font-family: 'Noto Sans JP', 'Noto Sans SC', sans-serif;
+            font-size: 16px;
+            line-height: 1.8;
+        }
+
+        body.is-overview-comprehension .question-box {
+            position: relative;
+            padding: 34px 22px 16px;
+            border-bottom: 1.5px dashed var(--graphite);
+            background-color: var(--marker-blue);
+            color: var(--graphite);
+            font-size: 16px;
+            font-weight: 700;
+            line-height: 1.8;
+        }
+
+        body.is-overview-comprehension .question-box::before {
+            content: '問題';
+            position: absolute;
+            top: 8px;
+            left: 18px;
+            padding: 2px 10px;
+            border: 1.5px solid var(--graphite);
+            border-radius: 50% 10% 50% 10% / 10% 50% 10% 50%;
+            background: var(--paper);
+            color: var(--graphite);
+            font-family: 'Noto Sans JP', sans-serif;
+            font-size: 12px;
+            font-weight: 900;
+            letter-spacing: 0.04em;
+        }
+
+        body.is-overview-comprehension .conversation-box {
+            padding: 28px 22px 4px;
+            color: var(--graphite);
+            font-size: 16px;
+            font-weight: 500;
+            line-height: 1.8;
+        }
+
+        body.is-overview-comprehension .conversation-line {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 18px;
+        }
+
+        body.is-overview-comprehension .speaker-name {
+            flex: 0 0 auto;
+            margin-right: 12px;
+            padding: 2px 8px;
+            border: 1.5px solid var(--graphite);
+            border-radius: 2px 6px 3px 5px / 5px 3px 6px 2px;
+            background-color: var(--marker-yellow);
+            color: var(--graphite);
+            font-size: 13px;
+            font-weight: 900;
+            line-height: 1.6;
+            white-space: nowrap;
+        }
+
+        body.is-overview-comprehension .speaker-text {
+            flex: 1;
+            min-width: 0;
+        }
+
+        body.is-overview-comprehension .translation {
+            display: block;
+            margin-top: 8px;
+            padding-top: 8px;
+            border-top: 1.5px dashed var(--graphite-faint);
+            color: var(--graphite-sub);
+            font-family: 'Noto Sans SC', 'Noto Sans JP', sans-serif;
+            font-size: 13px;
+            line-height: 1.6;
+            font-weight: 700;
+        }
+
+        body.is-overview-comprehension .highlight-correct {
+            background-color: var(--marker-mint);
+            color: var(--graphite);
+            padding: 2px 6px;
+            border-bottom: 2px solid var(--graphite);
+            font-weight: 700;
+        }
+
+        body.is-overview-comprehension .highlight-wrong {
+            background-color: var(--marker-pink);
+            color: var(--graphite);
+            padding: 2px 6px;
+            border-bottom: 2px dashed var(--graphite);
+            font-weight: 700;
+        }
+
+        body.is-overview-comprehension .opt-tag {
+            display: inline-block;
+            width: 18px;
+            height: 18px;
+            margin-right: 6px;
+            border: 1.5px solid var(--graphite);
+            border-radius: 50% 45% 55% 40% / 45% 55% 40% 50%;
+            background: #fff;
+            color: var(--graphite);
+            font-family: 'Noto Sans JP', sans-serif;
+            font-size: 11px;
+            font-weight: 900;
+            line-height: 16px;
+            text-align: center;
+            vertical-align: middle;
+        }
+
+        body.is-task-comprehension .dialogue-block ,
+        body.is-point-comprehension .dialogue-block ,
+        body.is-integrated-comprehension .dialogue-block {
+            gap: 0;
+            padding: 0 0 16px;
+            border: 1.5px solid var(--graphite);
+            border-radius: 2px 255px 3px 25px / 255px 5px 225px 3px;
+            background: transparent;
+            font-family: 'Noto Sans JP', 'Noto Sans SC', sans-serif;
+            font-size: 16px;
+            line-height: 1.8;
+        }
+
+        body.is-task-comprehension .question-box ,
+        body.is-point-comprehension .question-box ,
+        body.is-integrated-comprehension .question-box {
+            position: relative;
+            padding: 34px 22px 16px;
+            border-bottom: 1.5px dashed var(--graphite);
+            background-color: var(--marker-blue);
+            color: var(--graphite);
+            font-size: 16px;
+            font-weight: 700;
+            line-height: 1.8;
+        }
+
+        body.is-task-comprehension .question-box::before ,
+        body.is-point-comprehension .question-box::before ,
+        body.is-integrated-comprehension .question-box::before {
+            content: '問題';
+            position: absolute;
+            top: 8px;
+            left: 18px;
+            padding: 2px 10px;
+            border: 1.5px solid var(--graphite);
+            border-radius: 50% 10% 50% 10% / 10% 50% 10% 50%;
+            background: var(--paper);
+            color: var(--graphite);
+            font-family: 'Noto Sans JP', sans-serif;
+            font-size: 12px;
+            font-weight: 900;
+            letter-spacing: 0.04em;
+        }
+
+        body.is-task-comprehension .conversation-box ,
+        body.is-point-comprehension .conversation-box ,
+        body.is-integrated-comprehension .conversation-box {
+            padding: 28px 22px 4px;
+            color: var(--graphite);
+            font-size: 16px;
+            font-weight: 500;
+            line-height: 1.8;
+        }
+
+        body.is-task-comprehension .conversation-line ,
+        body.is-point-comprehension .conversation-line ,
+        body.is-integrated-comprehension .conversation-line {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 18px;
+        }
+
+        body.is-task-comprehension .speaker-name ,
+        body.is-point-comprehension .speaker-name ,
+        body.is-integrated-comprehension .speaker-name {
+            flex: 0 0 auto;
+            margin-right: 12px;
+            padding: 2px 8px;
+            border: 1.5px solid var(--graphite);
+            border-radius: 2px 6px 3px 5px / 5px 3px 6px 2px;
+            background-color: var(--marker-yellow);
+            color: var(--graphite);
+            font-size: 13px;
+            font-weight: 900;
+            line-height: 1.6;
+            white-space: nowrap;
+        }
+
+        body.is-task-comprehension .speaker-text ,
+        body.is-point-comprehension .speaker-text ,
+        body.is-integrated-comprehension .speaker-text {
+            flex: 1;
+            min-width: 0;
+        }
+
+        body.is-task-comprehension .translation ,
+        body.is-point-comprehension .translation ,
+        body.is-integrated-comprehension .translation {
+            display: block;
+            margin-top: 8px;
+            padding-top: 8px;
+            border-top: 1.5px dashed var(--graphite-faint);
+            color: var(--graphite-sub);
+            font-family: 'Noto Sans SC', 'Noto Sans JP', sans-serif;
+            font-size: 13px;
+            line-height: 1.6;
+            font-weight: 700;
+        }
+
+        body.is-task-comprehension .highlight-correct ,
+        body.is-point-comprehension .highlight-correct ,
+        body.is-integrated-comprehension .highlight-correct {
+            background-color: var(--marker-mint);
+            color: var(--graphite);
+            padding: 2px 6px;
+            border-bottom: 2px solid var(--graphite);
+            font-weight: 700;
+        }
+
+        body.is-task-comprehension .highlight-wrong ,
+        body.is-point-comprehension .highlight-wrong ,
+        body.is-integrated-comprehension .highlight-wrong {
+            background-color: var(--marker-pink);
+            color: var(--graphite);
+            padding: 2px 6px;
+            border-bottom: 2px dashed var(--graphite);
+            font-weight: 700;
+        }
+
+        body.is-task-comprehension .opt-tag ,
+        body.is-point-comprehension .opt-tag ,
+        body.is-integrated-comprehension .opt-tag {
+            display: inline-block;
+            width: 18px;
+            height: 18px;
+            margin-right: 6px;
+            border: 1.5px solid var(--graphite);
+            border-radius: 50% 45% 55% 40% / 45% 55% 40% 50%;
+            background: #fff;
+            color: var(--graphite);
+            font-family: 'Noto Sans JP', sans-serif;
+            font-size: 11px;
+            font-weight: 900;
+            line-height: 16px;
+            text-align: center;
+            vertical-align: middle;
+        }
+
+        body.is-task-comprehension .tag-wrong ,
+        body.is-point-comprehension .tag-wrong ,
+        body.is-integrated-comprehension .tag-wrong { background-color: var(--marker-pink); }
+        body.is-task-comprehension .tag-correct ,
+        body.is-point-comprehension .tag-correct ,
+        body.is-integrated-comprehension .tag-correct { background-color: var(--marker-mint); }
+
+        body.is-task-comprehension .keyword ,
+        body.is-point-comprehension .keyword ,
+        body.is-integrated-comprehension .keyword {
+            color: var(--graphite);
+            background: linear-gradient(transparent 50%, var(--marker-yellow) 50%);
+            border-bottom: 1.5px solid var(--graphite);
+            padding: 0 2px;
+            cursor: pointer;
+            font-weight: 700;
+        }
+
+        .keyword {
+            border-bottom: 2px solid var(--marker-peach);
+            cursor: help;
+            font-weight: 900;
+        }
+
+        body.is-overview-comprehension .highlight-correct,
+        body.is-task-comprehension .highlight-correct ,
+        body.is-point-comprehension .highlight-correct,
+        body.is-integrated-comprehension .highlight-correct,
+        body.is-overview-comprehension .highlight-wrong,
+        body.is-task-comprehension .highlight-wrong ,
+        body.is-point-comprehension .highlight-wrong,
+        body.is-integrated-comprehension .highlight-wrong {
+            background: transparent !important;
+            background-color: transparent !important;
+            border-radius: 0 !important;
+            color: var(--graphite) !important;
+            display: inline !important;
+            padding: 0 1px !important;
+            -webkit-box-decoration-break: clone;
+            box-decoration-break: clone;
+        }
+
+        body.is-overview-comprehension .highlight-correct,
+        body.is-task-comprehension .highlight-correct ,
+        body.is-point-comprehension .highlight-correct,
+        body.is-integrated-comprehension .highlight-correct {
+            border-bottom: 2px solid rgba(92, 153, 104, 0.9) !important;
+        }
+
+        body.is-overview-comprehension .highlight-wrong,
+        body.is-task-comprehension .highlight-wrong ,
+        body.is-point-comprehension .highlight-wrong,
+        body.is-integrated-comprehension .highlight-wrong {
+            border-bottom: 2px solid rgba(190, 92, 108, 0.88) !important;
+        }
+
+        body.is-overview-comprehension .keyword,
+        body.is-task-comprehension .keyword ,
+        body.is-point-comprehension .keyword,
+        body.is-integrated-comprehension .keyword {
+            background: transparent !important;
+            background-color: transparent !important;
+            border-bottom: 2px solid rgba(214, 166, 72, 0.92) !important;
+            border-radius: 0 !important;
+            color: var(--graphite) !important;
+            display: inline !important;
+            padding: 0 1px !important;
+            -webkit-box-decoration-break: clone;
+            box-decoration-break: clone;
+        }
+
+        body.is-overview-comprehension .highlight-correct .explain-correct,
+        body.is-task-comprehension .highlight-correct .explain-correct ,
+        body.is-point-comprehension .highlight-correct .explain-correct,
+        body.is-integrated-comprehension .highlight-correct .explain-correct,
+        body.is-overview-comprehension .highlight-wrong .explain-wrong,
+        body.is-task-comprehension .highlight-wrong .explain-wrong ,
+        body.is-point-comprehension .highlight-wrong .explain-wrong,
+        body.is-integrated-comprehension .highlight-wrong .explain-wrong {
+            background: transparent !important;
+            border-bottom: 0 !important;
+        }
+
+        .tooltip {
+            position: absolute;
+            z-index: 1000;
+            display: none;
+            max-width: min(320px, calc(100vw - 24px));
+            padding: 10px 12px;
+            border: 1.5px solid var(--graphite);
+            border-radius: 2px 8px 3px 6px / 6px 3px 8px 2px;
+            background: rgba(255, 255, 255, 0.98);
+            box-shadow: 3px 3px 0 rgba(51, 51, 51, 0.12);
+            color: var(--graphite);
+            font-family: 'Noto Sans JP', sans-serif;
+            font-size: 12px;
+            line-height: 1.7;
+            white-space: pre-line;
+        }
+
+        .hidden { display: none !important; }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(14px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @media (max-width: 720px) {
+            header { padding: 12px 14px; }
+            .back-btn, .home-btn, .action-btn { font-size: 12px; padding: 6px 10px; }
+            h1 { font-size: 16px; }
+            h1 span { font-size: 10px; padding: 2px 6px; }
+            main { width: calc(100% - 28px); padding: 22px 0 46px; gap: 16px; }
+            .meta-card, .practice-card, .result-panel, .error-card { padding: 16px; }
+            .meta-title { font-size: 18px; }
+            body.is-task-comprehension .meta-card ,
+        body.is-point-comprehension .meta-card ,
+        body.is-integrated-comprehension .meta-card {
+                grid-template-columns: minmax(0, 1fr) max-content;
+                column-gap: 8px;
+                row-gap: 8px;
+            }
+            body.is-task-comprehension .meta-copy ,
+        body.is-point-comprehension .meta-copy ,
+        body.is-integrated-comprehension .meta-copy {
+                font-size: 12px;
+                line-height: 1.45;
+            }
+            body.is-task-comprehension .pill-row .pill ,
+        body.is-point-comprehension .pill-row .pill ,
+        body.is-integrated-comprehension .pill-row .pill {
+                min-height: 26px;
+                padding: 4px 8px;
+                font-size: 11px;
+            }
+            .question-topline { gap: 10px; padding-bottom: 12px; }
+            .question-title {
+                flex: 1 1 190px;
+                font-size: 18px;
+                line-height: 1.45;
+                letter-spacing: 0.03em;
+            }
+            #questionCounter {
+                min-height: 30px;
+                padding: 5px 9px;
+                font-size: 12px;
+            }
+            .audio-box {
+                margin: 14px 0;
+                padding: 10px;
+            }
+            audio { min-height: 38px; }
+            .options-list { grid-template-columns: 1fr; gap: 10px; }
+            .options-list.is-paired { gap: 12px; }
+            .paired-question-block { padding: 12px; }
+            .paired-options-list { grid-template-columns: 1fr; gap: 8px; }
+            .paired-question-heading {
+                align-items: flex-start;
+                flex-direction: column;
+                gap: 4px;
+                font-size: 13px;
+            }
+            body.is-overview-comprehension .options-list {
+                grid-template-columns: 1fr;
+                gap: 10px;
+            }
+            body.is-overview-comprehension .option-item {
+                min-height: 54px;
+                padding: 9px;
+            }
+            body.is-overview-comprehension .option-index {
+                width: 32px;
+                height: 32px;
+                font-size: 15px;
+            }
+            body.is-overview-comprehension .option-item.is-locked {
+                min-height: 58px;
+            }
+            body.is-overview-comprehension .option-text {
+                font-size: 12px;
+                line-height: 1.45;
+            }
+            body.is-overview-comprehension .dialogue-block {
+                padding-bottom: 12px;
+                font-size: 14px;
+            }
+            body.is-overview-comprehension .question-box {
+                padding: 30px 16px 14px;
+                font-size: 14px;
+            }
+            body.is-overview-comprehension .question-box::before {
+                top: 8px;
+                left: 12px;
+                padding: 2px 8px;
+                font-size: 11px;
+            }
+            body.is-overview-comprehension .conversation-box {
+                padding: 20px 16px 4px;
+                font-size: 14px;
+            }
+            body.is-overview-comprehension .speaker-name {
+                margin-right: 8px;
+                font-size: 12px;
+            }
+            body.is-overview-comprehension .translation {
+                font-size: 12px;
+            }
+            body.is-task-comprehension .question-title ,
+        body.is-point-comprehension .question-title ,
+        body.is-integrated-comprehension .question-title {
+                font-size: 15px;
+                line-height: 1.55;
+                letter-spacing: 0.015em;
+            }
+            body.is-task-comprehension .options-list ,
+        body.is-point-comprehension .options-list ,
+        body.is-integrated-comprehension .options-list {
+                grid-template-columns: 1fr;
+                gap: 8px;
+            }
+            body.is-task-comprehension .option-item ,
+        body.is-point-comprehension .option-item ,
+        body.is-integrated-comprehension .option-item {
+                min-height: 52px;
+                padding: 8px;
+                gap: 8px;
+            }
+            body.is-task-comprehension .option-index ,
+        body.is-point-comprehension .option-index ,
+        body.is-integrated-comprehension .option-index {
+                width: 26px;
+                height: 26px;
+                font-size: 13px;
+            }
+            body.is-task-comprehension .option-text ,
+        body.is-point-comprehension .option-text ,
+        body.is-integrated-comprehension .option-text {
+                font-size: 12px;
+                line-height: 1.45;
+            }
+            body.is-task-comprehension .dialogue-block ,
+        body.is-point-comprehension .dialogue-block ,
+        body.is-integrated-comprehension .dialogue-block {
+                padding-bottom: 12px;
+                font-size: 14px;
+            }
+            body.is-task-comprehension .question-box ,
+        body.is-point-comprehension .question-box ,
+        body.is-integrated-comprehension .question-box {
+                padding: 30px 16px 14px;
+                font-size: 14px;
+            }
+            body.is-task-comprehension .question-box::before ,
+        body.is-point-comprehension .question-box::before ,
+        body.is-integrated-comprehension .question-box::before {
+                top: 8px;
+                left: 12px;
+                padding: 2px 8px;
+                font-size: 11px;
+            }
+            body.is-task-comprehension .conversation-box ,
+        body.is-point-comprehension .conversation-box ,
+        body.is-integrated-comprehension .conversation-box {
+                padding: 20px 16px 4px;
+                font-size: 14px;
+            }
+            body.is-task-comprehension .speaker-name ,
+        body.is-point-comprehension .speaker-name ,
+        body.is-integrated-comprehension .speaker-name {
+                margin-right: 8px;
+                font-size: 12px;
+            }
+            body.is-task-comprehension .translation ,
+        body.is-point-comprehension .translation ,
+        body.is-integrated-comprehension .translation {
+                font-size: 12px;
+            }
+            .option-item {
+                min-height: 58px;
+                padding: 8px 10px;
+                gap: 10px;
+            }
+            .option-index {
+                width: 30px;
+                height: 30px;
+                font-size: 15px;
+            }
+            .option-placeholder {
+                font-size: 12px;
+                letter-spacing: 0.04em;
+            }
+        }
+
+        @media (max-width: 520px) {
+            h1 { font-size: 14px; }
+            main { width: calc(100% - 20px); padding-top: 16px; gap: 12px; }
+            .meta-card, .practice-card, .result-panel, .error-card { padding: 14px; }
+            .pill-row { justify-content: flex-start; }
+            body.is-task-comprehension .meta-card ,
+        body.is-point-comprehension .meta-card ,
+        body.is-integrated-comprehension .meta-card {
+                column-gap: 6px;
+                row-gap: 7px;
+            }
+            body.is-task-comprehension .meta-title ,
+        body.is-point-comprehension .meta-title ,
+        body.is-integrated-comprehension .meta-title { font-size: 17px; }
+            body.is-task-comprehension .meta-copy ,
+        body.is-point-comprehension .meta-copy ,
+        body.is-integrated-comprehension .meta-copy {
+                font-size: 11px;
+                line-height: 1.4;
+            }
+            body.is-task-comprehension .pill-row .pill ,
+        body.is-point-comprehension .pill-row .pill ,
+        body.is-integrated-comprehension .pill-row .pill {
+                min-height: 24px;
+                padding: 4px 7px;
+                font-size: 10px;
+            }
+            .question-topline {
+                display: grid;
+                grid-template-columns: 1fr auto;
+                align-items: start;
+            }
+            body.is-overview-comprehension .question-topline {
+                display: flex;
+                align-items: center;
+                justify-content: flex-start;
+            }
+            body.is-overview-comprehension #questionCounter {
+                width: auto;
+                justify-self: start;
+            }
+            .question-title {
+                min-width: 0;
+                font-size: 17px;
+                line-height: 1.5;
+            }
+            .audio-box {
+                margin: 12px 0;
+                padding: 8px;
+            }
+            audio { min-height: 34px; }
+            .options-list { gap: 8px; }
+            body.is-overview-comprehension .options-list { gap: 8px; }
+            body.is-overview-comprehension .option-item {
+                min-height: 50px;
+                padding: 8px;
+            }
+            body.is-overview-comprehension .option-index {
+                width: 30px;
+                height: 30px;
+                font-size: 14px;
+            }
+            body.is-overview-comprehension .option-item.is-locked {
+                min-height: 54px;
+            }
+            body.is-overview-comprehension .option-text { font-size: 11px; }
+            body.is-task-comprehension .options-list ,
+        body.is-point-comprehension .options-list ,
+        body.is-integrated-comprehension .options-list { gap: 7px; }
+            body.is-task-comprehension .option-item ,
+        body.is-point-comprehension .option-item ,
+        body.is-integrated-comprehension .option-item {
+                min-height: 50px;
+                padding: 7px;
+            }
+            body.is-task-comprehension .option-index ,
+        body.is-point-comprehension .option-index ,
+        body.is-integrated-comprehension .option-index {
+                width: 24px;
+                height: 24px;
+                font-size: 12px;
+            }
+            body.is-task-comprehension .option-text ,
+        body.is-point-comprehension .option-text ,
+        body.is-integrated-comprehension .option-text { font-size: 11px; }
+            .option-item { min-height: 54px; }
+            .actions-row { flex-direction: column; }
+            .nav-actions, .answer-actions { width: 100%; }
+            .action-btn { flex: 1; }
+        }
+
+        @media (max-width: 390px) {
+            .question-topline { grid-template-columns: 1fr; }
+            body.is-overview-comprehension .question-topline { display: flex; }
+            #questionCounter { justify-self: start; }
+        }
+    </style>
+    <link rel="stylesheet" href="./listening-header.css">
+</head>
+<body>
+    <header>
+        <a href="../immediate-response/n2/index.html?browse=category" class="back-btn" id="backBtn">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+            戻る
+        </a>
+        <h1 id="pageHeading">即時応答 <span id="levelBadge">N2 STAGE</span></h1>
+        <a href="../../../index.html" class="home-btn">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+            ホーム
+        </a>
+    </header>
+
+    <main>
+        <section class="meta-card" id="metaCard">
+            <div class="meta-text">
+                <h2 class="meta-title" id="categoryTitle">分類練習</h2>
+                <p class="meta-copy" id="categoryCopy">読み込み中です。</p>
+            </div>
+            <div class="pill-row">
+                <span class="pill is-source" id="sourceBadge">-</span>
+                <span class="pill is-count" id="countBadge">0 题</span>
+            </div>
+        </section>
+
+        <section class="practice-card" id="practiceCard">
+            <div class="question-topline">
+                <h2 class="question-title" id="questionTitle">请听音频并选择最合适的回答。</h2>
+                <span class="pill" id="questionCounter">第 1 / 0 题</span>
+            </div>
+            <div class="audio-box">
+                <audio id="audioElement" controls preload="metadata"></audio>
+            </div>
+            <div class="status-box is-ready" id="statusBox" hidden>播放音频后，选择最合适的答案。</div>
+            <ol class="options-list" id="optionsList"></ol>
+            <div class="actions-row">
+                <div class="nav-actions">
+                    <button type="button" class="action-btn" id="prevBtn">上一题</button>
+                    <button type="button" class="action-btn" id="nextBtn">下一题</button>
+                </div>
+                <div class="answer-actions">
+                    <button type="button" class="action-btn" id="resetBtn">重新选择</button>
+                    <button type="button" class="action-btn" id="confirmBtn" disabled>确认答案</button>
+                </div>
+            </div>
+        </section>
+
+        <section class="result-panel" id="resultPanel" hidden>
+            <h2 class="result-title" id="resultTitle">解析</h2>
+            <div class="dialogue-block" id="dialogueBlock"></div>
+        </section>
+
+        <section class="error-card hidden" id="errorCard">
+            <h2 class="result-title">暂时无法开始分类练习</h2>
+            <p class="meta-copy" id="errorCopy">分类数据没有加载成功。</p>
+        </section>
+    </main>
+
+    <div class="tooltip" id="keywordTooltip"></div>
+
+    <script src="./listening-progress.js"></script>
+    <script src="./listening-question-pools.js"></script>
+    <script src="./listening-category-catalog.js"></script>
+    <script src="./listening-category-system.js"></script>
+    <script src="./listening-tooltip-bridge.js"></script>
+    <script>
+        const params = new URLSearchParams(window.location.search);
+        const type = window.ListeningCategorySystem.normalizeType(params.get('type') || 'immediate_response');
+        const level = window.ListeningCategorySystem.normalizeLevel(params.get('level') || 'N2');
+        const categoryId = String(params.get('category') || 'all').trim();
+        const setNumber = Math.max(0, Number.parseInt(params.get('set'), 10) || 0);
+        const progressType = type.replace(/_/g, '-');
+        const progressLevel = level.toLowerCase();
+
+        document.body.classList.toggle('is-task-comprehension', type === 'task_comprehension');
+        document.body.classList.toggle('is-point-comprehension', type === 'point_comprehension');
+        document.body.classList.toggle('is-overview-comprehension', type === 'overview_comprehension');
+        document.body.classList.toggle('is-integrated-comprehension', type === 'integrated_comprehension');
+        document.body.classList.toggle('is-immediate-response', type === 'immediate_response');
+
+        const state = {
+            category: null,
+            items: [],
+            index: 0,
+            selectedIndex: -1,
+            selectedIndexes: [],
+            groupResults: [],
+            judged: false,
+            setNumber
+        };
+
+        const ui = {
+            pageHeading: document.getElementById('pageHeading'),
+            levelBadge: document.getElementById('levelBadge'),
+            backBtn: document.getElementById('backBtn'),
+            categoryTitle: document.getElementById('categoryTitle'),
+            categoryCopy: document.getElementById('categoryCopy'),
+            sourceBadge: document.getElementById('sourceBadge'),
+            countBadge: document.getElementById('countBadge'),
+            questionCounter: document.getElementById('questionCounter'),
+            questionTitle: document.getElementById('questionTitle'),
+            audio: document.getElementById('audioElement'),
+            status: document.getElementById('statusBox'),
+            options: document.getElementById('optionsList'),
+            prev: document.getElementById('prevBtn'),
+            next: document.getElementById('nextBtn'),
+            reset: document.getElementById('resetBtn'),
+            confirm: document.getElementById('confirmBtn'),
+            result: document.getElementById('resultPanel'),
+            resultTitle: document.getElementById('resultTitle'),
+            dialogue: document.getElementById('dialogueBlock'),
+            error: document.getElementById('errorCard'),
+            errorCopy: document.getElementById('errorCopy'),
+            tooltip: document.getElementById('keywordTooltip')
+        };
+
+        function escapeHtml(value) {
+            return String(value == null ? '' : value)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;');
+        }
+
+        function getCurrentItem() {
+            return state.items[state.index] || null;
+        }
+
+        function isQuestionGroup(item) {
+            return Boolean(item && item.isQuestionGroup && Array.isArray(item.items) && item.items.length > 1);
+        }
+
+        function getItemChildren(item) {
+            if (!item) return [];
+            return isQuestionGroup(item) ? item.items : [item];
+        }
+
+        function getPrimaryItem(item) {
+            const children = getItemChildren(item);
+            return children[0] || item || null;
+        }
+
+        function getCurrentQuestion() {
+            const item = getCurrentItem();
+            const primary = getPrimaryItem(item);
+            return primary ? primary.question : null;
+        }
+
+        function isTaskComprehension() {
+            return type === 'task_comprehension';
+        }
+
+        function isPointComprehension() {
+            return type === 'point_comprehension';
+        }
+
+        function isOverviewComprehension() {
+            return type === 'overview_comprehension';
+        }
+
+        function isIntegratedComprehension() {
+            return type === 'integrated_comprehension';
+        }
+
+        function isIntegratedDoubleQuestionCategory() {
+            return isIntegratedComprehension() && categoryId === 'double-question';
+        }
+
+        function isScriptListeningType() {
+            return isTaskComprehension() || isOverviewComprehension() || isPointComprehension() || isIntegratedComprehension();
+        }
+
+        function getBaseQuestionId(questionId) {
+            return String(questionId || '').replace(/-\d+$/, '');
+        }
+
+        function getQuestionOrderValue(questionId) {
+            const match = String(questionId || '').match(/-(\d+)$/);
+            return match ? Number.parseInt(match[1], 10) : 0;
+        }
+
+        function groupIntegratedDoubleItems(items) {
+            if (!isIntegratedDoubleQuestionCategory()) return items;
+
+            const groupMap = new Map();
+            const groupOrder = [];
+            items.forEach((item) => {
+                const baseId = getBaseQuestionId(item.questionId);
+                const key = `${item.sourceExamKey}::${baseId}`;
+                if (!groupMap.has(key)) {
+                    groupMap.set(key, {
+                        sourceExamKey: item.sourceExamKey,
+                        questionId: item.questionId,
+                        baseQuestionId: baseId,
+                        displayYear: item.displayYear,
+                        displayLabel: `${item.displayYear} · 第 ${baseId} 题（两问）`,
+                        items: []
+                    });
+                    groupOrder.push(key);
+                }
+                groupMap.get(key).items.push(item);
+            });
+
+            return groupOrder.map((key, index) => {
+                const group = groupMap.get(key);
+                group.items.sort((a, b) => {
+                    const orderA = getQuestionOrderValue(a.questionId);
+                    const orderB = getQuestionOrderValue(b.questionId);
+                    if (orderA !== orderB) return orderA - orderB;
+                    return String(a.questionId).localeCompare(String(b.questionId), 'ja');
+                });
+                if (group.items.length <= 1) {
+                    return {
+                        ...group.items[0],
+                        index
+                    };
+                }
+                return {
+                    ...group,
+                    isQuestionGroup: true,
+                    question: group.items[0].question,
+                    index
+                };
+            });
+        }
+
+        function itemMatchesQuestion(item, sourceExamKey, questionId) {
+            return getItemChildren(item).some((child) => {
+                return child.sourceExamKey === sourceExamKey && child.questionId === questionId;
+            });
+        }
+
+        function getTypeFolder() {
+            if (isPointComprehension()) return 'point-comprehension';
+            if (isOverviewComprehension()) return 'summary-comprehension';
+            if (isIntegratedComprehension()) return 'integrated-comprehension';
+            return isTaskComprehension() ? 'task-comprehension' : 'immediate-response';
+        }
+
+        function getDefaultCategoryCopy() {
+            if (isPointComprehension()) return '按分类连续练习ポイント理解。';
+            if (isOverviewComprehension()) return '按分类连续练习概要理解。';
+            if (isIntegratedComprehension()) return '按分类连续练习総合理解。';
+            return isTaskComprehension() ? '按分类连续练习課題理解。' : '按分类连续练习即时应答。';
+        }
+
+        function getPracticeUnit() {
+            return isIntegratedDoubleQuestionCategory() ? '组' : '题';
+        }
+
+        function formatPracticeCount(count) {
+            return `${count} ${getPracticeUnit()}`;
+        }
+
+        function getHeaderTitle() {
+            if (isPointComprehension()) return 'ポイント理解';
+            if (isOverviewComprehension()) return '概要理解';
+            if (isIntegratedComprehension()) return '総合理解';
+            return isTaskComprehension() ? '課題理解' : '即時応答';
+        }
+
+        function getQuestionAudioSrc(question) {
+            if (question && question.audio) {
+                return question.audio;
+            }
+            if (!question || !isTaskComprehension()) {
+                return '';
+            }
+
+            const sourceExamKey = window.ListeningCategorySystem.normalizeExamKey(question.sourceExamKey);
+            const match = sourceExamKey.match(/^(\d{4})-(\d{2})$/);
+            if (!match) {
+                return '';
+            }
+
+            return `../task-comprehension/${level.toLowerCase()}/assets/audio/${match[1]}.${parseInt(match[2], 10)}-${question.questionId}.mp3`;
+        }
+
+        function renderQuestionTitle(question) {
+            ui.questionTitle.hidden = false;
+            if (isOverviewComprehension()) {
+                ui.questionTitle.hidden = true;
+                ui.questionTitle.textContent = '';
+                return;
+            }
+            if (isScriptListeningType() && question.script && question.script.question) {
+                ui.questionTitle.innerHTML = question.script.question;
+                return;
+            }
+            ui.questionTitle.textContent = '请听音频并选择最合适的回答。';
+        }
+
+        function normalizeAnalysisHtml(value) {
+            return String(value || '').replace(
+                /(<span\b[^>]*class=["'][^"']*\bopt-tag\b[^"']*\btag-correct\b[^"']*["'][^>]*>)\s*([①②③④⑤⑥⑦⑧⑨0-9]+)[^<]*(<\/span>)/g,
+                '$1$2$3'
+            );
+        }
+
+        function renderTaskAnalysis(question) {
+            const script = question.script || {};
+            return `
+                ${renderScriptQuestionBox(question)}
+                ${renderScriptConversationBox(question)}
+            `;
+        }
+
+        function renderScriptQuestionBox(question, labelHtml = '') {
+            const script = question.script || {};
+            const promptHtml = script.question
+                ? `<div>${normalizeAnalysisHtml(script.question)}</div>`
+                : '<div>（本题暂未整理题目原文）</div>';
+            const promptTrans = script.questionTrans
+                ? `<div class="translation">${escapeHtml(script.questionTrans)}</div>`
+                : '';
+
+            return `
+                <div class="question-box">
+                    ${labelHtml}
+                    ${promptHtml}
+                    ${promptTrans}
+                </div>
+            `;
+        }
+
+        function renderScriptConversationBox(question) {
+            const script = question.script || {};
+            const dialogue = Array.isArray(script.dialogue) && script.dialogue.length > 0
+                ? script.dialogue.map((line) => `
+                    <div class="conversation-line">
+                        <span class="speaker-name">${escapeHtml(line.speaker)}</span>
+                        <div class="speaker-text">
+                            <div>${normalizeAnalysisHtml(line.text)}</div>
+                            ${line.trans ? `<div class="translation">${escapeHtml(line.trans)}</div>` : ''}
+                        </div>
+                    </div>
+                `).join('')
+                : '<div>（本题暂未整理对话原文）</div>';
+
+            return `
+                <div class="conversation-box">
+                    ${dialogue}
+                </div>
+            `;
+        }
+
+        function renderGroupedTaskAnalysis(item) {
+            const questionBlocks = item.items.map((child, index) => {
+                const result = state.groupResults[index] || {};
+                const labelClass = result.isCorrect ? 'is-correct' : 'is-wrong';
+                const labelText = result.isCorrect ? '正解' : '不正解';
+                const label = `<div class="paired-analysis-label ${labelClass}">第 ${escapeHtml(child.questionId)} 题 · ${labelText}</div>`;
+                return `<div class="paired-analysis-block">${renderScriptQuestionBox(child.question, label)}</div>`;
+            }).join('');
+            const primary = getPrimaryItem(item);
+            return `${questionBlocks}${renderScriptConversationBox(primary.question)}`;
+        }
+
+        function findInitialIndex() {
+            const requestedExamKey = window.ListeningCategorySystem.normalizeExamKey(params.get('examKey'));
+            const requestedQuestionId = String(params.get('questionId') || '').trim();
+
+            if (requestedExamKey && requestedQuestionId) {
+                const requestedIndex = state.items.findIndex((item) => {
+                    return itemMatchesQuestion(item, requestedExamKey, requestedQuestionId);
+                });
+                if (requestedIndex >= 0) return requestedIndex;
+            }
+
+            const lastQuestion = state.setNumber
+                ? window.ListeningCategorySystem.getLastSetQuestion(type, level, categoryId, state.setNumber)
+                : window.ListeningCategorySystem.getLastQuestion(type, level, categoryId);
+            if (lastQuestion) {
+                const lastIndex = state.items.findIndex((item) => {
+                    return itemMatchesQuestion(item, lastQuestion.sourceExamKey, lastQuestion.questionId);
+                });
+                if (lastIndex >= 0) return lastIndex;
+            }
+
+            return 0;
+        }
+
+        function showError(message) {
+            ui.error.classList.remove('hidden');
+            document.getElementById('practiceCard').classList.add('hidden');
+            ui.errorCopy.textContent = message;
+        }
+
+        function syncUrl(item) {
+            const primaryItem = getPrimaryItem(item);
+            if (!primaryItem) return;
+            const nextUrl = window.ListeningCategorySystem.buildCategoryPracticeUrl({
+                type,
+                level,
+                categoryId,
+                sourceExamKey: primaryItem.sourceExamKey,
+                questionId: primaryItem.questionId,
+                setNumber: state.setNumber
+            });
+            try {
+                window.history.replaceState({ path: nextUrl }, '', nextUrl);
+            } catch (error) {
+                console.warn('History API is restricted in this environment.');
+            }
+        }
+
+        function saveProgress(item) {
+            const primaryItem = getPrimaryItem(item);
+            if (!primaryItem) return;
+            window.ListeningCategorySystem.saveLastQuestion(type, level, categoryId, {
+                sourceExamKey: primaryItem.sourceExamKey,
+                questionId: primaryItem.questionId,
+                index: state.index
+            });
+            if (state.setNumber) {
+                window.ListeningCategorySystem.saveLastSetQuestion(type, level, categoryId, state.setNumber, {
+                    sourceExamKey: primaryItem.sourceExamKey,
+                    questionId: primaryItem.questionId,
+                    index: state.index
+                });
+            }
+        }
+
+        function updateStatus(text, tone) {
+            ui.status.textContent = text;
+            ui.status.className = 'status-box';
+            if (tone) ui.status.classList.add(tone);
+        }
+
+        function renderOptions(question) {
+            ui.options.classList.remove('is-paired');
+            ui.options.innerHTML = question.options.map((option, index) => {
+                const classes = ['option-item'];
+                if (state.selectedIndex === index) classes.push('is-selected');
+
+                if (state.judged) {
+                    classes.push('is-locked');
+                    if (option.correct) classes.push('is-correct');
+                    if (state.selectedIndex === index && !option.correct) classes.push('is-wrong');
+                }
+
+                const shouldShowOptionText = state.judged || isTaskComprehension() || isPointComprehension() || isIntegratedComprehension();
+                const shouldShowTranslation = state.judged && option.translation;
+                const body = shouldShowOptionText
+                    ? `
+                        <div class="option-body">
+                            <div class="option-text">${option.text || ''}</div>
+                            ${shouldShowTranslation ? `<div class="option-translation">${escapeHtml(option.translation)}</div>` : ''}
+                        </div>
+                    `
+                    : (isOverviewComprehension() ? '' : '<span class="option-placeholder">選択肢</span>');
+
+                return `
+                    <li class="${classes.join(' ')}" data-option-index="${index}">
+                        <span class="option-index">${index + 1}</span>
+                        ${body}
+                    </li>
+                `;
+            }).join('');
+
+            ui.options.querySelectorAll('.option-item').forEach((node) => {
+                node.addEventListener('click', () => {
+                    if (state.judged) return;
+                    state.selectedIndex = Number.parseInt(node.dataset.optionIndex, 10);
+                    ui.confirm.disabled = state.selectedIndex < 0;
+                    updateStatus('已选择答案，点击“确认答案”后显示解析。', 'is-ready');
+                    renderOptions(question);
+                });
+            });
+        }
+
+        function areAllGroupedAnswersSelected(item) {
+            return isQuestionGroup(item) && item.items.every((child, index) => {
+                const selectedIndex = Number.parseInt(state.selectedIndexes[index], 10);
+                return Number.isInteger(selectedIndex) && selectedIndex >= 0;
+            });
+        }
+
+        function renderGroupedOptions(item) {
+            ui.options.classList.add('is-paired');
+            ui.options.innerHTML = item.items.map((child, questionIndex) => {
+                const selectedIndex = Number.parseInt(state.selectedIndexes[questionIndex], 10);
+                const result = state.groupResults[questionIndex] || {};
+                const title = child.question && child.question.script && child.question.script.question
+                    ? normalizeAnalysisHtml(child.question.script.question)
+                    : `第 ${escapeHtml(child.questionId)} 题`;
+                const statusText = state.judged
+                    ? (result.isCorrect ? '正解' : '不正解')
+                    : '请选择答案';
+
+                const options = child.question.options.map((option, optionIndex) => {
+                    const classes = ['option-item'];
+                    if (selectedIndex === optionIndex) classes.push('is-selected');
+
+                    if (state.judged) {
+                        classes.push('is-locked');
+                        if (option.correct) classes.push('is-correct');
+                        if (selectedIndex === optionIndex && !option.correct) classes.push('is-wrong');
+                    }
+
+                    const shouldShowTranslation = state.judged && option.translation;
+                    return `
+                        <li class="${classes.join(' ')}" data-question-index="${questionIndex}" data-option-index="${optionIndex}">
+                            <span class="option-index">${optionIndex + 1}</span>
+                            <div class="option-body">
+                                <div class="option-text">${option.text || ''}</div>
+                                ${shouldShowTranslation ? `<div class="option-translation">${escapeHtml(option.translation)}</div>` : ''}
+                            </div>
+                        </li>
+                    `;
+                }).join('');
+
+                return `
+                    <li class="paired-question-block">
+                        <h3 class="paired-question-heading">
+                            <strong>第 ${escapeHtml(child.questionId)} 题</strong>
+                            <span>${statusText}</span>
+                        </h3>
+                        <div class="question-title" style="font-size: 14px; margin: 0 0 12px;">${title}</div>
+                        <ol class="paired-options-list">${options}</ol>
+                    </li>
+                `;
+            }).join('');
+
+            ui.options.querySelectorAll('.option-item').forEach((node) => {
+                node.addEventListener('click', () => {
+                    if (state.judged) return;
+                    const questionIndex = Number.parseInt(node.dataset.questionIndex, 10);
+                    const optionIndex = Number.parseInt(node.dataset.optionIndex, 10);
+                    state.selectedIndexes[questionIndex] = optionIndex;
+                    ui.confirm.disabled = !areAllGroupedAnswersSelected(item);
+                    updateStatus(
+                        ui.confirm.disabled ? '两问都选完后，就可以一起确认答案。' : '两问都已选择，点击“确认答案”后一起判定。',
+                        'is-ready'
+                    );
+                    renderGroupedOptions(item);
+                });
+            });
+        }
+
+        function renderResult(question, isCorrect) {
+            ui.result.hidden = false;
+            const resultCopy = isScriptListeningType() ? '来看一下完整原文' : '来看一下完整应答';
+            ui.resultTitle.textContent = isCorrect ? `答对了，${resultCopy}` : `已加入错题，${resultCopy}`;
+            ui.dialogue.innerHTML = isScriptListeningType()
+                ? renderTaskAnalysis(question)
+                : `
+                    <div class="dialogue-original">${question.dialogueHtml || '（本题暂未整理原文）'}</div>
+                    ${question.translation ? `<div class="dialogue-translation">${escapeHtml(question.translation)}</div>` : ''}
+                `;
+        }
+
+        function renderGroupedResult(item) {
+            ui.result.hidden = false;
+            const correctCount = state.groupResults.filter((result) => result.isCorrect).length;
+            const totalCount = item.items.length;
+            ui.resultTitle.textContent = correctCount === totalCount
+                ? '两问都答对了，来看完整原文'
+                : `已完成 ${correctCount} / ${totalCount} 问，来看完整原文`;
+            ui.dialogue.innerHTML = renderGroupedTaskAnalysis(item);
+        }
+
+        function markMistake(question) {
+            if (!window.ListeningProgress || typeof window.ListeningProgress.getMistakeIds !== 'function') return;
+            const ids = window.ListeningProgress.getMistakeIds(progressType, progressLevel, question.sourceExamKey) || [];
+            const progressQuestionId = question.sourceQuestionId || question.questionId;
+            if (!ids.map(String).includes(String(progressQuestionId))) {
+                ids.push(progressQuestionId);
+                window.ListeningProgress.setMistakeIds(progressType, progressLevel, question.sourceExamKey, ids);
+            }
+        }
+
+        function confirmAnswer() {
+            const question = getCurrentQuestion();
+            const item = getCurrentItem();
+            if (isQuestionGroup(item)) {
+                confirmGroupedAnswer(item);
+                return;
+            }
+            if (!question || state.selectedIndex < 0 || state.judged) return;
+
+            const selected = question.options[state.selectedIndex];
+            const isCorrect = Boolean(selected && selected.correct);
+            state.judged = true;
+            ui.confirm.disabled = true;
+            ui.reset.disabled = false;
+
+            if (!isCorrect) {
+                markMistake(question);
+            }
+
+            updateStatus(isCorrect ? '回答正确。' : '回答不正确，正确选项已经用薄荷色标出。', isCorrect ? 'is-correct' : 'is-wrong');
+            if (state.setNumber && item) {
+                window.ListeningCategorySystem.markCategorySetQuestionAnswered(type, level, categoryId, state.setNumber, item);
+            }
+            renderOptions(question);
+            renderResult(question, isCorrect);
+        }
+
+        function confirmGroupedAnswer(item) {
+            if (!isQuestionGroup(item) || !areAllGroupedAnswersSelected(item) || state.judged) return;
+
+            state.judged = true;
+            ui.confirm.disabled = true;
+            ui.reset.disabled = false;
+            state.groupResults = item.items.map((child, questionIndex) => {
+                const selectedIndex = Number.parseInt(state.selectedIndexes[questionIndex], 10);
+                const selected = child.question.options[selectedIndex];
+                const isCorrect = Boolean(selected && selected.correct);
+                if (!isCorrect) {
+                    markMistake(child.question);
+                }
+                if (state.setNumber) {
+                    window.ListeningCategorySystem.markCategorySetQuestionAnswered(type, level, categoryId, state.setNumber, child);
+                }
+                return { selectedIndex, isCorrect };
+            });
+
+            const correctCount = state.groupResults.filter((result) => result.isCorrect).length;
+            const totalCount = item.items.length;
+            const allCorrect = correctCount === totalCount;
+            updateStatus(
+                allCorrect
+                    ? '两问都回答正确。'
+                    : `本组完成 ${correctCount} / ${totalCount} 问，正确答案已经标出。`,
+                allCorrect ? 'is-correct' : 'is-wrong'
+            );
+            renderGroupedOptions(item);
+            renderGroupedResult(item);
+        }
+
+        function resetAnswer() {
+            const item = getCurrentItem();
+            if (isQuestionGroup(item)) {
+                state.selectedIndexes = [];
+                state.groupResults = [];
+                state.judged = false;
+                ui.result.hidden = true;
+                ui.confirm.disabled = true;
+                renderGroupedOptions(item);
+                updateStatus('已重置本组，可以重新选择。', 'is-ready');
+                return;
+            }
+
+            if (!state.judged) {
+                state.selectedIndex = -1;
+                ui.confirm.disabled = true;
+                renderOptions(getCurrentQuestion());
+                updateStatus('播放音频后，选择最合适的答案。', 'is-ready');
+                return;
+            }
+
+            state.selectedIndex = -1;
+            state.judged = false;
+            ui.result.hidden = true;
+            ui.confirm.disabled = true;
+            renderOptions(getCurrentQuestion());
+            updateStatus('已重置本题，可以重新选择。', 'is-ready');
+        }
+
+        function renderQuestion() {
+            const item = getCurrentItem();
+            const question = getCurrentQuestion();
+            if (!item || !question) return;
+
+            state.selectedIndex = -1;
+            state.selectedIndexes = [];
+            state.groupResults = [];
+            state.judged = false;
+            ui.result.hidden = true;
+            ui.confirm.disabled = true;
+            ui.reset.disabled = false;
+            ui.prev.disabled = state.index <= 0;
+            ui.next.disabled = state.index >= state.items.length - 1;
+            const counterText = `第 ${state.index + 1} / ${state.items.length} ${getPracticeUnit()}`;
+            ui.questionCounter.textContent = counterText;
+            ui.countBadge.textContent = isScriptListeningType() ? counterText : formatPracticeCount(state.items.length);
+            ui.sourceBadge.textContent = item.displayLabel;
+            if (isQuestionGroup(item)) {
+                ui.questionTitle.hidden = false;
+                ui.questionTitle.textContent = '请听音频后，连续完成下面两问。';
+            } else {
+                renderQuestionTitle(question);
+            }
+            ui.audio.src = getQuestionAudioSrc(question);
+            ui.audio.currentTime = 0;
+            updateStatus(isQuestionGroup(item) ? '播放音频后，连续完成下面两问。' : '播放音频后，选择最合适的答案。', 'is-ready');
+            if (isQuestionGroup(item)) {
+                renderGroupedOptions(item);
+            } else {
+                renderOptions(question);
+            }
+            saveProgress(item);
+            syncUrl(item);
+        }
+
+        function moveQuestion(delta) {
+            const nextIndex = state.index + delta;
+            if (nextIndex < 0 || nextIndex >= state.items.length) return;
+            state.index = nextIndex;
+            renderQuestion();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function showTooltip(event, text) {
+            event.stopPropagation();
+            ui.tooltip.textContent = text;
+            ui.tooltip.style.display = 'block';
+            const rect = event.target.getBoundingClientRect();
+            const top = rect.top + window.scrollY - ui.tooltip.offsetHeight - 12;
+            let left = rect.left + window.scrollX + rect.width / 2 - ui.tooltip.offsetWidth / 2;
+            if (left < 10) left = 10;
+            if (left + ui.tooltip.offsetWidth > window.innerWidth - 10) {
+                left = window.innerWidth - ui.tooltip.offsetWidth - 10;
+            }
+            ui.tooltip.style.top = `${Math.max(10, top)}px`;
+            ui.tooltip.style.left = `${left}px`;
+        }
+
+        window.showTooltip = showTooltip;
+        document.addEventListener('click', () => {
+            ui.tooltip.style.display = 'none';
+        });
+
+        function init() {
+            ui.pageHeading.childNodes[0].nodeValue = `${getHeaderTitle()} `;
+            ui.levelBadge.textContent = `${level} STAGE`;
+            ui.backBtn.href = `../${getTypeFolder()}/${level.toLowerCase()}/index.html?browse=category&category=${encodeURIComponent(categoryId)}`;
+
+            state.category = window.ListeningCategorySystem.getCategory(type, level, categoryId);
+            const rawItems = state.setNumber
+                ? window.ListeningCategorySystem.getCategorySetItems(type, level, categoryId, state.setNumber)
+                : window.ListeningCategorySystem.getCategoryItems(type, level, categoryId);
+            state.items = groupIntegratedDoubleItems(rawItems);
+
+            if (!state.category) {
+                showError('没有找到这个分类，请返回目录重新选择。');
+                return;
+            }
+
+            if (state.items.length === 0) {
+                showError(state.setNumber ? '这个分组里还没有可练习的题目，请返回目录重新选择。' : '这个分类里还没有可练习的题目。');
+                return;
+            }
+
+            ui.categoryTitle.textContent = state.setNumber ? `${state.category.name} · 第${state.setNumber}组` : state.category.name;
+            ui.categoryCopy.textContent = state.setNumber
+                ? `${state.category.description || getDefaultCategoryCopy()} 本组共 ${formatPracticeCount(state.items.length)}。`
+                : state.category.description || getDefaultCategoryCopy();
+            ui.countBadge.textContent = formatPracticeCount(state.items.length);
+            state.index = findInitialIndex();
+            renderQuestion();
+        }
+
+        ui.prev.addEventListener('click', () => moveQuestion(-1));
+        ui.next.addEventListener('click', () => moveQuestion(1));
+        ui.confirm.addEventListener('click', confirmAnswer);
+        ui.reset.addEventListener('click', resetAnswer);
+
+        window.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>

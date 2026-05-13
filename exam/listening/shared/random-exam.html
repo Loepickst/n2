@@ -426,9 +426,20 @@
         }
 
         .hidden { display: none !important; }
-        .keyword { cursor: pointer; color: #1d6fd8; font-weight: 700; }
+        .keyword {
+            background: transparent;
+            border-bottom: 2px solid rgba(214, 166, 72, 0.92);
+            color: var(--text);
+            cursor: pointer;
+            display: inline;
+            font-weight: 700;
+            padding: 0 1px;
+            text-decoration: none;
+            -webkit-box-decoration-break: clone;
+            box-decoration-break: clone;
+        }
 
-        body[data-exam-theme="ir-n1"] {
+        body[data-exam-theme="ir-n3"] {
             --chip-gold: var(--marker-yellow);
             --chip-blue: var(--marker-blue);
             --chip-source: rgba(255, 241, 214, 0.92);
@@ -448,7 +459,7 @@
             --primary-btn-bg: var(--marker-lavender);
         }
 
-        body[data-exam-theme="tc-n1"] {
+        body[data-exam-theme="tc-n2"] {
             --chip-gold: var(--marker-yellow);
             --chip-blue: var(--marker-blue);
             --chip-source: rgba(129, 212, 250, 0.18);
@@ -1161,6 +1172,8 @@
 
     <script src="./listening-progress.js"></script>
     <script src="./listening-question-pools.js"></script>
+    <script src="./listening-tooltip-bridge.js"></script>
+    <script src="../../../shared/practice-feedback-system.js"></script>
     <script>
         window.__LISTENING_RANDOM_EXAM__ = true;
 
@@ -1169,16 +1182,39 @@
         const level = String(params.get('level') || '').trim().toUpperCase();
         const fromYear = Number.parseInt(params.get('fromYear'), 10);
         const toYear = Number.parseInt(params.get('toYear'), 10);
+        const TYPE_LABELS = {
+            task_comprehension: '课题理解',
+            point_comprehension: '要点理解',
+            overview_comprehension: '概要理解',
+            integrated_comprehension: '综合理解',
+            immediate_response: '即时应答'
+        };
+        const TYPE_FOLDERS = {
+            task_comprehension: 'task-comprehension',
+            point_comprehension: 'point-comprehension',
+            overview_comprehension: 'summary-comprehension',
+            integrated_comprehension: 'integrated-comprehension',
+            immediate_response: 'immediate-response'
+        };
         const themeKey = (() => {
-            if (type === 'task_comprehension') return 'tc-n1';
+            if (type !== 'immediate_response') return 'tc-n2';
             if (type === 'immediate_response' && level === 'N2') return 'ir-n2';
-            return 'ir-n1';
+            return 'ir-n3';
         })();
         document.body.dataset.examTheme = themeKey;
         const pageTitleCount = document.getElementById('pageTitleCount');
         const randomExamDefaults = (() => {
             if (type === 'task_comprehension') {
-                return { questionCount: 6, autoAdvanceSeconds: 5 };
+                return { questionCount: 5, autoAdvanceSeconds: 5 };
+            }
+            if (type === 'point_comprehension') {
+                return { questionCount: 6, autoAdvanceSeconds: 3 };
+            }
+            if (type === 'overview_comprehension') {
+                return { questionCount: 5, autoAdvanceSeconds: 3 };
+            }
+            if (type === 'immediate_response' && level === 'N3') {
+                return { questionCount: 9, autoAdvanceSeconds: 3 };
             }
             return { questionCount: 11, autoAdvanceSeconds: 3 };
         })();
@@ -1260,11 +1296,11 @@
         }
 
         function normalizeTypeLabel(value) {
-            return value === 'task_comprehension' ? '课题理解' : '即时应答';
+            return TYPE_LABELS[value] || '听力';
         }
 
         function buildIndexHref() {
-            const folder = type === 'task_comprehension' ? 'task-comprehension' : 'immediate-response';
+            const folder = TYPE_FOLDERS[type] || 'immediate-response';
             return `../${folder}/${level.toLowerCase()}/index.html`;
         }
 
@@ -1307,6 +1343,10 @@
             const wrapper = document.createElement('div');
             wrapper.innerHTML = stripHighlightHtml(html);
             wrapper.querySelectorAll('[onclick]').forEach((node) => node.removeAttribute('onclick'));
+            wrapper.querySelectorAll('[data-explain], [data-tooltip]').forEach((node) => {
+                node.removeAttribute('data-explain');
+                node.removeAttribute('data-tooltip');
+            });
             wrapper.querySelectorAll('.keyword').forEach((node) => {
                 node.classList.remove('keyword');
                 if (!node.className.trim()) {
@@ -1316,8 +1356,12 @@
             return wrapper.innerHTML;
         }
 
+        function isScriptBasedListeningExam() {
+            return type !== 'immediate_response';
+        }
+
         function getQuestionPrompt(question) {
-            if (type === 'task_comprehension' && question.script) {
+            if (isScriptBasedListeningExam() && question.script) {
                 const rawPrompt = question.script.question || '音频播放后作答。';
                 return {
                     title: sanitizeExamHtml(rawPrompt),
@@ -1348,7 +1392,7 @@
         }
 
         function createSourceLabel(question) {
-            return `${question.sourceLabel} · 第 ${question.questionId} 题`;
+            return `${question.sourceLabel} · 第 ${question.displayQuestionId || question.questionId} 题`;
         }
 
         function clearCountdown() {
@@ -1542,6 +1586,19 @@
             }
             state.answers[state.index] = answer;
             state.submitted = true;
+            if (window.N2PracticeFeedback) {
+                window.N2PracticeFeedback.trackAnswer({
+                    module: 'listening',
+                    subType: type.replace(/_/g, '-'),
+                    mode: 'random-exam',
+                    level,
+                    isCorrect: answer.unanswered ? null : answer.isCorrect,
+                    skipped: answer.unanswered,
+                    questionId: question.questionId || question.id,
+                    questionIndex: state.index + 1,
+                    questionCount: state.questions.length
+                });
+            }
 
             if (!answer.isCorrect) {
                 if (window.ListeningProgress && typeof window.ListeningProgress.setMistakeIds === 'function') {
@@ -1623,6 +1680,20 @@
             ui.summaryEmpty.textContent = String(stats.empty);
             ui.summaryAccuracy.textContent = `${stats.accuracy}%`;
             ui.summaryCopy.textContent = '成绩已生成。';
+            if (window.N2PracticeFeedback) {
+                const message = window.N2PracticeFeedback.trackSummary({
+                    module: 'listening',
+                    subType: type.replace(/_/g, '-'),
+                    mode: 'random-exam',
+                    level,
+                    total: stats.total,
+                    correct: stats.correct,
+                    accuracy: stats.total ? stats.correct / stats.total : 0
+                });
+                if (message) {
+                    ui.summaryCopy.textContent = message;
+                }
+            }
 
             dispatchPhase(stats.accuracy === 100 ? 'perfect_clear' : 'clear', {
                 total: stats.total,
@@ -1640,7 +1711,7 @@
             `;
         }
 
-        function renderTaskAnalysis(question) {
+        function renderScriptAnalysis(question) {
             const script = question.script || {};
             const promptHtml = script.question ? `<div class="analysis-line">${script.question}</div>` : '';
             const promptTrans = script.questionTrans ? `<div class="analysis-translation">${htmlEscape(script.questionTrans)}</div>` : '';
@@ -1667,7 +1738,7 @@
 
             ui.analysisCounter.textContent = `解析 ${state.index + 1} / ${state.questions.length}`;
             ui.analysisSource.textContent = createSourceLabel(question);
-            ui.analysisTitle.textContent = type === 'task_comprehension' ? '课题理解解析' : '即时应答解析';
+            ui.analysisTitle.textContent = `${normalizeTypeLabel(type)}解析`;
             ui.analysisCopy.textContent = '';
 
             ui.analysisAudio.src = question.audio || '';
@@ -1685,8 +1756,8 @@
                 ui.analysisResultNote.className = 'analysis-note is-wrong';
             }
 
-            ui.analysisTranscript.innerHTML = type === 'task_comprehension'
-                ? renderTaskAnalysis(question)
+            ui.analysisTranscript.innerHTML = isScriptBasedListeningExam()
+                ? renderScriptAnalysis(question)
                 : renderImmediateAnalysis(question);
             ui.analysisOptions.innerHTML = `
                 <div class="analysis-block">

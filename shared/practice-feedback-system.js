@@ -9,6 +9,8 @@
     let lastSignalAt = 0;
     let practicePetController = null;
     let petAssetsPromise = null;
+    let rewardRuntimePromise = null;
+    const recentRewardSignals = new Map();
 
     function injectStyles() {
         if (document.getElementById(STYLE_ID)) {
@@ -617,6 +619,55 @@
         return petAssetsPromise;
     }
 
+    function loadSharedScript(path, datasetKey) {
+        const scriptSrc = resolveSharedAsset(path);
+        const existingScript = Array.from(document.querySelectorAll('script[src]')).find((script) => script.src === scriptSrc);
+        if (existingScript) {
+            return new Promise((resolve) => {
+                if (existingScript.dataset.loaded === 'true') {
+                    resolve(true);
+                    return;
+                }
+                existingScript.addEventListener('load', () => resolve(true), { once: true });
+                existingScript.addEventListener('error', () => resolve(false), { once: true });
+                setTimeout(() => resolve(true), 0);
+            });
+        }
+        return new Promise((resolve) => {
+            const script = document.createElement('script');
+            script.src = scriptSrc;
+            if (datasetKey) {
+                script.dataset[datasetKey] = 'true';
+            }
+            script.addEventListener('load', () => {
+                script.dataset.loaded = 'true';
+                resolve(true);
+            }, { once: true });
+            script.addEventListener('error', () => resolve(false), { once: true });
+            document.head.appendChild(script);
+        });
+    }
+
+    function ensureRewardRuntime() {
+        if (global.KikiPracticeRewardRuntime) {
+            return Promise.resolve(global.KikiPracticeRewardRuntime);
+        }
+        if (rewardRuntimePromise) {
+            return rewardRuntimePromise;
+        }
+        rewardRuntimePromise = Promise.resolve()
+            .then(() => {
+                if (global.OmikujiCatalog) {
+                    return true;
+                }
+                return loadSharedScript('omikuji-catalog.js', 'n2OmikujiCatalog');
+            })
+            .then(() => loadSharedScript('practice-reward-runtime.js', 'n2PracticeRewardRuntime'))
+            .then(() => global.KikiPracticeRewardRuntime || null)
+            .catch(() => null);
+        return rewardRuntimePromise;
+    }
+
     function detectPracticeModule(payload = {}) {
         if (payload.module) return String(payload.module);
         const path = String(global.location && global.location.pathname ? global.location.pathname : '').toLowerCase();
@@ -628,6 +679,18 @@
         return 'practice';
     }
 
+    function detectRewardModule(payload = {}) {
+        const moduleName = String(payload.module || '').toLowerCase();
+        const subType = String(payload.subType || '').toLowerCase();
+        const path = String(global.location && global.location.pathname ? global.location.pathname : '').toLowerCase();
+        const tokens = `${moduleName} ${subType} ${path}`;
+        if (tokens.includes('vocabulary') || tokens.includes('vocab') || tokens.includes('/vocabulary/')) return 'vocabulary';
+        if (tokens.includes('listening') || tokens.includes('immediate') || tokens.includes('/listening/')) return 'listening';
+        if (tokens.includes('reading') || tokens.includes('jlpt-reading') || tokens.includes('/jlpt-reading/')) return 'reading';
+        if (tokens.includes('grammar') || tokens.includes('textbook') || tokens.includes('try-n2') || tokens.includes('/grammar/') || tokens.includes('/daily/grammar/') || tokens.includes('/textbook/') || tokens.includes('/test/')) return 'grammar';
+        return '';
+    }
+
     function detectPracticeSubType(payload = {}) {
         if (payload.subType) return String(payload.subType);
         const path = String(global.location && global.location.pathname ? global.location.pathname : '').toLowerCase();
@@ -636,6 +699,85 @@
         if (path.includes('/cloze/')) return 'cloze';
         if (path.includes('/vocabulary/')) return 'n2_verbs';
         return '';
+    }
+
+    function normalizeRewardAccuracy(payload = {}) {
+        const total = Math.max(0, Number(payload.total ?? payload.questionCount ?? payload.answeredCount ?? 0));
+        const correct = Math.max(0, Number(payload.correct ?? payload.correctCount ?? 0));
+        if (Number.isFinite(Number(payload.accuracy))) {
+            const accuracy = Number(payload.accuracy);
+            return accuracy > 1 ? accuracy / 100 : accuracy;
+        }
+        return total > 0 ? correct / total : 0;
+    }
+
+    function shouldSignalPracticeReward(payload = {}) {
+        const phase = String(payload.phase || payload.type || '').trim();
+        return phase === 'summary' || phase === 'clear' || phase === 'perfect_clear';
+    }
+
+    function shouldThrottleRewardSignal(payload = {}) {
+        const moduleKey = detectRewardModule(payload);
+        if (!moduleKey) return true;
+        const total = Math.max(0, Number(payload.total ?? payload.questionCount ?? payload.answeredCount ?? 0));
+        const correct = Math.max(0, Number(payload.correct ?? payload.correctCount ?? 0));
+        const key = [
+            moduleKey,
+            payload.runKey || '',
+            payload.phase || '',
+            payload.scopeKey || '',
+            global.location && global.location.pathname ? global.location.pathname : '',
+            correct,
+            total
+        ].join(':');
+        const now = Date.now();
+        const previous = recentRewardSignals.get(key) || 0;
+        if (previous && now - previous < 3000) {
+            return true;
+        }
+        recentRewardSignals.set(key, now);
+        recentRewardSignals.forEach((timestamp, signalKey) => {
+            if (now - timestamp > 15000) {
+                recentRewardSignals.delete(signalKey);
+            }
+        });
+        return false;
+    }
+
+    function trackPracticeReward(payload = {}) {
+        if (!shouldSignalPracticeReward(payload) || shouldThrottleRewardSignal(payload)) {
+            return;
+        }
+        const moduleKey = detectRewardModule(payload);
+        if (!moduleKey) {
+            return;
+        }
+        const total = Math.max(0, Number(payload.total ?? payload.questionCount ?? payload.answeredCount ?? 0));
+        const correct = Math.max(0, Number(payload.correct ?? payload.correctCount ?? 0));
+        const sourcePage = global.location ? `${global.location.pathname}${global.location.search || ''}` : '';
+        ensureRewardRuntime().then((runtime) => {
+            if (!runtime || typeof runtime.completeRun !== 'function') {
+                return;
+            }
+            const result = runtime.completeRun({
+                ...payload,
+                module: moduleKey,
+                subType: detectPracticeSubType(payload),
+                sourcePage,
+                scopeKey: payload.scopeKey || sourcePage,
+                total,
+                questionCount: total,
+                answeredCount: Number(payload.answeredCount ?? total),
+                correct,
+                correctCount: correct,
+                accuracy: normalizeRewardAccuracy(payload),
+                cleared: payload.cleared !== false,
+                finishedAt: payload.finishedAt || new Date().toISOString()
+            });
+            if (result && result.accepted && result.drawOffer && result.drawOffer.available && typeof runtime.renderDrawOffer === 'function') {
+                runtime.renderDrawOffer(result, payload);
+            }
+        }).catch(() => {});
     }
 
     function mapFeedbackPhase(payload = {}) {
@@ -780,6 +922,7 @@
             </div>
         `;
         notifyPet({ ...payload, phase: 'summary' });
+        trackPracticeReward({ ...payload, phase: 'summary' });
         return element;
     }
 
@@ -791,10 +934,15 @@
     }
 
     function trackSummary(payload = {}) {
-        return notifyPet({
+        const message = notifyPet({
             ...payload,
             phase: payload.phase || 'summary'
         });
+        trackPracticeReward({
+            ...payload,
+            phase: payload.phase || 'summary'
+        });
+        return message;
     }
 
     function dispatchPracticeState(payload = {}) {
@@ -858,6 +1006,15 @@
     };
     existingUi.mountPracticeTestTools = existingUi.mountPracticeTestTools || function() {};
     existingUi.hidePracticeTestTools = existingUi.hidePracticeTestTools || function() {};
-    existingUi.getDrawAffordanceMarkup = existingUi.getDrawAffordanceMarkup || function() { return ''; };
+    existingUi.getDrawAffordanceMarkup = existingUi.getDrawAffordanceMarkup || function(runKey) {
+        return global.KikiPracticeRewardRuntime && typeof global.KikiPracticeRewardRuntime.getDrawAffordanceMarkup === 'function'
+            ? global.KikiPracticeRewardRuntime.getDrawAffordanceMarkup(runKey)
+            : '';
+    };
+    existingUi.canOpenDrawForRunKey = existingUi.canOpenDrawForRunKey || function(runKey) {
+        return global.KikiPracticeRewardRuntime && typeof global.KikiPracticeRewardRuntime.canOpenDrawForRunKey === 'function'
+            ? global.KikiPracticeRewardRuntime.canOpenDrawForRunKey(runKey)
+            : false;
+    };
     global.StudyQuestTestUi = existingUi;
 })(typeof window !== 'undefined' ? window : globalThis);

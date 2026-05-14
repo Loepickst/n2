@@ -50,7 +50,16 @@
         { id: "pet_cat_max", rarity: "MAX", title: "月影猫伴", desc: "把猫猫一路陪到满级后获得的成长纪念卡。它会在安静的夜里，继续陪你把学习走稳。", color: "#6D6A8B", icon: "takarakuji/nekoji.png", isRewardOnly: true }
     ];
 
-    const collectionCatalog = [...petRewardFortunes, ...fortunes];
+    const practiceRewardFortunes = [
+        { id: "practice_chunji_vocabulary", rarity: "MR", title: "春吉", desc: "词汇练习中偶然飘来的春风。把一个个动词种下去，来日会长成自己的语感。", color: "#B7745A", icon: "takarakuji/chunji.png", isRewardOnly: true, acquireMode: "practice_draw", rewardSource: { type: "practice_module", module: "vocabulary" }, themeSetId: "n2_seasons" },
+        { id: "practice_xiaji_grammar", rarity: "MR", title: "夏吉", desc: "语法练习里热乎乎的夏日签。被汗水浸过的接续，最后会变成稳稳的判断力。", color: "#C28633", icon: "takarakuji/xiaji.png", isRewardOnly: true, acquireMode: "practice_draw", rewardSource: { type: "practice_module", module: "grammar" }, themeSetId: "n2_seasons" },
+        { id: "practice_qiuji_reading", rarity: "MR", title: "秋吉", desc: "阅读练习后落下的一枚秋叶。读懂关键句的瞬间，答案也会轻轻显形。", color: "#9A5A3D", icon: "takarakuji/qiuji.png", isRewardOnly: true, acquireMode: "practice_draw", rewardSource: { type: "practice_module", module: "reading" }, themeSetId: "n2_seasons" },
+        { id: "practice_dongji_listening", rarity: "MR", title: "冬吉", desc: "听力练习里藏着的冬雪。越安静地听，越能听见句子真正落下的位置。", color: "#55718A", icon: "takarakuji/dongji.png", isRewardOnly: true, acquireMode: "practice_draw", rewardSource: { type: "practice_module", module: "listening" }, themeSetId: "n2_seasons" },
+        { id: "practice_shengji_max", rarity: "MR", title: "胜吉", desc: "练习累计到第 30 次时出现的特别纪念。烟火亮起的那一刻，努力终于有了形状。", color: "#C96A2A", icon: "takarakuji/shengji.png", isRewardOnly: true, acquireMode: "achievement", rewardSource: { type: "effective_practice_count", threshold: 30 } },
+        { id: "practice_n2_pass_complete", rarity: "SP", title: "N2合格", desc: "春夏秋冬都走过之后，终于点亮的合格纪念。不是终点，是你已经真正走到这里的证据。", color: "#B7282E", icon: "takarakuji/N2合格.png", isRewardOnly: true, acquireMode: "set_reward", rewardSource: { type: "set_complete", setId: "n2_seasons" }, themeSetId: "n2_seasons" }
+    ];
+
+    const collectionCatalog = [...petRewardFortunes, ...practiceRewardFortunes, ...fortunes];
     const catalogById = collectionCatalog.reduce((acc, item) => {
         acc[item.id] = item;
         return acc;
@@ -88,7 +97,11 @@
                 count,
                 firstObtainedAt: Number.isFinite(firstObtainedAt) && firstObtainedAt > 0 ? firstObtainedAt : null,
                 lastObtainedAt: Number.isFinite(lastObtainedAt) && lastObtainedAt > 0 ? lastObtainedAt : null,
-                isNew: Boolean(entry.isNew)
+                isNew: Boolean(entry.isNew),
+                rarity: typeof entry.rarity === "string" ? entry.rarity : "",
+                title: typeof entry.title === "string" ? entry.title : "",
+                source: typeof entry.source === "string" ? entry.source : "",
+                acquireMode: typeof entry.acquireMode === "string" ? entry.acquireMode : ""
             };
             return acc;
         }, {});
@@ -127,6 +140,7 @@
         COLLECTION_META_KEY,
         fortunes,
         petRewardFortunes,
+        practiceRewardFortunes,
         collectionCatalog,
         safeParseJSON,
         getCollectionMeta,

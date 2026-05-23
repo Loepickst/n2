@@ -2743,6 +2743,23 @@
                 .find(Boolean) || '';
         }
 
+        function normalizeDefinitionDisplay(meanText, nuanceText) {
+            const mean = String(meanText || '').trim();
+            const nuance = String(nuanceText || '').trim();
+            if (!mean || !nuance) {
+                return { meanText: mean, nuanceText: nuance };
+            }
+            const fullWidthPrefix = `${mean}（`;
+            if (nuance.startsWith(fullWidthPrefix) && nuance.endsWith('）')) {
+                return { meanText: mean, nuanceText: nuance.slice(fullWidthPrefix.length, -1).trim() };
+            }
+            const halfWidthPrefix = `${mean}(`;
+            if (nuance.startsWith(halfWidthPrefix) && nuance.endsWith(')')) {
+                return { meanText: mean, nuanceText: nuance.slice(halfWidthPrefix.length, -1).trim() };
+            }
+            return { meanText: mean, nuanceText: nuance };
+        }
+
         function getEligibleWordsForPracticeType(words, type) {
             const pool = Array.isArray(words) ? words : [];
             if (type === 'reading') {
@@ -4527,8 +4544,12 @@
             let definitionsHtml = '';
 
             for (let itemIndex = 0; itemIndex < count; itemIndex += 1) {
-                const meanText = meanings[itemIndex] || (itemIndex === 0 ? (usage || meaning) : '');
-                const nuanceText = nuances[itemIndex] || '';
+                const definitionDisplay = normalizeDefinitionDisplay(
+                    meanings[itemIndex] || (itemIndex === 0 ? (usage || meaning) : ''),
+                    nuances[itemIndex] || ''
+                );
+                const meanText = definitionDisplay.meanText;
+                const nuanceText = definitionDisplay.nuanceText;
                 const example = examples[itemIndex];
                 if (!meanText && !nuanceText && !(example && example.jp)) {
                     continue;

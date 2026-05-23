@@ -12868,7 +12868,7 @@ const FULL_WORD_LIST = [
                 ],
                 "optionWordIds": [
                     "n2-verb-208",
-                    "n2-verb-39",
+                    null,
                     "n2-verb-242",
                     "n2-verb-160"
                 ],
@@ -12917,7 +12917,7 @@ const FULL_WORD_LIST = [
             ],
             "optionWordIds": [
                 "n2-verb-208",
-                "n2-verb-39",
+                null,
                 "n2-verb-242",
                 "n2-verb-160"
             ],
@@ -12997,7 +12997,7 @@ const FULL_WORD_LIST = [
                 "optionWordIds": [
                     "n2-verb-242",
                     "n2-verb-208",
-                    "n2-verb-39",
+                    null,
                     "n2-verb-160"
                 ],
                 "optionDetails": [
@@ -13046,7 +13046,7 @@ const FULL_WORD_LIST = [
             "optionWordIds": [
                 "n2-verb-242",
                 "n2-verb-208",
-                "n2-verb-39",
+                null,
                 "n2-verb-160"
             ],
             "optionDetails": [
@@ -13125,7 +13125,7 @@ const FULL_WORD_LIST = [
                 "optionWordIds": [
                     "n2-verb-160",
                     "n2-verb-208",
-                    "n2-verb-39",
+                    null,
                     "n2-verb-242"
                 ],
                 "optionDetails": [
@@ -13174,7 +13174,7 @@ const FULL_WORD_LIST = [
             "optionWordIds": [
                 "n2-verb-160",
                 "n2-verb-208",
-                "n2-verb-39",
+                null,
                 "n2-verb-242"
             ],
             "optionDetails": [
@@ -15694,7 +15694,7 @@ const FULL_WORD_LIST = [
                 "optionWordIds": [
                     "n2-verb-210",
                     "n2-verb-208",
-                    "n2-verb-39",
+                    null,
                     "n2-verb-142"
                 ],
                 "optionDetails": [
@@ -15743,7 +15743,7 @@ const FULL_WORD_LIST = [
             "optionWordIds": [
                 "n2-verb-210",
                 "n2-verb-208",
-                "n2-verb-39",
+                null,
                 "n2-verb-142"
             ],
             "optionDetails": [

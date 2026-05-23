@@ -40,7 +40,7 @@
             .replace(/<rt[^>]*>[\s\S]*?<\/rt>/g, '')
             .replace(/<rp[^>]*>[\s\S]*?<\/rp>/g, '')
             .replace(/<span class=['"][^'"]*\bblank-space\b[^'"]*['"]>\s*<\/span>/g, '[[BLANK]]')
-            .replace(/<span class=['"]ex-highlight['"]>[\s\S]*?<\/span>/g, '[[BLANK]]')
+            .replace(/<(span|strong) class=['"]ex-highlight['"]>[\s\S]*?<\/\1>/g, '[[BLANK]]')
             .replace(/____|_{2,}|＿{2,}|________/g, '[[BLANK]]')
             .replace(/<[^>]+>/g, '')
             .replace(/[「」『』"'\s。！？、，,.!！?？]/g, '')
@@ -717,7 +717,7 @@
             if (sourceMeta.sourceKind === 'disabled') return null;
             let richSentence = sourceMeta.sentence || '例文がありません。';
             const questionCn = sourceMeta.cn || '';
-            const highlightRegex = /<span class=['"]ex-highlight['"]>(.*?)<\/span>/g;
+            const highlightRegex = /<(span|strong) class=['"]ex-highlight['"]>(.*?)<\/\1>/g;
             const renderedBlankRegex = /<span class=['"][^'"]*\bblank-space\b[^'"]*['"]>\s*<\/span>/g;
             const existingBlankRegex = /(_{2,}|＿{2,}|\(\s*\)|（\s*）)/g;
             if (richSentence.match(renderedBlankRegex)) {

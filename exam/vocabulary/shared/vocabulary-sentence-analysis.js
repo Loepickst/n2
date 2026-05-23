@@ -803,10 +803,6 @@
             blocks.push(`<div class="challenge-analysis-block"><span class="challenge-analysis-label">句子翻译</span><div class="challenge-analysis-copy">${esc(reviewAnalysis.sentenceTranslation)}</div></div>`);
         }
 
-        if (reviewAnalysis.questionAnalysis) {
-            blocks.push(`<div class="challenge-analysis-block"><span class="challenge-analysis-label">题目解析</span><div class="challenge-analysis-copy">${esc(reviewAnalysis.questionAnalysis)}</div></div>`);
-        }
-
         if (correct) {
             const correctLines = [
                 renderLine('用法', correct.usage, esc),

@@ -1,0 +1,1531 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>长篇阅读 - 努力の測定</title>
+    <!-- 使用书面/印刷感字体组合 -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&family=Noto+Sans+SC:wght@400;500;700;900&family=Noto+Serif+JP:wght@400;600;700;900&family=Noto+Serif+SC:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            /* 纸张与铅笔色盘 */
+            --paper: #ffffff;          
+            --graphite: #333333;       
+            --graphite-sub: #666666;   
+            --graphite-faint: #cccccc; 
+            
+            /* 批改笔触颜色 */
+            --red-pencil: #e64a4a;     
+            --green-pencil: #10b981;
+            --blue-pencil: #0ea5e9;
+            --orange-pencil: #f97316;
+            --purple-pencil: #a855f7; 
+            
+            /* 水彩记号笔色系 (用于各题型区分) */
+            --marker-blue: rgba(14, 165, 233, 0.25);    
+            --marker-peach: rgba(249, 115, 22, 0.25);   
+            --marker-purple: rgba(168, 85, 247, 0.25);  
+            --marker-mint: rgba(16, 185, 129, 0.25);    
+            --marker-yellow: rgba(255, 213, 79, 0.35);   
+            --marker-yellow-strong: rgba(255, 213, 79, 0.8);
+            --marker-green: rgba(16, 185, 129, 0.15);
+            --marker-red: rgba(230, 74, 74, 0.1);
+
+            /* 铅笔排线背景 */
+            --hatching-graphite: repeating-linear-gradient(45deg, transparent, transparent 3px, rgba(51, 51, 51, 0.04) 3px, rgba(51, 51, 51, 0.04) 4px);
+
+            --transition: all 0.3s ease-out;
+            
+            --font-sans: 'Noto Sans SC', 'Noto Sans JP', sans-serif;
+            --font-serif: 'Noto Serif SC', 'Noto Serif JP', 'Songti SC', 'SimSun', serif;
+        }
+
+        body {
+            font-family: var(--font-sans);
+            background-color: var(--paper);
+            color: var(--graphite);
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+        }
+
+        /* 纸张噪点纹理 */
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.02'/%3E%3C/svg%3E");
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        /* 工具类：手绘感不规则边框 */
+        .sketch-box {
+            border: 1.5px solid var(--graphite);
+            border-radius: 2px 255px 3px 25px / 255px 5px 225px 3px;
+            background: transparent;
+        }
+
+        /* ================= Header ================= */
+        header {
+            width: 100%;
+            padding: 16px 20px;
+            box-sizing: border-box;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(4px);
+            border-bottom: 1.5px solid var(--graphite);
+            border-bottom-left-radius: 50% 2px;
+            border-bottom-right-radius: 50% 3px;
+        }
+
+        .header-btn {
+            text-decoration: none;
+            color: var(--graphite);
+            font-size: 14px;
+            font-weight: 700;
+            padding: 6px 12px;
+            background: transparent;
+            border: 1.5px solid var(--graphite);
+            border-radius: 2px 8px 3px 6px / 6px 3px 8px 2px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: var(--transition);
+            letter-spacing: 0.05em;
+            cursor: pointer;
+        }
+        
+        .header-btn:hover { 
+            background: var(--marker-yellow);
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--graphite);
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            white-space: nowrap;
+            letter-spacing: 0.1em;
+            display: flex;
+            align-items: center;
+        }
+
+        /* ================= 布局容器 ================= */
+        .layout-container {
+            width: 95%;
+            max-width: 800px;
+            padding: 30px 0 80px 0;
+            display: flex;
+            flex-direction: column;
+            gap: 40px;
+            flex: 1;
+            box-sizing: border-box;
+        }
+
+        /* ================= 上部文章区 ================= */
+        .article-section {
+            padding: 30px 40px;
+            background: var(--paper);
+            box-shadow: 2px 4px 15px rgba(0,0,0,0.03);
+            height: fit-content;
+        }
+
+        .article-meta {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 1.5px dashed var(--graphite-faint);
+        }
+
+        .meta-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .tag {
+            font-family: 'Noto Sans JP', sans-serif;
+            font-size: 12px;
+            color: var(--graphite);
+            background: var(--marker-peach);
+            padding: 2px 8px;
+            border: 1.5px solid var(--graphite);
+            border-radius: 2px 8px 2px 6px / 6px 2px 8px 2px;
+            font-weight: 700;
+        }
+
+        .article-title-info {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--graphite-sub);
+        }
+
+        .translate-toggle-btn {
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--graphite);
+            background: transparent;
+            border: 1.5px solid var(--graphite);
+            border-radius: 2px 8px 3px 6px / 6px 3px 8px 2px;
+            padding: 4px 10px;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .translate-toggle-btn:hover, .translate-toggle-btn.active {
+            background: var(--marker-blue);
+            box-shadow: inset 1px 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .article-part {
+            margin-bottom: 30px;
+            scroll-margin-top: 80px;
+        }
+
+        .article-content {
+            font-family: var(--font-serif);
+            font-size: 16px;
+            line-height: 2.2;
+            color: #222;
+            text-align: justify;
+        }
+
+        .paragraph-group {
+            margin-bottom: 1.5em;
+            scroll-margin-top: 80px;
+        }
+
+        .article-content p {
+            margin: 0;
+            text-indent: 2em; /* 段首缩进 */
+        }
+
+        /* 重点词汇点击查词功能 (随时可用) */
+        .vocab-word {
+            border-bottom: 1.5px dotted var(--graphite-sub);
+            cursor: pointer;
+            transition: var(--transition);
+            position: relative;
+            padding-bottom: 1px;
+            font-weight: 600;
+        }
+
+        .vocab-word:hover {
+            background-color: var(--marker-yellow);
+            color: var(--graphite);
+        }
+
+        /* 词汇解释气泡容器 */
+        .vocab-tooltip {
+            position: absolute;
+            z-index: 1000;
+            background: #fffcf2; 
+            border: 1.5px solid var(--graphite);
+            border-radius: 2px 12px 3px 12px / 12px 3px 12px 2px;
+            padding: 8px 14px;
+            box-shadow: 2px 4px 8px rgba(0,0,0,0.1);
+            font-family: var(--font-sans);
+            font-size: 13px;
+            color: var(--graphite);
+            pointer-events: none; 
+            opacity: 0;
+            transform: translateY(5px);
+            transition: all 0.2s ease-out;
+            display: none;
+            width: max-content;
+            max-width: 250px;
+        }
+
+        .vocab-tooltip.show {
+            opacity: 1;
+            transform: translateY(0);
+            display: block;
+        }
+
+        .vocab-tooltip::after {
+            content: '';
+            position: absolute;
+            bottom: -6px;
+            left: 20px;
+            width: 10px;
+            height: 10px;
+            background: #fffcf2;
+            border-bottom: 1.5px solid var(--graphite);
+            border-right: 1.5px solid var(--graphite);
+            transform: rotate(45deg);
+        }
+
+        .vocab-tooltip .reading {
+            font-size: 11px;
+            color: var(--graphite-sub);
+            margin-bottom: 4px;
+            display: block;
+            font-weight: 500;
+        }
+
+        .vocab-tooltip .meaning {
+            font-weight: 700;
+            line-height: 1.4;
+        }
+
+        /* 文章翻译样式 */
+        .article-translation {
+            display: none;
+            font-family: var(--font-sans);
+            font-size: 14px;
+            line-height: 1.8;
+            color: var(--graphite-sub);
+            background: rgba(0,0,0,0.02);
+            padding: 10px 16px;
+            margin-top: 10px;
+            border-left: 3px solid var(--marker-yellow-strong);
+            border-radius: 0 8px 8px 0;
+        }
+
+        .article-translation.show {
+            display: block;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        /* 模拟阅读时的划线笔记 */
+        .underline-note {
+            text-decoration: underline var(--graphite-sub);
+            text-underline-offset: 6px;
+            text-decoration-thickness: 1.5px;
+            padding-bottom: 2px;
+            font-weight: 600;
+        }
+
+        /* --- 动态解题关键句划线样式 (按题目独立配色) --- */
+        .ks-target {
+            transition: background-color 0.4s ease;
+            border-radius: 2px;
+        }
+
+        /* 第1题关键句配色 (蓝色) */
+        .ks-target.revealed-q1 {
+            background: linear-gradient(transparent 65%, var(--marker-blue) 65%);
+            border-bottom: 2px dashed var(--blue-pencil);
+            padding-bottom: 2px;
+        }
+        .ks-target.revealed-q1::before {
+            content: '1';
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 18px;
+            height: 18px;
+            background: var(--blue-pencil);
+            color: #fff;
+            font-size: 12px;
+            font-weight: 900;
+            font-family: 'Noto Sans JP', sans-serif;
+            border-radius: 50% 40% 60% 45% / 55% 45% 50% 60%;
+            margin-right: 6px;
+            position: relative;
+            top: -2px;
+            text-indent: 0;
+        }
+
+        /* 第2题关键句配色 (橙色) */
+        .ks-target.revealed-q2 {
+            background: linear-gradient(transparent 65%, var(--marker-peach) 65%);
+            border-bottom: 2px dashed var(--orange-pencil);
+            padding-bottom: 2px;
+        }
+        .ks-target.revealed-q2::before {
+            content: '2';
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 18px;
+            height: 18px;
+            background: var(--orange-pencil);
+            color: #fff;
+            font-size: 12px;
+            font-weight: 900;
+            font-family: 'Noto Sans JP', sans-serif;
+            border-radius: 50% 40% 60% 45% / 55% 45% 50% 60%;
+            margin-right: 6px;
+            position: relative;
+            top: -2px;
+            text-indent: 0;
+        }
+
+        /* 第3题关键句配色 (紫色) */
+        .ks-target.revealed-q3 {
+            background: linear-gradient(transparent 65%, var(--marker-purple) 65%);
+            border-bottom: 2px dashed var(--purple-pencil);
+            padding-bottom: 2px;
+        }
+        .ks-target.revealed-q3::before {
+            content: '3';
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 18px;
+            height: 18px;
+            background: var(--purple-pencil);
+            color: #fff;
+            font-size: 12px;
+            font-weight: 900;
+            font-family: 'Noto Sans JP', sans-serif;
+            border-radius: 50% 40% 60% 45% / 55% 45% 50% 60%;
+            margin-right: 6px;
+            position: relative;
+            top: -2px;
+            text-indent: 0;
+        }
+
+        /* 点击跳转時の黄色闪烁动画 */
+        .ks-target.flash-focus {
+            animation: flashHighlight 1.5s ease-out;
+        }
+        @keyframes flashHighlight {
+            0% { background-color: rgba(255, 213, 79, 0.7); }
+            100% { background-color: transparent; }
+        }
+
+        .article-source {
+            text-align: right;
+            font-size: 13px;
+            color: var(--graphite-sub);
+            margin-top: 20px;
+        }
+
+        .article-notes {
+            margin-top: 20px;
+            padding-top: 15px;
+            border-top: 1px solid var(--graphite-faint);
+            font-size: 13px;
+            color: var(--graphite-sub);
+            line-height: 1.8;
+            font-family: var(--font-sans);
+        }
+
+        /* ================= 下部题目区 ================= */
+        .question-section {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .question-card {
+            padding: 24px;
+            background: rgba(255, 255, 255, 0.5);
+            transition: var(--transition);
+            position: relative;
+            scroll-margin-top: 80px; 
+        }
+
+        .question-card:hover {
+            box-shadow: 2px 4px 10px rgba(0,0,0,0.02);
+            background: var(--paper);
+        }
+
+        .q-header {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .q-number {
+            font-family: 'Noto Sans JP', sans-serif;
+            font-size: 16px;
+            font-weight: 900;
+            color: var(--graphite);
+            width: 28px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1.5px solid var(--graphite);
+            border-radius: 50% 45% 55% 40% / 45% 55% 40% 50%;
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+
+        .q-text-wrapper {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .q-text {
+            font-size: 15px;
+            font-weight: 700;
+            line-height: 1.6;
+        }
+
+        /* 题干の翻译默认隐藏 */
+        .q-text-trans {
+            display: none;
+            font-size: 13px;
+            color: var(--graphite-sub);
+            font-weight: normal;
+        }
+
+        /* 选项样式 */
+        .options-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .option-label {
+            display: flex;
+            align-items: flex-start;
+            padding: 12px 16px;
+            border: 1.5px solid var(--graphite);
+            border-radius: 2px 255px 3px 25px / 255px 5px 225px 3px;
+            cursor: pointer;
+            transition: var(--transition);
+            position: relative;
+            background: transparent;
+            flex-wrap: wrap; 
+        }
+
+        .option-label:hover:not(.disabled) {
+            background: var(--hatching-graphite);
+        }
+
+        /* 提交后的选项可点击看解析 */
+        .options-group.reviewed .option-label {
+            cursor: pointer;
+        }
+        .options-group.reviewed .option-label:hover {
+            border-color: var(--graphite);
+            box-shadow: 2px 2px 0 rgba(0,0,0,0.05);
+        }
+        
+        .click-hint {
+            display: none;
+            position: absolute;
+            right: 12px;
+            top: 12px;
+            font-size: 11px;
+            color: var(--marker-yellow-strong);
+            font-weight: 700;
+            border: 1px dashed var(--marker-yellow-strong);
+            padding: 2px 6px;
+            border-radius: 10px;
+            background: #fff;
+        }
+        .options-group.reviewed .click-hint {
+            display: block; 
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        .option-input {
+            display: none; 
+        }
+
+        /* 自定义手绘单选框 */
+        .custom-radio {
+            width: 18px;
+            height: 18px;
+            border: 1.5px solid var(--graphite);
+            border-radius: 50% 40% 60% 45% / 55% 45% 50% 60%;
+            margin-right: 12px;
+            margin-top: 4px;
+            flex-shrink: 0;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition);
+            font-weight: 900;
+            font-size: 12px;
+            font-family: 'Noto Sans JP', sans-serif;
+            color: var(--graphite-sub);
+        }
+
+        .option-input:checked + .custom-radio {
+            background: var(--marker-yellow-strong);
+            color: var(--graphite);
+        }
+        
+        .option-label.selected {
+            background: rgba(255, 213, 79, 0.1);
+            border-style: solid;
+        }
+
+        .option-content-wrapper {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .option-content {
+            font-size: 15px;
+            line-height: 1.5;
+            color: var(--graphite);
+            padding-right: 60px;
+        }
+
+        .option-input:checked ~ .option-content-wrapper .option-content {
+            font-weight: 700;
+        }
+
+        .option-trans {
+            display: none;
+            font-size: 13px;
+            color: var(--graphite-sub);
+            line-height: 1.4;
+        }
+
+        /* 提交后控制翻译显示 */
+        .question-card.reviewed .q-text-trans,
+        .question-card.reviewed .option-trans {
+            display: block;
+            animation: fadeIn 0.4s ease-out;
+        }
+
+        /* 选项独立解析展开框 */
+        .option-detail-analysis {
+            display: none;
+            width: 100%;
+            margin-top: 12px;
+            padding: 12px 16px;
+            background: #fffcf2;
+            border: 1px dashed var(--graphite-sub);
+            border-radius: 2px 8px 3px 6px / 6px 3px 8px 2px;
+            font-size: 13px;
+            color: var(--graphite);
+            line-height: 1.6;
+            box-sizing: border-box;
+        }
+        .option-detail-analysis.show {
+            display: block;
+            animation: slideDown 0.3s ease-out;
+        }
+
+        /* ================= 解析反馈样式 ================= */
+        .option-label.is-correct {
+            background: var(--marker-green);
+            border-color: var(--green-pencil);
+        }
+        .option-label.is-correct .custom-radio {
+            background: var(--green-pencil);
+            border-color: var(--green-pencil);
+            color: white;
+        }
+        
+        .option-label.is-wrong {
+            background: var(--marker-red);
+            border-color: var(--red-pencil);
+            border-style: dashed;
+        }
+        .option-label.is-wrong .custom-radio {
+            background: var(--red-pencil);
+            border-color: var(--red-pencil);
+            color: white;
+        }
+
+        .explanation-box {
+            margin-top: 20px;
+            padding: 20px;
+            background: #fafafa;
+            border: 1.5px solid var(--graphite);
+            border-radius: 2px 15px 3px 15px / 15px 5px 15px 3px;
+            position: relative;
+            display: none; 
+            animation: slideDown 0.4s ease-out;
+        }
+
+        .explanation-box.show {
+            display: block;
+        }
+
+        .explanation-box::before {
+            content: '';
+            position: absolute;
+            top: -10px;
+            left: 50%;
+            transform: translateX(-50%) rotate(-2deg);
+            width: 60px;
+            height: 20px;
+            background: rgba(255, 213, 79, 0.6);
+            border: 1px solid rgba(0,0,0,0.05);
+        }
+
+        .explanation-title {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--red-pencil);
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border-bottom: 1.5px dashed var(--graphite-faint);
+            padding-bottom: 8px;
+        }
+        
+        .key-sentence-box {
+            background: #fff;
+            border-left: 3px solid var(--graphite-faint);
+            padding: 10px 12px;
+            margin-bottom: 12px;
+            font-size: 13.5px;
+            box-shadow: 1px 2px 5px rgba(0,0,0,0.02);
+            position: relative;
+        }
+
+        .key-sentence-box .ks-label {
+            font-weight: 700;
+            color: var(--graphite);
+            margin-bottom: 4px;
+            font-size: 12px;
+        }
+
+        .key-sentence-box.clickable {
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .key-sentence-box.clickable:hover {
+            transform: translateY(-1px);
+            box-shadow: 2px 4px 8px rgba(0,0,0,0.04);
+        }
+
+        .key-sentence-box.clickable::after {
+            content: '🔗 点击定位至原文';
+            position: absolute;
+            right: 12px;
+            top: 12px;
+            font-size: 11px;
+            font-weight: 700;
+            opacity: 0.8;
+        }
+
+        /* 动态主题类：Q1 */
+        .ks-theme-q1 { border-left-color: var(--blue-pencil); }
+        .ks-theme-q1:hover { background: #f0f9ff; }
+        .ks-theme-q1 .ks-label { color: var(--blue-pencil); }
+        .ks-theme-q1.clickable::after { color: var(--blue-pencil); }
+
+        /* 动态主题类：Q2 */
+        .ks-theme-q2 { border-left-color: var(--orange-pencil); }
+        .ks-theme-q2:hover { background: #fff7ed; }
+        .ks-theme-q2 .ks-label { color: var(--orange-pencil); }
+        .ks-theme-q2.clickable::after { color: var(--orange-pencil); }
+
+        /* 动态主题类：Q3 */
+        .ks-theme-q3 { border-left-color: var(--purple-pencil); }
+        .ks-theme-q3:hover { background: #faf5ff; }
+        .ks-theme-q3 .ks-label { color: var(--purple-pencil); }
+        .ks-theme-q3.clickable::after { color: var(--purple-pencil); }
+
+        .explanation-content {
+            font-size: 14px;
+            line-height: 1.8;
+            color: var(--graphite);
+        }
+
+        /* ================= 底部动作区 ================= */
+        .action-bar {
+            grid-column: 1 / -1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            margin-top: 10px;
+            padding-top: 30px;
+            border-bottom: 1.5px dashed var(--graphite-faint); 
+            padding-bottom: 30px;
+            min-height: 80px; 
+        }
+
+        .submit-btn {
+            font-family: 'Noto Sans JP', sans-serif;
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--graphite);
+            background: var(--marker-mint);
+            padding: 12px 50px;
+            border: 1.5px solid var(--graphite);
+            border-radius: 3px 255px 4px 25px / 255px 5px 225px 4px;
+            cursor: pointer;
+            letter-spacing: 0.1em;
+            transition: var(--transition);
+            box-shadow: 2px 4px 0px rgba(51,51,51,0.1);
+        }
+
+        .submit-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 2px 6px 0px rgba(51,51,51,0.15);
+        }
+
+        .submit-btn:active:not(:disabled) {
+            transform: translateY(2px);
+            box-shadow: 0px 0px 0px rgba(51,51,51,0);
+        }
+
+        /* ================= 精简版题目情况结算版 ================= */
+        .result-board {
+            display: none; 
+            align-items: center;
+            justify-content: center;
+            gap: 16px;
+            padding: 10px 24px;
+            background: #fffcf2; 
+            border: 1.5px solid var(--graphite);
+            border-radius: 2px 255px 3px 25px / 255px 5px 225px 3px;
+            animation: slideDown 0.4s ease-out;
+        }
+
+        .result-board.show {
+            display: flex;
+            flex-wrap: wrap; 
+        }
+
+        .result-score-compact {
+            font-size: 16px;
+            font-weight: 900;
+            color: var(--red-pencil);
+            font-family: 'Noto Sans JP', sans-serif;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            white-space: nowrap;
+        }
+
+        .result-score-compact.perfect {
+            color: var(--green-pencil);
+        }
+
+        .result-divider {
+            width: 1.5px;
+            height: 18px;
+            background: var(--graphite-faint);
+            border-style: dashed;
+        }
+
+        .result-details-compact {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .result-item-compact {
+            font-size: 13px;
+            font-weight: 700;
+            padding: 4px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            background: rgba(230, 74, 74, 0.05);
+            color: var(--red-pencil);
+            border: 1px solid rgba(230, 74, 74, 0.2);
+            font-family: 'Noto Sans JP', sans-serif;
+        }
+
+        .result-item-compact:hover {
+            background: rgba(230, 74, 74, 0.15);
+            transform: translateY(-2px);
+            box-shadow: 1px 2px 5px rgba(230, 74, 74, 0.15);
+        }
+
+        .result-item-compact::after {
+            content: '🔗';
+            font-size: 11px;
+            opacity: 0.8;
+        }
+
+        .result-item-compact.perfect-badge {
+            background: rgba(16, 185, 129, 0.05);
+            color: var(--green-pencil);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+            pointer-events: none;
+        }
+
+        .result-item-compact.perfect-badge::after {
+            content: '✨';
+            font-size: 12px;
+        }
+
+        /* ================= 单字版快速跳转导航栏 (3题定制) ================= */
+        .quick-nav {
+            position: fixed;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            z-index: 90;
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(4px);
+            padding: 12px 8px;
+            border: 1.5px solid var(--graphite);
+            border-radius: 2px 8px 3px 6px / 6px 3px 8px 2px;
+            box-shadow: 2px 4px 10px rgba(0,0,0,0.05);
+            align-items: center; 
+        }
+
+        .nav-section-title {
+            font-size: 14px;
+            color: var(--graphite);
+            text-align: center;
+            margin-top: 6px;
+            margin-bottom: 2px;
+            font-weight: 900;
+            font-family: 'Noto Sans JP', sans-serif;
+            background: var(--marker-yellow);
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50% 40% 60% 45% / 55% 45% 50% 60%;
+            border: 1.5px solid var(--graphite);
+        }
+
+        .nav-link {
+            text-decoration: none;
+            color: var(--graphite-sub);
+            font-family: 'Noto Sans JP', sans-serif;
+            font-size: 14px;
+            font-weight: 700;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1.5px solid transparent;
+            border-radius: 4px;
+            transition: var(--transition);
+        }
+
+        .nav-link:hover {
+            background: var(--marker-yellow);
+            color: var(--graphite);
+            border-color: var(--graphite);
+            border-radius: 2px 255px 3px 25px / 255px 5px 225px 3px;
+        }
+
+        .nav-divider {
+            width: 100%;
+            height: 1.5px;
+            background: var(--graphite-faint);
+            border-style: dashed;
+            margin: 4px 0;
+        }
+
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @media (max-width: 900px) {
+            .quick-nav { right: 5px; padding: 10px 4px; gap: 4px; }
+            .nav-section-title, .nav-link { width: 20px; height: 20px; font-size: 12px; }
+        }
+
+        @media (max-width: 600px) {
+            header { padding: 12px 16px; }
+            h1 { font-size: 15px; }
+            .header-btn { font-size: 13px; padding: 6px 10px; }
+            .layout-container { width: 100%; padding: 20px 16px 60px 16px; gap: 24px; }
+            .article-section { padding: 20px 16px; border-radius: 2px 20px 3px 20px / 20px 5px 20px 3px; }
+            .article-meta { margin-bottom: 16px; padding-bottom: 12px; }
+            .article-content { font-size: 15px; line-height: 2.0; } 
+            .question-section { gap: 16px; padding-top: 16px; }
+            .question-card { padding: 20px 16px; }
+            .q-header { margin-bottom: 12px; }
+            .q-number { width: 24px; height: 24px; font-size: 14px; margin-top: 0; }
+            .q-text { font-size: 15px; line-height: 1.6; }
+            .option-label { padding: 10px 12px; }
+            .custom-radio { width: 16px; height: 16px; font-size: 11px; margin-right: 10px; margin-top: 2px; }
+            .option-content { font-size: 14px; padding-right: 0; }
+            .click-hint { 
+                position: static; margin-top: 8px; font-size: 11px; padding: 4px 8px; 
+                background: #fff9e6; border: 1px dashed var(--marker-yellow-strong);
+            }
+            .options-group.reviewed .click-hint { display: inline-block; }
+            .key-sentence-box { padding: 10px; font-size: 13px; }
+            .key-sentence-box.clickable::after { 
+                position: static; display: inline-block; margin-top: 6px; 
+                font-size: 11px; padding: 4px 8px; background: #f0fdf4; border-radius: 4px;
+            }
+            .explanation-box { padding: 16px; }
+            .explanation-title { font-size: 13px; }
+            .explanation-content { font-size: 14px; }
+            .submit-btn { width: 100%; padding: 12px; font-size: 15px; }
+            .quick-nav { display: none; }
+            .vocab-tooltip { max-width: 200px; font-size: 12px; padding: 6px 10px; }
+            .result-board { padding: 12px 16px; gap: 12px; border-radius: 2px 15px 3px 15px / 15px 5px 15px 3px;}
+            .result-score-compact { font-size: 15px; }
+            .result-item-compact { font-size: 12px; padding: 4px 8px; }
+            .result-divider { display: none; } 
+        }
+    </style>
+</head>
+<body id="top">
+
+    <header>
+        <a class="header-btn" id="back-to-reading-index" href="../../index.html?level=N2&type=long&browse=year" style="position:absolute;left:20px;display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border:1.5px solid var(--graphite);border-radius:2px 8px 3px 6px/6px 3px 8px 2px;background:transparent;color:var(--graphite);text-decoration:none;font-size:14px;font-weight:800;line-height:1;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+            戻る
+        </a>
+        <h1>長文読解演習</h1>
+        <div style="width: 65px;"></div>
+    </header>
+
+    <!-- 单字版快速跳转导航 (3题定制) -->
+    <nav class="quick-nav sketch-box">
+        <a href="#top" class="nav-link" title="返回顶部">↑</a>
+        <div class="nav-divider"></div>
+        <div class="nav-section-title">文</div>
+        <a href="#para-1" class="nav-link" title="第1-3段">1</a>
+        <a href="#para-4" class="nav-link" title="第4-6段">2</a>
+        <a href="#para-7" class="nav-link" title="第7-10段">3</a>
+        <div class="nav-divider"></div>
+        <div class="nav-section-title">問</div>
+        <a href="#q1-card" class="nav-link" title="問 1">1</a>
+        <a href="#q2-card" class="nav-link" title="問 2">2</a>
+        <a href="#q3-card" class="nav-link" title="問 3">3</a>
+    </nav>
+
+    <div class="layout-container">
+        
+        <!-- 上部：文章区域 -->
+        <main class="article-section sketch-box">
+            <div class="article-meta">
+                <div class="meta-left">
+                    <span class="tag">N2 読解</span>
+                    <span class="article-title-info">2010年7月 · 努力の測定</span>
+                </div>
+                <button class="translate-toggle-btn" onclick="toggleTranslation(this)">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 8l6 6"/><path d="M4 14l6-6 2-3"/><path d="M2 5h12"/><path d="M7 2h1"/><path d="M22 22l-5-10-5 10"/><path d="M14 18h6"/></svg>
+                    参考訳
+                </button>
+            </div>
+            
+            <div class="article-content" id="mainArticleContent">
+                
+                <div class="article-part" id="article-main">
+                    
+                    <div class="paragraph-group" id="para-1">
+                        <p>下の文章は、ある人物が自分の人生に影響を与えた言葉について説明したものである。</p>
+                        <p>（　①　）</p>
+                        <p>　この言葉は私のオリジナルです。この考え方にたどり着いたのは３８歳のときですが、その頃から努力することにたいして抵抗感がなくなり、とても生きやすくなりました。</p>
+                        <div class="article-translation">
+                            下面的文章，是某个人就影响了自己人生的语句所作的说明。<br>（　①　）<br>　这句话是我的原创。我得出这种思考方式是在38岁的时候，从那时起，我对“努力”这件事不再有抗拒感，生活变得非常轻松。
+                        </div>
+                    </div>
+                    
+                    <div class="paragraph-group" id="para-4">
+                        <p>　私たちはなぜか、中学、高校生の頃に「努力する姿」を人に見せることをやめてしまいます。試験前の<span class="vocab-word" data-reading="がりべん" data-meaning="成績を上げるために勉強ばかりする様子">ガリ勉</span>(注1)や運動会前の徒競走の<span class="vocab-word" data-reading="もうれんしゅう" data-meaning="一生懸命練習すること">猛練習</span>(注2)などが、人に知られると気恥ずかしくなってしまうのです。</p>
+                        <p>　<span class="ks-target target-q2">その心境は複雑です。まず結果が出なかったとき「あいつ、あれだけやってダメだった」とバカにされるのを恐れます。結果が出ても「あれだけ準備すれば当然だ」と評価が下がるのを恐れます。他者の評価を気にし始めると、いずれにせよ努力を<span class="vocab-word" data-reading="かくすにこしたことはない" data-meaning="隠したほうがいい">隠すに越したことはない</span>(注3)わけです。</span></p>
+                        <p>　それは社会人になっても同じです。得意技について「よほど努力しているのでしょうね」と褒められても、「たいしたことはしていません」と②<u>自分の努力をわざわざ否定してしまったりするわけ</u>です。</p>
+                        <div class="article-translation">
+                            　不知道为什么，我们在初中、高中的时候，就会停止让别人看到自己“努力的样子”。像考试前的<span class="vocab-word" data-reading="がりべん" data-meaning="为了提高成绩而只顾学习的样子">死用功</span>，或是运动会赛跑前的<span class="vocab-word" data-reading="もうれんしゅう" data-meaning="拼命练习">猛练</span>等，一旦被别人知道了就会觉得难为情。<br>　那种心境是很复杂的。首先，当没有取得成果时，害怕被嘲笑说“那家伙，做了那么多还是不行”。就算取得了成果，也害怕评价会降低，被说“准备了那么多理所当然”。一旦开始在意他人的评价，无论如何<span class="vocab-word" data-reading="かくすにこしたことはない" data-meaning="隐藏起来比较好">最好还是隐藏</span>努力。<br>　这即使成了社会人也是一样的。关于自己的拿手本领，即使被夸奖“你肯定非常努力吧”，也会说“没做什么了不起的事”，从而②<u>特意去否定自己的努力</u>。
+                        </div>
+                    </div>
+
+                    <div class="paragraph-group" id="para-7">
+                        <p>　しかし、この「謙遜して努力を隠す対応」はとても危険です。なぜなら、努力しなくていいことへの言い訳になる一方で、努力を「かっこう悪い」とする無意識の<span class="vocab-word" data-reading="ばりあ" data-meaning="障害となるもの">バリア</span>(注4)になりかねないためです。</p>
+                        <p>　もちろん、努力すれば、すべてがなんとかなるわけではありませんが、努力なしでは何も始まりません。<span class="ks-target target-q3">そのためには「努力」という言葉を生活に積極的に取り入れ、そのプロセスを楽しむ仕組みをつくらなければなりません。</span></p>
+                        <p>　<span class="ks-target target-q1">そして、努力を客観視するための測定方法が「時間」なのです。</span></p>
+                        <p>　<span class="ks-target target-q3">努力をする、しないはあくまで主観ですが、その分量を時間換算する仕組みを取り入れれば、自分がどこまで努力をしたのか、わかりやすく管理できるようになり、</span><span class="vocab-word" data-reading="どうどうと" data-meaning="自信のある様子で">堂々と</span>(注5)「○○については何年間やってきた」と言えます。</p>
+                        <p>　例えば、私はよく「文章を書くのが速い」と言われますが、その場合にこう返すのです。「大学卒業から１６年間、独立するまで、文章で<span class="vocab-word" data-reading="こきゃく" data-meaning="大切な客">顧客</span>(注6)にリポートを作る仕事でしたから速くないと困ります」と。</p>
+                        <p>　<span class="ks-target target-q1">努力を時間で測定すれば、時間が有限だからこそ、何を努力するのか自分で考え、決めなければいけません。そうすれば、結果はあとからついてくる、という気持ちになれる魔法の言葉なのです。</span></p>
+                        <div class="article-translation">
+                            　但是，这种“通过谦虚来隐藏努力的应对”是非常危险的。因为这不仅会成为可以不努力的借口，还有可能成为将努力视为“难看”的无意识的<span class="vocab-word" data-reading="ばりあ" data-meaning="成为障碍的东西">屏障</span>。<br>　当然，并非只要努力，一切就都能迎刃而解，但如果不努力，什么都不会开始。为此，必须把“努力”这个词积极地引入生活，并建立一种能享受其过程的机制。<br>　而为了客观看待努力，其测量方法就是“时间”。<br>　努力与否终究是主观的，但如果引入将其分量换算成时间的机制，就能清楚地管理自己到底努力到了什么程度，从而能<span class="vocab-word" data-reading="どうどうと" data-meaning="充满自信的样子">堂堂正正地</span>说“关于某某事，我已经做了多少年”。<br>　例如，我经常被人说“写文章写得真快”，那种时候我会这样回答：“从大学毕业后到独立的16年里，我做的是用文章为<span class="vocab-word" data-reading="こきゃく" data-meaning="重要的客人">顾客</span>撰写报告的工作，如果不快的话就很麻烦了。”<br>　如果用时间来测量努力，正因为时间是有限的，所以必须自己去思考、决定要在什么上努力。如果那样做，这便是一句能让人产生“结果自然会随之而来”这种心情的魔法话语。
+                        </div>
+                    </div>
+
+                    <div class="article-source">
+                        （勝間和代「勝間和代の人生を変えるコトバ」2009年4月11日付朝日新聞による）
+                    </div>
+
+                    <div class="article-notes">
+                        （注１）ガリ勉：成績を上げるために勉強ばかりする様子<br>
+                        （注２）猛練習：一生懸命練習すること<br>
+                        （注３）隠すに越したことはない：隠したほうがいい<br>
+                        （注４）バリア：障害となるもの<br>
+                        （注５）堂々と：自信のある様子で<br>
+                        （注６）顧客：大切な客
+                    </div>
+                </div>
+
+            </div>
+            
+        </main>
+
+        <!-- 下部：题目区域 -->
+        <aside class="question-section" id="quizForm">
+            
+            <!-- 问题 1 -->
+            <div class="question-card sketch-box" data-question="q1" id="q1-card">
+                <div class="q-header">
+                    <div class="q-number" style="background: var(--marker-blue);">1</div>
+                    <div class="q-text-wrapper">
+                        <div class="q-text">（　①　）には、筆者の人生に影響を与えた言葉が入る。それはどれか。</div>
+                        <div class="q-text-trans">(在（　①　）中，填入的是影响了作者人生的那句话。是哪一项？)</div>
+                    </div>
+                </div>
+                <div class="options-group">
+                    <label class="option-label" data-opt="1">
+                        <input type="radio" name="q1" value="1" class="option-input">
+                        <div class="custom-radio">1</div>
+                        <div class="option-content-wrapper">
+                            <div class="option-content">努力する姿は、隠すことに価値がある</div>
+                            <div class="option-trans">努力的样子，将其隐藏起来是有价值的。</div>
+                        </div>
+                        <span class="click-hint">詳細解説</span>
+                        <div class="option-detail-analysis"></div>
+                    </label>
+                    <label class="option-label" data-opt="2">
+                        <input type="radio" name="q1" value="2" class="option-input">
+                        <div class="custom-radio">2</div>
+                        <div class="option-content-wrapper">
+                            <div class="option-content">努力すれば、他人からの評価は変わる</div>
+                            <div class="option-trans">只要努力，来自他人的评价就会改变。</div>
+                        </div>
+                        <span class="click-hint">詳細解説</span>
+                        <div class="option-detail-analysis"></div>
+                    </label>
+                    <label class="option-label" data-opt="3">
+                        <input type="radio" name="q1" value="3" class="option-input">
+                        <div class="custom-radio">3</div>
+                        <div class="option-content-wrapper">
+                            <div class="option-content">努力は、かけた時間によって測定できる</div>
+                            <div class="option-trans">努力，可以通过花费的时间来测量。</div>
+                        </div>
+                        <span class="click-hint">詳細解説</span>
+                        <div class="option-detail-analysis"></div>
+                    </label>
+                    <label class="option-label" data-opt="4">
+                        <input type="radio" name="q1" value="4" class="option-input">
+                        <div class="custom-radio">4</div>
+                        <div class="option-content-wrapper">
+                            <div class="option-content">努力すれば、時間管理も上手になる</div>
+                            <div class="option-trans">只要努力，时间管理也会变得拿手。</div>
+                        </div>
+                        <span class="click-hint">詳細解説</span>
+                        <div class="option-detail-analysis"></div>
+                    </label>
+                </div>
+                <div class="explanation-box">
+                    <div class="explanation-title">✎ 赤ペン解析 (内容の把握)</div>
+                    <div class="key-sentence-box">
+                        <div class="ks-label">【着眼点】</div>
+                        <div class="ks-text" id="q1-ks"></div>
+                    </div>
+                    <div class="explanation-content" id="q1-exp"></div>
+                </div>
+            </div>
+
+            <!-- 问题 2 -->
+            <div class="question-card sketch-box" data-question="q2" id="q2-card">
+                <div class="q-header">
+                    <div class="q-number" style="background: var(--marker-peach);">2</div>
+                    <div class="q-text-wrapper">
+                        <div class="q-text">②<u>自分の努力をわざわざ否定してしまったりする</u>のはなぜだと筆者は述べているか。</div>
+                        <div class="q-text-trans">(作者认为②“特意去否定自己的努力”是为什么？)</div>
+                    </div>
+                </div>
+                <div class="options-group">
+                    <label class="option-label" data-opt="1">
+                        <input type="radio" name="q2" value="1" class="option-input">
+                        <div class="custom-radio">1</div>
+                        <div class="option-content-wrapper">
+                            <div class="option-content">努力していると感じるのは自分の主観であり、他の人には理解できないから</div>
+                            <div class="option-trans">因为觉得自己正在努力是自己的主观感受，其他人是无法理解的。</div>
+                        </div>
+                        <span class="click-hint">詳細解説</span>
+                        <div class="option-detail-analysis"></div>
+                    </label>
+                    <label class="option-label" data-opt="2">
+                        <input type="radio" name="q2" value="2" class="option-input">
+                        <div class="custom-radio">2</div>
+                        <div class="option-content-wrapper">
+                            <div class="option-content">自分の努力の結果に対し、他人にいろいろ言われたり思われたりしたくないから</div>
+                            <div class="option-trans">因为不想对于自己努力的结果，被他人说三道四或产生各种想法。</div>
+                        </div>
+                        <span class="click-hint">詳細解説</span>
+                        <div class="option-detail-analysis"></div>
+                    </label>
+                    <label class="option-label" data-opt="3">
+                        <input type="radio" name="q2" value="3" class="option-input">
+                        <div class="custom-radio">3</div>
+                        <div class="option-content-wrapper">
+                            <div class="option-content">他の人に比べると自分の努力は不十分で、もっと努力が必要だと思っているから</div>
+                            <div class="option-trans">因为和别人相比自己的努力还不充分，认为需要更多的努力。</div>
+                        </div>
+                        <span class="click-hint">詳細解説</span>
+                        <div class="option-detail-analysis"></div>
+                    </label>
+                    <label class="option-label" data-opt="4">
+                        <input type="radio" name="q2" value="4" class="option-input">
+                        <div class="custom-radio">4</div>
+                        <div class="option-content-wrapper">
+                            <div class="option-content">自分の努力している姿を見せると、他人から謙虚な人だと思ってもらえないから</div>
+                            <div class="option-trans">因为一旦展现出自己努力的样子，别人就不会认为自己是个谦虚的人。</div>
+                        </div>
+                        <span class="click-hint">詳細解説</span>
+                        <div class="option-detail-analysis"></div>
+                    </label>
+                </div>
+                <div class="explanation-box">
+                    <div class="explanation-title">✎ 赤ペン解析 (理由の把握)</div>
+                    <div class="key-sentence-box">
+                        <div class="ks-label">【着眼点】</div>
+                        <div class="ks-text" id="q2-ks"></div>
+                    </div>
+                    <div class="explanation-content" id="q2-exp"></div>
+                </div>
+            </div>
+
+            <!-- 问题 3 -->
+            <div class="question-card sketch-box" data-question="q3" id="q3-card">
+                <div class="q-header">
+                    <div class="q-number" style="background: var(--marker-purple);">3</div>
+                    <div class="q-text-wrapper">
+                        <div class="q-text">筆者は「努力」についてどのように述べているか。</div>
+                        <div class="q-text-trans">(关于“努力”，作者是如何论述的？)</div>
+                    </div>
+                </div>
+                <div class="options-group">
+                    <label class="option-label" data-opt="1">
+                        <input type="radio" name="q3" value="1" class="option-input">
+                        <div class="custom-radio">1</div>
+                        <div class="option-content-wrapper">
+                            <div class="option-content">努力は主観的なものなので、どこまで努力するか自分で決めればよい。</div>
+                            <div class="option-trans">努力是主观的东西，所以努力到什么程度自己决定就好。</div>
+                        </div>
+                        <span class="click-hint">詳細解説</span>
+                        <div class="option-detail-analysis"></div>
+                    </label>
+                    <label class="option-label" data-opt="2">
+                        <input type="radio" name="q3" value="2" class="option-input">
+                        <div class="custom-radio">2</div>
+                        <div class="option-content-wrapper">
+                            <div class="option-content">社会人になったら、努力している姿は他人にあまり見せないほうがよい。</div>
+                            <div class="option-trans">成为社会人之后，努力的样子最好不要过多地展现给他人看。</div>
+                        </div>
+                        <span class="click-hint">詳細解説</span>
+                        <div class="option-detail-analysis"></div>
+                    </label>
+                    <label class="option-label" data-opt="3">
+                        <input type="radio" name="q3" value="3" class="option-input">
+                        <div class="custom-radio">3</div>
+                        <div class="option-content-wrapper">
+                            <div class="option-content">よい結果を出すためには他人に自分の努力している姿を見せることが大切だ。</div>
+                            <div class="option-trans">为了取得好结果，把自身努力的样子展现给他人看是很重要的。</div>
+                        </div>
+                        <span class="click-hint">詳細解説</span>
+                        <div class="option-detail-analysis"></div>
+                    </label>
+                    <label class="option-label" data-opt="4">
+                        <input type="radio" name="q3" value="4" class="option-input">
+                        <div class="custom-radio">4</div>
+                        <div class="option-content-wrapper">
+                            <div class="option-content">何をどれだけ努力したかを確認しながら、努力自体を楽しむことが大切だ。</div>
+                            <div class="option-trans">一边确认在什么事上努力了多少，一边享受努力本身是很重要的。</div>
+                        </div>
+                        <span class="click-hint">詳細解説</span>
+                        <div class="option-detail-analysis"></div>
+                    </label>
+                </div>
+                <div class="explanation-box">
+                    <div class="explanation-title">✎ 赤ペン解析 (筆者の主張)</div>
+                    <div class="key-sentence-box">
+                        <div class="ks-label">【着眼点】</div>
+                        <div class="ks-text" id="q3-ks"></div>
+                    </div>
+                    <div class="explanation-content" id="q3-exp"></div>
+                </div>
+            </div>
+
+            <!-- 底部动作区与精简版结算版融合 -->
+            <div class="action-bar">
+                <!-- 提交按钮 -->
+                <button type="button" class="submit-btn" id="submitBtn" onclick="submitAnswers()">答え合わせ</button>
+                
+                <!-- 精简版题目情况结算版 (提交后显示) -->
+                <div id="resultBoard" class="result-board"></div>
+            </div>
+
+        </aside>
+
+    </div>
+
+    <!-- 词汇解释气泡 (全局复用) -->
+    <div id="vocabTooltip" class="vocab-tooltip"></div>
+
+    <script>
+        // 平滑滚动逻辑
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const targetId = this.getAttribute('href');
+                if(targetId === '#top') {
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                } else {
+                    const targetElement = document.querySelector(targetId);
+                    if(targetElement) {
+                        targetElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }
+                }
+            });
+        });
+
+        // 翻译切换逻辑
+        function toggleTranslation(btn) {
+            if (!document.getElementById('mainArticleContent').classList.contains('reviewed')) {
+                alert("请先完成所有题目（点击「答え合わせ」提交），然后再查看译文哦！");
+                return;
+            }
+            
+            btn.classList.toggle('active');
+            const translations = document.querySelectorAll('.article-translation');
+            translations.forEach(el => {
+                el.classList.toggle('show');
+            });
+        }
+
+        // 包含3道题目的解析数据
+        const answerData = {
+            q1: { 
+                correct: "3", 
+                keySentence: `「そして、努力を客観視するための測定方法が『時間』なのです。（中略）努力を時間で測定すれば、時間が有限だからこそ、何を努力するのか自分で考え、決めなければいけません。そうすれば、結果はあとからついてくる、という気持ちになれる魔法の言葉なのです。」`,
+                explanation: `本题考查对填空处核心观点的推导。定位到文章末尾的结论部分。作者明确指出，让努力变得可见并能客观评价的测量方法就是“时间（時間）”，并在最后一段总结说“如果用时间来测量努力……这便是一句具有魔力的话语”。由此可以推断出，影响作者人生的那句话正是关于“用时间来衡量努力”的。选项 3 准确对应了这一核心思想。`,
+                optAnalysis: {
+                    "1": `【✖ 错误】文章主张将努力积极融入生活并客观化，而不是藏起来。`,
+                    "2": `【✖ 错误】文章指出过于在意他人评价才导致人们隐藏努力，并非主张努力是为了改变他人评价。`,
+                    "3": `【✔ 正解】客观契合了文章后半段关于“努力的测量方法是时间”的论述。`,
+                    "4": `【✖ 错误】文章是说用时间来测量努力，而不是说努力了就会擅长时间管理。`
+                }
+            },
+            q2: { 
+                correct: "2", 
+                keySentence: `「その心境は複雑です。まず結果が出なかったとき『あいつ、あれだけやってダメだった』とバカにされるのを恐れます。結果が出ても『あれだけ準備すれば当然だ』と評価が下がるのを恐れます。他者の評価を気にし始めると、いずれにせよ努力を隠すに越したことはないわけです。」`,
+                explanation: `本题考查原因的把握。定位到第四段画线句。这句话说明了社会人也会故意否定自己的努力。其原因需要向前追溯到第三段。第三段详细剖析了隐藏努力的复杂心境：一方面害怕没有结果被嘲笑，另一方面又害怕出了结果被认为理所当然。总之，是因为在意他人的评价（他者の評価を気にし始める），害怕因为努力的结果被别人指指点点。选项 2 客观贴合了这一因果关系。`,
+                optAnalysis: {
+                    "1": `【✖ 错误】虽然后文提到努力与否是主观的，但这并非人们故意否定自己努力的原因。`,
+                    "2": `【✔ 正解】准确概括了第三段中“害怕被嘲笑、害怕评价降低（在意他人评价）”的心理动机。`,
+                    "3": `【✖ 错误】文中并未提到是因为觉得自己努力不足。`,
+                    "4": `【✖ 错误】文中说隐藏努力看起来像是“谦虚应对”，但这是一种危险的做法，并非为了让人觉得谦虚才去隐藏。`
+                }
+            },
+            q3: { 
+                correct: "4", 
+                keySentence: `「そのためには『努力』という言葉を生活に積極的に取り入れ、そのプロセスを楽しむ仕組みをつくらなければなりません。（中略）その分量を時間換算する仕組みを取り入れれば、自分がどこまで努力をしたのか、わかりやすく管理できるようになり、」`,
+                explanation: `本题考查对作者主张的理解。定位到第六段和第八段。作者认为，没有努力就无法开始，因此要建立一种享受努力过程的机制（そのプロセスを楽しむ仕組み）。而通过引入时间换算机制，可以清晰地管理自己努力的程度（どこまで努力をしたのか、わかりやすく管理できるようになり）。选项 4 准确概括了“确认努力的内容与程度，并享受努力本身”这一观点。`,
+                optAnalysis: {
+                    "1": `【✖ 错误】作者认为主观的努力需要通过“时间”这一客观方法来测量和管理。`,
+                    "2": `【✖ 错误】这是文章中指出的危险做法（谦虚地隐藏努力的应对），并非作者的主张。`,
+                    "3": `【✖ 错误】文章主张的是客观把握自身的努力并享受过程，而不是强调“让别人看到努力的样子”。`,
+                    "4": `【✔ 正解】客观契合了文中“通过时间管理努力的份量”以及“建立享受过程的机制”的论述。`
+                }
+            }
+        };
+
+        // 选项选中状态的视觉反馈
+        document.querySelectorAll('.option-input').forEach(input => {
+            input.addEventListener('change', function() {
+                if (document.getElementById('submitBtn').style.display === 'none') return;
+
+                const name = this.name;
+                document.querySelectorAll(`input[name="${name}"]`).forEach(radio => {
+                    radio.closest('.option-label').classList.remove('selected');
+                });
+                
+                if(this.checked) {
+                    this.closest('.option-label').classList.add('selected');
+                }
+            });
+        });
+
+        // 选项点击展示独立解析
+        document.querySelectorAll('.option-label').forEach(label => {
+            label.addEventListener('click', function(e) {
+                const group = this.closest('.options-group');
+                if(group.classList.contains('reviewed')) {
+                    const detailBox = this.querySelector('.option-detail-analysis');
+                    if(detailBox.classList.contains('show')) {
+                        detailBox.classList.remove('show');
+                    } else {
+                        group.querySelectorAll('.option-detail-analysis').forEach(box => box.classList.remove('show'));
+                        detailBox.classList.add('show');
+                    }
+                }
+            });
+        });
+
+        // 词汇点击出气泡逻辑
+        const vocabTooltip = document.getElementById('vocabTooltip');
+        document.querySelectorAll('.vocab-word').forEach(word => {
+            word.addEventListener('click', function(e) {
+                e.stopPropagation();
+                const reading = this.getAttribute('data-reading');
+                const meaning = this.getAttribute('data-meaning');
+                
+                vocabTooltip.innerHTML = `<span class="reading">${reading}</span><span class="meaning">${meaning}</span>`;
+                
+                const rect = this.getBoundingClientRect();
+                const scrollX = window.pageXOffset || document.documentElement.scrollLeft;
+                const scrollY = window.pageYOffset || document.documentElement.scrollTop;
+                
+                vocabTooltip.style.left = `${rect.left + scrollX - 10}px`;
+                vocabTooltip.style.top = `${rect.top + scrollY - vocabTooltip.offsetHeight - 10}px`;
+                
+                vocabTooltip.classList.add('show');
+                setTimeout(() => {
+                    vocabTooltip.style.top = `${rect.top + scrollY - vocabTooltip.offsetHeight - 10}px`;
+                }, 10);
+            });
+        });
+
+        document.addEventListener('click', function() {
+            vocabTooltip.classList.remove('show');
+        });
+
+        function submitAnswers() {
+            const q1 = document.querySelector('input[name="q1"]:checked');
+            const q2 = document.querySelector('input[name="q2"]:checked');
+            const q3 = document.querySelector('input[name="q3"]:checked');
+
+            if (!q1 || !q2 || !q3) {
+                alert("すべての問いに答えてください。（请回答所有問題）");
+                return;
+            }
+
+            const userAnswers = { q1: q1.value, q2: q2.value, q3: q3.value };
+            let score = 0;
+
+            document.querySelectorAll('.option-input').forEach(input => {
+                input.disabled = true;
+                input.closest('.option-label').classList.add('disabled'); 
+            });
+            
+            document.querySelectorAll('.options-group').forEach(group => {
+                group.classList.add('reviewed');
+            });
+
+            document.getElementById('mainArticleContent').classList.add('reviewed');
+
+            // 隐藏提交按钮
+            const submitBtn = document.getElementById('submitBtn');
+            submitBtn.style.display = 'none';
+
+            let resultDetailsHTML = '';
+
+            Object.keys(answerData).forEach(qName => {
+                const qCard = document.querySelector(`.question-card[data-question="${qName}"]`);
+                if(qCard) {
+                    qCard.classList.add('reviewed');
+
+                    const data = answerData[qName];
+                    const correctVal = data.correct;
+                    const userVal = userAnswers[qName];
+                    const qNum = qName.replace('q', '');
+
+                    qCard.querySelectorAll('.option-label').forEach(label => {
+                        const input = label.querySelector('.option-input');
+                        const optVal = input.value;
+                        
+                        if (optVal === correctVal) {
+                            label.classList.add('is-correct');
+                            label.querySelector('.custom-radio').innerHTML = '✔';
+                        }
+                        if (optVal === userVal && userVal !== correctVal) {
+                            label.classList.add('is-wrong');
+                            label.querySelector('.custom-radio').innerHTML = '✖';
+                        }
+                        
+                        const detailBox = label.querySelector('.option-detail-analysis');
+                        detailBox.innerText = data.optAnalysis[optVal];
+                    });
+
+                    if (userVal === correctVal) {
+                        score++;
+                    } else {
+                        // 错题标签生成
+                        resultDetailsHTML += `<div class="result-item-compact" onclick="document.getElementById('${qName}-card').scrollIntoView({behavior: 'smooth', block: 'start'})" title="点击跳转查看解析">問${qNum} ✖</div>`;
+                    }
+
+                    const expBox = qCard.querySelector('.explanation-box');
+                    document.getElementById(`${qName}-ks`).innerText = data.keySentence;
+                    document.getElementById(`${qName}-exp`).innerText = data.explanation;
+                    expBox.classList.add('show');
+
+                    const targetArticleSpans = document.querySelectorAll(`.target-${qName}`);
+                    targetArticleSpans.forEach(span => {
+                        span.classList.add(`revealed-${qName}`);
+                    });
+
+                    const ksBox = qCard.querySelector('.key-sentence-box');
+                    ksBox.classList.add('clickable');
+                    ksBox.classList.add(`ks-theme-${qName}`);
+                    
+                    ksBox.onclick = function() {
+                        if (targetArticleSpans.length > 0) {
+                            targetArticleSpans[0].scrollIntoView({ behavior: 'smooth', block: 'center' });
+                            targetArticleSpans.forEach(span => {
+                                span.classList.remove('flash-focus');
+                                void span.offsetWidth;
+                                span.classList.add('flash-focus');
+                            });
+                        }
+                    };
+                }
+            });
+
+            // 渲染精简版结算面板
+            const resultBoard = document.getElementById('resultBoard');
+            if (score === 3) {
+                resultBoard.innerHTML = `
+                    <div class="result-score-compact perfect">採点：3 / 3</div>
+                    <div class="result-divider"></div>
+                    <div class="result-details-compact">
+                        <div class="result-item-compact perfect-badge">全問正解</div>
+                    </div>
+                `;
+            } else {
+                resultBoard.innerHTML = `
+                    <div class="result-score-compact">採点：${score} / 3</div>
+                    <div class="result-divider"></div>
+                    <div class="result-details-compact">${resultDetailsHTML}</div>
+                `;
+            }
+            resultBoard.classList.add('show');
+        }
+    </script>
+  <script src="../../../../shared/study-quest-test-runtime.js"></script>
+  <script src="../../../../shared/study-quest-test-boot.js"></script>
+  <script src="../../shared/reading-year-system.js"></script>
+  <script src="../../shared/reading-dt-year-session.js"></script>
+</body>
+</html>

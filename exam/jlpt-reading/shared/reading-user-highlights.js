@@ -15,9 +15,9 @@
     const examKey = fileName.replace(/\.html$/i, "") || "unknown";
     const configuredLevel = configRoot ? configRoot.getAttribute("data-reading-highlight-level") : "";
     const configuredType = configRoot ? configRoot.getAttribute("data-reading-highlight-type") : "";
-    const sectionIsLevel = /^n2$/i.test(section);
-    const parentIsLevel = /^n2$/i.test(parentSection);
-    const inferredLevel = sectionIsLevel ? section.toUpperCase() : parentIsLevel ? parentSection.toUpperCase() : "N2";
+    const sectionIsLevel = /^(?:n1|n2|n3)$/i.test(section);
+    const parentIsLevel = /^(?:n1|n2|n3)$/i.test(parentSection);
+    const inferredLevel = sectionIsLevel ? section.toUpperCase() : parentIsLevel ? parentSection.toUpperCase() : "N1";
     const inferredTypeSegment = parentIsLevel && section === "10" && grandParentSection === "l"
         ? "l"
         : sectionIsLevel

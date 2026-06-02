@@ -1,0 +1,1604 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>中文読解 - 練習と解析</title>
+    <!-- 使用书面/印刷感字体组合 -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&family=Noto+Sans+SC:wght@400;500;700;900&family=Noto+Serif+JP:wght@400;600;700;900&family=Noto+Serif+SC:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../../shared/reading-user-highlights.css">
+    <style>
+        :root {
+            /* 纸张与铅笔色盘 */
+            --paper: #ffffff;          
+            --graphite: #333333;       
+            --graphite-sub: #666666;   
+            --graphite-faint: #cccccc; 
+            
+            /* 批改笔触颜色 */
+            --red-pencil: #e64a4a;     
+            --green-pencil: #10b981;
+            --blue-pencil: #0ea5e9;
+            --orange-pencil: #f97316;
+            
+            /* 水彩记号笔色系 (用于各题型区分) */
+            --marker-blue: rgba(14, 165, 233, 0.25);    
+            --marker-peach: rgba(249, 115, 22, 0.25);   
+            --marker-mint: rgba(16, 185, 129, 0.25);    
+            --marker-yellow: rgba(255, 213, 79, 0.35);   
+            --marker-yellow-strong: rgba(255, 213, 79, 0.8);
+            --marker-green: rgba(16, 185, 129, 0.15);
+            --marker-red: rgba(230, 74, 74, 0.1);
+
+            /* 铅笔排线背景 */
+            --hatching-graphite: repeating-linear-gradient(45deg, transparent, transparent 3px, rgba(51, 51, 51, 0.04) 3px, rgba(51, 51, 51, 0.04) 4px);
+
+            --transition: all 0.3s ease-out;
+            
+            --font-sans: 'Noto Sans SC', 'Noto Sans JP', sans-serif;
+            --font-serif: 'Noto Serif SC', 'Noto Serif JP', 'Songti SC', 'SimSun', serif;
+        }
+
+        body {
+            font-family: var(--font-sans);
+            background-color: var(--paper);
+            color: var(--graphite);
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+        }
+
+        /* 纸张噪点纹理 */
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.02'/%3E%3C/svg%3E");
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        /* 工具类：手绘感不规则边框 */
+        .sketch-box {
+            border: 1.5px solid var(--graphite);
+            border-radius: 2px 255px 3px 25px / 255px 5px 225px 3px;
+            background: transparent;
+        }
+
+        /* ================= Header ================= */
+        header {
+            width: 100%;
+            padding: 16px 20px;
+            box-sizing: border-box;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(4px);
+            border-bottom: 1.5px solid var(--graphite);
+            border-bottom-left-radius: 50% 2px;
+            border-bottom-right-radius: 50% 3px;
+        }
+
+        .header-btn {
+            text-decoration: none;
+            color: var(--graphite);
+            font-size: 14px;
+            font-weight: 700;
+            padding: 6px 12px;
+            background: transparent;
+            border: 1.5px solid var(--graphite);
+            border-radius: 2px 8px 3px 6px / 6px 3px 8px 2px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: var(--transition);
+            letter-spacing: 0.05em;
+            cursor: pointer;
+        }
+        
+        .header-btn:hover { background: var(--marker-yellow); }
+
+        h1 {
+            margin: 0;
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--graphite);
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            white-space: nowrap;
+            letter-spacing: 0.1em;
+            display: flex;
+            align-items: center;
+        }
+
+        /* ================= 布局容器 ================= */
+        .layout-container {
+            width: 95%;
+            max-width: 800px; 
+            padding: 40px 0 80px 0;
+            box-sizing: border-box;
+        }
+
+        .page-container {
+            display: none; 
+            flex-direction: column; 
+            gap: 40px;
+            animation: fadeIn 0.4s ease-out;
+        }
+
+        .page-container.active {
+            display: flex; 
+        }
+
+        /* ================= 上部文章区 ================= */
+        .article-section {
+            padding: 30px 40px;
+            background: var(--paper);
+            box-shadow: 2px 4px 15px rgba(0,0,0,0.03);
+            height: fit-content;
+        }
+
+        .article-meta {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 1.5px dashed var(--graphite-faint);
+        }
+
+        .meta-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .tag {
+            font-family: 'Noto Sans JP', sans-serif;
+            font-size: 12px;
+            color: var(--graphite);
+            background: var(--marker-peach);
+            padding: 2px 8px;
+            border: 1.5px solid var(--graphite);
+            border-radius: 2px 8px 2px 6px / 6px 2px 8px 2px;
+            font-weight: 700;
+        }
+
+        .article-title-info {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--graphite-sub);
+        }
+
+        .translate-toggle-btn {
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--graphite);
+            background: transparent;
+            border: 1.5px solid var(--graphite);
+            border-radius: 2px 8px 3px 6px / 6px 3px 8px 2px;
+            padding: 4px 10px;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .translate-toggle-btn:hover, .translate-toggle-btn.active {
+            background: var(--marker-blue);
+            box-shadow: inset 1px 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .article-content {
+            font-family: var(--font-serif);
+            font-size: 16px;
+            line-height: 2.2;
+            color: #222;
+            text-align: justify;
+            margin-top: 20px;
+        }
+
+        .paragraph-group { margin-bottom: 1.5em; }
+        
+        .article-content p { margin: 0; text-indent: 1em; }
+        .article-content p.no-indent { text-indent: 0; }
+        
+        .note-word {
+            border-bottom: 1.5px dashed var(--graphite-sub);
+            cursor: help;
+            position: relative;
+            transition: var(--transition);
+        }
+        .note-word:hover {
+            background-color: rgba(51, 51, 51, 0.08);
+        }
+
+        .vocab-tooltip {
+            position: absolute;
+            z-index: 1000;
+            background: #fffcf2; 
+            border: 1.5px solid var(--graphite);
+            border-radius: 2px 12px 3px 12px / 12px 3px 12px 2px;
+            padding: 8px 14px;
+            box-shadow: 2px 4px 8px rgba(0,0,0,0.1);
+            font-family: var(--font-sans);
+            font-size: 13px;
+            color: var(--graphite);
+            pointer-events: none; 
+            opacity: 0;
+            transform: translateY(5px);
+            transition: all 0.2s ease-out;
+            display: none;
+            width: max-content;
+            max-width: 220px;
+        }
+
+        .vocab-tooltip.show { opacity: 1; transform: translateY(0); display: block; }
+        .vocab-tooltip::after {
+            content: '';
+            position: absolute;
+            bottom: -6px; left: 20px;
+            width: 10px; height: 10px;
+            background: #fffcf2;
+            border-bottom: 1.5px solid var(--graphite);
+            border-right: 1.5px solid var(--graphite);
+            transform: rotate(45deg);
+        }
+
+        .vocab-tooltip .reading {
+            font-size: 11px; color: var(--graphite-sub);
+            margin-bottom: 4px; display: block; font-weight: 500;
+        }
+
+        .vocab-tooltip .meaning { font-weight: 700; line-height: 1.4; }
+
+        .article-translation {
+            display: none;
+            font-family: var(--font-sans);
+            font-size: 14px;
+            line-height: 1.8;
+            color: var(--graphite-sub);
+            background: rgba(0,0,0,0.02);
+            padding: 10px 16px;
+            margin-top: 10px;
+            border-left: 3px solid var(--marker-yellow-strong);
+            border-radius: 0 8px 8px 0;
+        }
+        .article-translation.show { display: block; animation: fadeIn 0.3s ease-out; }
+
+        .ks-target { transition: background-color 0.4s ease; border-radius: 2px; }
+        .ks-target.revealed {
+            padding-bottom: 2px;
+            position: relative;
+        }
+        .ks-target.revealed::before {
+            display: inline-block;
+            font-size: 12px;
+            font-weight: 900;
+            font-family: 'Noto Sans JP', sans-serif;
+            margin-right: 6px;
+            padding: 0 5px;
+            border-radius: 4px;
+            text-indent: 0;
+            line-height: 1.4;
+            vertical-align: baseline;
+            transform: translateY(-1px);
+        }
+        
+        /* 60/63/66题高亮 (蓝色) */
+        .ks-target.target-ks-60.revealed, .ks-target.target-ks-63.revealed, .ks-target.target-ks-66.revealed {
+            background: linear-gradient(transparent 65%, var(--marker-blue) 65%);
+            border-bottom: 2px dashed var(--blue-pencil);
+        }
+        .ks-target.target-ks-60.revealed::before { content: 'Q60'; background: var(--marker-blue); color: var(--blue-pencil); border: 1px solid var(--blue-pencil); }
+        .ks-target.target-ks-63.revealed::before { content: 'Q63'; background: var(--marker-blue); color: var(--blue-pencil); border: 1px solid var(--blue-pencil); }
+        .ks-target.target-ks-66.revealed::before { content: 'Q66'; background: var(--marker-blue); color: var(--blue-pencil); border: 1px solid var(--blue-pencil); }
+
+        /* 61/64/67题高亮 (橘色) */
+        .ks-target.target-ks-61.revealed, .ks-target.target-ks-64.revealed, .ks-target.target-ks-67.revealed {
+            background: linear-gradient(transparent 65%, var(--marker-peach) 65%);
+            border-bottom: 2px dashed var(--orange-pencil);
+        }
+        .ks-target.target-ks-61.revealed::before { content: 'Q61'; background: var(--marker-peach); color: var(--orange-pencil); border: 1px solid var(--orange-pencil); }
+        .ks-target.target-ks-64.revealed::before { content: 'Q64'; background: var(--marker-peach); color: var(--orange-pencil); border: 1px solid var(--orange-pencil); }
+        .ks-target.target-ks-67.revealed::before { content: 'Q67'; background: var(--marker-peach); color: var(--orange-pencil); border: 1px solid var(--orange-pencil); }
+
+        /* 62/65/68题高亮 (绿色) */
+        .ks-target.target-ks-62.revealed, .ks-target.target-ks-65.revealed, .ks-target.target-ks-68.revealed {
+            background: linear-gradient(transparent 65%, var(--marker-mint) 65%);
+            border-bottom: 2px dashed var(--green-pencil);
+        }
+        .ks-target.target-ks-62.revealed::before { content: 'Q62'; background: var(--marker-mint); color: var(--green-pencil); border: 1px solid var(--green-pencil); }
+        .ks-target.target-ks-65.revealed::before { content: 'Q65'; background: var(--marker-mint); color: var(--green-pencil); border: 1px solid var(--green-pencil); }
+        .ks-target.target-ks-68.revealed::before { content: 'Q68'; background: var(--marker-mint); color: var(--green-pencil); border: 1px solid var(--green-pencil); }
+
+        .ks-target.flash-focus { animation: flashHighlight 1.5s ease-out; }
+
+        /* ================= 下部题目区 ================= */
+        .question-section { display: flex; flex-direction: column; gap: 24px; }
+
+        .question-card {
+            padding: 24px;
+            background: rgba(255, 255, 255, 0.5);
+            transition: var(--transition);
+            position: relative;
+        }
+        .question-card:hover { box-shadow: 2px 4px 10px rgba(0,0,0,0.02); background: var(--paper); }
+
+        .q-header { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 16px; }
+        .q-number {
+            font-family: 'Noto Sans JP', sans-serif; font-size: 16px; font-weight: 900;
+            color: var(--graphite); 
+            width: 28px; height: 28px; display: flex; align-items: center; justify-content: center;
+            border: 1.5px solid var(--graphite);
+            border-radius: 50% 45% 55% 40% / 45% 55% 40% 50%;
+            flex-shrink: 0; margin-top: 2px;
+        }
+        /* 各题号背景色 */
+        .q-number.bg-blue { background: var(--marker-blue); }
+        .q-number.bg-peach { background: var(--marker-peach); }
+        .q-number.bg-mint { background: var(--marker-mint); }
+
+        .q-text-wrapper { display: flex; flex-direction: column; gap: 4px; }
+        .q-text { font-size: 15px; font-weight: 700; line-height: 1.6; }
+        .q-text-trans { display: none; font-size: 13px; color: var(--graphite-sub); font-weight: normal; }
+
+        .options-group { display: flex; flex-direction: column; gap: 12px; }
+        .option-label {
+            display: flex; align-items: flex-start; padding: 12px 16px;
+            border: 1.5px solid var(--graphite);
+            border-radius: 2px 255px 3px 25px / 255px 5px 225px 3px;
+            cursor: pointer; transition: var(--transition);
+            position: relative; background: transparent; flex-wrap: wrap;
+        }
+        .option-label:hover:not(.disabled) { background: var(--hatching-graphite); }
+        .options-group.reviewed .option-label { cursor: pointer; }
+        .options-group.reviewed .option-label:hover { border-color: var(--graphite); box-shadow: 2px 2px 0 rgba(0,0,0,0.05); }
+        
+        .click-hint {
+            display: none; position: absolute; right: 12px; top: 12px;
+            font-size: 11px; color: var(--marker-yellow-strong); font-weight: 700;
+            border: 1px solid var(--marker-yellow-strong); padding: 2px 6px;
+            border-radius: 10px; background: #fff;
+        }
+        .options-group.reviewed .click-hint { display: block; animation: fadeIn 0.5s ease-out; }
+
+        .option-input { display: none; }
+        .custom-radio {
+            width: 18px; height: 18px; border: 1.5px solid var(--graphite);
+            border-radius: 50% 40% 60% 45% / 55% 45% 50% 60%;
+            margin-right: 12px; margin-top: 4px; flex-shrink: 0; position: relative;
+            display: flex; align-items: center; justify-content: center;
+            transition: var(--transition); font-weight: 900; font-size: 12px;
+            font-family: 'Noto Sans JP', sans-serif; color: var(--graphite-sub);
+        }
+        .option-input:checked + .custom-radio { background: var(--marker-yellow-strong); color: var(--graphite); }
+        .option-label.selected { background: rgba(255, 213, 79, 0.1); border-style: solid; }
+        
+        .option-content-wrapper { flex: 1; display: flex; flex-direction: column; gap: 4px; }
+        .option-content { font-size: 15px; line-height: 1.5; color: var(--graphite); padding-right: 60px; }
+        .option-input:checked ~ .option-content-wrapper .option-content { font-weight: 700; }
+        .option-trans { display: none; font-size: 13px; color: var(--graphite-sub); line-height: 1.4; }
+        
+        .question-card.reviewed .q-text-trans,
+        .question-card.reviewed .option-trans { display: block; animation: fadeIn 0.4s ease-out; }
+
+        .option-detail-analysis {
+            display: none; width: 100%; margin-top: 12px; padding: 12px 16px;
+            background: #fffcf2; border: 1px dashed var(--graphite-sub);
+            border-radius: 2px 8px 3px 6px / 6px 3px 8px 2px;
+            font-size: 13px; color: var(--graphite); line-height: 1.6; box-sizing: border-box;
+        }
+        .option-detail-analysis.show { display: block; animation: slideDown 0.3s ease-out; }
+
+        .option-label.is-correct { background: var(--marker-green); border-color: var(--green-pencil); }
+        .option-label.is-correct .custom-radio { background: var(--green-pencil); border-color: var(--green-pencil); color: white; }
+        .option-label.is-wrong { background: var(--marker-red); border-color: var(--red-pencil); border-style: dashed; }
+        .option-label.is-wrong .custom-radio { background: var(--red-pencil); border-color: var(--red-pencil); color: white; }
+
+        .explanation-box {
+            margin-top: 20px; padding: 20px; background: #fafafa;
+            border: 1.5px solid var(--graphite); border-radius: 2px 15px 3px 15px / 15px 5px 15px 3px;
+            position: relative; display: none; animation: slideDown 0.4s ease-out;
+        }
+        .explanation-box.show { display: block; }
+        .explanation-box::before {
+            content: ''; position: absolute; top: -10px; left: 50%;
+            transform: translateX(-50%) rotate(-2deg); width: 60px; height: 20px;
+            background: rgba(255, 213, 79, 0.6); border: 1px solid rgba(0,0,0,0.05);
+        }
+        .explanation-title {
+            font-size: 14px; font-weight: 700; color: var(--red-pencil);
+            margin-bottom: 12px; display: flex; align-items: center; gap: 8px;
+            border-bottom: 1.5px dashed var(--graphite-faint); padding-bottom: 8px;
+        }
+        
+        .key-sentence-box {
+            background: #fff; border-left: 3px solid var(--blue-pencil);
+            padding: 10px 12px; margin-bottom: 12px; font-size: 13.5px;
+            box-shadow: 1px 2px 5px rgba(0,0,0,0.02); position: relative;
+        }
+        .key-sentence-box .ks-label { font-weight: 700; color: var(--blue-pencil); margin-bottom: 4px; font-size: 12px; }
+        .key-sentence-box.clickable { cursor: pointer; transition: var(--transition); }
+        .key-sentence-box.clickable:hover { transform: translateY(-1px); box-shadow: 2px 4px 8px rgba(0,0,0,0.04); background: #f0f9ff; }
+        .key-sentence-box.clickable::after {
+            content: '🔗 クリックして原文に移動'; position: absolute;
+            right: 12px; top: 12px; font-size: 11px; font-weight: 700; opacity: 0.8; color: var(--blue-pencil);
+        }
+        .explanation-content { font-size: 14px; line-height: 1.8; color: var(--graphite); }
+
+        /* ================= 底部動作区 (题目内) ================= */
+        .action-bar {
+            grid-column: 1 / -1; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center;
+            margin-top: 10px; 
+            padding-top: 20px; 
+            gap: 12px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        
+        /* 针对页面底部的导航条 */
+        .page-navigation-bar {
+            border-top: 1.5px dashed var(--graphite-faint); 
+            padding-top: 30px;
+            margin-top: 20px;
+        }
+
+        .nav-btn {
+            font-family: 'Noto Sans JP', sans-serif;
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--graphite-sub);
+            background: transparent;
+            padding: 10px 18px;
+            border: 1.5px solid var(--graphite-faint);
+            border-radius: 2px 8px 3px 6px / 6px 3px 8px 2px;
+            cursor: pointer;
+            transition: var(--transition);
+            white-space: nowrap;
+            min-width: 100px;
+            text-align: center;
+        }
+
+        .nav-btn:hover {
+            color: var(--graphite);
+            border-color: var(--graphite);
+            background: var(--marker-yellow);
+        }
+        
+        .nav-btn[style*="visibility: hidden"] {
+            pointer-events: none;
+        }
+
+        .submit-btn {
+            font-family: 'Noto Sans JP', sans-serif; font-size: 16px; font-weight: 700;
+            color: var(--graphite); background: var(--marker-mint);
+            padding: 12px 50px; border: 1.5px solid var(--graphite);
+            border-radius: 3px 255px 4px 25px / 255px 5px 225px 4px;
+            cursor: pointer; letter-spacing: 0.1em; transition: var(--transition);
+            box-shadow: 2px 4px 0px rgba(51,51,51,0.1);
+            flex: 1;
+            max-width: 320px;
+            margin: 0 auto;
+            display: block;
+        }
+        .submit-btn:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 2px 6px 0px rgba(51,51,51,0.15); }
+        .submit-btn:disabled {
+            background: var(--graphite-faint); color: var(--graphite-sub);
+            cursor: not-allowed; box-shadow: none; transform: none;
+        }
+
+        @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes flashHighlight { 0% { background-color: rgba(255, 213, 79, 0.7); } 100% { background-color: transparent; } }
+
+        /* ================= 响应式调整 ================= */
+        @media (max-width: 600px) {
+            header { padding: 12px 16px; }
+            h1 { font-size: 15px; }
+            .header-btn { font-size: 13px; padding: 6px 10px; }
+            .layout-container { width: 100%; padding: 20px 16px 60px 16px; gap: 24px; }
+            .article-section { padding: 20px 16px; border-radius: 2px 20px 3px 20px / 20px 5px 20px 3px; }
+            .article-meta { margin-bottom: 16px; padding-bottom: 12px; }
+            .article-content { font-size: 15px; line-height: 2.0; } 
+            .question-section { gap: 16px; padding-top: 16px; }
+            .question-card { padding: 20px 16px; }
+            .q-header { margin-bottom: 12px; }
+            .q-number { width: 24px; height: 24px; font-size: 14px; margin-top: 0; }
+            .q-text { font-size: 15px; line-height: 1.6; }
+            .option-label { padding: 10px 12px; }
+            .custom-radio { width: 16px; height: 16px; font-size: 11px; margin-right: 10px; margin-top: 2px; }
+            .option-content { font-size: 14px; padding-right: 0; }
+            .click-hint { position: static; margin-top: 8px; font-size: 11px; padding: 4px 8px; }
+            .options-group.reviewed .click-hint { display: inline-block; }
+            .key-sentence-box { padding: 10px; font-size: 13px; }
+            .key-sentence-box.clickable::after { position: static; display: inline-block; margin-top: 6px; font-size: 11px; padding: 4px 8px;}
+            .explanation-box { padding: 16px; }
+            .vocab-tooltip { max-width: 200px; font-size: 12px; padding: 6px 10px; }
+            
+            .page-navigation-bar {
+                flex-wrap: wrap;
+                justify-content: space-between;
+                gap: 15px;
+            }
+            .nav-btn {
+                width: calc(50% - 8px);
+                min-width: 0;
+                padding: 12px 0;
+            }
+            .submit-btn {
+                width: 100%;
+                max-width: none;
+                flex: none;
+            }
+        }
+    </style>
+</head>
+<body id="top" data-reading-highlight-root=".layout-container" data-reading-highlight-level="N2" data-reading-highlight-type="middle">
+
+    <header class="top-bar">
+        <a class="header-btn" id="back-to-reading-index" href="../../index.html?level=N2&type=middle&browse=year">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+            戻る
+        </a>
+        <h1>中篇読解演習</h1>
+        <div class="top-actions"></div>
+    </header>
+
+    <div class="layout-container">
+        
+        <!-- ================= 页面 1 ================= -->
+        <div class="page-container active" id="page-1">
+            
+            <main class="article-section sketch-box">
+                <div class="article-meta">
+                    <div class="meta-left">
+                        <span class="tag">N2 読解</span>
+                        <span class="article-title-info">2017年12月・中篇読解 1：大学の講義と時間</span>
+                    </div>
+                    <button class="translate-toggle-btn" onclick="toggleTranslation(this, 'page-1')">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 8l6 6"/><path d="M4 14l6-6 2-3"/><path d="M2 5h12"/><path d="M7 2h1"/><path d="M22 22l-5-10-5 10"/><path d="M14 18h6"/></svg>
+                        参考訳
+                    </button>
+                </div>
+                
+                <div class="article-content">
+                    <div class="paragraph-group">
+                        <p>大学で「よく学び、よく遊ぶ」ためには、時間の使い方が重要です。「大学生の楽しさ」に目覚めると、本当に忙しくなります。講義だけなら、宿題が出されたり授業中に当てられたりした高校時代のほうが、よほど大変です。<span class="ks-target target-ks-60">大学の講義の多くは、聞いていれば済むし、たまに意見を求める教員がいても、受講する前に勉強してこなかったからと責める教員はいませんから、<span class="note-word" data-note="注1" data-desc="ここでは、ただ時間が過ぎるのを待つ">やりすごし（注1）</span>さえすれば終わりです。</span>だから、講義だけ見れば、一定時間教室に「<span class="note-word" data-note="注2" data-desc="ここでは、いなければならない">拘束（注2）される</span>」ことを除けば、ほとんど苦痛はありません。</p>
+                        <div class="article-translation">在大学里想要“好好学习，好好玩耍”，时间的使用方法很重要。一旦体会到了“大学生的快乐”，就会变得非常忙碌。如果只看听课的话，会被布置作业、在课上被点名的高中时代要辛苦得多。大学里的大多数讲义，只要听着就行了，即使偶尔有征求意见的教师，也不会有教师因为你上课前没复习就责备你，所以只要混过去就算结束了。因此，仅从讲义来看，除了要在教室里“被束缚（待在里面）”一段时间之外，几乎没有什么痛苦。</div>
+                    </div>
+
+                    <div class="paragraph-group">
+                        <p>しかし、こうして講義をただ聴いているだけでは、得られることもごく限られます。ときどき「高校時代の授業のほうが充実していた」と考える人がいるのは、そのためです。しかし、大学で講義している教員は、講義内容よりもはるかにレベルの高い、広い知識を持っているのが普通で、講義ではそのうちの基本的なことだけを伝えているにすぎません。<span class="note-word" data-note="注3" data-desc="ここでは、伝えることができるのに伝えない">出し惜しみしている（注3）</span>のではなく、学生の理解力と講義時間の<span class="note-word" data-note="注4" data-desc="制限">制約（注4）</span>によって、<span class="note-word" data-note="注5" data-desc="そうするしかない">そうせざるをえない（注5）</span>のです。<span class="ks-target target-ks-61">だから、講義で興味を抱いたり疑問を感じたことがあれば、教員の研究室を訪ねて質問すると、驚くほど豊富な話をしてもらえます。</span></p>
+                        <div class="article-translation">但是，像这样仅仅只是听讲义，能获得的东西是非常有限的。有时会有人觉得“高中时代的课更充实”，就是因为这个原因。然而，在大学里讲课的教师，通常拥有比讲义内容水平高得多、广得多的知识，在讲义中只不过传达了其中最基本的内容而已。他们并不是在吝啬不讲，而是由于学生的理解能力和讲义时间的限制，只能这么做。所以，如果在讲义中有了兴趣或感到有疑问，去拜访教师的研究室提问的话，他们会给你讲出令人惊讶的丰富内容。</div>
+                    </div>
+
+                    <div class="paragraph-group">
+                        <p>学生らしい大学生活を送るには、<u>こうした「講義からはみだす時間」</u>も必要ですし、将来の就職活動に備えて、在学中にやっておきたいことのための時間も要ります。</p>
+                        <div class="article-translation">为了度过像个学生一样的大学生活，这种“超出讲义以外的时间”也是需要的，并且为了将来的求职活动做准备，也需要留出时间去做在校期间想做的事情。</div>
+                    </div>
+
+                    <div class="paragraph-group">
+                        <p><span class="ks-target target-ks-62">これらを計画的に組み立てれば、無駄も省け、時間的にも気持ちのうえでも「<span class="note-word" data-note="注6" data-desc="余裕">ゆとり（注6）</span>」が生まれます。</span></p>
+                        <div class="article-translation">如果能有计划地安排这些事情，就能省去浪费，在时间和心情上都会产生“余裕”。</div>
+                    </div>
+                </div>
+            </main>
+
+            <aside class="question-section">
+                <!-- 题目 60 -->
+                <div class="question-card sketch-box" id="qcard-60">
+                    <div class="q-header">
+                        <div class="q-number bg-blue">60</div>
+                        <div class="q-text-wrapper">
+                            <div class="q-text">大学の講義について、筆者の考えに合うのはどれか。</div>
+                            <div class="q-text-trans">关于大学的讲义，哪一项符合作者的想法？</div>
+                        </div>
+                    </div>
+                    <div class="options-group">
+                        <label class="option-label">
+                            <input type="radio" name="q60" value="1" class="option-input">
+                            <div class="custom-radio">1</div>
+                            <div class="option-content-wrapper">
+                                <div class="option-content">出席しなくても責められない。</div>
+                                <div class="option-trans">即使不出席也不会被责备。</div>
+                            </div>
+                            <span class="click-hint">詳細解説</span>
+                            <div class="option-detail-analysis"></div>
+                        </label>
+                        <label class="option-label">
+                            <input type="radio" name="q60" value="2" class="option-input">
+                            <div class="custom-radio">2</div>
+                            <div class="option-content-wrapper">
+                                <div class="option-content">聞いていれば済む講義もある。</div>
+                                <div class="option-trans">有些讲义只要听着就行了。</div>
+                            </div>
+                            <span class="click-hint">詳細解説</span>
+                            <div class="option-detail-analysis"></div>
+                        </label>
+                        <label class="option-label">
+                            <input type="radio" name="q60" value="3" class="option-input">
+                            <div class="custom-radio">3</div>
+                            <div class="option-content-wrapper">
+                                <div class="option-content">高校の授業のほうが充実している。</div>
+                                <div class="option-trans">高中的课程更充实。</div>
+                            </div>
+                            <span class="click-hint">詳細解説</span>
+                            <div class="option-detail-analysis"></div>
+                        </label>
+                        <label class="option-label">
+                            <input type="radio" name="q60" value="4" class="option-input">
+                            <div class="custom-radio">4</div>
+                            <div class="option-content-wrapper">
+                                <div class="option-content">講義で意見を求められることはない。</div>
+                                <div class="option-trans">讲义中不会被征求意见。</div>
+                            </div>
+                            <span class="click-hint">詳細解説</span>
+                            <div class="option-detail-analysis"></div>
+                        </label>
+                    </div>
+                    
+                    <div class="explanation-box">
+                        <div class="explanation-title">✎ 赤ペン解析</div>
+                        <div class="key-sentence-box">
+                            <div class="ks-label">【着眼点】</div>
+                            <div class="ks-text"></div>
+                        </div>
+                        <div class="explanation-content"></div>
+                    </div>
+                </div>
+
+                <!-- 题目 61 -->
+                <div class="question-card sketch-box" id="qcard-61">
+                    <div class="q-header">
+                        <div class="q-number bg-peach">61</div>
+                        <div class="q-text-wrapper">
+                            <div class="q-text"><u>こうした「講義からはみだす時間」</u>とは、講義時間外に何をする時間か。</div>
+                            <div class="q-text-trans">“这种‘超出讲义以外的时间’”是指在讲义时间外做什么的时间？</div>
+                        </div>
+                    </div>
+                    <div class="options-group">
+                        <label class="option-label">
+                            <input type="radio" name="q61" value="1" class="option-input">
+                            <div class="custom-radio">1</div>
+                            <div class="option-content-wrapper">
+                                <div class="option-content">教員に将来について相談に乗ってもらう。</div>
+                                <div class="option-trans">让教师帮忙商谈将来的事情。</div>
+                            </div>
+                            <span class="click-hint">詳細解説</span>
+                            <div class="option-detail-analysis"></div>
+                        </label>
+                        <label class="option-label">
+                            <input type="radio" name="q61" value="2" class="option-input">
+                            <div class="custom-radio">2</div>
+                            <div class="option-content-wrapper">
+                                <div class="option-content">教員に質問をして講義内容の理解を深める。</div>
+                                <div class="option-trans">向教师提问以加深对讲义内容的理解。</div>
+                            </div>
+                            <span class="click-hint">詳細解説</span>
+                            <div class="option-detail-analysis"></div>
+                        </label>
+                        <label class="option-label">
+                            <input type="radio" name="q61" value="3" class="option-input">
+                            <div class="custom-radio">3</div>
+                            <div class="option-content-wrapper">
+                                <div class="option-content">教員と講義以外のことについての会話を楽しむ。</div>
+                                <div class="option-trans">享受与教师关于讲义以外内容的对话。</div>
+                            </div>
+                            <span class="click-hint">詳細解説</span>
+                            <div class="option-detail-analysis"></div>
+                        </label>
+                        <label class="option-label">
+                            <input type="radio" name="q61" value="4" class="option-input">
+                            <div class="custom-radio">4</div>
+                            <div class="option-content-wrapper">
+                                <div class="option-content">教員から講義内容の基本的なことを教えてもらう。</div>
+                                <div class="option-trans">让教师教讲义内容中基本的东西。</div>
+                            </div>
+                            <span class="click-hint">詳細解説</span>
+                            <div class="option-detail-analysis"></div>
+                        </label>
+                    </div>
+
+                    <div class="explanation-box">
+                        <div class="explanation-title">✎ 赤ペン解析</div>
+                        <div class="key-sentence-box">
+                            <div class="ks-label">【着眼点】</div>
+                            <div class="ks-text"></div>
+                        </div>
+                        <div class="explanation-content"></div>
+                    </div>
+                </div>
+
+                <!-- 题目 62 -->
+                <div class="question-card sketch-box" id="qcard-62">
+                    <div class="q-header">
+                        <div class="q-number bg-mint">62</div>
+                        <div class="q-text-wrapper">
+                            <div class="q-text">筆者の言いたいことは何か。</div>
+                            <div class="q-text-trans">作者想表达什么？</div>
+                        </div>
+                    </div>
+                    <div class="options-group">
+                        <label class="option-label">
+                            <input type="radio" name="q62" value="1" class="option-input">
+                            <div class="custom-radio">1</div>
+                            <div class="option-content-wrapper">
+                                <div class="option-content">講義より自分のやりたいことに時間を使ったほうがいい。</div>
+                                <div class="option-trans">比起讲义，把时间用在自己想做的事情上更好。</div>
+                            </div>
+                            <span class="click-hint">詳細解説</span>
+                            <div class="option-detail-analysis"></div>
+                        </label>
+                        <label class="option-label">
+                            <input type="radio" name="q62" value="2" class="option-input">
+                            <div class="custom-radio">2</div>
+                            <div class="option-content-wrapper">
+                                <div class="option-content">時間を計画的に使って、就職活動に備えたほうがいい。</div>
+                                <div class="option-trans">有计划地使用时间，为求职活动做准备更好。</div>
+                            </div>
+                            <span class="click-hint">詳細解説</span>
+                            <div class="option-detail-analysis"></div>
+                        </label>
+                        <label class="option-label">
+                            <input type="radio" name="q62" value="3" class="option-input">
+                            <div class="custom-radio">3</div>
+                            <div class="option-content-wrapper">
+                                <div class="option-content">講義にしっかり出て、学生らしい大学生活を送ることが大切だ。</div>
+                                <div class="option-trans">好好去听讲义，度过像学生一样的大学生活是很重要的。</div>
+                            </div>
+                            <span class="click-hint">詳細解説</span>
+                            <div class="option-detail-analysis"></div>
+                        </label>
+                        <label class="option-label">
+                            <input type="radio" name="q62" value="4" class="option-input">
+                            <div class="custom-radio">4</div>
+                            <div class="option-content-wrapper">
+                                <div class="option-content">大学生活を充実させるには、時間を計画的に使うことが大切だ。</div>
+                                <div class="option-trans">为了充实大学生活，有计划地使用时间是很重要的。</div>
+                            </div>
+                            <span class="click-hint">詳細解説</span>
+                            <div class="option-detail-analysis"></div>
+                        </label>
+                    </div>
+
+                    <div class="explanation-box">
+                        <div class="explanation-title">✎ 赤ペン解析</div>
+                        <div class="key-sentence-box">
+                            <div class="ks-label">【着眼点】</div>
+                            <div class="ks-text"></div>
+                        </div>
+                        <div class="explanation-content"></div>
+                    </div>
+                </div>
+
+                <!-- 页面1 底部导航 -->
+                <div class="action-bar page-navigation-bar">
+                    <button type="button" class="nav-btn" style="visibility: hidden;">◀ 前の文章</button>
+                    <button type="button" class="submit-btn" id="submit-all-btn-1" onclick="submitAllAnswers(1, [60, 61, 62])">全文答え合わせ</button>
+                    <button type="button" class="nav-btn" onclick="switchPage(2)">次の文章 ▶</button>
+                </div>
+            </aside>
+        </div>
+
+        <!-- ================= 页面 2 ================= -->
+        <div class="page-container" id="page-2">
+            
+            <main class="article-section sketch-box">
+                <div class="article-meta">
+                    <div class="meta-left">
+                        <span class="tag">N2 読解</span>
+                        <span class="article-title-info">2017年12月・中篇読解 2：個性について</span>
+                    </div>
+                    <button class="translate-toggle-btn" onclick="toggleTranslation(this, 'page-2')">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 8l6 6"/><path d="M4 14l6-6 2-3"/><path d="M2 5h12"/><path d="M7 2h1"/><path d="M22 22l-5-10-5 10"/><path d="M14 18h6"/></svg>
+                        参考訳
+                    </button>
+                </div>
+                
+                <div class="article-content">
+                    <div class="paragraph-group">
+                        <p style="font-size: 14px; color: var(--graphite-sub); margin-bottom: 1em;">以下は、ある作家が書いた文章である。</p>
+                        <p>人に対して好き嫌いの感情を持つことは誰にもあることだ。それを否定することはない。だが、好きな人とばかりつきあってビジネス生活を送ることははっきり言って不可能なのである。</p>
+                        <div class="article-translation">以下是某位作家写的文章。<br>对别人有喜欢或讨厌的感情是任何人都会有的事情。这没什么可否定的。但是，只和喜欢的人交往来度过商业生活，说白了是不可能的。</div>
+                    </div>
+
+                    <div class="paragraph-group">
+                        <p>分析してみると、好きな人とはつまり話が合う人で、自分と考え方が似ているケースが多い。そして、嫌いな人とは考え方が合わない人がほとんどだ。</p>
+                        <div class="article-translation">分析一下就会发现，喜欢的人也就是谈得来的人，多半是和自己想法相似的情况。而讨厌的人几乎都是想法不合的人。</div>
+                    </div>
+
+                    <div class="paragraph-group">
+                        <p><span class="ks-target target-ks-63">嫌い、もしくは<span class="note-word" data-note="注1" data-desc="または">（注1）</span>考え方が合わない人は、自分とは違う発想をしているわけで、じっくり話を聞いてみると、面白い見方、魅力ある発見を教えてくれることがある。</span></p>
+                        <div class="article-translation">讨厌或者想法不合的人，就是和自己有着不同的思维方式，如果仔细听他们说话，有时能告诉我们有趣的视角和充满魅力的发现。</div>
+                    </div>
+
+                    <div class="paragraph-group">
+                        <p><span class="ks-target target-ks-64">私自身、取材をしていて、最初は「感じ悪いな、こいつは」と思った人物が話をしていくうちに、「なるほど」といった情報を教えてくれたことがある。そうすると、取材が終わったころには、「この人はいい人だ」と判断を変えてしまうのだから、人間の好悪の感情なんて実にいい加減なものだ。</span></p>
+                        <div class="article-translation">我自己在采访时，有时最初觉得“这家伙感觉真差”的人，在交谈的过程中，会告诉我一些让我觉得“原来如此”的信息。这样一来，到了采访结束时，我就会改变判断觉得“这人是个好人”，可见人类喜欢和讨厌的感情真的是相当随便的东西。</div>
+                    </div>
+                    
+                    <div class="paragraph-group">
+                        <p><span class="ks-target target-ks-65">初めての人に会ったときは好き嫌いの感情を抜きにすること。</span>素直に人を見て、話を聞いて、そして、面白い話を聞くことができたら相手に<span class="note-word" data-note="注2" data-desc="～と同じように感じる">共感する（注2）</span>。そうすると人は謙虚になっていく。なんといっても仕事に役立つヒントをもらったわけだから、相手を尊敬するようになる。それが続くうちに人は出会った相手を尊重し、関係を大切にする人間に変わっていく。そういった人間になってしまえば、他人からも信頼されるし親しまれるだろう。</p>
+                        <div class="article-translation">第一次见别人时要抛开喜欢和讨厌的感情。真诚地看着别人，听别人说话，如果听到了有趣的话题，就与对方产生共鸣。这样一来人就会变得谦虚。不管怎么说毕竟是从对方那里得到了对工作有用的启示，就会变得尊敬对方。在这样持续的过程中，人会变成尊重遇到的人、珍惜彼此关系的人。如果变成了那样的人，应该也会受到他人的信赖和亲近吧。</div>
+                    </div>
+                </div>
+            </main>
+
+            <aside class="question-section">
+                <!-- 题目 63 -->
+                <div class="question-card sketch-box" id="qcard-63">
+                    <div class="q-header">
+                        <div class="q-number bg-blue">63</div>
+                        <div class="q-text-wrapper">
+                            <div class="q-text">嫌いな人と話すことについて、筆者はどのように述べているか。</div>
+                            <div class="q-text-trans">关于和讨厌的人说话，作者是怎么论述的？</div>
+                        </div>
+                    </div>
+                    <div class="options-group">
+                        <label class="option-label">
+                            <input type="radio" name="q63" value="1" class="option-input">
+                            <div class="custom-radio">1</div>
+                            <div class="option-content-wrapper">
+                                <div class="option-content">話してみると、自身とは違う見方や発見を得られる。</div>
+                                <div class="option-trans">试着交流的话，能获得与自己不同的视角和发现。</div>
+                            </div>
+                            <span class="click-hint">詳細解説</span>
+                            <div class="option-detail-analysis"></div>
+                        </label>
+                        <label class="option-label">
+                            <input type="radio" name="q63" value="2" class="option-input">
+                            <div class="custom-radio">2</div>
+                            <div class="option-content-wrapper">
+                                <div class="option-content">話す機会が増えるにつれて、だんだん考え方が似てくる。</div>
+                                <div class="option-trans">随着交流机会的增加，想法会渐渐变得相似。</div>
+                            </div>
+                            <span class="click-hint">詳細解説</span>
+                            <div class="option-detail-analysis"></div>
+                        </label>
+                        <label class="option-label">
+                            <input type="radio" name="q63" value="3" class="option-input">
+                            <div class="custom-radio">3</div>
+                            <div class="option-content-wrapper">
+                                <div class="option-content">好き嫌いの感情を持つのは当然なので、積極的に話す必要はない。</div>
+                                <div class="option-trans">产生喜欢或讨厌的感情是理所当然的，没必要积极去交流。</div>
+                            </div>
+                            <span class="click-hint">詳細解説</span>
+                            <div class="option-detail-analysis"></div>
+                        </label>
+                        <label class="option-label">
+                            <input type="radio" name="q63" value="4" class="option-input">
+                            <div class="custom-radio">4</div>
+                            <div class="option-content-wrapper">
+                                <div class="option-content">自身の考え方の間違いを指摘してくれるので、話したほうがいい。</div>
+                                <div class="option-trans">因为能指出自己想法的错误，所以去交流比较好。</div>
+                            </div>
+                            <span class="click-hint">詳細解説</span>
+                            <div class="option-detail-analysis"></div>
+                        </label>
+                    </div>
+
+                    <div class="explanation-box">
+                        <div class="explanation-title">✎ 赤ペン解析</div>
+                        <div class="key-sentence-box">
+                            <div class="ks-label">【着眼点】</div>
+                            <div class="ks-text"></div>
+                        </div>
+                        <div class="explanation-content"></div>
+                    </div>
+                </div>
+
+                <!-- 题目 64 -->
+                <div class="question-card sketch-box" id="qcard-64">
+                    <div class="q-header">
+                        <div class="q-number bg-peach">64</div>
+                        <div class="q-text-wrapper">
+                            <div class="q-text">筆者が取材の体験を通してわかったことは何か。</div>
+                            <div class="q-text-trans">作者通过采访的体验明白了什么？</div>
+                        </div>
+                    </div>
+                    <div class="options-group">
+                        <label class="option-label">
+                            <input type="radio" name="q64" value="1" class="option-input">
+                            <div class="custom-radio">1</div>
+                            <div class="option-content-wrapper">
+                                <div class="option-content">話を聞くうちに、どんな相手もいい人だと思えるようになる。</div>
+                                <div class="option-trans">在听人说话的过程中，会变得觉得任何对方都是好人。</div>
+                            </div>
+                            <span class="click-hint">詳細解説</span>
+                            <div class="option-detail-analysis"></div>
+                        </label>
+                        <label class="option-label">
+                            <input type="radio" name="q64" value="2" class="option-input">
+                            <div class="custom-radio">2</div>
+                            <div class="option-content-wrapper">
+                                <div class="option-content">いい人だと思って話せば、相手から役立つ情報が得られる。</div>
+                                <div class="option-trans">如果把对方当成好人去交流，就能从对方那里获得有用的信息。</div>
+                            </div>
+                            <span class="click-hint">詳細解説</span>
+                            <div class="option-detail-analysis"></div>
+                        </label>
+                        <label class="option-label">
+                            <input type="radio" name="q64" value="3" class="option-input">
+                            <div class="custom-radio">3</div>
+                            <div class="option-content-wrapper">
+                                <div class="option-content">相手に対する好き嫌いの感情は人それぞれだ。</div>
+                                <div class="option-trans">对他人的喜欢或讨厌的感情是因人而异的。</div>
+                            </div>
+                            <span class="click-hint">詳細解説</span>
+                            <div class="option-detail-analysis"></div>
+                        </label>
+                        <label class="option-label">
+                            <input type="radio" name="q64" value="4" class="option-input">
+                            <div class="custom-radio">4</div>
+                            <div class="option-content-wrapper">
+                                <div class="option-content">相手に対する好き嫌いの感情は変わることがある。</div>
+                                <div class="option-trans">对他人喜欢或讨厌的感情有时是会改变的。</div>
+                            </div>
+                            <span class="click-hint">詳細解説</span>
+                            <div class="option-detail-analysis"></div>
+                        </label>
+                    </div>
+
+                    <div class="explanation-box">
+                        <div class="explanation-title">✎ 赤ペン解析</div>
+                        <div class="key-sentence-box">
+                            <div class="ks-label">【着眼点】</div>
+                            <div class="ks-text"></div>
+                        </div>
+                        <div class="explanation-content"></div>
+                    </div>
+                </div>
+
+                <!-- 题目 65 -->
+                <div class="question-card sketch-box" id="qcard-65">
+                    <div class="q-header">
+                        <div class="q-number bg-mint">65</div>
+                        <div class="q-text-wrapper">
+                            <div class="q-text">筆者の言いたいことは何か。</div>
+                            <div class="q-text-trans">作者想表达什么？</div>
+                        </div>
+                    </div>
+                    <div class="options-group">
+                        <label class="option-label">
+                            <input type="radio" name="q65" value="1" class="option-input">
+                            <div class="custom-radio">1</div>
+                            <div class="option-content-wrapper">
+                                <div class="option-content">謙虚な態度でつきあっていれば、相手から尊敬されるようになる。</div>
+                                <div class="option-trans">如果以谦虚的态度交往，就会变得受对方尊敬。</div>
+                            </div>
+                            <span class="click-hint">詳細解説</span>
+                            <div class="option-detail-analysis"></div>
+                        </label>
+                        <label class="option-label">
+                            <input type="radio" name="q65" value="2" class="option-input">
+                            <div class="custom-radio">2</div>
+                            <div class="option-content-wrapper">
+                                <div class="option-content">相手から信頼されるには好き嫌いの感情を素直に表すことが必要だ。</div>
+                                <div class="option-trans">为了受到对方信赖，有必要坦率地表达喜欢和讨厌的感情。</div>
+                            </div>
+                            <span class="click-hint">詳細解説</span>
+                            <div class="option-detail-analysis"></div>
+                        </label>
+                        <label class="option-label">
+                            <input type="radio" name="q65" value="3" class="option-input">
+                            <div class="custom-radio">3</div>
+                            <div class="option-content-wrapper">
+                                <div class="option-content">初対面のときは相手に好き嫌いの感情を持たないほうがいい。</div>
+                                <div class="option-trans">初次见面时最好不对对方抱有喜欢和讨厌的感情。</div>
+                            </div>
+                            <span class="click-hint">詳細解説</span>
+                            <div class="option-detail-analysis"></div>
+                        </label>
+                        <label class="option-label">
+                            <input type="radio" name="q65" value="4" class="option-input">
+                            <div class="custom-radio">4</div>
+                            <div class="option-content-wrapper">
+                                <div class="option-content">初対面のときの感情を大切にしなければ、相手といい関係を築けない。</div>
+                                <div class="option-trans">如果不珍惜初次见面的感情，就无法和对方建立良好的关系。</div>
+                            </div>
+                            <span class="click-hint">詳細解説</span>
+                            <div class="option-detail-analysis"></div>
+                        </label>
+                    </div>
+
+                    <div class="explanation-box">
+                        <div class="explanation-title">✎ 赤ペン解析</div>
+                        <div class="key-sentence-box">
+                            <div class="ks-label">【着眼点】</div>
+                            <div class="ks-text"></div>
+                        </div>
+                        <div class="explanation-content"></div>
+                    </div>
+                </div>
+
+                <!-- 页面2 底部导航 -->
+                <div class="action-bar page-navigation-bar">
+                    <button type="button" class="nav-btn" onclick="switchPage(1)">◀ 前の文章</button>
+                    <button type="button" class="submit-btn" id="submit-all-btn-2" onclick="submitAllAnswers(2, [63, 64, 65])">全文答え合わせ</button>
+                    <button type="button" class="nav-btn" onclick="switchPage(3)">次の文章 ▶</button>
+                </div>
+            </aside>
+        </div>
+
+        <!-- ================= 页面 3 ================= -->
+        <div class="page-container" id="page-3">
+            
+            <main class="article-section sketch-box">
+                <div class="article-meta">
+                    <div class="meta-left">
+                        <span class="tag">N2 読解</span>
+                        <span class="article-title-info">2017年12月・中篇読解 3：消えない鉛筆</span>
+                    </div>
+                    <button class="translate-toggle-btn" onclick="toggleTranslation(this, 'page-3')">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 8l6 6"/><path d="M4 14l6-6 2-3"/><path d="M2 5h12"/><path d="M7 2h1"/><path d="M22 22l-5-10-5 10"/><path d="M14 18h6"/></svg>
+                        参考訳
+                    </button>
+                </div>
+                
+                <div class="article-content">
+                    <div class="paragraph-group">
+                        <p class="no-indent">「鉛筆でかいたのになぜ消えないの。」</p>
+                        <div class="article-translation">“为什么用铅笔画的却擦不掉呢。”</div>
+                    </div>
+
+                    <div class="paragraph-group">
+                        <p>小学校の写生大会で、画用紙に鉛筆で下書きをし、水性絵の具で色をぬった後、下書きを消しゴムで消そうとしたのに消えなかったときに思ったことだ。不思議だと思うと同時に、<span class="ks-target target-ks-66">絵が思ったように仕上げられずがっかりした。</span></p>
+                        <div class="article-translation">这是在小学的写生大会上，用铅笔在画纸上打草稿，用水性颜料上色后，想用橡皮擦掉草稿却擦不掉时产生的想法。在觉得不可思议的同时，画没能如预期那样完成，让人感到很失望。</div>
+                    </div>
+
+                    <div class="paragraph-group">
+                        <p>この疑問に対する答えを、最近、あるホームページで見付けた。そのページには、まず普通の鉛筆は消しゴムで消せるのに、なぜ色鉛筆は消せないのかという説明が書いてあった。</p>
+                        <div class="article-translation">最近，我在某个网页上找到了对这个疑问的解答。那个网页上，首先写着为什么普通的铅笔能用橡皮擦掉，而彩色铅笔却擦不掉的解释。</div>
+                    </div>
+
+                    <div class="paragraph-group">
+                        <p>その説明によると、それは普通の鉛筆と色鉛筆の芯の材料が異なっているためだそうだ。鉛筆は黒鉛と粘土から、色鉛筆は顔料とロウ(油分)からできている。黒鉛と顔料は、色の元になるものである。紙に書かれた文字の状態をそれぞれ簡単に説明すると、<span class="ks-target target-ks-67">前者は細かくくだかれた黒鉛が紙の表面にくっついている状態であり</span>、後者は顔料が紙の中に油とともにしみ込んでいる状態だそうだ。<span class="ks-target target-ks-67">したがって、表面にくっついているだけの黒鉛は、消しゴムでこすることで、紙から引き離すことができる。</span>一方、しみ込んだ顔料は引き離すことができない。</p>
+                        <div class="article-translation">根据那个解释，似乎是因为普通铅笔和彩色铅笔的笔芯材料不同。铅笔是由石墨和粘土构成的，彩色铅笔是由颜料和蜡（油分）构成的。石墨和颜料是颜色的基础。简单说明一下写在纸上的文字的状态，前者是被粉碎得很细的石墨附着在纸张表面的状态，后者似乎是颜料和油一起渗入纸张内部的状态。因此，仅仅附着在表面的石墨，通过用橡皮摩擦，就可以从纸上分离下来。另一方面，渗进去的颜料是无法分离的。</div>
+                    </div>
+                    
+                    <div class="paragraph-group">
+                        <p>そして最後に、鉛筆の下書きが水性絵の具で色をぬった後に消せない理由が説明されていた。<span class="ks-target target-ks-68">鉛筆の下書きが消せないのは、水性絵の具を溶かすのに使う水のせいだそうだ。この水が、色鉛筆の芯の油分と同じ役割を果たすという。水も油も紙にしみ込みやすいのだ。</span></p>
+                        <div class="article-translation">最后，解释了铅笔的草稿在用水性颜料上色后无法擦掉的理由。铅笔的草稿擦不掉，似乎是因为溶解水性颜料所使用的水的缘故。据说这个水起到了和彩色铅笔笔芯中的油分相同的作用。水和油都容易渗入纸张中。</div>
+                    </div>
+                </div>
+            </main>
+
+            <aside class="question-section">
+                <!-- 题目 66 -->
+                <div class="question-card sketch-box" id="qcard-66">
+                    <div class="q-header">
+                        <div class="q-number bg-blue">66</div>
+                        <div class="q-text-wrapper">
+                            <div class="q-text"><u>がっかりした</u>とあるが、なぜか。</div>
+                            <div class="q-text-trans">文中提到“感到失望”，这是为什么？</div>
+                        </div>
+                    </div>
+                    <div class="options-group">
+                        <label class="option-label">
+                            <input type="radio" name="q66" value="1" class="option-input">
+                            <div class="custom-radio">1</div>
+                            <div class="option-content-wrapper">
+                                <div class="option-content">不思議だと思ったことの理由がわからなかったから</div>
+                                <div class="option-trans">因为不懂觉得不可思议的理由</div>
+                            </div>
+                            <span class="click-hint">詳細解説</span>
+                            <div class="option-detail-analysis"></div>
+                        </label>
+                        <label class="option-label">
+                            <input type="radio" name="q66" value="2" class="option-input">
+                            <div class="custom-radio">2</div>
+                            <div class="option-content-wrapper">
+                                <div class="option-content">水性絵の具で思ったように色がぬれなかったから</div>
+                                <div class="option-trans">因为水性颜料没能如预期上色</div>
+                            </div>
+                            <span class="click-hint">詳細解説</span>
+                            <div class="option-detail-analysis"></div>
+                        </label>
+                        <label class="option-label">
+                            <input type="radio" name="q66" value="3" class="option-input">
+                            <div class="custom-radio">3</div>
+                            <div class="option-content-wrapper">
+                                <div class="option-content">鉛筆で絵が上手にかげなかったから</div>
+                                <div class="option-trans">因为铅笔画没画好</div>
+                            </div>
+                            <span class="click-hint">詳細解説</span>
+                            <div class="option-detail-analysis"></div>
+                        </label>
+                        <label class="option-label">
+                            <input type="radio" name="q66" value="4" class="option-input">
+                            <div class="custom-radio">4</div>
+                            <div class="option-content-wrapper">
+                                <div class="option-content">鉛筆の下書きが消せなかったから</div>
+                                <div class="option-trans">因为铅笔的草稿擦不掉</div>
+                            </div>
+                            <span class="click-hint">詳細解説</span>
+                            <div class="option-detail-analysis"></div>
+                        </label>
+                    </div>
+
+                    <div class="explanation-box">
+                        <div class="explanation-title">✎ 赤ペン解析</div>
+                        <div class="key-sentence-box">
+                            <div class="ks-label">【着眼点】</div>
+                            <div class="ks-text"></div>
+                        </div>
+                        <div class="explanation-content"></div>
+                    </div>
+                </div>
+
+                <!-- 题目 67 -->
+                <div class="question-card sketch-box" id="qcard-67">
+                    <div class="q-header">
+                        <div class="q-number bg-peach">67</div>
+                        <div class="q-text-wrapper">
+                            <div class="q-text">普通の鉛筆で書いた文字を消しゴムで消すとは、どうすることか。</div>
+                            <div class="q-text-trans">用橡皮擦掉普通铅笔写的字，是怎么一回事？</div>
+                        </div>
+                    </div>
+                    <div class="options-group">
+                        <label class="option-label">
+                            <input type="radio" name="q67" value="1" class="option-input">
+                            <div class="custom-radio">1</div>
+                            <div class="option-content-wrapper">
+                                <div class="option-content">紙の表面にくっついた黒鉛を、紙から引き離す。</div>
+                                <div class="option-trans">把附着在纸张表面的石墨从纸上分离。</div>
+                            </div>
+                            <span class="click-hint">詳細解説</span>
+                            <div class="option-detail-analysis"></div>
+                        </label>
+                        <label class="option-label">
+                            <input type="radio" name="q67" value="2" class="option-input">
+                            <div class="custom-radio">2</div>
+                            <div class="option-content-wrapper">
+                                <div class="option-content">紙の表面にくっついた黒鉛を、細かくくだいて見えなくする。</div>
+                                <div class="option-trans">把附着在表面的石墨弄碎变看不见。</div>
+                            </div>
+                            <span class="click-hint">詳細解説</span>
+                            <div class="option-detail-analysis"></div>
+                        </label>
+                        <label class="option-label">
+                            <input type="radio" name="q67" value="3" class="option-input">
+                            <div class="custom-radio">3</div>
+                            <div class="option-content-wrapper">
+                                <div class="option-content">紙の中にしみ込んだ黒鉛を、紙から引き離す。</div>
+                                <div class="option-trans">把渗入纸里的石墨从纸上分离。</div>
+                            </div>
+                            <span class="click-hint">詳細解説</span>
+                            <div class="option-detail-analysis"></div>
+                        </label>
+                        <label class="option-label">
+                            <input type="radio" name="q67" value="4" class="option-input">
+                            <div class="custom-radio">4</div>
+                            <div class="option-content-wrapper">
+                                <div class="option-content">紙の中にしみ込んだ黒鉛を、さらにしみ込ませて見えなくする。</div>
+                                <div class="option-trans">让渗入纸里的石墨进一步渗入变看不见。</div>
+                            </div>
+                            <span class="click-hint">詳細解説</span>
+                            <div class="option-detail-analysis"></div>
+                        </label>
+                    </div>
+
+                    <div class="explanation-box">
+                        <div class="explanation-title">✎ 赤ペン解析</div>
+                        <div class="key-sentence-box">
+                            <div class="ks-label">【着眼点】</div>
+                            <div class="ks-text"></div>
+                        </div>
+                        <div class="explanation-content"></div>
+                    </div>
+                </div>
+
+                <!-- 题目 68 -->
+                <div class="question-card sketch-box" id="qcard-68">
+                    <div class="q-header">
+                        <div class="q-number bg-mint">68</div>
+                        <div class="q-text-wrapper">
+                            <div class="q-text">水性絵の具で色をぬった後に、鉛筆の下書きが消せないのはなぜか。</div>
+                            <div class="q-text-trans">用水性颜料上色后，铅笔的草稿为什么擦不掉？</div>
+                        </div>
+                    </div>
+                    <div class="options-group">
+                        <label class="option-label">
+                            <input type="radio" name="q68" value="1" class="option-input">
+                            <div class="custom-radio">1</div>
+                            <div class="option-content-wrapper">
+                                <div class="option-content">黒鉛が細かくくだかれていて取り除けないから</div>
+                                <div class="option-trans">因为石墨被弄得太碎无法去除</div>
+                            </div>
+                            <span class="click-hint">詳細解説</span>
+                            <div class="option-detail-analysis"></div>
+                        </label>
+                        <label class="option-label">
+                            <input type="radio" name="q68" value="2" class="option-input">
+                            <div class="custom-radio">2</div>
+                            <div class="option-content-wrapper">
+                                <div class="option-content">絵の具で黒鉛が紙の表面にくっついたから</div>
+                                <div class="option-trans">因为颜料让石墨附着在纸张表面</div>
+                            </div>
+                            <span class="click-hint">詳細解説</span>
+                            <div class="option-detail-analysis"></div>
+                        </label>
+                        <label class="option-label">
+                            <input type="radio" name="q68" value="3" class="option-input">
+                            <div class="custom-radio">3</div>
+                            <div class="option-content-wrapper">
+                                <div class="option-content">水によって黒鉛が紙にしみ込んだから</div>
+                                <div class="option-trans">因为水让石墨渗入了纸张中</div>
+                            </div>
+                            <span class="click-hint">詳細解説</span>
+                            <div class="option-detail-analysis"></div>
+                        </label>
+                        <label class="option-label">
+                            <input type="radio" name="q68" value="4" class="option-input">
+                            <div class="custom-radio">4</div>
+                            <div class="option-content-wrapper">
+                                <div class="option-content">黒鉛が油分と同じ働きをしていたから</div>
+                                <div class="option-trans">因为石墨起到了和油分相同的作用</div>
+                            </div>
+                            <span class="click-hint">詳細解説</span>
+                            <div class="option-detail-analysis"></div>
+                        </label>
+                    </div>
+
+                    <div class="explanation-box">
+                        <div class="explanation-title">✎ 赤ペン解析</div>
+                        <div class="key-sentence-box">
+                            <div class="ks-label">【着眼点】</div>
+                            <div class="ks-text"></div>
+                        </div>
+                        <div class="explanation-content"></div>
+                    </div>
+                </div>
+
+                <!-- 页面3 底部导航 -->
+                <div class="action-bar page-navigation-bar">
+                    <button type="button" class="nav-btn" onclick="switchPage(2)">◀ 前の文章</button>
+                    <button type="button" class="submit-btn" id="submit-all-btn-3" onclick="submitAllAnswers(3, [66, 67, 68])">全文答え合わせ</button>
+                    <button type="button" class="nav-btn" style="visibility: hidden;">次の文章 ▶</button>
+                </div>
+            </aside>
+        </div>
+
+    </div>
+
+    <!-- 词汇解释气泡 -->
+    <div id="vocabTooltip" class="vocab-tooltip"></div>
+
+    <script>
+        // ================= 数据设定 =================
+        const answersData = {
+            // 2017年12月 第1篇
+            60: { 
+                correct: "2", 
+                keySentence: "「大学の講義の多くは、聞いていれば済むし、たまに意見を求める教員がいても、受講する前に勉強してこなかったからと責める教員はいませんから、やりすごしさえすれば終わりです。」",
+                explanation: "题目询问关于大学讲义，哪一项符合作者的想法。文章第一段指出，“大学里的大多数讲义，只要听着就行了”，并且即使被问到，只要混过去就算结束了。选项2“有些讲义只要听着就行了”与原文的描述直接对应。",
+                optAnalysis: {
+                    "1": "【✖ 誤り】文章提到“不会因为你上课前没复习就责备你”，而不是“不出席也不会被责备”。",
+                    "2": "【✔ 正解】准确对应了第一段中“大学的讲义大多只要听着就行了（聞いていれば済む）”的描述。",
+                    "3": "【✖ 誤り】文章提到“有时会有人觉得”高中课程更充实，但这并非作者认为的客观事实或普遍情况，作者只是在解释为什么会有人产生这种感觉（因为光听讲义收获有限）。",
+                    "4": "【✖ 誤り】文章明确提到“即使偶尔有征求意见的教师（たまに意見を求める教員がいても）”，所以并不是完全没有。"
+                }
+            },
+            61: {
+                correct: "2",
+                keySentence: "「だから、講義で興味を抱いたり疑問を感じたことがあれば、教員の研究室を訪ねて質問すると、驚くほど豊富な話をしてもらえます。学生らしい大学生活を送るには、こうした『講義からはみだす時間』も必要ですし……」",
+                explanation: "题目询问划线部分“这种‘超出讲义以外的时间’”是指做什么的时间。划线部分紧接在前一句之后，前一句描述的是：如果在讲义中有了兴趣或疑问，去拜访教师的研究室提问，会听到丰富的内容。这说明这段时间是用来向老师提问、深化对讲义内容的理解的。选项2符合这一逻辑。",
+                optAnalysis: {
+                    "1": "【✖ 誤り】文章并未提到去找老师商谈将来的事情。",
+                    "2": "【✔ 正解】准确对应了划线部分前一句所说的“有了疑问去拜访教师提问听取更丰富的内容”。",
+                    "3": "【✖ 誤り】去提问是因为对讲义内容有了兴趣或疑问，而不是去聊讲义以外的事。",
+                    "4": "【✖ 誤り】文章指出老师在讲义上讲的才是基本内容，去研究室能听到的是更高深、更丰富的知识，而不是去让老师教基本的内容。"
+                }
+            },
+            62: {
+                correct: "4",
+                keySentence: "「大学で『よく学び、よく遊ぶ』ためには、時間の使い方が重要です。……これらを計画的に組み立てれば、無駄も省け、時間的にも気持ちのうえでも『ゆとり』が生まれます。」",
+                explanation: "题目询问作者想表达什么。文章开篇就点明“在大学里想要好好学习好好玩耍，时间的使用方法很重要”。接着列举了听讲义、去研究室深化学习、为将来做准备等需要花时间的事情，并在最后一段总结：如果有计划地安排这些事情，就能在时间和心情上产生宽裕。综合来看，作者想强调的是有计划地使用时间对充实大学生活的重要性。选项4完美契合这一主旨。",
+                optAnalysis: {
+                    "1": "【✖ 誤り】作者并未建议要重此薄彼，而是建议要有计划地安排各项活动。",
+                    "2": "【✖ 誤り】为求职做准备只是有计划使用时间的一部分，并非文章的最终主旨，最终主旨是产生整体的“余裕”。",
+                    "3": "【✖ 誤り】文章也提到光好好听讲义是不够的，还需要课外的时间。",
+                    "4": "【✔ 正解】准确抓住了文章开头“时间的使用方法很重要”和结尾“有计划安排能产生宽裕”的核心逻辑。"
+                }
+            },
+
+            // 2017年12月 第2篇
+            63: {
+                correct: "1",
+                keySentence: "「嫌い、もしくは考え方が合わない人は、自分とは違う発想をしているわけで、じっくり話を聞いてみると、面白い見方、魅力ある発見を教えてくれることがある。」",
+                explanation: "题目询问关于和讨厌的人说话作者怎么看。第三段指出，讨厌或者想法不合的人有着不同的思维方式，仔细听他们说话，“有时能告诉我们有趣的视角和充满魅力的发现”。选项1准确概括了这一点。",
+                optAnalysis: {
+                    "1": "【✔ 正解】准确对应了原文“有时能告诉我们有趣的视角和充满魅力的发现（面白い見方、魅力ある発見を教えてくれる）”。",
+                    "2": "【✖ 誤り】文章说的是能获得新发现，并没有说想法会变得相似（考え方が似てくる）。",
+                    "3": "【✖ 誤り】文章鼓励去听他们说话，而不是认为没必要交流。",
+                    "4": "【✖ 誤り】文章提到他们会带来有趣的视角，而不是说对方能“指出自己想法的错误（間違いを指摘してくれる）”。"
+                }
+            },
+            64: {
+                correct: "4",
+                keySentence: "「私自身、取材をしていて、最初は『感じ悪いな、こいつは』と思った人物が話をしていくうちに、『なるほど』といった情報を教えてくれたことがある。そうすると、取材が終わったころには、『この人はいい人だ』と判断を変えてしまうのだから、人間の好悪の感情なんて実にいい加減なものだ。」",
+                explanation: "题目询问作者通过采访的体验明白了什么。第四段描述了作者在采访时，最初觉得感觉很差的人，聊着聊着因为对方提供了有用的信息，到最后判断变成了“这人是个好人”。作者由此感叹“人类喜欢和讨厌的感情真的是相当随便的东西”。这说明对人的好恶感情是会发生改变的。选项4符合这一点。",
+                optAnalysis: {
+                    "1": "【✖ 誤り】文章是说“有时”会改变判断，并没有说会觉得“任何对方（どんな相手も）”都是好人，过于绝对。",
+                    "2": "【✖ 誤り】作者一开始并没有把对方当好人，而是觉得“这家伙感觉真差”，是交流后才改观的。",
+                    "3": "【✖ 誤り】虽然好恶因人而异是事实，但这段体验重点强调的是“感情的随便与易变”，而非因人而异。",
+                    "4": "【✔ 正解】准确对应了原文中对同一个人从“感觉差”转变为“好人”的感情变化过程。"
+                }
+            },
+            65: {
+                correct: "3",
+                keySentence: "「初めての人に会ったときは好き嫌いの感情を抜きにすること。素直に人を見て、話を聞いて……そういった人間になってしまえば、他人からも信頼されるし親しまれるだろう。」",
+                explanation: "题目询问作者想表达什么。最后一段是文章的结论部分，第一句就明确提出：“第一次见别人时要抛开喜欢和讨厌的感情”。接着说明了这样做的好处：能真诚听人说话，产生共鸣，变得谦虚并尊敬对方，最终建立良好的关系并受到信赖。因此核心主张就是初次见面不要带着好恶的感情。选项3完美契合。",
+                optAnalysis: {
+                    "1": "【✖ 誤り】文章是说听了有用的话自己变得谦虚，从而尊敬对方，而不是受对方尊敬（相手から尊敬される）。",
+                    "2": "【✖ 誤り】这与作者的观点完全相反。作者主张抛开（抜きにする）好恶感情，而不是坦率表达（表す）好恶感情。",
+                    "3": "【✔ 正解】完美对应最后一段第一句的核心主张“第一次见别人时要抛开喜欢和讨厌的感情（好き嫌いの感情を抜きにすること）”。",
+                    "4": "【✖ 誤り】作者主张“抛开”初见时的感情，而不是“珍惜（大切にしなければ）”。"
+                }
+            },
+
+            // 2017年12月 第3篇
+            66: {
+                correct: "4",
+                keySentence: "「小学校の写生大会で、画用紙に鉛筆で下書きをし、水性絵の具で色をぬった後、下書きを消しゴムで消そうとしたのに消えなかったときに思ったことだ。不思議だと思うと同時に、絵が思ったように仕上げられずがっかりした。」",
+                explanation: "题目询问为什么“感到很失望”。根据划线部分所在的前一句话，“用水性颜料上色后，想用橡皮擦掉草稿却擦不掉”，紧接着说“画没能如预期那样完成，让人感到很失望”。由此可知，失望的原因是草稿擦不掉导致画作不完美。选项4准确传达了这一点。",
+                optAnalysis: {
+                    "1": "【✖ 誤り】作者确实觉得不可思议，但这是并列的情绪，真正的失望原因是画没达到预期（因为草稿没擦掉）。",
+                    "2": "【✖ 誤り】文章说的是草稿擦不掉，并没有说水性颜料没能如预期上色。",
+                    "3": "【✖ 誤り】文章说的是草稿无法擦除影响了完成效果，而不是说铅笔画得不好。",
+                    "4": "【✔ 正解】准确对应了“想用橡皮擦掉草稿却擦不掉（下書きを消しゴムで消そうとしたのに消えなかった）”导致画没完成好的直接原因。"
+                }
+            },
+            67: {
+                correct: "1",
+                keySentence: "「前者は細かくくだかれた黒鉛が紙の表面にくっついている状態であり……したがって、表面にくっついているだけの黒鉛は、消しゴムでこすることで、紙から引き離すことができる。」",
+                explanation: "题目询问用橡皮擦掉普通铅笔写的字是怎么一回事。文章第三段明确写道，普通铅笔是“细碎的石墨附着在纸张表面的状态（黒鉛が紙の表面にくっついている状態）”，因此“仅仅附着在表面的石墨，通过用橡皮摩擦，就可以从纸上分离下来（紙から引き離すことができる）”。选项1完全符合这一描述。",
+                optAnalysis: {
+                    "1": "【✔ 正解】精准对应了原文“仅仅附着在表面的石墨……可以从纸上分离下来（紙から引き離すことができる）”。",
+                    "2": "【✖ 誤り】文章说的是从纸上分离下来，而不是进一步弄碎变看不见。",
+                    "3": "【✖ 誤り】普通铅笔的石墨是附着在表面的，只有彩色铅笔的颜料才会和油分一起“渗入（しみ込んでいる）”纸内部。",
+                    "4": "【✖ 誤り】这同样混淆了铅笔和彩色铅笔的原理，且橡皮擦并非让其进一步渗入。"
+                }
+            },
+            68: {
+                correct: "3",
+                keySentence: "「鉛筆の下書きが消せないのは、水性絵の具を溶かすのに使う水のせいだそうだ。この水が、色鉛筆の芯の油分と同じ役割を果たすという。水も油も紙にしみ込みやすいのだ。」",
+                explanation: "题目询问用水性颜料上色后铅笔草稿擦不掉的原因。文章最后一段指出，是因为溶解颜料的“水”起到了和彩色铅笔中“油分”相同的作用。结合前文“彩色铅笔是颜料和油一起渗入纸张内部”，可以推断出，水让铅笔的石墨也像彩色铅笔的颜料一样，渗入到了纸张内部。选项3准确概括了这一因果关系。",
+                optAnalysis: {
+                    "1": "【✖ 誤り】石墨太碎是铅笔正常书写的状态，这并不是上色后擦不掉的原因。",
+                    "2": "【✖ 誤り】颜料上色后石墨不是附着在表面，而是因为水的作用渗进去了。",
+                    "3": "【✔ 正解】准确推断出“水”起到了“油”的作用，即让石墨“渗入（しみ込む）”了纸里，导致无法分离。",
+                    "4": "【✖ 誤り】起到和油分相同作用的是“水”，而不是“石墨（黒鉛）”。"
+                }
+            }
+        };
+
+        // ================= 页面切换逻辑 =================
+        function switchPage(pageNumber) {
+            document.querySelectorAll('.page-container').forEach(container => {
+                container.classList.remove('active');
+            });
+            const targetPage = document.getElementById(`page-${pageNumber}`);
+            if (targetPage) {
+                targetPage.classList.add('active');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        }
+
+        // ================= 答题提交与页面更新 (按页面一括) =================
+        function submitAllAnswers(pageNumber, questionIds) {
+            let allAnswered = true;
+
+            // 检查是否全部作答
+            questionIds.forEach(qId => {
+                const card = document.getElementById(`qcard-${qId}`);
+                if (!card.querySelector(`input[name="q${qId}"]:checked`)) {
+                    allAnswered = false;
+                }
+            });
+
+            if (!allAnswered) {
+                alert("すべての問題に答えてください。（请先完成本页的所有题目哦）");
+                return;
+            }
+
+            let allCorrect = true;
+
+            // 遍历判题
+            questionIds.forEach(qId => {
+                const card = document.getElementById(`qcard-${qId}`);
+                const selectedOpt = card.querySelector(`input[name="q${qId}"]:checked`);
+                const data = answersData[qId];
+                
+                const correctVal = data.correct;
+                const userVal = selectedOpt.value;
+                let isCorrect = (userVal === correctVal);
+                
+                if (!isCorrect) allCorrect = false;
+
+                // 禁用选项并更新样式
+                card.querySelectorAll('.option-input').forEach(input => {
+                    input.disabled = true;
+                    const label = input.closest('.option-label');
+                    label.classList.add('disabled');
+                    
+                    const optVal = input.value;
+                    if (optVal === correctVal) {
+                        label.classList.add('is-correct');
+                        label.querySelector('.custom-radio').innerHTML = '✔';
+                    }
+                    if (optVal === userVal && userVal !== correctVal) {
+                        label.classList.add('is-wrong');
+                        label.querySelector('.custom-radio').innerHTML = '✖';
+                    }
+                    
+                    // 插入详细解析
+                    label.querySelector('.option-detail-analysis').innerText = data.optAnalysis[optVal];
+                });
+                
+                card.querySelector('.options-group').classList.add('reviewed');
+                card.classList.add('reviewed'); // 用于显示选项译文
+
+                // 显示解析气泡
+                const expBox = card.querySelector('.explanation-box');
+                expBox.querySelector('.ks-text').innerText = data.keySentence;
+                expBox.querySelector('.explanation-content').innerText = data.explanation;
+                expBox.classList.add('show');
+
+                // 原文对应关键句高亮展示
+                const pageContainer = document.getElementById(`page-${pageNumber}`);
+                const targetSpans = pageContainer.querySelectorAll(`.ks-target.target-ks-${qId}`);
+                if (targetSpans.length > 0) {
+                    targetSpans.forEach(span => span.classList.add('revealed'));
+                }
+
+                // 着眼点跳转逻辑
+                const ksBox = card.querySelector('.key-sentence-box');
+                ksBox.classList.add('clickable');
+                ksBox.onclick = function() {
+                    if (targetSpans.length > 0) {
+                        targetSpans[0].scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        targetSpans.forEach(span => {
+                            span.classList.remove('flash-focus');
+                            void span.offsetWidth; // 触发重绘
+                            span.classList.add('flash-focus');
+                        });
+                    }
+                };
+            });
+
+            // 标记当前文章已复习，允许查看全文翻译
+            document.querySelector(`#page-${pageNumber} .article-content`).classList.add('reviewed');
+
+            // 按钮状态更新
+            const mainBtn = document.getElementById(`submit-all-btn-${pageNumber}`);
+            mainBtn.disabled = true;
+            if (allCorrect) {
+                mainBtn.innerText = "全問正解！素晴らしい！";
+                mainBtn.style.background = "var(--marker-mint)";
+                mainBtn.style.color = "var(--green-pencil)";
+            } else {
+                mainBtn.innerText = "残念！解説をチェックしよう";
+                mainBtn.style.background = "var(--marker-peach)";
+                mainBtn.style.color = "var(--red-pencil)";
+            }
+        }
+
+        // ================= 翻译展示切换 =================
+        function toggleTranslation(btn, containerId) {
+            const container = document.getElementById(containerId);
+            const articleContent = container.querySelector('.article-content');
+            
+            if (!articleContent.classList.contains('reviewed')) {
+                alert("問題を解いてから（「全文答え合わせ」をクリックしてから）訳文を確認してくださいね！\n(请在完成所有题目并提交后再查看参考译文哦！)");
+                return;
+            }
+            
+            btn.classList.toggle('active');
+            container.querySelectorAll('.article-translation').forEach(el => {
+                el.classList.toggle('show');
+            });
+        }
+
+        // ================= 事件监听 (UI 交互增强) =================
+        
+        // 选中反馈
+        document.addEventListener('change', function(e) {
+            if (e.target && e.target.classList.contains('option-input')) {
+                const name = e.target.name;
+                const card = e.target.closest('.question-card');
+                card.querySelectorAll(`input[name="${name}"]`).forEach(radio => {
+                    radio.closest('.option-label').classList.remove('selected');
+                });
+                if (e.target.checked) {
+                    e.target.closest('.option-label').classList.add('selected');
+                }
+            }
+        });
+
+        // 详细解析框的折叠与展开
+        document.addEventListener('click', function(e) {
+            const label = e.target.closest('.option-label');
+            if (label) {
+                const group = label.closest('.options-group');
+                if (group && group.classList.contains('reviewed')) {
+                    const detailBox = label.querySelector('.option-detail-analysis');
+                    if (detailBox.classList.contains('show')) {
+                        detailBox.classList.remove('show');
+                    } else {
+                        group.querySelectorAll('.option-detail-analysis').forEach(box => box.classList.remove('show'));
+                        detailBox.classList.add('show');
+                    }
+                }
+            }
+        });
+
+        // 词汇与注解提示框定位
+        const vocabTooltip = document.getElementById('vocabTooltip');
+        document.addEventListener('click', function(e) {
+            const word = e.target.closest('.vocab-word');
+            const note = e.target.closest('.note-word');
+            const article = e.target.closest('.article-content');
+            
+            if (note) {
+                e.stopPropagation();
+                const reading = note.getAttribute('data-note');
+                const meaning = note.getAttribute('data-desc');
+                
+                vocabTooltip.innerHTML = `<span class="reading">${reading}</span><span class="meaning">${meaning}</span>`;
+                
+                const rect = note.getBoundingClientRect();
+                const scrollX = window.pageXOffset || document.documentElement.scrollLeft;
+                const scrollY = window.pageYOffset || document.documentElement.scrollTop;
+                
+                vocabTooltip.style.left = `${rect.left + scrollX - 10}px`;
+                vocabTooltip.style.top = `${rect.top + scrollY - vocabTooltip.offsetHeight - 10}px`;
+                vocabTooltip.classList.add('show');
+                
+                setTimeout(() => {
+                    vocabTooltip.style.top = `${rect.top + scrollY - vocabTooltip.offsetHeight - 10}px`;
+                }, 10);
+            } else if (word && article && article.classList.contains('reviewed')) {
+                e.stopPropagation();
+                const reading = word.getAttribute('data-reading');
+                const meaning = word.getAttribute('data-meaning');
+                
+                vocabTooltip.innerHTML = `<span class="reading">${reading}</span><span class="meaning">${meaning}</span>`;
+                
+                const rect = word.getBoundingClientRect();
+                const scrollX = window.pageXOffset || document.documentElement.scrollLeft;
+                const scrollY = window.pageYOffset || document.documentElement.scrollTop;
+                
+                vocabTooltip.style.left = `${rect.left + scrollX - 10}px`;
+                vocabTooltip.style.top = `${rect.top + scrollY - vocabTooltip.offsetHeight - 10}px`;
+                vocabTooltip.classList.add('show');
+                
+                setTimeout(() => {
+                    vocabTooltip.style.top = `${rect.top + scrollY - vocabTooltip.offsetHeight - 10}px`;
+                }, 10);
+            } else {
+                vocabTooltip.classList.remove('show');
+            }
+        });
+
+    </script>
+  <script src="../../../../shared/study-quest-test-runtime.js"></script>
+  <script src="../../../../shared/study-quest-test-boot.js"></script>
+  <script src="../../shared/reading-year-system.js"></script>
+  <script src="../../shared/reading-n2-middle-session.js"></script>
+</body>
+</html>

@@ -1,7 +1,7 @@
 (function() {
     function normalizeReadingType(value) {
         const type = String(value || '').trim();
-        if (type === 'mid') {
+        if (type === 'mid' || type === 'medium') {
             return 'middle';
         }
         if (type === 'd') {

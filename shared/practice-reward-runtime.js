@@ -652,12 +652,20 @@
     }
 
     function maybeUnlockN2Pass() {
-        const hasAllSeasons = SEASON_CARD_IDS.every(hasCard);
-        if (!hasAllSeasons || hasCard(N2_PASS_CARD_ID)) {
+        const api = getCatalogApi();
+        const themeSet = api && typeof api.getThemeSetById === 'function'
+            ? api.getThemeSetById('n2_seasons')
+            : null;
+        const seasonCardIds = themeSet && Array.isArray(themeSet.cardIds) && themeSet.cardIds.length
+            ? themeSet.cardIds
+            : SEASON_CARD_IDS;
+        const rewardCardId = themeSet && themeSet.rewardCardId ? themeSet.rewardCardId : N2_PASS_CARD_ID;
+        const hasAllSeasons = seasonCardIds.every(hasCard);
+        if (!hasAllSeasons || hasCard(rewardCardId)) {
             return null;
         }
-        const passCard = getCardDefinition(N2_PASS_CARD_ID);
-        return passCard ? recordCard(passCard, Date.now(), 'practice_set_complete') : null;
+        const passCard = getCardDefinition(rewardCardId);
+        return passCard ? recordCard(passCard, Date.now(), `set_complete:${themeSet ? themeSet.id : 'n2_seasons'}`) : null;
     }
 
     function hasPracticeAchievementRecord(state) {

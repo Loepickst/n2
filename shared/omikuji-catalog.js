@@ -45,22 +45,43 @@
         { id: "f39", rarity: "R", title: "鹰吉", desc: "日复一日的练习，必然让你练就锐利的“鹰眼”，一箭正中要害！", weight: 30, color: "#5C4A3D", icon: "https://cdn.jsdelivr.net/gh/Loepickst/kiki@main/takarakuji/yingji.png" }
     ];
 
-    const petRewardFortunes = [
-        { id: "pet_shiba_max", rarity: "MAX", title: "守护柴犬", desc: "把柴犬一路陪到满级后获得的成长纪念卡。它会继续守在你身边，提醒你一点点向前。", color: "#B7282E", icon: "kiki2.png", isRewardOnly: true },
-        { id: "pet_cat_max", rarity: "MAX", title: "月影猫伴", desc: "把猫猫一路陪到满级后获得的成长纪念卡。它会在安静的夜里，继续陪你把学习走稳。", color: "#6D6A8B", icon: "takarakuji/nekoji.png", isRewardOnly: true }
+    const achievementRewardFortunes = [
+        { id: "practice_shengji_max", rarity: "SP", title: "胜吉", desc: "练习累计到第 30 次时出现的特别纪念。烟火亮起的那一刻，努力终于有了形状。", color: "#C96A2A", icon: "takarakuji/shengji.png", isRewardOnly: true, acquireMode: "achievement", rewardSource: { type: "effective_practice_count", threshold: 30 } }
     ];
 
     const practiceRewardFortunes = [
         { id: "practice_chunji_vocabulary", rarity: "MR", title: "春吉", desc: "词汇练习中偶然飘来的春风。把一个个动词种下去，来日会长成自己的语感。", color: "#B7745A", icon: "takarakuji/chunji.png", isRewardOnly: true, acquireMode: "practice_draw", rewardSource: { type: "practice_module", module: "vocabulary" }, themeSetId: "n2_seasons" },
         { id: "practice_xiaji_grammar", rarity: "MR", title: "夏吉", desc: "语法练习里热乎乎的夏日签。被汗水浸过的接续，最后会变成稳稳的判断力。", color: "#C28633", icon: "takarakuji/xiaji.png", isRewardOnly: true, acquireMode: "practice_draw", rewardSource: { type: "practice_module", module: "grammar" }, themeSetId: "n2_seasons" },
         { id: "practice_qiuji_reading", rarity: "MR", title: "秋吉", desc: "阅读练习后落下的一枚秋叶。读懂关键句的瞬间，答案也会轻轻显形。", color: "#9A5A3D", icon: "takarakuji/qiuji.png", isRewardOnly: true, acquireMode: "practice_draw", rewardSource: { type: "practice_module", module: "reading" }, themeSetId: "n2_seasons" },
-        { id: "practice_dongji_listening", rarity: "MR", title: "冬吉", desc: "听力练习里藏着的冬雪。越安静地听，越能听见句子真正落下的位置。", color: "#55718A", icon: "takarakuji/dongji.png", isRewardOnly: true, acquireMode: "practice_draw", rewardSource: { type: "practice_module", module: "listening" }, themeSetId: "n2_seasons" },
-        { id: "practice_shengji_max", rarity: "MR", title: "胜吉", desc: "练习累计到第 30 次时出现的特别纪念。烟火亮起的那一刻，努力终于有了形状。", color: "#C96A2A", icon: "takarakuji/shengji.png", isRewardOnly: true, acquireMode: "achievement", rewardSource: { type: "effective_practice_count", threshold: 30 } },
+        { id: "practice_dongji_listening", rarity: "MR", title: "冬吉", desc: "听力练习里藏着的冬雪。越安静地听，越能听见句子真正落下的位置。", color: "#55718A", icon: "takarakuji/dongji.png", isRewardOnly: true, acquireMode: "practice_draw", rewardSource: { type: "practice_module", module: "listening" }, themeSetId: "n2_seasons" }
+    ];
+
+    const themeRewardFortunes = [
         { id: "practice_n2_pass_complete", rarity: "SP", title: "N2合格", desc: "春夏秋冬都走过之后，终于点亮的合格纪念。不是终点，是你已经真正走到这里的证据。", color: "#B7282E", icon: "takarakuji/N2合格.png", isRewardOnly: true, acquireMode: "set_reward", rewardSource: { type: "set_complete", setId: "n2_seasons" }, themeSetId: "n2_seasons" }
     ];
 
-    const collectionCatalog = [...petRewardFortunes, ...practiceRewardFortunes, ...fortunes];
+    const themeSets = [
+        {
+            id: "n2_seasons",
+            title: "N2四季练习札",
+            intro: "把词汇、语法、阅读与听力的四季练习卡收齐后，终章的合格札就会亮起。",
+            cardIds: [
+                "practice_chunji_vocabulary",
+                "practice_xiaji_grammar",
+                "practice_qiuji_reading",
+                "practice_dongji_listening"
+            ],
+            rewardCardId: "practice_n2_pass_complete",
+            coverCardId: "practice_chunji_vocabulary"
+        }
+    ];
+
+    const collectionCatalog = [...achievementRewardFortunes, ...practiceRewardFortunes, ...themeRewardFortunes, ...fortunes];
     const catalogById = collectionCatalog.reduce((acc, item) => {
+        acc[item.id] = item;
+        return acc;
+    }, {});
+    const themeSetById = themeSets.reduce((acc, item) => {
         acc[item.id] = item;
         return acc;
     }, {});
@@ -135,17 +156,57 @@
         return normalizedId && catalogById[normalizedId] ? catalogById[normalizedId] : null;
     }
 
+    function getThemeSetById(id) {
+        const normalizedId = String(id || "").trim();
+        return normalizedId && themeSetById[normalizedId] ? themeSetById[normalizedId] : null;
+    }
+
+    function getThemeSetProgress(metaOrSetId, maybeSetId) {
+        const meta = typeof metaOrSetId === "string" && maybeSetId === undefined
+            ? getCollectionMeta()
+            : (metaOrSetId && typeof metaOrSetId === "object" ? metaOrSetId : getCollectionMeta());
+        const setId = typeof metaOrSetId === "string" && maybeSetId === undefined
+            ? metaOrSetId
+            : maybeSetId;
+        const themeSet = getThemeSetById(setId);
+        if (!themeSet) {
+            return null;
+        }
+
+        const unlockedCount = themeSet.cardIds.filter((cardId) => {
+            const entry = meta[cardId];
+            return entry && Number(entry.count) > 0;
+        }).length;
+        const rewardEntry = meta[themeSet.rewardCardId];
+        const rewardUnlocked = Boolean(rewardEntry && Number(rewardEntry.count) > 0);
+
+        return {
+            setId: themeSet.id,
+            title: themeSet.title,
+            unlockedCount,
+            totalCount: themeSet.cardIds.length,
+            rewardCardId: themeSet.rewardCardId,
+            rewardUnlocked,
+            coverCardId: themeSet.coverCardId,
+            allCollected: unlockedCount === themeSet.cardIds.length
+        };
+    }
+
     window.OmikujiCatalog = {
         COLLECTION_KEY,
         COLLECTION_META_KEY,
         fortunes,
-        petRewardFortunes,
+        achievementRewardFortunes,
         practiceRewardFortunes,
+        themeRewardFortunes,
+        themeSets,
         collectionCatalog,
         safeParseJSON,
         getCollectionMeta,
         getUnlockedFortuneIds,
         getUnlockedCatalog,
-        getFortuneById
+        getFortuneById,
+        getThemeSetById,
+        getThemeSetProgress
     };
 })(window);

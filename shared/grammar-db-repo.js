@@ -3,7 +3,7 @@
 
   const core = Array.isArray(window.GrammarDB.core) ? window.GrammarDB.core : [];
   const tags = Array.isArray(window.GrammarDB.tags) ? window.GrammarDB.tags : [];
-  const resources = window.GrammarDB.resources || { comparisonNotes: {}, extraExamples: {} };
+  const resources = window.GrammarDB.resources || { extraExamples: {} };
   const collections = window.GrammarDB.collections || { specialCollections: [], similarityGroups: [] };
   const legacyTryView = Array.isArray(window.GrammarDB.legacyTryView) ? window.GrammarDB.legacyTryView : [];
 
@@ -11,6 +11,7 @@
   const tagsById = new Map(tags.map((item) => [item.id, item]));
   const searchIdToCanonicalId = new Map();
   const canonicalIdToSearchId = new Map();
+  const canonicalAliasToCanonicalId = new Map();
 
   core.forEach((item) => {
     const legacy = item.legacy || {};
@@ -18,6 +19,14 @@
       searchIdToCanonicalId.set(Number(legacy.searchId), item.id);
       canonicalIdToSearchId.set(item.id, Number(legacy.searchId));
     }
+    (Array.isArray(legacy.aliasCanonicalIds) ? legacy.aliasCanonicalIds : []).forEach((aliasId) => {
+      const alias = String(aliasId || "").trim();
+      if (alias) canonicalAliasToCanonicalId.set(alias, item.id);
+    });
+    (Array.isArray(legacy.aliasSearchIds) ? legacy.aliasSearchIds : []).forEach((aliasId) => {
+      const numeric = Number(aliasId);
+      if (!Number.isNaN(numeric)) searchIdToCanonicalId.set(numeric, item.id);
+    });
   });
 
   function clone(value) {
@@ -85,6 +94,10 @@
   function resolveCanonicalId(id) {
     if (id == null) return null;
     if (coreById.has(id)) return id;
+    const direct = String(id).trim();
+    if (canonicalAliasToCanonicalId.has(direct)) {
+      return canonicalAliasToCanonicalId.get(direct);
+    }
     const numeric = Number(id);
     if (!Number.isNaN(numeric) && searchIdToCanonicalId.has(numeric)) {
       return searchIdToCanonicalId.get(numeric);
@@ -99,6 +112,10 @@
   }
 
   function buildSearchHaystack(item) {
+    const usageText = (Array.isArray(item.usageSections) ? item.usageSections : [])
+      .flatMap((usage) => [usage.title, usage.meaning, usage.connection, usage.desc])
+      .filter(Boolean)
+      .join("\n");
     return [
       item.title,
       item.kana,
@@ -108,7 +125,8 @@
       item.macro,
       item.category,
       buildSearchTags(item),
-      item.desc
+      item.desc,
+      usageText
     ]
       .filter(Boolean)
       .join("\n")
@@ -142,6 +160,7 @@
     const legacy = item.legacy || {};
     return {
       id: Number(legacy.searchId),
+      canonicalId: item.id,
       title: item.title,
       romaji: item.romaji || "",
       kana: item.kana || "",
@@ -152,11 +171,11 @@
       meaning: item.meaning,
       connection: item.connection,
       desc: item.desc,
+      usageSections: clone(item.usageSections || []),
       examples: clone(item.examples || []),
       related: (item.related || [])
         .map((relatedId) => resolveSearchIdFromCanonicalId(relatedId))
         .filter((relatedId) => relatedId != null),
-      compareWith: clone(legacy.compareWith || []),
       lessonNumber: item.lessonNumber,
       sourceId: legacy.sourceId != null ? legacy.sourceId : legacy.sourceNumericId,
       macro: item.macro ?? null,
@@ -165,7 +184,8 @@
       firstKana: item.firstKana ?? null,
       sourceMacro: item.sourceMacro ?? null,
       sourceCategory: item.sourceCategory ?? null,
-      sourcePage: legacy.sourcePage || null
+      sourcePage: legacy.sourcePage || null,
+      learningSources: clone(item.learningSources || [])
     };
   }
 
@@ -202,10 +222,6 @@
 
     getSearchDataset(filters) {
       return clone(core.map(enrichGrammar).filter((item) => matchesFilter(item, filters)).map(toSearchItem));
-    },
-
-    getComparisonNotes() {
-      return clone(resources.comparisonNotes || {});
     },
 
     getExtraExamples() {

@@ -2,7 +2,6 @@
     'use strict';
 
     const REWARD_STATE_KEY = 'kiki_study_rewards_sandbox_v1';
-    const PET_STATE_KEY = 'kiki_pet_state_sandbox_v1';
     const COLLECTION_KEY = 'omikujiCollection_sandbox';
     const COLLECTION_META_KEY = 'omikujiCollectionMeta_sandbox_v1';
     const LAST_OBTAINED_KEY = 'omikujiLastObtained_sandbox_v1';
@@ -43,7 +42,6 @@
             version: 1,
             economy: {
                 studyXp: 0,
-                petXp: 0,
                 shards: 0,
                 tickets: 0,
                 totalRunsRewarded: 0
@@ -215,10 +213,9 @@
         const studyXp = 5
             + Math.floor(completedQuestionCount / 5)
             + (result.accuracy >= 0.9 ? 4 : result.accuracy >= 0.75 ? 2 : 0);
-        const petXp = 2 + (result.challengeCleared ? 2 : 0);
         const shards = 1 + ((result.challengeCleared || result.accuracy >= 1) ? 1 : 0);
 
-        return { studyXp, petXp, shards };
+        return { studyXp, shards };
     }
 
     function getScopeLabel(result) {
@@ -341,7 +338,6 @@
     function getSandboxStorageKeys() {
         return [
             REWARD_STATE_KEY,
-            PET_STATE_KEY,
             COLLECTION_KEY,
             COLLECTION_META_KEY,
             LAST_OBTAINED_KEY
@@ -403,7 +399,6 @@
             const cardPlan = evaluateSandboxCardPlan(result, rewardState);
 
             rewardState.economy.studyXp += rewards.studyXp;
-            rewardState.economy.petXp += rewards.petXp;
             rewardState.economy.shards += rewards.shards;
             rewardState.economy.totalRunsRewarded += 1;
             rewardState.practiceLedger.rewardedRunKeys = Array.isArray(rewardState.practiceLedger.rewardedRunKeys)
@@ -413,11 +408,6 @@
             rewardState.meta.lastModule = result.module;
             rewardState.meta.lastRunKey = result.runKey;
 
-            const petResult = getRequiredAdapter('pet').awardPetXp(rewards.petXp, {
-                petId: 'shiba',
-                source: 'study_rewards_sandbox',
-                runKey: result.runKey
-            });
             let cardReward = {
                 granted: false,
                 isDuplicate: false,
@@ -474,7 +464,6 @@
                     ...rewards,
                     card: cardReward
                 },
-                pet: petResult,
                 lottery: lotterySnapshot,
                 summary: {
                     title: 'Sandbox 奖励已结算',
@@ -490,7 +479,6 @@
     const root = getRoot();
     root.storageKeys = Object.freeze({
         rewardState: REWARD_STATE_KEY,
-        petState: PET_STATE_KEY,
         collectionIds: COLLECTION_KEY,
         collectionMeta: COLLECTION_META_KEY,
         lastObtained: LAST_OBTAINED_KEY

@@ -4,8 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>kikiの日本語の家</title>
-    <!-- 引入明朝体与黑体，确保不同字重下显示清晰细腻 -->
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;600&family=Noto+Sans+SC:wght@300;400;500;600&family=Noto+Serif+JP:wght@400;500;600;700&family=Noto+Serif+SC:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
             /* 极简和风调色板 */
@@ -192,6 +190,43 @@
 
         .countdown-copy--short {
             display: none;
+        }
+
+        .main-chip.is-locked {
+            color: var(--ink-soft);
+        }
+
+        .home-toast {
+            position: fixed;
+            left: 50%;
+            bottom: max(28px, env(safe-area-inset-bottom));
+            z-index: 1000;
+            max-width: calc(100% - 32px);
+            padding: 11px 20px;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 6px;
+            background: var(--ink-main);
+            color: #fff;
+            box-shadow: 0 4px 16px rgba(44, 54, 63, 0.14);
+            font-family: var(--font-ui);
+            font-size: 13px;
+            line-height: 1.6;
+            letter-spacing: 0.04em;
+            text-align: center;
+            pointer-events: none;
+            visibility: hidden;
+            opacity: 0;
+            transform: translateX(-50%);
+            transition: opacity 150ms ease, visibility 150ms ease;
+        }
+
+        .home-toast.is-visible {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .home-toast { transition: none; }
         }
 
         /* 统一按钮形态：小巧、克制、方正 */
@@ -529,6 +564,32 @@
             position: absolute;
             inset: 0;
             background: linear-gradient(180deg, rgba(247, 246, 242, 0.1), rgba(247, 246, 242, 0.7));
+        }
+
+        .feature-card--immersive-cover .feature-visual {
+            overflow: visible;
+            background: transparent;
+        }
+
+        .feature-card--immersive-cover .feature-cover {
+            overflow: visible;
+        }
+
+        .feature-card--immersive-cover .feature-cover img {
+            object-fit: contain;
+            object-position: center bottom;
+        }
+
+        .feature-card--immersive-cover .feature-cover::after,
+        .feature-card--immersive-cover .feature-visual::before,
+        .feature-card--immersive-cover .feature-visual::after,
+        .feature-card--immersive-cover .feature-art {
+            display: none;
+        }
+
+        .feature-card--immersive-cover .feature-badge {
+            right: auto;
+            left: 10px;
         }
 
         /* 降低内部装饰的饱和度，贴合和风 */
@@ -1486,14 +1547,14 @@
         }
     </style>
     <link rel="stylesheet" href="shared/site-fonts.css">
-    <link rel="stylesheet" href="shared/home-pet.css">
+    <link rel="stylesheet" href="shared/n2-home-refinement.css?v=20260905-7">
 </head>
-<body>
+<body class="home-refined">
     <div class="page-shell">
         <header class="topbar">
             <a href="index.html" class="brand" aria-label="返回首页通知页">
                 <span class="brand-avatar">
-                    <img src="kiki2.png" alt="kikiの日本語の家" onerror="this.src='kiki3.png'">
+                    <img src="kiki2.png" alt="kikiの日本語の家">
                 </span>
                 <span class="brand-copy">
                     <span class="brand-name">kikiの日本語の家</span>
@@ -1502,10 +1563,10 @@
             </a>
 
             <div class="tool-rail" aria-label="工具入口">
-                <div class="tool-countdown" id="exam-countdown" role="status" aria-live="polite" aria-atomic="true">
+                <div class="tool-countdown" role="status" title="N2 考试：2026年12月6日">
                     <span class="icon-slot tool-icon" data-icon="countdown" aria-hidden="true"></span>
-                    <span class="countdown-copy countdown-copy--full" id="exam-countdown-full">试炼降临还有 80 天</span>
-                    <span class="countdown-copy countdown-copy--short" id="exam-countdown-short">试炼还有 80 天</span>
+                    <span class="countdown-copy countdown-copy--full">试炼将于12月6日降临</span>
+                    <span class="countdown-copy countdown-copy--short">试炼将于12月6日降临</span>
                 </div>
                 <!-- 御神签风格运势入口 -->
                 <a href="lottery.html" class="tool-link--fortune" id="fortune-entry" aria-label="御神签">
@@ -1522,8 +1583,8 @@
                     <span class="icon-slot main-chip__icon" data-icon="daily" aria-hidden="true"></span>
                     <span>日常学习</span>
                 </button>
-                <button type="button" class="main-chip" data-section="exam" aria-controls="panel-stage" aria-selected="false">
-                    <span class="icon-slot main-chip__icon" data-icon="exam" aria-hidden="true"></span>
+                <button type="button" class="main-chip is-locked" data-section="exam" aria-controls="panel-stage" aria-selected="false" aria-description="暂未开放">
+                    <span class="icon-slot main-chip__icon" data-icon="lock" aria-hidden="true"></span>
                     <span>备考专区</span>
                 </button>
                 <button type="button" class="main-chip" data-section="favorites" aria-controls="panel-stage" aria-selected="false">
@@ -1538,11 +1599,10 @@
                         <div class="notice-meta">
                             <span class="icon-slot" id="notice-icon" aria-hidden="true"></span>
                             <span>通知</span>
-                            <span class="notice-countdown-inline" id="notice-countdown-inline"></span>
                         </div>
                         <div class="notice-body">
                             <h1 class="notice-title">备考专区开放啰</h1>
-                            <p>备考专区部分已经添加了 <b>核心词汇</b>、<b>文法专练</b>、<b>阅读专练</b>、<b>听力专练</b>。</p>
+                            <p>备考专区部分已经添加了 <b>核心词汇、文法专练、阅读专练、听力专练</b>。</p>
                             <p>目前暂时开放一部分，之后会逐步进行开放，好好练习，成为N2大师！。！</p>
                         </div>
                         <div class="notice-foot">
@@ -1550,7 +1610,6 @@
                         </div>
                     </div>
                 </div>
-
                 <div class="content-panel is-hidden" id="content-panel">
                     <div class="feature-panels" id="feature-panels"></div>
                 </div>
@@ -1562,7 +1621,7 @@
         </footer>
     </div>
 
-    <div id="home-pet-root"></div>
+    <div class="home-toast" id="home-toast" role="status" aria-live="polite" aria-atomic="true"></div>
 
     <div class="modal-overlay" id="favorites-modal" aria-hidden="true">
         <div class="modal-card modal-card--editor" role="dialog" aria-modal="true" aria-labelledby="favorites-title">
@@ -1599,7 +1658,7 @@
                 </div>
                 <div>
                     <label class="field-label" for="favorite-url-input">链接</label>
-                    <input class="field-input" id="favorite-url-input" name="url" type="text" placeholder="例如：exam/textbook/try-n2.html 或 https://example.com">
+                    <input class="field-input" id="favorite-url-input" name="url" type="text" placeholder="例如：daily/try-n2/lesson-content-redesign.html?lesson=1 或 https://example.com">
                 </div>
                 <div>
                     <label class="field-label" for="favorite-note-input">备注</label>
@@ -1628,89 +1687,102 @@
 
     <script src="shared/omikuji-catalog.js"></script>
     <script src="shared/omikuji-daily-state.js"></script>
-    <script src="shared/grammar-db-core.js"></script>
-    <script src="shared/grammar-db-tags.js"></script>
-    <script src="shared/grammar-db-resources.js"></script>
-    <script src="shared/grammar-db-repo.js"></script>
-    <script src="shared/home-pet.js"></script>
     <script>
         const HOME_SECTIONS = {
             daily: {
                 items: [
                     {
-                        title: "Try！N2学习",
-                        desc: "课后复习，练习",
-                        href: "exam/textbook/n2_menu.html",
-                        coverImage: "icon/try.png",
+                        title: "TRY! N2学習",
+                        titleLang: "ja",
+                        desc: "课后复习与练习",
+                        href: "daily/try-n2/lesson-content-redesign.html?lesson=1",
+                        coverImage: "icon/try-n2-study-shiba.webp",
                         icon: "textbook",
                         tag: "TRY!",
-                        tone: "sage"
+                        tone: "blush",
+                        immersiveCover: true
                     },
                     {
-                        title: "语法搜索",
-                        desc: "你懂的🐶",
-                        href: "daily/search/index.html",
-                        coverImage: "https://cdn.jsdelivr.net/gh/Loepickst/n2@main/icon/sagasu.png",
-                        icon: "search",
-                        tag: "検索",
-                        tone: "mist"
-                    },
-                    {
-                        title: "语法专练",
-                        desc: "走过路过不要错过",
-                        href: "daily/grammar/index.html",
+                        title: "文法練習",
+                        titleLang: "ja",
+                        desc: "建设中",
                         coverImage: "icon/bunnpou1.png",
                         icon: "grammar",
                         tag: "基礎",
-                        tone: "blush"
+                        tagLang: "ja",
+                        tone: "mist",
+                        disabled: true
                     },
                     {
-                        title: "民间故事",
-                        desc: "放松放松😌",
-                        href: "daily/light-read/folklore/read_folklore.html",
-                        coverImage: "icon/du.png",
-                        icon: "light-read",
-                        tag: "物語",
+                        title: "日本語ゲーム",
+                        titleLang: "ja",
+                        desc: "轻松练习日语",
+                        href: "日语学习游戏合集.html",
+                        coverImage: "icon/shiba-games-cover.png",
+                        icon: "game",
+                        tag: "遊戯",
+                        tagLang: "ja",
                         tone: "sage"
+                    },
+                    {
+                        title: "文法検索",
+                        titleLang: "ja",
+                        desc: "查找语法与例句",
+                        href: "daily/search/index.html",
+                        coverImage: "icon/grammar-search-shiba.webp",
+                        icon: "search",
+                        tag: "検索",
+                        tone: "pearl",
+                        immersiveCover: true
                     }
                 ]
             },
             exam: {
+                locked: true,
+                lockedMessage: "别急，马上就来",
                 items: [
                     {
                         title: "語彙暗記",
-                        desc: "动词，形容词，副词，外来语，总会有你心仪的～",
+                        titleLang: "ja",
+                        desc: "记忆常考词汇",
                         href: "exam/vocabulary/n2/index.html",
                         coverImage: "icon/tango.png",
                         icon: "vocabulary",
                         tag: "語彙",
+                        tagLang: "ja",
                         tone: "pearl"
                     },
                     {
-                        title: "语法专项",
-                        desc: "想那么多干嘛，练就完事了！",
+                        title: "文法特訓",
+                        titleLang: "ja",
+                        desc: "集中强化文法",
                         href: "exam/grammar/index.html",
                         coverImage: "icon/bunnpou2.png",
                         icon: "grammar",
                         tag: "文法",
+                        tagLang: "ja",
                         tone: "blush"
                     },
                     {
-                        title: "読解特训",
-                        desc: "写完回来看看就行，别整成近视眼了。",
+                        title: "読解特訓",
+                        titleLang: "ja",
+                        desc: "练习真题阅读",
                         href: "exam/jlpt-reading/index.html",
                         coverImage: "icon/dokkai.png",
                         icon: "jlpt-read",
                         tag: "読解",
+                        tagLang: "ja",
                         tone: "blush"
                     },
                     {
                         title: "聴解練習",
-                        desc: "你就是下一个听力大师！",
+                        titleLang: "ja",
+                        desc: "练习真题听力",
                         href: "exam/listening/index.html",
                         coverImage: "icon/cyoukai.png",
                         icon: "listen",
                         tag: "聴解",
+                        tagLang: "ja",
                         tone: "mist"
                     }
                 ]
@@ -1724,11 +1796,12 @@
             // 定制的日式抽签箱 SVG 图标
             omikuji: `
                 <svg viewBox="0 0 24 24" class="icon-svg" aria-hidden="true">
-                    <path d="M8 6h8l1.5 14H6.5L8 6z"></path>
-                    <path d="M12 6V2"></path>
-                    <path d="M10 2h4"></path>
-                    <path d="M9 11h6"></path>
-                    <path d="M9 15h6"></path>
+                    <path d="M8.6 5.2h6.8"></path>
+                    <path d="M10.2 5.2V2.6h3.6v2.6"></path>
+                    <path d="M8.35 7.7h7.3l1.15 12.7H7.2l1.15-12.7Z"></path>
+                    <path d="M10.4 11.1h3.2"></path>
+                    <path d="M12 9.8v7.4"></path>
+                    <path d="M10.35 17.2h3.3"></path>
                 </svg>
             `,
             custom: `
@@ -1746,6 +1819,12 @@
                     <path d="M6.5 13.4c1-3.8 4-6.5 7.9-7"></path>
                     <path d="M15.4 5.8c.8 1.6.9 3.3.2 5"></path>
                     <path d="M8.1 16.6c1.8.6 3.6.5 5.2-.3"></path>
+                </svg>
+            `,
+            lock: `
+                <svg viewBox="0 0 24 24" class="icon-svg" aria-hidden="true">
+                    <rect x="6.5" y="10" width="11" height="10" rx="1.5"></rect>
+                    <path d="M8.5 10V7a3.5 3.5 0 0 1 7 0v3M12 14v2"></path>
                 </svg>
             `,
             exam: `
@@ -1771,6 +1850,13 @@
                     <path d="m14.8 14.8 3.7 3.7"></path>
                     <path d="M10.5 8.4v4.2"></path>
                     <path d="M8.4 10.5h4.2"></path>
+                </svg>
+            `,
+            game: `
+                <svg viewBox="0 0 24 24" class="icon-svg" aria-hidden="true">
+                    <path d="M7.2 8.2h9.6c1.3 0 2.3 1 2.5 2.2l.8 5.1c.3 1.8-1.9 2.9-3.1 1.6l-1.7-1.9H8.7L7 17.1c-1.2 1.3-3.4.2-3.1-1.6l.8-5.1c.2-1.3 1.2-2.2 2.5-2.2Z"></path>
+                    <path d="M8.3 10.8V14M6.7 12.4h3.2"></path>
+                    <path d="M15.6 11.3h.1M17.2 13h.1"></path>
                 </svg>
             `,
             "light-read": `
@@ -1801,11 +1887,9 @@
             `,
             listen: `
                 <svg viewBox="0 0 24 24" class="icon-svg" aria-hidden="true">
-                    <path d="M12 5.4c2.9 0 5.2 2.3 5.2 5.2V12"></path>
-                    <path d="M6.8 12v-1.4c0-2.9 2.3-5.2 5.2-5.2"></path>
-                    <path d="M6.8 12c0 1.8.7 3.5 2 4.7"></path>
-                    <path d="M17.2 12c0 1.8-.7 3.5-2 4.7"></path>
-                    <path d="M10.2 17.6c.4.6 1 .9 1.8.9"></path>
+                    <path d="M5.5 13v-2.2a6.5 6.5 0 0 1 13 0V13"></path>
+                    <path d="M5.5 12H8v7H6.5a2 2 0 0 1-2-2v-3a2 2 0 0 1 1-2Z"></path>
+                    <path d="M18.5 12H16v7h1.5a2 2 0 0 0 2-2v-3a2 2 0 0 0-1-2Z"></path>
                 </svg>
             `,
             "jlpt-read": `
@@ -1819,10 +1903,11 @@
             `,
             countdown: `
                 <svg viewBox="0 0 24 24" class="icon-svg" aria-hidden="true">
-                    <path d="M8 4.8h8"></path>
-                    <path d="M8 19.2h8"></path>
-                    <path d="M9 4.8c0 3.3 1.8 4.4 3 5.4 1.2-1 3-2.1 3-5.4"></path>
-                    <path d="M9 19.2c0-3.3 1.8-4.4 3-5.4 1.2 1 3 2.1 3 5.4"></path>
+                    <path d="M6.4 3.4h11.2"></path>
+                    <path d="M6.4 20.6h11.2"></path>
+                    <path d="M8.2 4.9c.15 3.2 1.6 5 3.8 6.6-2.2 1.7-3.65 3.55-3.8 6.8h7.6c-.15-3.25-1.6-5.1-3.8-6.8 2.2-1.6 3.65-3.4 3.8-6.6H8.2Z"></path>
+                    <path d="m9.8 7.2 2.2 2 2.2-2H9.8Z" class="icon-fill"></path>
+                    <path d="m9.65 17 2.35-2.15L14.35 17h-4.7Z" class="icon-fill"></path>
                 </svg>
             `
         };
@@ -1852,44 +1937,41 @@
         const FAVORITES_KEY = "kikiFavoriteEntries";
         const LEGACY_KEY = "kikiHomeCustomEntry";
         const MAX_FAVORITES = 6;
-        const MS_PER_DAY = 24 * 60 * 60 * 1000;
-        const EXAM_TARGET = { year: 2026, monthIndex: 6, day: 5 };
         const FAVORITE_TONES = ["sage", "mist", "pearl", "blush"];
-        const HOME_CDN_BASE = "https://cdn.jsdelivr.net/gh/Loepickst/kiki@main/";
         const FAVORITE_PRESETS = [
             {
                 id: "try-n2-textbook",
-                name: "Try！N2课文内容",
-                url: "exam/textbook/try-n2.html",
-                note: "开始 Try！N2 的学习"
+                name: "TRY! N2本文",
+                url: "daily/try-n2/lesson-content-redesign.html?lesson=1",
+                note: "直接打开 Try！N2 新版课文学习"
             },
             {
                 id: "kakujyo-guide",
-                name: "格助词讲解",
+                name: "格助詞の解説",
                 url: "daily/grammar/kakujyo.html",
                 note: "掌握日语中“最核心”的知识"
             },
             {
                 id: "keigo-guide",
-                name: "敬语讲解",
+                name: "敬語の解説",
                 url: "daily/grammar/敬语.html",
                 note: "陌生的它，你必须掌握"
             },
             {
                 id: "try-n2-mindmap",
-                name: "思维导图",
+                name: "文法マインドマップ",
                 url: "test/Try%EF%BC%81N2.html",
                 note: "打开 Try！N2 语法思维导图"
             },
             {
                 id: "n3-immediate-response",
-                name: "N3即时应答",
+                name: "N3即時応答",
                 url: "exam/listening/immediate-response/n3/index.html",
                 note: "先热热身，再进正式听力"
             },
             {
                 id: "n2-immediate-response",
-                name: "N2即时应答",
+                name: "N2即時応答",
                 url: "exam/listening/immediate-response/n2/index.html",
                 note: "进入 N2 即时应答真题训练"
             }
@@ -1917,17 +1999,11 @@
         const favoriteDeleteBtn = document.getElementById("favorite-delete-btn");
         const switchButtons = Array.from(document.querySelectorAll(".main-chip[data-section]"));
         const fortuneEntry = document.getElementById("fortune-entry");
-        const homePetRoot = document.getElementById("home-pet-root");
-        const examCountdown = document.getElementById("exam-countdown");
-        const examCountdownFull = document.getElementById("exam-countdown-full");
-        const examCountdownShort = document.getElementById("exam-countdown-short");
-        const noticeCountdownInline = document.getElementById("notice-countdown-inline");
 
         let activeSection = null;
         let editingFavoriteIndex = null;
         let isFavoritesModalOpen = false;
         let isFavoriteCoverModalOpen = false;
-        let homePetController = null;
         let favoritesPanelDirty = false;
         let activeFavoritePresetId = null;
         let activeFavoriteCoverFortuneId = null;
@@ -1968,46 +2044,6 @@
             fortuneEntry.setAttribute("aria-label", "御神签");
         }
 
-        function getLocalDayStamp(date) {
-            return Date.UTC(date.getFullYear(), date.getMonth(), date.getDate());
-        }
-
-        function getExamCountdownText(now = new Date()) {
-            const todayStamp = getLocalDayStamp(now);
-            const targetStamp = Date.UTC(EXAM_TARGET.year, EXAM_TARGET.monthIndex, EXAM_TARGET.day);
-            const diffDays = Math.round((targetStamp - todayStamp) / MS_PER_DAY);
-
-            if (diffDays > 0) {
-                return {
-                    full: `试炼降临还有 ${diffDays} 天`,
-                    short: `试炼还有 ${diffDays} 天`
-                };
-            }
-
-            if (diffDays === 0) {
-                return {
-                    full: "试炼就是今天",
-                    short: "今天开场"
-                };
-            }
-
-            return {
-                full: "本轮试炼已开场",
-                short: "已开场"
-            };
-        }
-
-        function renderExamCountdown() {
-            if (!examCountdown || !examCountdownFull || !examCountdownShort) return;
-            const countdownText = getExamCountdownText();
-            examCountdownFull.textContent = countdownText.full;
-            examCountdownShort.textContent = countdownText.short;
-            examCountdown.setAttribute("aria-label", countdownText.full);
-            if (noticeCountdownInline) {
-                noticeCountdownInline.textContent = countdownText.short;
-            }
-        }
-
         function escapeHtml(value) {
             return String(value)
                 .replace(/&/g, "&amp;")
@@ -2039,8 +2075,7 @@
             const value = normalizeCoverImage(rawValue);
             if (!value) return "";
             if (/^https?:\/\//i.test(value)) return value;
-            const normalizedPath = value.replace(/^(?:\.\.\/)+/, "").replace(/^(?:\.\/)+/, "").replace(/^\/+/, "");
-            return normalizedPath ? `${HOME_CDN_BASE}${normalizedPath}` : "";
+            return value;
         }
 
         function normalizeCoverFortuneId(rawValue) {
@@ -2116,7 +2151,6 @@
             document.body.classList.add("modal-open");
             if (modal === favoritesModal) isFavoritesModalOpen = true;
             if (modal === favoriteCoverModal) isFavoriteCoverModalOpen = true;
-            if (homePetController) homePetController.setModalState(true);
         }
 
         function closeModal(modal) {
@@ -2125,7 +2159,6 @@
             if (modal === favoritesModal) isFavoritesModalOpen = false;
             if (modal === favoriteCoverModal) isFavoriteCoverModalOpen = false;
             if (!document.querySelector(".modal-overlay.is-open")) document.body.classList.remove("modal-open");
-            if (homePetController) homePetController.setModalState(Boolean(document.querySelector(".modal-overlay.is-open")));
         }
 
         function setActiveSwitch(sectionKey) {
@@ -2156,7 +2189,7 @@
         }
 
         function getSectionHash(sectionKey) {
-            return (sectionKey === "daily" || sectionKey === "exam" || sectionKey === "favorites") ? `#${sectionKey}` : "";
+            return HOME_SECTIONS[sectionKey] ? `#${sectionKey}` : "";
         }
 
         function syncSectionHash(sectionKey) {
@@ -2183,37 +2216,51 @@
             return `${value}${separator}return=${encodeURIComponent(getFallbackTarget(sectionKey, value))}`;
         }
 
+        function getFeatureTitleMarkup(item) {
+            if (Array.isArray(item.titleParts) && item.titleParts.length) {
+                return item.titleParts.map((part) => {
+                    const isJapanese = part && part.lang === "ja";
+                    const lang = isJapanese ? "ja" : "zh-CN";
+                    return `<span lang="${lang}">${escapeHtml(part && part.text)}</span>`;
+                }).join("");
+            }
+
+            if (item.titleLang === "ja") {
+                return `<span lang="ja">${escapeHtml(item.title)}</span>`;
+            }
+
+            return escapeHtml(item.title);
+        }
+
         function getFeatureCardMarkup(item, index, sectionKey) {
             const hasCover = Boolean(toHomeCdnUrl(item.coverImage));
-            const visualClass = hasCover ? `feature-visual feature-visual--${item.tone} has-cover` : `feature-visual feature-visual--${item.tone}`;
-            const badgeMarkup = item.badge 
-                ? `<span class="feature-badge" style="border-color:#993333; color:#993333;">${escapeHtml(item.badge)}</span>` 
-                : `<span class="feature-badge">${escapeHtml(item.tag)}</span>`;
+            const visualClass = `feature-visual feature-visual--${item.tone}${hasCover ? " has-cover" : ""}`;
+            const cardClass = `feature-card${item.immersiveCover ? " feature-card--immersive-cover" : ""}`;
 
             const visualMarkup = `
                 <span class="${visualClass}">
                     ${getStaticCoverMarkup(item)}
-                    ${badgeMarkup}
+                    <span class="feature-badge">${escapeHtml(item.tag)}</span>
                     <span class="feature-art"><span class="icon-slot" aria-hidden="true">${getIconMarkup(item.icon)}</span></span>
                 </span>
             `;
             const bodyMarkup = `
                 <span class="feature-body">
-                    <span class="feature-title">${escapeHtml(item.title)}</span>
+                    <span class="feature-title">${getFeatureTitleMarkup(item)}</span>
                     <span class="feature-desc">${escapeHtml(item.desc)}</span>
                 </span>
             `;
 
             if (item.disabled) {
                 return `
-                    <div class="feature-card feature-card--disabled" style="--item-index:${index};" aria-disabled="true">
+                    <div class="${cardClass} feature-card--disabled" style="--item-index:${index};" aria-disabled="true">
                         <div class="feature-card-link">${visualMarkup}${bodyMarkup}</div>
                     </div>
                 `;
             }
 
             return `
-                <a class="feature-card" href="${escapeHtml(appendReturnParam(item.href, sectionKey))}" style="--item-index:${index};">
+                <a class="${cardClass}" href="${escapeHtml(appendReturnParam(item.href, sectionKey))}" style="--item-index:${index};">
                     <span class="feature-card-link">${visualMarkup}${bodyMarkup}</span>
                 </a>
             `;
@@ -2262,7 +2309,7 @@
                             <span class="feature-art feature-art--plus" aria-hidden="true"><span class="feature-plus">+</span></span>
                         </span>
                         <span class="feature-body">
-                            <span class="feature-title">添加入口</span>
+                            <span class="feature-title">${getFeatureTitleMarkup({ title: "お気に入りを追加", titleLang: "ja" })}</span>
                             <span class="feature-desc">点击这里打开编辑界面，保存一个新的常用路径。</span>
                         </span>
                     </span>
@@ -2340,8 +2387,7 @@
 
         function initializeSectionPanels() {
             ["daily", "exam", "favorites"].forEach((sectionKey) => {
-                renderSectionPanel(sectionKey);
-                const panel = sectionPanels.get(sectionKey);
+                const panel = getOrCreateSectionPanel(sectionKey);
                 if (panel) panel.classList.remove("is-active", "is-entering");
             });
         }
@@ -2483,18 +2529,35 @@
             noticePanel.classList.remove("is-hidden");
             contentPanel.classList.add("is-hidden");
             if (syncHash) syncSectionHash(null);
-            if (homePetController) homePetController.sync("section-change");
+        }
+
+        let homeToastTimer = null;
+
+        function showHomeToast(message) {
+            const toast = document.getElementById("home-toast");
+            window.clearTimeout(homeToastTimer);
+            toast.textContent = message;
+            toast.classList.add("is-visible");
+            homeToastTimer = window.setTimeout(() => {
+                toast.classList.remove("is-visible");
+                toast.textContent = "";
+            }, 3000);
         }
 
         function renderSection(sectionKey, animate = true, syncHash = true) {
             if (!HOME_SECTIONS[sectionKey]) return;
+            if (HOME_SECTIONS[sectionKey].locked) {
+                if (!activeSection) renderNotice(false);
+                syncSectionHash(activeSection);
+                showHomeToast(HOME_SECTIONS[sectionKey].lockedMessage);
+                return;
+            }
             activeSection = sectionKey;
             setActiveSwitch(sectionKey);
             noticePanel.classList.add("is-hidden");
             contentPanel.classList.remove("is-hidden");
             showSectionPanel(sectionKey, animate);
             if (syncHash) syncSectionHash(sectionKey);
-            if (homePetController) homePetController.sync("section-change");
         }
 
         switchButtons.forEach((button) => {
@@ -2516,15 +2579,6 @@
                 return;
             }
 
-            const launchTarget = event.target.closest("a[href]");
-            if (launchTarget && featurePanels.contains(launchTarget) && homePetController) {
-                const titleNode = launchTarget.querySelector(".feature-title");
-                homePetController.recordStudyLaunch({
-                    href: launchTarget.getAttribute("href"),
-                    label: titleNode ? titleNode.textContent.trim() : "学习入口",
-                    sectionKey: activeSection || ""
-                });
-            }
         });
 
         favoritesForm.addEventListener("submit", (event) => {
@@ -2623,15 +2677,9 @@
             const deltaX = touch.clientX - touchStartX;
             const target = event.target;
             if (window.scrollY > 0 || deltaY <= 0 || Math.abs(deltaY) <= Math.abs(deltaX)) return;
-            if (target && target.closest("#home-pet-root, input, textarea, select, [contenteditable='true']")) return;
+            if (target && target.closest("input, textarea, select, [contenteditable='true']")) return;
             event.preventDefault();
         }, { passive: false });
-
-        window.addEventListener("hashchange", () => {
-            const sectionKey = location.hash.replace(/^#/, "");
-            if (HOME_SECTIONS[sectionKey]) renderSection(sectionKey, false, false);
-            else renderNotice(false);
-        });
 
         window.addEventListener("pageshow", updateFortuneEntryState);
         window.addEventListener("storage", (event) => {
@@ -2645,36 +2693,22 @@
             }
         });
 
+        window.addEventListener("hashchange", () => {
+            const sectionKey = location.hash.replace(/^#/, "");
+            if (HOME_SECTIONS[sectionKey]) renderSection(sectionKey, false, false);
+            else renderNotice(false);
+        });
+
         mountStaticIcons();
-        renderExamCountdown();
         updateFortuneEntryState();
-        window.setInterval(renderExamCountdown, 60 * 1000);
         renderFavoritePresets();
         initializeSectionPanels();
         resetFavoriteEditor();
-        document.body.classList.add("has-home-pet");
-
-        if (window.HomePetSystem && homePetRoot) {
-            homePetController = window.HomePetSystem.init({
-                mountSelector: "#home-pet-root",
-                pageShellSelector: ".page-shell",
-                surfaceType: "home",
-                getActiveSection: () => activeSection,
-                sectionCatalog: HOME_SECTIONS,
-                buildReturnHref: (href, sectionKey) => appendReturnParam(href, sectionKey),
-                enableGrammarIdleCards: true
-            });
-            window.__studyQuestTestPetController = homePetController;
-        }
-
         const initialSection = location.hash.replace(/^#/, "");
         if (HOME_SECTIONS[initialSection]) renderSection(initialSection, false, false);
         else renderNotice(false);
 
-        if (homePetController) {
-            homePetController.setModalState(Boolean(document.querySelector(".modal-overlay.is-open")));
-            homePetController.sync("boot");
-        }
     </script>
+    <script src="shared/home-countdown.js?v=20260905"></script>
 </body>
 </html>

@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+  <meta name="theme-color" content="#f1eadf">
+  <title>日本語遊戯場｜稽古選択</title>
+<style>
+    :root{
+      --canvas:#f1eadf;--paper:#fffaf2;--ink:#1f1b19;--gold:#9a6f2f;
+      --cream:#1f1b19;--muted:#766e65;--line:rgba(61,49,42,.17);
+      --sans:"Hiragino Kaku Gothic ProN","Yu Gothic",Meiryo,sans-serif;
+      --serif:"Yu Mincho","Hiragino Mincho ProN","Noto Serif JP",serif;
+      color-scheme:light;
+    }
+    *{box-sizing:border-box}
+    html,body{width:100%;height:100%;margin:0;overflow:hidden;background:var(--canvas);color:var(--ink)}
+    body{font-family:var(--serif);-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+    button{font:inherit;color:inherit}
+    [hidden]{display:none!important}
+
+    .selection-view{position:fixed;inset:0;display:grid;place-items:center;overflow:auto;padding:max(28px,env(safe-area-inset-top)) 20px max(24px,env(safe-area-inset-bottom));background:
+      radial-gradient(circle at 50% 0,rgba(168,65,53,.07),transparent 40%),
+      linear-gradient(180deg,#f7f2e9,#ebe3d7)}
+    .selection-view:before{content:"";position:fixed;inset:0;pointer-events:none;opacity:.32;background:
+      repeating-linear-gradient(0deg,transparent 0 4px,rgba(71,55,45,.014) 5px),
+      repeating-linear-gradient(90deg,transparent 0 95px,rgba(71,55,45,.018) 96px)}
+    .collection-back-button{position:fixed;z-index:5;top:max(18px,env(safe-area-inset-top));left:max(18px,env(safe-area-inset-left));display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:40px;padding:0 15px;border:1px solid rgba(61,49,42,.2);border-radius:22px;background:rgba(255,252,247,.82);box-shadow:0 7px 18px rgba(65,49,39,.08);backdrop-filter:blur(8px);color:var(--ink);font:700 12px/1 var(--sans);letter-spacing:.06em;text-decoration:none;transition:border-color .18s,background .18s,transform .18s,box-shadow .18s}
+    .collection-back-button:hover{border-color:rgba(154,111,47,.45);background:#fffaf2;transform:translateX(-2px);box-shadow:0 9px 22px rgba(65,49,39,.12)}
+    .collection-back-button:focus-visible{outline:3px solid rgba(154,111,47,.5);outline-offset:3px}
+    .collection-back-arrow{font-family:var(--sans);font-size:16px;font-weight:500;line-height:1}
+    .selection-shell{position:relative;z-index:1;width:min(760px,100%)}
+    .collection-header{text-align:center;margin-bottom:30px}
+    .collection-mark{width:52px;height:52px;margin:0 auto 16px;display:grid;place-items:center;border:1px solid rgba(154,111,47,.48);transform:rotate(45deg);background:rgba(255,250,242,.58);box-shadow:0 8px 22px rgba(78,59,43,.08)}
+    .collection-mark span{transform:rotate(-45deg);font:800 17px/1 var(--serif);color:var(--gold)}
+    .eyebrow{margin:0;font:800 10px/1 var(--sans);letter-spacing:.34em;color:var(--gold)}
+    .main-title{margin:12px 0 0;font:900 clamp(38px,6vw,62px)/1 var(--serif);letter-spacing:.12em;text-shadow:0 2px rgba(255,255,255,.9)}
+    .subtitle{margin:13px 0 0;font:600 12px/1 var(--sans);letter-spacing:.32em;color:var(--muted)}
+
+    .game-list{display:grid;gap:12px}
+    .game-entry{--accent:#a84135;position:relative;width:100%;min-height:118px;display:grid;grid-template-columns:64px minmax(0,1fr) auto;align-items:center;gap:22px;padding:20px 24px;border:1px solid var(--line);border-left:5px solid transparent;background:rgba(255,252,247,.62);text-align:left;cursor:pointer;overflow:hidden;transition:border-color .2s,background .2s,transform .2s,box-shadow .2s;outline:none;box-shadow:0 5px 18px rgba(65,49,39,.035)}
+    .game-entry:before{content:"";position:absolute;inset:0;opacity:0;pointer-events:none;background:linear-gradient(90deg,color-mix(in srgb,var(--accent) 17%,transparent),transparent 62%);transition:opacity .2s}
+    .game-entry:hover{background:rgba(255,253,249,.9);transform:translateX(3px)}
+    .game-entry.is-selected{border-color:rgba(62,49,40,.22);border-left-color:var(--accent);background:#fffaf2;box-shadow:0 13px 30px rgba(65,49,39,.11),0 0 22px color-mix(in srgb,var(--accent) 8%,transparent)}
+    .game-entry.is-selected:before{opacity:1}
+    .game-entry:focus-visible{outline:3px solid var(--gold);outline-offset:3px}
+    .entry-number{position:relative;z-index:1;width:50px;height:50px;display:grid;place-items:center;border:1px solid color-mix(in srgb,var(--accent) 68%,#fff 12%);border-radius:50%;font:800 16px/1 var(--serif);color:color-mix(in srgb,var(--accent) 62%,#fff 34%)}
+    .entry-copy{position:relative;z-index:1;min-width:0}
+    .entry-meta{display:block;margin-bottom:7px;font:800 10px/1 var(--sans);letter-spacing:.22em;color:color-mix(in srgb,var(--accent) 55%,#fff 38%)}
+    .entry-title{font:900 clamp(24px,3.4vw,34px)/1.05 var(--serif);letter-spacing:.08em;color:var(--ink)}
+    .entry-description{display:block;margin-top:9px;font:500 12px/1.5 var(--sans);color:var(--muted);letter-spacing:.04em}
+    .entry-record{position:relative;z-index:1;min-width:112px;padding-left:20px;border-left:1px solid var(--line);font:700 10px/1.35 var(--sans);letter-spacing:.12em;color:var(--muted);text-align:right}
+    .entry-record strong{display:block;margin-top:4px;font:700 31px/1 var(--serif);letter-spacing:0;color:var(--ink)}
+    .entry-record small{margin-left:4px;font:700 9px/1 var(--sans);color:var(--muted)}
+    .entry-arrow{display:inline-block;margin-left:9px;color:var(--gold);transition:transform .2s}
+    .game-entry.is-selected .entry-arrow{transform:translateX(4px)}
+    .key-guide{text-align:center;margin:22px 0 0;font:600 10px/1.5 var(--sans);letter-spacing:.18em;color:#8b8177}
+
+    .game-stage{position:fixed;z-index:20;inset:0;background:#0c0a0d}
+    .game-frame{display:block;width:100%;height:100%;border:0;background:var(--paper)}
+    .return-button{position:absolute;z-index:4;left:max(13px,env(safe-area-inset-left));top:max(13px,env(safe-area-inset-top));height:42px;padding:0 17px;border:1px solid rgba(255,255,255,.3);border-radius:22px;background:rgba(18,15,18,.84);backdrop-filter:blur(8px);color:#fff;font:800 12px/1 var(--sans);letter-spacing:.08em;cursor:pointer;box-shadow:0 8px 18px rgba(0,0,0,.2)}
+    .return-button:hover{background:#29212a}.return-button:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+    .stage-loader{position:absolute;inset:0;display:grid;place-items:center;background:#f1eadf;color:var(--gold);font:800 15px/1 var(--sans);letter-spacing:.3em;pointer-events:none;transition:opacity .25s}
+    .stage-loader.is-done{opacity:0}
+
+    @media(max-width:640px){
+      .selection-view{place-items:start center;padding:22px 14px max(18px,env(safe-area-inset-bottom))}
+      .collection-back-button{top:max(12px,env(safe-area-inset-top));left:max(12px,env(safe-area-inset-left));min-height:36px;padding:0 12px;font-size:11px}
+      .selection-shell{margin:auto 0}.collection-header{margin-bottom:22px}.collection-mark{width:43px;height:43px;margin-bottom:13px}.collection-mark span{font-size:14px}.eyebrow{font-size:9px}.main-title{font-size:37px;margin-top:10px}.subtitle{font-size:10px;margin-top:10px}
+      .game-list{gap:9px}.game-entry{min-height:104px;grid-template-columns:46px minmax(0,1fr) auto;gap:13px;padding:16px 14px;border-left-width:4px}.entry-number{width:40px;height:40px;font-size:14px}.entry-meta{font-size:9px;margin-bottom:6px}.entry-title{font-size:23px}.entry-description{font-size:10px;margin-top:7px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.entry-record{min-width:73px;padding-left:12px;font-size:8px}.entry-record strong{font-size:24px}.entry-arrow{display:none}.key-guide{margin-top:16px;font-size:9px}.return-button{height:38px;padding:0 14px;font-size:11px}
+    }
+    @media(max-height:680px){
+      .selection-view{padding-top:16px}.collection-header{margin-bottom:16px}.collection-mark{display:none}.main-title{font-size:34px}.subtitle{margin-top:8px}.game-entry{min-height:88px;padding-top:12px;padding-bottom:12px}.entry-description{margin-top:5px}.key-guide{margin-top:12px}
+    }
+    @media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+  </style>
+</head>
+<body>
+  <main class="selection-view" id="selectionView">
+    <a class="collection-back-button" href="index.html#daily" aria-label="返回日常学习"><span class="collection-back-arrow" aria-hidden="true">←</span><span>返回</span></a>
+    <div class="selection-shell">
+      <header class="collection-header">
+        <div class="collection-mark" aria-hidden="true"><span>遊</span></div>
+        <p class="eyebrow">学びを、遊びに。</p>
+        <h1 class="main-title">日本語遊戯場</h1>
+        <p class="subtitle">稽古を選ぶ</p>
+      </header>
+
+      <section class="game-list" aria-label="ゲーム選択">
+        <button class="game-entry is-selected" type="button" data-index="0" aria-pressed="true" style="--accent:#a84135">
+          <span class="entry-number">壱</span>
+          <span class="entry-copy"><span class="entry-meta">動詞変形</span><strong class="entry-title">活用道場</strong><span class="entry-description">指定された形へ、動詞をすばやく変える</span></span>
+          <span class="entry-record">自己最高<strong data-score="0">0<small>点</small><span class="entry-arrow">→</span></strong></span>
+        </button>
+
+        <button class="game-entry" type="button" data-index="1" aria-pressed="false" style="--accent:#58785e">
+          <span class="entry-number">弐</span>
+          <span class="entry-copy"><span class="entry-meta">格助詞</span><strong class="entry-title">助詞茶寮</strong><span class="entry-description">短い語句に合う、格助詞を見切る</span></span>
+          <span class="entry-record">自己最高<strong data-score="1">0<small>点</small><span class="entry-arrow">→</span></strong></span>
+        </button>
+
+        <button class="game-entry" type="button" data-index="2" aria-pressed="false" style="--accent:#b27e36">
+          <span class="entry-number">参</span>
+          <span class="entry-copy"><span class="entry-meta">漢字読み</span><strong class="entry-title">漢字道場</strong><span class="entry-description">漢字の読みを、ローマ字ですばやく入力</span></span>
+          <span class="entry-record">自己最高<strong data-score="2">0<small>点</small><span class="entry-arrow">→</span></strong></span>
+        </button>
+
+        <button class="game-entry" type="button" data-index="3" aria-pressed="false" style="--accent:#6d6688">
+          <span class="entry-number">肆</span>
+          <span class="entry-copy"><span class="entry-meta">数詞読み</span><strong class="entry-title">数詞道場</strong><span class="entry-description">数字と助数詞の読みを、反射で答える</span></span>
+          <span class="entry-record">自己最高<strong data-score="3">0<small>点</small><span class="entry-arrow">→</span></strong></span>
+        </button>
+      </section>
+      <p class="key-guide">↑ ↓ 選ぶ　・　Enter 決定</p>
+    </div>
+  </main>
+
+  <section class="game-stage" id="gameStage" hidden>
+    <button class="return-button" id="returnButton" type="button" hidden>← 退場</button>
+    <iframe class="game-frame" id="gameFrame" title="選択した日本語ゲーム"></iframe>
+    <div class="stage-loader" id="stageLoader">読込中</div>
+  </section>
+
+  <script>
+    (()=>{
+      'use strict';
+      const games=[
+        {id:'katsuyo',path:'动词变形游戏.html',title:'活用道場',scoreKey:'katsuyo-personal-best-v1'},
+        {id:'joshi',path:'格助词练习游戏.html',title:'助詞茶寮',scoreKey:'joshi-charyo-best-v1'},
+        {id:'kanji',path:'汉字读音游戏.html',title:'漢字道場',scoreKey:'kanji-reading-best-v1'},
+        {id:'number',path:'数字读法游戏.html',title:'数詞道場',scoreKey:'number-reading-best-v1'}
+      ];
+      const entries=[...document.querySelectorAll('.game-entry')];
+      const selection=document.getElementById('selectionView'),stage=document.getElementById('gameStage'),frame=document.getElementById('gameFrame'),loader=document.getElementById('stageLoader'),returnButton=document.getElementById('returnButton');
+      let selected=0,viewObserver=null;
+      function readScore(key){try{return Math.max(0,Number.parseInt(localStorage.getItem(key)||'0',10)||0)}catch{return 0}}
+      function refreshScores(){games.forEach((game,index)=>{const target=document.querySelector(`[data-score="${index}"]`);target.firstChild.nodeValue=String(readScore(game.scoreKey))})}
+      function select(index,focus=false){selected=(index+games.length)%games.length;entries.forEach((entry,i)=>{const active=i===selected;entry.classList.toggle('is-selected',active);entry.setAttribute('aria-pressed',String(active))});if(focus)entries[selected].focus({preventScroll:true})}
+      function findHomeView(doc){return doc?.getElementById('homeView')||doc?.querySelector('[data-game-view="home"]')}
+      function syncReturnButton(){try{const doc=frame.contentDocument,home=findHomeView(doc),bodyView=doc?.body?.dataset.view;const onHome=bodyView?bodyView==='home':!!home&&!home.hidden;returnButton.hidden=!onHome}catch{returnButton.hidden=true}}
+      function watchGameView(){viewObserver?.disconnect();viewObserver=null;try{const doc=frame.contentDocument,home=findHomeView(doc);if(!doc||!home){returnButton.hidden=true;return}viewObserver=new MutationObserver(syncReturnButton);viewObserver.observe(home,{attributes:true,attributeFilter:['hidden','class']});if(doc.body)viewObserver.observe(doc.body,{attributes:true,attributeFilter:['data-view']});syncReturnButton()}catch{returnButton.hidden=true}}
+      function openGame(index=selected){select(index);const game=games[selected];viewObserver?.disconnect();viewObserver=null;returnButton.hidden=true;loader.classList.remove('is-done');frame.title=game.title;selection.hidden=true;stage.hidden=false;frame.src=game.path;document.title=`${game.title}｜日本語遊戯場`}
+      function closeGame(){viewObserver?.disconnect();viewObserver=null;returnButton.hidden=true;frame.removeAttribute('src');stage.hidden=true;selection.hidden=false;document.title='日本語遊戯場｜稽古選択';refreshScores();select(selected,true)}
+      entries.forEach((entry,index)=>{entry.addEventListener('pointerenter',()=>select(index));entry.addEventListener('focus',()=>select(index));entry.addEventListener('click',()=>openGame(index))});
+      returnButton.onclick=closeGame;frame.addEventListener('load',()=>{loader.classList.add('is-done');watchGameView()});
+      document.addEventListener('keydown',event=>{if(!stage.hidden){if(event.key==='Escape')closeGame();return}if(event.key==='ArrowUp'){event.preventDefault();select(selected-1,true)}else if(event.key==='ArrowDown'){event.preventDefault();select(selected+1,true)}else if(event.key==='Enter'){event.preventDefault();openGame()}});
+      refreshScores();select(0);
+    })();
+  </script>
+</body>
+</html>

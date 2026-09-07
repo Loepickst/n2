@@ -1,0 +1,1166 @@
+/*
+ * 敬语练习视觉层
+ * 只覆盖视觉与响应式表现；题目、状态类、计分和页面切换仍由 keigo.html 原逻辑管理。
+ */
+
+:root {
+    --keigo-practice-zh: "Noto Sans SC", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Heiti SC", "SimHei", sans-serif;
+    --keigo-practice-jp: "Noto Sans JP", "Hiragino Sans", "Yu Gothic", sans-serif;
+    --keigo-practice-pixel: "VT323", monospace;
+    --keigo-practice-paper: #fbfaf7;
+    --keigo-practice-white: #ffffff;
+    --keigo-practice-ink: #282a2d;
+    --keigo-practice-muted: #6f7479;
+    --keigo-practice-line: #d9dadd;
+    --keigo-practice-line-strong: #bfc5cc;
+    --keigo-practice-blue: #4e6178;
+    --keigo-practice-blue-dark: #35475d;
+    --keigo-practice-blue-soft: #eef2f7;
+    --keigo-practice-apricot: #9a5f2d;
+    --keigo-practice-apricot-soft: #faf0e4;
+    --keigo-practice-red: #7f3028;
+    --keigo-practice-red-soft: #f8ece9;
+    --keigo-practice-success: #3f6958;
+    --keigo-practice-success-soft: #edf5f1;
+    --keigo-practice-danger: #9a3f37;
+    --keigo-practice-danger-soft: #faeeee;
+    --keigo-practice-shadow: 0 18px 48px rgba(53, 71, 93, 0.09);
+}
+
+html {
+    background: var(--keigo-practice-paper);
+}
+
+body.keigo-practice-page {
+    min-height: 100svh;
+    background-color: var(--keigo-practice-paper);
+    background-image:
+        linear-gradient(rgba(78, 97, 120, 0.025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(78, 97, 120, 0.018) 1px, transparent 1px);
+    background-size: 36px 36px;
+    color: var(--keigo-practice-ink);
+    font-family: var(--keigo-practice-zh) !important;
+}
+
+.keigo-practice-page,
+.keigo-practice-page button,
+.keigo-practice-page input,
+.keigo-practice-page select,
+.keigo-practice-page textarea,
+.keigo-practice-page .font-serif {
+    font-family: var(--keigo-practice-zh) !important;
+}
+
+.keigo-practice-page .font-pixel,
+.keigo-practice-page .damage-text {
+    font-family: var(--keigo-practice-pixel) !important;
+}
+
+.keigo-practice-page .page-topbar {
+    position: sticky;
+    z-index: 80;
+    top: 0;
+    border-color: var(--keigo-practice-line);
+    background: rgba(251, 250, 247, 0.95);
+    box-shadow: none;
+    backdrop-filter: blur(14px);
+}
+
+.keigo-practice-page .topbar-inner {
+    max-width: 1180px;
+    min-height: 64px;
+    padding-top: 8px;
+    padding-bottom: 8px;
+}
+
+.keigo-practice-page #header-back-link {
+    min-height: 44px;
+    padding: 0;
+    border: 0;
+    border-bottom: 1px solid var(--keigo-practice-blue);
+    border-radius: 0;
+    color: var(--keigo-practice-blue-dark);
+    background: transparent;
+    box-shadow: none;
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.keigo-practice-page #header-back-link:focus-visible,
+.keigo-practice-page .ui-interactive:focus-visible,
+.keigo-practice-page .ut-option-btn:focus-visible {
+    outline: 3px solid rgba(154, 95, 45, 0.42);
+    outline-offset: 3px;
+}
+
+.keigo-practice-page #app-container {
+    min-height: calc(100svh - 64px);
+    align-items: center;
+    padding: clamp(30px, 5vw, 72px) clamp(16px, 4vw, 56px);
+}
+
+.keigo-practice-page .card {
+    border-color: var(--keigo-practice-line-strong);
+    border-radius: 0;
+    background: rgba(255, 255, 255, 0.96);
+    box-shadow: var(--keigo-practice-shadow);
+}
+
+/* 主菜单：保留两个可选游戏模式，但把首屏收束为一个明确入口。 */
+.keigo-practice-page #view-menu {
+    max-width: 1040px;
+    margin-top: 0;
+    gap: 20px;
+}
+
+.keigo-practice-page #view-menu > :first-child {
+    position: relative;
+    justify-content: flex-start;
+    min-height: 122px;
+    padding: 0 0 28px;
+    border-bottom: 1px solid var(--keigo-practice-line-strong);
+}
+
+.keigo-practice-page #view-menu > :first-child::before {
+    position: absolute;
+    top: 2px;
+    left: 0;
+    color: var(--keigo-practice-apricot);
+    content: "HONORIFIC TRAINING";
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+}
+
+.keigo-practice-page #view-menu > :first-child > div {
+    width: 100%;
+    justify-content: flex-start;
+    padding-top: 30px;
+    text-align: left;
+}
+
+.keigo-practice-page #view-menu > :first-child .fa-paw {
+    display: grid;
+    width: 54px;
+    height: 54px;
+    place-items: center;
+    border: 1px solid var(--keigo-practice-line-strong);
+    color: var(--keigo-practice-blue-dark);
+    background: var(--keigo-practice-white);
+    font-size: 24px;
+}
+
+.keigo-practice-page #view-menu > :first-child span.font-serif {
+    color: var(--keigo-practice-ink);
+    font-size: clamp(30px, 5vw, 48px);
+    font-weight: 700;
+    letter-spacing: 0.02em;
+}
+
+.keigo-practice-page #view-menu > :first-child span.h-10 {
+    height: 44px;
+    background: var(--keigo-practice-apricot);
+}
+
+.keigo-practice-page .ui-menu-card {
+    position: relative;
+    min-height: 220px;
+    padding: 62px 34px 32px !important;
+    overflow: hidden;
+    border-width: 1px 1px 1px 5px;
+    border-color: var(--keigo-practice-line-strong);
+    border-left-color: var(--keigo-practice-blue) !important;
+    background: var(--keigo-practice-white) !important;
+    box-shadow: 0 14px 36px rgba(53, 71, 93, 0.07);
+}
+
+.keigo-practice-page .ui-menu-card:nth-of-type(3) {
+    border-left-color: var(--keigo-practice-red) !important;
+}
+
+.keigo-practice-page .ui-menu-card::before {
+    position: absolute;
+    top: 25px;
+    left: 34px;
+    color: var(--keigo-practice-blue);
+    content: "TRAINING MODE";
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+}
+
+.keigo-practice-page .ui-menu-card:nth-of-type(3)::before {
+    color: var(--keigo-practice-red);
+    content: "BATTLE MODE";
+}
+
+.keigo-practice-page .ui-menu-card::after {
+    position: absolute;
+    right: 28px;
+    bottom: 25px;
+    color: var(--keigo-practice-blue);
+    content: "→";
+    font-size: 26px;
+    transition: transform 180ms ease;
+}
+
+.keigo-practice-page .ui-menu-card:nth-of-type(3)::after {
+    color: var(--keigo-practice-red);
+}
+
+.keigo-practice-page .ui-menu-card-icon {
+    display: grid;
+    width: 58px;
+    height: 58px;
+    margin-bottom: 22px;
+    place-items: center;
+    border: 1px solid var(--keigo-practice-line);
+    color: var(--keigo-practice-blue-dark);
+    background: var(--keigo-practice-blue-soft);
+    font-size: 27px;
+}
+
+.keigo-practice-page .ui-menu-card:nth-of-type(3) .ui-menu-card-icon {
+    color: var(--keigo-practice-red);
+    background: var(--keigo-practice-red-soft);
+}
+
+.keigo-practice-page .ui-menu-card h2,
+.keigo-practice-page .ui-leaderboard-card h3 {
+    color: var(--keigo-practice-ink);
+    font-weight: 700;
+}
+
+.keigo-practice-page .ui-menu-card p,
+.keigo-practice-page .ui-leaderboard-card p {
+    max-width: 34rem;
+    color: var(--keigo-practice-muted);
+    font-size: 14px;
+    line-height: 1.85;
+}
+
+.keigo-practice-page .ui-leaderboard-card {
+    min-height: 76px;
+    padding: 16px 24px !important;
+    border: 1px solid var(--keigo-practice-line-strong);
+    border-radius: 0;
+    background: var(--keigo-practice-blue-soft);
+    box-shadow: none;
+}
+
+.keigo-practice-page .ui-leaderboard-card-icon {
+    color: var(--keigo-practice-apricot);
+}
+
+@media (hover: hover) and (pointer: fine) {
+    .keigo-practice-page .ui-menu-card:hover {
+        border-color: var(--keigo-practice-blue);
+        border-left-color: var(--keigo-practice-blue) !important;
+        box-shadow: 0 20px 44px rgba(53, 71, 93, 0.13);
+        transform: translateY(-4px);
+    }
+
+    .keigo-practice-page .ui-menu-card:nth-of-type(3):hover {
+        border-color: var(--keigo-practice-red);
+        border-left-color: var(--keigo-practice-red) !important;
+    }
+
+    .keigo-practice-page .ui-menu-card:hover::after {
+        transform: translateX(5px);
+    }
+
+    .keigo-practice-page #header-back-link:hover {
+        color: var(--keigo-practice-apricot);
+    }
+}
+
+/* 训练目录与课前指导 */
+.keigo-practice-page #view-training-menu,
+.keigo-practice-page #view-rest-area,
+.keigo-practice-page #view-leaderboard {
+    max-width: 1040px;
+}
+
+.keigo-practice-page #view-training-menu > :first-child,
+.keigo-practice-page #view-rest-area > :first-child,
+.keigo-practice-page #view-leaderboard > :first-child {
+    margin-bottom: 28px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--keigo-practice-line-strong);
+    text-align: left;
+}
+
+.keigo-practice-page #view-training-menu > :first-child h2,
+.keigo-practice-page #view-rest-area h2,
+.keigo-practice-page #view-leaderboard h2,
+.keigo-practice-page #intro-category-title {
+    color: var(--keigo-practice-ink);
+    font-size: clamp(28px, 3.4vw, 40px);
+    font-weight: 700;
+    letter-spacing: 0.02em;
+}
+
+.keigo-practice-page #view-training-menu > :first-child p {
+    margin-top: 8px;
+    color: var(--keigo-practice-muted);
+    font-size: 14px;
+}
+
+.keigo-practice-page .dojo-item {
+    min-height: 132px;
+    gap: 20px;
+    padding: 24px 26px !important;
+    border: 1px solid var(--keigo-practice-line-strong);
+    border-left: 4px solid var(--keigo-practice-blue);
+    border-radius: 0;
+    background: var(--keigo-practice-white);
+}
+
+.keigo-practice-page .dojo-item > :first-child {
+    display: grid;
+    width: 50px;
+    height: 50px;
+    flex: 0 0 50px;
+    place-items: center;
+    background: var(--keigo-practice-blue-soft);
+    font-size: 24px;
+}
+
+.keigo-practice-page .dojo-item h3 {
+    color: var(--keigo-practice-blue-dark);
+    font-size: 18px;
+    font-weight: 700;
+}
+
+.keigo-practice-page .dojo-item p {
+    margin-top: 7px;
+    color: var(--keigo-practice-muted);
+    font-size: 13px;
+    line-height: 1.7;
+}
+
+.keigo-practice-page .ui-rest-entry {
+    min-height: 68px;
+    border: 1px solid var(--keigo-practice-line-strong);
+    border-left: 4px solid var(--keigo-practice-apricot);
+    border-radius: 0;
+    background: var(--keigo-practice-apricot-soft);
+}
+
+.keigo-practice-page .ui-rest-entry h3 {
+    color: var(--keigo-practice-apricot);
+}
+
+.keigo-practice-page #wrong-count-badge {
+    min-width: 24px;
+    border-radius: 2px;
+    background: var(--keigo-practice-red);
+    text-align: center;
+}
+
+.keigo-practice-page #view-training-intro {
+    max-width: 820px;
+    padding-bottom: 0;
+}
+
+.keigo-practice-page #intro-category-title {
+    margin-bottom: 30px;
+}
+
+.keigo-practice-page .ui-story-avatar {
+    display: grid;
+    width: 88px;
+    height: 88px;
+    margin-bottom: 18px;
+    place-items: center;
+    border: 1px solid var(--keigo-practice-line-strong);
+    border-radius: 50%;
+    background: var(--keigo-practice-blue-soft);
+    filter: none;
+    font-size: 48px;
+}
+
+.keigo-practice-page .speech-bubble-top {
+    padding: 30px 34px !important;
+    border: 1px solid var(--keigo-practice-line-strong);
+    border-left: 5px solid var(--keigo-practice-blue);
+    border-radius: 0;
+    background: var(--keigo-practice-white);
+    box-shadow: var(--keigo-practice-shadow);
+}
+
+.keigo-practice-page .speech-bubble-top::after,
+.keigo-practice-page .speech-bubble-top::before {
+    display: none;
+}
+
+.keigo-practice-page .speech-bubble-top > p:first-child {
+    margin-bottom: 18px;
+    padding-bottom: 13px;
+    border-color: var(--keigo-practice-line);
+    color: var(--keigo-practice-blue-dark);
+    font-size: 13px;
+    letter-spacing: 0.08em;
+}
+
+.keigo-practice-page #intro-instructor-advice {
+    color: var(--keigo-practice-ink);
+    font-size: 16px;
+    line-height: 1.95;
+}
+
+.keigo-practice-page .ui-primary-enji-btn,
+.keigo-practice-page .ui-secondary-border-btn,
+.keigo-practice-page .ui-next-question-btn,
+.keigo-practice-page .ui-retry-btn {
+    min-height: 48px;
+    border-radius: 0;
+}
+
+.keigo-practice-page .ui-primary-enji-btn {
+    background: var(--keigo-practice-red);
+    box-shadow: 0 10px 24px rgba(127, 48, 40, 0.16);
+}
+
+/* 训练答题：信息按进度、题干、选项、解析顺序展开。 */
+.keigo-practice-page #view-training-session {
+    max-width: 920px;
+}
+
+.keigo-practice-page #view-training-session > :first-child {
+    min-height: 36px;
+    margin-bottom: 16px;
+    padding: 0;
+    justify-content: flex-start;
+    border-bottom: 1px solid var(--keigo-practice-line);
+}
+
+.keigo-practice-page #training-category-title {
+    padding-bottom: 11px;
+    color: var(--keigo-practice-blue-dark);
+    font-size: 13px;
+    letter-spacing: 0.08em;
+}
+
+.keigo-practice-page #view-training-session > .card {
+    min-height: min(650px, calc(100svh - 165px));
+    padding: clamp(58px, 8vw, 82px) clamp(22px, 6vw, 64px) clamp(28px, 5vw, 48px) !important;
+    border: 1px solid var(--keigo-practice-line-strong);
+    border-left: 5px solid var(--keigo-practice-blue);
+    border-radius: 0;
+    box-shadow: var(--keigo-practice-shadow);
+}
+
+.keigo-practice-page #training-progress,
+.keigo-practice-page #training-progress + div {
+    min-height: 34px;
+    padding: 8px 15px;
+    border: 0;
+    border-radius: 0;
+    font-size: 11px;
+    letter-spacing: 0.08em;
+}
+
+.keigo-practice-page #training-progress {
+    color: var(--keigo-practice-blue-dark);
+    background: var(--keigo-practice-blue-soft);
+}
+
+.keigo-practice-page #training-progress + div {
+    color: var(--keigo-practice-white);
+    background: var(--keigo-practice-apricot);
+}
+
+.keigo-practice-page #training-desc {
+    margin-bottom: 14px;
+    color: var(--keigo-practice-muted);
+    font-size: 13px;
+    letter-spacing: 0.04em;
+}
+
+.keigo-practice-page #training-question {
+    margin-bottom: 28px;
+    padding: clamp(24px, 5vw, 44px) clamp(18px, 4vw, 38px);
+    border: 0;
+    border-top: 1px solid var(--keigo-practice-line);
+    border-bottom: 1px solid var(--keigo-practice-line);
+    border-radius: 0;
+    color: var(--keigo-practice-ink);
+    background: transparent;
+    box-shadow: none;
+    font-size: clamp(20px, 3.1vw, 30px);
+    font-weight: 600;
+    line-height: 1.8;
+    text-align: left;
+}
+
+.keigo-practice-page #training-question [lang="ja"] {
+    font-family: var(--keigo-practice-jp);
+}
+
+.keigo-practice-page #training-hint-box {
+    margin: 22px 0 0;
+    padding: 18px 20px;
+    border: 0;
+    border-left: 4px solid var(--keigo-practice-blue);
+    border-radius: 0;
+    color: var(--keigo-practice-ink);
+    background: var(--keigo-practice-blue-soft);
+    font-size: 14px;
+    line-height: 1.85;
+}
+
+.keigo-practice-page #training-hint-box strong {
+    display: block;
+    margin-bottom: 5px;
+    color: var(--keigo-practice-blue-dark);
+}
+
+.keigo-practice-page #training-options {
+    gap: 12px;
+}
+
+.keigo-practice-page .ui-training-option-btn {
+    min-height: 58px;
+    padding: 14px 18px !important;
+    border: 1px solid var(--keigo-practice-line-strong);
+    border-radius: 0;
+    color: var(--keigo-practice-ink);
+    background: var(--keigo-practice-white);
+    box-shadow: none;
+    font-size: 16px;
+    font-weight: 600;
+    line-height: 1.55;
+}
+
+.keigo-practice-page .ui-training-option-btn:disabled {
+    cursor: default;
+}
+
+.keigo-practice-page .ui-training-option-btn.bg-green-50,
+.keigo-practice-page .ui-training-option-btn.border-green-500 {
+    border-color: var(--keigo-practice-success) !important;
+    color: #294b3e !important;
+    background: var(--keigo-practice-success-soft) !important;
+}
+
+.keigo-practice-page .ui-training-option-btn.bg-red-50,
+.keigo-practice-page .ui-training-option-btn.border-red-500 {
+    border-color: var(--keigo-practice-danger) !important;
+    color: #73342f !important;
+    background: var(--keigo-practice-danger-soft) !important;
+}
+
+.keigo-practice-page .ui-next-question-btn {
+    background: var(--keigo-practice-blue-dark);
+}
+
+@media (hover: hover) and (pointer: fine) {
+    .keigo-practice-page .dojo-item:hover,
+    .keigo-practice-page .ui-training-option-btn:not(:disabled):hover {
+        border-color: var(--keigo-practice-blue);
+        background: var(--keigo-practice-blue-soft);
+        box-shadow: none;
+        transform: translateY(-2px);
+    }
+}
+
+/* 错题与记录 */
+.keigo-practice-page #view-rest-area > .bg-white,
+.keigo-practice-page #view-leaderboard > .card {
+    padding: clamp(22px, 4vw, 40px) !important;
+    border: 1px solid var(--keigo-practice-line-strong);
+    border-left: 5px solid var(--keigo-practice-blue);
+    border-radius: 0;
+    background: var(--keigo-practice-white);
+    box-shadow: var(--keigo-practice-shadow);
+}
+
+.keigo-practice-page #view-rest-area > .bg-white > p,
+.keigo-practice-page #view-leaderboard > .card > p {
+    color: var(--keigo-practice-muted);
+    line-height: 1.8;
+}
+
+.keigo-practice-page .rest-area-item {
+    padding: 18px 20px !important;
+    border: 1px solid var(--keigo-practice-line);
+    border-left: 4px solid var(--keigo-practice-apricot);
+    border-radius: 0;
+    background: var(--keigo-practice-apricot-soft);
+    box-shadow: none;
+}
+
+.keigo-practice-page .rest-area-item .font-serif {
+    color: var(--keigo-practice-ink);
+    font-size: 16px;
+    line-height: 1.7;
+}
+
+.keigo-practice-page .ui-retry-btn {
+    border-color: var(--keigo-practice-red);
+    color: var(--keigo-practice-red);
+    background: transparent;
+}
+
+.keigo-practice-page #view-leaderboard table {
+    color: var(--keigo-practice-ink);
+}
+
+.keigo-practice-page #view-leaderboard thead {
+    border-color: var(--keigo-practice-blue);
+    color: var(--keigo-practice-blue-dark);
+}
+
+.keigo-practice-page #view-leaderboard th,
+.keigo-practice-page #view-leaderboard td {
+    padding: 14px 12px;
+}
+
+.keigo-practice-page #view-leaderboard tbody tr {
+    border-color: var(--keigo-practice-line);
+}
+
+/* 生存战：保留像素 HUD 与黑底战斗感，只整理边界、节奏和小屏适配。 */
+body.keigo-practice-page.boss-mode-active {
+    background-color: #07090c;
+    background-image:
+        linear-gradient(rgba(255, 255, 255, 0.025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
+    background-size: 28px 28px;
+    color: #ffffff;
+}
+
+.keigo-practice-page #view-challenge-intro,
+.keigo-practice-page #view-challenge,
+.keigo-practice-page #view-challenge-summary {
+    max-width: 880px;
+}
+
+.keigo-practice-page #story-container {
+    width: min(760px, 100%);
+    min-height: 230px;
+    padding: clamp(24px, 5vw, 44px);
+    border: 2px solid #ffffff;
+    background: #050505;
+    font-family: var(--keigo-practice-zh) !important;
+    font-size: clamp(17px, 2.3vw, 23px);
+    line-height: 2;
+    text-align: left;
+}
+
+.keigo-practice-page .ut-dialogue-box {
+    min-height: 142px;
+    padding: clamp(20px, 4vw, 34px);
+    border: 3px solid #ffffff;
+    border-radius: 0;
+    background: #050505;
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.1);
+    font-family: var(--keigo-practice-zh) !important;
+    font-size: clamp(17px, 2.2vw, 22px);
+    line-height: 1.85;
+}
+
+.keigo-practice-page .ut-option-btn {
+    min-height: 58px;
+    padding: 14px 18px 14px 44px;
+    border: 2px solid #d7d9de;
+    border-radius: 0;
+    background: #050505;
+    font-family: var(--keigo-practice-zh) !important;
+    font-size: 16px;
+    line-height: 1.55;
+}
+
+.keigo-practice-page .ut-option-btn::before {
+    left: 17px;
+}
+
+.keigo-practice-page #boss-avatar {
+    filter: drop-shadow(0 10px 18px rgba(0, 0, 0, 0.5));
+}
+
+.keigo-practice-page #boss-name {
+    color: #e5e7eb;
+    font-family: var(--keigo-practice-zh) !important;
+    font-weight: 700;
+}
+
+.keigo-practice-page #challenge-stage-shell > div:first-child > div:last-child {
+    border-color: #5e6672;
+    border-radius: 0;
+    background: #11151b;
+}
+
+.keigo-practice-page #timer-container {
+    height: 7px;
+    margin: 0 0 14px;
+    border: 1px solid #3f4651;
+    border-radius: 0;
+    background: #11151b;
+}
+
+.keigo-practice-page #timer-bar {
+    background: #a33e35;
+}
+
+.keigo-practice-page #view-challenge #challenge-stage-shell > div:last-child {
+    border-color: #626a75;
+    border-radius: 0;
+    background: #11151b;
+}
+
+.keigo-practice-page .hp-bar-bg {
+    border-color: #e8eaed;
+    border-radius: 0;
+    background: #303640;
+}
+
+.keigo-practice-page .boss-hp-fill {
+    background-color: #65a67f;
+}
+
+.keigo-practice-page .player-hp-fill {
+    background-color: #d9ad4a;
+}
+
+.keigo-practice-page #view-challenge-summary .ut-dialogue-box {
+    padding: clamp(24px, 5vw, 38px);
+}
+
+.keigo-practice-page #view-challenge-summary .bg-gray-900 {
+    border-radius: 0;
+    background: #11151b;
+}
+
+.keigo-practice-page #view-challenge-summary #summary-eval {
+    font-family: var(--keigo-practice-zh) !important;
+}
+
+@media (hover: hover) and (pointer: fine) {
+    .keigo-practice-page .ut-option-btn:hover {
+        border-color: #d9ad4a;
+        color: #f1c863;
+        background: #101318;
+    }
+}
+
+/* 平板 */
+@media (max-width: 1024px) {
+    .keigo-practice-page #app-container {
+        padding: 34px 26px 48px;
+    }
+
+    .keigo-practice-page #view-menu {
+        max-width: 900px;
+    }
+
+    .keigo-practice-page .ui-menu-card {
+        min-height: 205px;
+        padding-right: 28px !important;
+        padding-left: 28px !important;
+    }
+
+    .keigo-practice-page .ui-menu-card::before {
+        left: 28px;
+    }
+
+    .keigo-practice-page #view-training-session > .card {
+        min-height: 620px;
+    }
+}
+
+/* 手机 */
+@media (max-width: 767px) {
+    .keigo-practice-page {
+        background-size: 28px 28px;
+    }
+
+    .keigo-practice-page .topbar-inner {
+        min-height: 54px;
+        padding-top: 5px;
+        padding-bottom: 5px;
+    }
+
+    .keigo-practice-page #header-back-link {
+        min-height: 40px;
+        font-size: 13px;
+    }
+
+    .keigo-practice-page #app-container {
+        min-height: calc(100svh - 54px);
+        padding: 24px 14px 38px;
+    }
+
+    .keigo-practice-page #view-menu {
+        gap: 12px;
+    }
+
+    .keigo-practice-page #view-menu > :first-child {
+        min-height: auto;
+        padding-bottom: 20px;
+    }
+
+    .keigo-practice-page #view-menu > :first-child > div {
+        gap: 10px;
+        padding-top: 28px;
+        flex-wrap: nowrap;
+    }
+
+    .keigo-practice-page #view-menu > :first-child .fa-paw {
+        width: 42px;
+        height: 42px;
+        font-size: 18px;
+    }
+
+    .keigo-practice-page #view-menu > :first-child span.font-serif {
+        font-size: clamp(22px, 7.2vw, 30px);
+        white-space: nowrap;
+    }
+
+    .keigo-practice-page #view-menu > :first-child span.h-10 {
+        height: 30px;
+    }
+
+    .keigo-practice-page .ui-menu-card {
+        min-height: 164px;
+        padding: 48px 20px 22px !important;
+    }
+
+    .keigo-practice-page .ui-menu-card::before {
+        top: 18px;
+        left: 20px;
+    }
+
+    .keigo-practice-page .ui-menu-card::after {
+        right: 18px;
+        bottom: 18px;
+        font-size: 22px;
+    }
+
+    .keigo-practice-page .ui-menu-card-icon {
+        position: absolute;
+        top: 46px;
+        right: 18px;
+        width: 42px;
+        height: 42px;
+        font-size: 21px;
+    }
+
+    .keigo-practice-page .ui-menu-card h2 {
+        max-width: calc(100% - 58px);
+        margin-bottom: 8px;
+        font-size: 18px;
+    }
+
+    .keigo-practice-page .ui-menu-card p {
+        max-width: calc(100% - 42px);
+        padding-right: 4px;
+        font-size: 12px;
+        line-height: 1.7;
+    }
+
+    .keigo-practice-page .ui-leaderboard-card {
+        min-height: 66px;
+        padding: 13px 15px !important;
+        justify-content: flex-start;
+    }
+
+    .keigo-practice-page .ui-leaderboard-card h3 {
+        font-size: 16px;
+    }
+
+    .keigo-practice-page .ui-leaderboard-card p {
+        font-size: 11px;
+    }
+
+    .keigo-practice-page #view-training-menu > :first-child,
+    .keigo-practice-page #view-rest-area > :first-child,
+    .keigo-practice-page #view-leaderboard > :first-child {
+        margin-bottom: 18px;
+        padding-bottom: 15px;
+    }
+
+    .keigo-practice-page #view-training-menu > :first-child h2,
+    .keigo-practice-page #view-rest-area h2,
+    .keigo-practice-page #view-leaderboard h2,
+    .keigo-practice-page #intro-category-title {
+        font-size: 26px;
+    }
+
+    .keigo-practice-page #view-training-menu > .grid {
+        gap: 10px;
+        margin-bottom: 12px;
+    }
+
+    .keigo-practice-page .dojo-item {
+        min-height: 98px;
+        gap: 14px;
+        padding: 17px 16px !important;
+    }
+
+    .keigo-practice-page .dojo-item > :first-child {
+        width: 42px;
+        height: 42px;
+        flex-basis: 42px;
+        font-size: 20px;
+    }
+
+    .keigo-practice-page .dojo-item h3 {
+        font-size: 16px;
+    }
+
+    .keigo-practice-page .dojo-item p {
+        font-size: 12px;
+        line-height: 1.6;
+    }
+
+    .keigo-practice-page .ui-rest-entry {
+        min-height: 60px;
+        padding: 13px 14px !important;
+        justify-content: flex-start;
+    }
+
+    .keigo-practice-page .ui-rest-entry h3 {
+        font-size: 16px;
+    }
+
+    .keigo-practice-page #intro-category-title {
+        margin-bottom: 22px;
+    }
+
+    .keigo-practice-page #view-training-intro > .flex.flex-col.items-center {
+        margin-bottom: 26px;
+        padding-right: 0;
+        padding-left: 0;
+    }
+
+    .keigo-practice-page .ui-story-avatar {
+        width: 70px;
+        height: 70px;
+        margin-bottom: 12px;
+        font-size: 38px;
+    }
+
+    .keigo-practice-page .speech-bubble-top {
+        padding: 22px 20px !important;
+    }
+
+    .keigo-practice-page #intro-instructor-advice {
+        font-size: 14px !important;
+        line-height: 1.85;
+    }
+
+    .keigo-practice-page #view-training-session > :first-child {
+        margin-bottom: 11px;
+    }
+
+    .keigo-practice-page #view-training-session > .card {
+        min-height: auto;
+        padding: 54px 16px 22px !important;
+        border-left-width: 4px;
+    }
+
+    .keigo-practice-page #training-progress,
+    .keigo-practice-page #training-progress + div {
+        min-height: 30px;
+        padding: 7px 10px;
+        font-size: 10px;
+    }
+
+    .keigo-practice-page #training-desc {
+        margin-bottom: 8px;
+        font-size: 11px;
+    }
+
+    .keigo-practice-page #training-question {
+        margin-bottom: 16px;
+        padding: 18px 3px;
+        font-size: clamp(16px, 4.4vw, 18px) !important;
+        line-height: 1.68;
+        overflow-wrap: anywhere;
+        word-break: normal;
+    }
+
+    .keigo-practice-page #training-options {
+        grid-template-columns: minmax(0, 1fr) !important;
+        gap: 9px;
+    }
+
+    .keigo-practice-page .ui-training-option-btn {
+        min-height: 48px;
+        padding: 11px 13px !important;
+        font-size: 13px;
+        line-height: 1.5;
+        white-space: normal !important;
+    }
+
+    .keigo-practice-page #training-hint-box {
+        margin-top: 15px;
+        padding: 14px 15px;
+        font-size: 12px;
+        line-height: 1.7;
+    }
+
+    .keigo-practice-page #view-rest-area > .bg-white,
+    .keigo-practice-page #view-leaderboard > .card {
+        padding: 18px 16px !important;
+        border-left-width: 4px;
+    }
+
+    .keigo-practice-page .rest-area-item {
+        padding: 15px !important;
+    }
+
+    .keigo-practice-page .rest-area-item .font-serif {
+        font-size: 14px;
+    }
+
+    .keigo-practice-page #view-leaderboard .overflow-x-auto {
+        margin-right: -16px;
+        margin-left: -16px;
+        padding-right: 16px;
+        padding-left: 16px;
+    }
+
+    body.keigo-practice-page.boss-mode-active #app-container {
+        min-height: 100svh;
+        padding: 14px 12px 20px;
+    }
+
+    .keigo-practice-page #view-challenge-intro {
+        justify-content: center;
+    }
+
+    .keigo-practice-page #story-container {
+        min-height: 190px;
+        margin-bottom: 24px;
+        padding: 22px 18px;
+        font-size: 16px;
+        line-height: 1.85;
+    }
+
+    .keigo-practice-page #view-challenge {
+        padding-bottom: 0;
+    }
+
+    .keigo-practice-page #view-challenge > .absolute {
+        top: 0;
+        right: 0;
+    }
+
+    .keigo-practice-page #challenge-stage-shell {
+        margin-top: 30px;
+    }
+
+    .keigo-practice-page #boss-avatar {
+        margin-bottom: 7px !important;
+        font-size: 48px !important;
+    }
+
+    .keigo-practice-page #challenge-stage-shell > div:first-child > div:last-child {
+        gap: 8px;
+        padding: 6px 10px;
+    }
+
+    .keigo-practice-page #boss-name {
+        font-size: 13px !important;
+        letter-spacing: 0.04em;
+    }
+
+    .keigo-practice-page #challenge-question {
+        font-size: 16px;
+        line-height: 1.75;
+    }
+
+    .keigo-practice-page .ut-dialogue-box {
+        min-height: 116px;
+        padding: 17px 16px;
+        border-width: 2px;
+        font-size: 16px;
+    }
+
+    .keigo-practice-page #challenge-options {
+        grid-template-columns: minmax(0, 1fr) !important;
+        gap: 8px;
+    }
+
+    .keigo-practice-page .ut-option-btn {
+        min-height: 49px;
+        padding: 11px 12px 11px 38px;
+        font-size: 14px;
+    }
+
+    .keigo-practice-page .ut-option-btn::before {
+        left: 13px;
+    }
+
+    .keigo-practice-page #view-challenge #challenge-stage-shell > div:last-child {
+        gap: 10px;
+        padding: 11px 12px;
+        flex-wrap: nowrap;
+    }
+
+    .keigo-practice-page #view-challenge #challenge-stage-shell > div:last-child > div {
+        gap: 8px;
+    }
+
+    .keigo-practice-page #view-challenge #challenge-stage-shell > div:last-child > div:first-child span:nth-child(2) {
+        display: none;
+    }
+
+    .keigo-practice-page #view-challenge #challenge-stage-shell > div:last-child .hp-bar-bg {
+        width: min(30vw, 118px);
+        height: 18px !important;
+    }
+
+    .keigo-practice-page #player-hp-text {
+        width: 58px;
+        font-size: 15px;
+    }
+
+    .keigo-practice-page #view-challenge-summary h2 {
+        margin-bottom: 18px;
+        font-size: 34px;
+    }
+
+    .keigo-practice-page #view-challenge-summary .ut-dialogue-box {
+        padding: 22px 18px;
+    }
+}
+
+@media (max-width: 390px) {
+    .keigo-practice-page #view-menu > :first-child .fa-paw {
+        display: none;
+    }
+
+    .keigo-practice-page #view-menu > :first-child > div {
+        justify-content: space-between;
+    }
+
+    .keigo-practice-page #view-menu > :first-child span.font-serif {
+        font-size: 22px;
+    }
+
+    .keigo-practice-page .ui-menu-card p {
+        max-width: calc(100% - 28px);
+    }
+
+    .keigo-practice-page #challenge-stage-shell > div:first-child > div:last-child {
+        flex-direction: column;
+    }
+
+    .keigo-practice-page #boss-name {
+        white-space: normal;
+        text-align: center;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .keigo-practice-page *,
+    .keigo-practice-page *::before,
+    .keigo-practice-page *::after {
+        scroll-behavior: auto !important;
+        transition-duration: 0.01ms !important;
+    }
+}

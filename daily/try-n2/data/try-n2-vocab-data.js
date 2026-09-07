@@ -338,6 +338,26 @@ window.tryN2VocabData = Object.freeze({
         "zh": "下午要拜访新的业务客户。"
       }
     ],
+    "focusParts": [
+      {
+        "word": "〜先",
+        "reading": "さき",
+        "partOfSpeech": "接尾语・构词成分",
+        "partOfSpeechGroup": "word-forming",
+        "pitch": "复合词型",
+        "needsExplanation": false,
+        "meaning": "接在表示动作、关系或往来的词后，表示该动作所面向的对象、地点或去处。常见「取引先」（业务往来对象）、「勤務先」（工作单位）、「行き先」（目的地）和「送り先」（寄送地址）。",
+        "usage": "",
+        "examples": [
+          {
+            "ja": "書類の送り先を確認してください。",
+            "jaHtml": "<ruby>書<rt>しょ</rt></ruby><ruby>類<rt>るい</rt></ruby>の<ruby>送<rt>おく</rt></ruby>り<strong><ruby>先<rt>さき</rt></ruby></strong>を<ruby>確<rt>かく</rt></ruby><ruby>認<rt>にん</rt></ruby>してください。",
+            "zh": "请确认文件的寄送地址。"
+          }
+        ],
+        "titleHtml": "〜<ruby>先<rt>さき</rt></ruby>"
+      }
+    ],
     "titleHtml": "<ruby>取<rt>とり</rt></ruby><ruby>引<rt>ひき</rt></ruby><ruby>先<rt>さき</rt></ruby>"
   },
   "tsukiaikata": {

@@ -549,10 +549,6 @@
       const header = document.createElement("div");
       header.className = "lesson-header";
       header.innerHTML = `<span>${escapeHtml(pageHeader.genre)}</span><span>${escapeHtml(pageHeader.titles[index] || item.title)}</span>`;
-      const holes = document.createElement("div");
-      holes.className = "paper-holes";
-      holes.setAttribute("aria-hidden", "true");
-      article.prepend(holes);
       article.prepend(header);
     });
   }
@@ -3064,6 +3060,11 @@
   window.addEventListener("resize", () => {
     if (activeDetailAnchor && !dom.detailPopover.hidden) positionDetailPopover(activeDetailAnchor);
     if (activeSection === "patterns") schedulePatternCardAlignment();
+    updatePracticeFloatingSubmit();
+  });
+  window.addEventListener("try-n2:font-size-change", () => {
+    schedulePatternCardAlignment();
+    if (activeDetailAnchor && !dom.detailPopover.hidden) positionDetailPopover(activeDetailAnchor);
     updatePracticeFloatingSubmit();
   });
   window.addEventListener("scroll", updatePracticeFloatingSubmit, { passive: true });

@@ -1547,7 +1547,7 @@
         }
     </style>
     <link rel="stylesheet" href="shared/site-fonts.css">
-    <link rel="stylesheet" href="shared/n2-home-refinement.css?v=20260905-7">
+    <link rel="stylesheet" href="shared/n2-home-refinement.css?v=20260907-8">
 </head>
 <body class="home-refined">
     <div class="page-shell">
@@ -1696,40 +1696,42 @@
                         titleLang: "ja",
                         desc: "课后复习与练习",
                         href: "daily/try-n2/lesson-content-redesign.html?lesson=1",
-                        coverImage: "icon/try-n2-study-shiba.webp",
+                        coverImage: "icon/try-n2-watercolor-study.webp",
                         icon: "textbook",
                         tag: "TRY!",
                         tone: "blush",
                         immersiveCover: true
                     },
                     {
-                        title: "文法練習",
+                        title: "文法学習",
                         titleLang: "ja",
-                        desc: "建设中",
-                        coverImage: "icon/bunnpou1.png",
+                        desc: "梳理基础语法与表达",
+                        href: "daily/grammar/index.html",
+                        coverImage: "icon/grammar-learning-watercolor-bookshelf.webp",
                         icon: "grammar",
                         tag: "基礎",
                         tagLang: "ja",
                         tone: "mist",
-                        disabled: true
+                        immersiveCover: true
                     },
                     {
                         title: "日本語ゲーム",
                         titleLang: "ja",
                         desc: "轻松练习日语",
                         href: "日语学习游戏合集.html",
-                        coverImage: "icon/shiba-games-cover.png",
+                        coverImage: "icon/japanese-games-watercolor.webp",
                         icon: "game",
                         tag: "遊戯",
                         tagLang: "ja",
-                        tone: "sage"
+                        tone: "sage",
+                        immersiveCover: true
                     },
                     {
                         title: "文法検索",
                         titleLang: "ja",
                         desc: "查找语法与例句",
                         href: "daily/search/index.html",
-                        coverImage: "icon/grammar-search-shiba.webp",
+                        coverImage: "icon/grammar-search-watercolor.webp",
                         icon: "search",
                         tag: "検索",
                         tone: "pearl",
@@ -1948,13 +1950,13 @@
             {
                 id: "kakujyo-guide",
                 name: "格助詞の解説",
-                url: "daily/grammar/kakujyo.html",
+                url: "daily/grammar/particles/kakujyo.html",
                 note: "掌握日语中“最核心”的知识"
             },
             {
                 id: "keigo-guide",
                 name: "敬語の解説",
-                url: "daily/grammar/敬语.html",
+                url: "daily/grammar/expressions/敬语.html",
                 note: "陌生的它，你必须掌握"
             },
             {
@@ -2100,7 +2102,7 @@
 
         function normalizeFavoriteEntry(entry) {
             const name = String(entry && entry.name ? entry.name : "").trim();
-            const href = normalizeHref(entry && entry.href ? entry.href : "");
+            const href = migrateGrammarFavoriteHref(normalizeHref(entry && entry.href ? entry.href : ""));
             const note = String(entry && entry.note ? entry.note : "").trim();
             const coverFortuneId = normalizeCoverFortuneId(entry && entry.coverFortuneId ? entry.coverFortuneId : "");
             if (!name || !href) return null;
@@ -2110,6 +2112,24 @@
                 note: note.slice(0, 28),
                 ...(coverFortuneId ? { coverFortuneId } : {})
             };
+        }
+
+        function migrateGrammarFavoriteHref(href) {
+            if (!href) return href;
+            const replacements = {
+                "daily/grammar/change.html": "daily/grammar/foundation/change.html",
+                "daily/grammar/kakujyo.html": "daily/grammar/particles/kakujyo.html",
+                "daily/grammar/kakujyo_practice.html": "daily/grammar/particles/kakujyo_practice.html",
+                "daily/grammar/敬语.html": "daily/grammar/expressions/敬语.html",
+                "test/keigo.html": "daily/grammar/expressions/keigo-practice.html"
+            };
+            try {
+                const siteRoot = new URL("./", window.location.href);
+                const url = new URL(href, siteRoot);
+                if (url.origin !== siteRoot.origin || !url.pathname.startsWith(siteRoot.pathname)) return href;
+                const relative = decodeURIComponent(url.pathname.slice(siteRoot.pathname.length));
+                return replacements[relative] ? replacements[relative] + url.search + url.hash : href;
+            } catch { return href; }
         }
 
         function loadLegacyFavoriteEntry() {

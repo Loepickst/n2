@@ -628,7 +628,15 @@ window.tryN2VocabData = Object.freeze({
     "type": "vocab",
     "key": "lesson2_nyukasuru",
     "lesson": 2,
+    "lessons": [
+      2,
+      4
+    ],
     "order": 16,
+    "lessonOrders": {
+      "2": 16,
+      "4": 29
+    },
     "word": "入荷する",
     "reading": "にゅうかする",
     "partOfSpeech": "名词・サ变动词・自动词",
@@ -2054,6 +2062,314 @@ window.tryN2VocabData = Object.freeze({
     ],
     "titleHtml": "つながる"
   },
+  "lesson4_omoiukabu": {
+    "type": "vocab",
+    "key": "lesson4_omoiukabu",
+    "lesson": 4,
+    "order": 17,
+    "word": "思い浮かぶ",
+    "reading": "おもいうかぶ",
+    "partOfSpeech": "动词・五段・自动词",
+    "partOfSpeechGroup": "verb",
+    "pitch": "⑤型",
+    "needsExplanation": false,
+    "meaning": "想起、浮现在脑海中；人物、情景或想法等自然地进入意识。主语通常是浮现出的内容，常用「顔が思い浮かぶ」「案が思い浮かぶ」；主动在脑中描绘则用他动词「思い浮かべる」。",
+    "usage": "",
+    "examples": [
+      {
+        "ja": "その写真を見ると、学生時代の友人の顔が思い浮かびます。",
+        "jaHtml": "その<ruby>写<rt>しゃ</rt></ruby><ruby>真<rt>しん</rt></ruby>を<ruby>見<rt>み</rt></ruby>ると、<ruby>学<rt>がく</rt></ruby><ruby>生<rt>せい</rt></ruby><ruby>時<rt>じ</rt></ruby><ruby>代<rt>だい</rt></ruby>の<ruby>友<rt>ゆう</rt></ruby><ruby>人<rt>じん</rt></ruby>の<ruby>顔<rt>かお</rt></ruby>が<strong><ruby>思<rt>おも</rt></ruby>い<ruby>浮<rt>う</rt></ruby>かびます</strong>。",
+        "zh": "看到那张照片，我就会想起学生时代朋友的面容。"
+      }
+    ],
+    "titleHtml": "<ruby>思<rt>おも</rt></ruby>い<ruby>浮<rt>う</rt></ruby>かぶ"
+  },
+  "lesson4_kansousuru": {
+    "type": "vocab",
+    "key": "lesson4_kansousuru",
+    "lesson": 4,
+    "order": 18,
+    "word": "完走する",
+    "reading": "かんそうする",
+    "partOfSpeech": "名词・サ变动词・自动词",
+    "partOfSpeechGroup": "noun-verb",
+    "pitch": "⓪型",
+    "needsExplanation": false,
+    "meaning": "跑完全程；在马拉松、接力赛等比赛中不半途退出，坚持抵达终点。常用「マラソンを完走する」，只强调完成全程，不表示取得名次。",
+    "usage": "",
+    "examples": [
+      {
+        "ja": "けがを乗り越え、初めてのフルマラソンを完走しました。",
+        "jaHtml": "けがを<ruby>乗<rt>の</rt></ruby>り<ruby>越<rt>こ</rt></ruby>え、<ruby>初<rt>はじ</rt></ruby>めてのフルマラソンを<strong><ruby>完<rt>かん</rt></ruby><ruby>走<rt>そう</rt></ruby>しました</strong>。",
+        "zh": "克服伤病后，我跑完了人生第一次全程马拉松。"
+      }
+    ],
+    "titleHtml": "<ruby>完<rt>かん</rt></ruby><ruby>走<rt>そう</rt></ruby>する"
+  },
+  "lesson4_hagemasu": {
+    "type": "vocab",
+    "key": "lesson4_hagemasu",
+    "lesson": 4,
+    "order": 20,
+    "word": "励ます",
+    "reading": "はげます",
+    "partOfSpeech": "动词・五段・他动词",
+    "partOfSpeechGroup": "verb",
+    "pitch": "③型",
+    "needsExplanation": false,
+    "meaning": "鼓励、勉励；通过语言或行动增强对方的勇气、信心或干劲。对象用「人を励ます」，也常说「励ましの言葉」。",
+    "usage": "",
+    "examples": [
+      {
+        "ja": "苦しいとき、仲間の言葉が私を励ましてくれました。",
+        "jaHtml": "<ruby>苦<rt>くる</rt></ruby>しいとき、<ruby>仲<rt>なか</rt></ruby><ruby>間<rt>ま</rt></ruby>の<ruby>言<rt>こと</rt></ruby><ruby>葉<rt>ば</rt></ruby>が<ruby>私<rt>わたし</rt></ruby>を<strong><ruby>励<rt>はげ</rt></ruby>まして</strong>くれました。",
+        "zh": "艰难的时候，同伴的话给了我鼓励。"
+      }
+    ],
+    "titleHtml": "<ruby>励<rt>はげ</rt></ruby>ます"
+  },
+  "lesson4_minoru": {
+    "type": "vocab",
+    "key": "lesson4_minoru",
+    "lesson": 4,
+    "order": 21,
+    "word": "実る",
+    "reading": "みのる",
+    "partOfSpeech": "动词・五段・自动词",
+    "partOfSpeechGroup": "verb",
+    "pitch": "②型",
+    "needsExplanation": false,
+    "meaning": "结果、成熟；本义指植物结出果实，也可表示努力、计划或愿望取得成果。常用「果実が実る」「努力が実る」。",
+    "usage": "",
+    "examples": [
+      {
+        "ja": "長年の努力が実り、ようやく目標を達成しました。",
+        "jaHtml": "<ruby>長<rt>なが</rt></ruby><ruby>年<rt>ねん</rt></ruby>の<ruby>努<rt>ど</rt></ruby><ruby>力<rt>りょく</rt></ruby>が<strong><ruby>実<rt>みの</rt></ruby>り</strong>、ようやく<ruby>目<rt>もく</rt></ruby><ruby>標<rt>ひょう</rt></ruby>を<ruby>達<rt>たっ</rt></ruby><ruby>成<rt>せい</rt></ruby>しました。",
+        "zh": "多年的努力终于有了成果，实现了目标。"
+      }
+    ],
+    "titleHtml": "<ruby>実<rt>みの</rt></ruby>る"
+  },
+  "lesson4_mure": {
+    "type": "vocab",
+    "key": "lesson4_mure",
+    "lesson": 4,
+    "order": 22,
+    "word": "群れ",
+    "reading": "むれ",
+    "partOfSpeech": "名词",
+    "partOfSpeechGroup": "noun",
+    "pitch": "②型",
+    "needsExplanation": false,
+    "meaning": "群、群体；指动物或人聚集在一起形成的一群。常用「鳥の群れ」「魚の群れ」「群れを作る」，表示以群体方式行动时可说「群れで」。",
+    "usage": "",
+    "examples": [
+      {
+        "ja": "湖の近くで鳥の群れを見つけました。",
+        "jaHtml": "<ruby>湖<rt>みずうみ</rt></ruby>の<ruby>近<rt>ちか</rt></ruby>くで<ruby>鳥<rt>とり</rt></ruby>の<strong><ruby>群<rt>む</rt></ruby>れ</strong>を<ruby>見<rt>み</rt></ruby>つけました。",
+        "zh": "我在湖边发现了一群鸟。"
+      }
+    ],
+    "titleHtml": "<ruby>群<rt>む</rt></ruby>れ"
+  },
+  "lesson4_burausu": {
+    "type": "vocab",
+    "key": "lesson4_burausu",
+    "lesson": 4,
+    "order": 23,
+    "word": "ブラウス",
+    "reading": "ブラウス",
+    "partOfSpeech": "名词",
+    "partOfSpeechGroup": "noun",
+    "pitch": "②型",
+    "needsExplanation": false,
+    "meaning": "女式衬衫、罩衫；通常指面料较轻、可与裙子或裤子搭配的女性上衣。常用「ブラウスを着る」「白いブラウス」。",
+    "usage": "",
+    "examples": [
+      {
+        "ja": "白いブラウスに紺色のスカートを合わせました。",
+        "jaHtml": "<ruby>白<rt>しろ</rt></ruby>い<strong>ブラウス</strong>に<ruby>紺<rt>こん</rt></ruby><ruby>色<rt>いろ</rt></ruby>のスカートを<ruby>合<rt>あ</rt></ruby>わせました。",
+        "zh": "我用白色女式衬衫搭配了藏青色裙子。"
+      }
+    ],
+    "titleHtml": "ブラウス"
+  },
+  "lesson4_shoujiru": {
+    "type": "vocab",
+    "key": "lesson4_shoujiru",
+    "lesson": 4,
+    "order": 24,
+    "word": "生じる",
+    "reading": "しょうじる",
+    "partOfSpeech": "动词・一段・自动词",
+    "partOfSpeechGroup": "verb",
+    "pitch": "⓪型",
+    "needsExplanation": false,
+    "meaning": "产生、发生；表示问题、差异、费用或影响等从无到有地出现。语气较正式，主语用「～が」，常见「問題が生じる」「差が生じる」。",
+    "usage": "",
+    "examples": [
+      {
+        "ja": "計画を変更したため、新たな費用が生じました。",
+        "jaHtml": "<ruby>計<rt>けい</rt></ruby><ruby>画<rt>かく</rt></ruby>を<ruby>変<rt>へん</rt></ruby><ruby>更<rt>こう</rt></ruby>したため、<ruby>新<rt>あら</rt></ruby>たな<ruby>費<rt>ひ</rt></ruby><ruby>用<rt>よう</rt></ruby>が<strong><ruby>生<rt>しょう</rt></ruby>じました</strong>。",
+        "zh": "由于变更了计划，产生了新的费用。"
+      }
+    ],
+    "titleHtml": "<ruby>生<rt>しょう</rt></ruby>じる"
+  },
+  "lesson4_tsunami": {
+    "type": "vocab",
+    "key": "lesson4_tsunami",
+    "lesson": 4,
+    "order": 25,
+    "word": "津波",
+    "reading": "つなみ",
+    "partOfSpeech": "名词",
+    "partOfSpeechGroup": "noun",
+    "pitch": "⓪型",
+    "needsExplanation": false,
+    "meaning": "海啸；由海底地震、火山活动等引起的大规模海水波动。新闻和防灾信息中常见「津波が発生する」「津波警報」「津波のおそれ」。",
+    "usage": "",
+    "examples": [
+      {
+        "ja": "地震のあと、沿岸部に津波警報が出されました。",
+        "jaHtml": "<ruby>地<rt>じ</rt></ruby><ruby>震<rt>しん</rt></ruby>のあと、<ruby>沿<rt>えん</rt></ruby><ruby>岸<rt>がん</rt></ruby><ruby>部<rt>ぶ</rt></ruby>に<strong><ruby>津<rt>つ</rt></ruby><ruby>波<rt>なみ</rt></ruby></strong><ruby>警<rt>けい</rt></ruby><ruby>報<rt>ほう</rt></ruby>が<ruby>出<rt>だ</rt></ruby>されました。",
+        "zh": "地震后，沿海地区发布了海啸警报。"
+      }
+    ],
+    "titleHtml": "<ruby>津<rt>つ</rt></ruby><ruby>波<rt>なみ</rt></ruby>"
+  },
+  "lesson4_nichiya": {
+    "type": "vocab",
+    "key": "lesson4_nichiya",
+    "lesson": 4,
+    "order": 26,
+    "word": "日夜",
+    "reading": "にちや",
+    "partOfSpeech": "名词・副词",
+    "partOfSpeechGroup": "adverb",
+    "pitch": "①型",
+    "needsExplanation": false,
+    "meaning": "日夜、昼夜不停地；表示不分白天黑夜持续做某事，常用于较正式的表达。常见「日夜努力する」「日夜研究に取り組む」。",
+    "usage": "",
+    "examples": [
+      {
+        "ja": "研究者たちは新薬の開発に日夜取り組んでいます。",
+        "jaHtml": "<ruby>研<rt>けん</rt></ruby><ruby>究<rt>きゅう</rt></ruby><ruby>者<rt>しゃ</rt></ruby>たちは<ruby>新<rt>しん</rt></ruby><ruby>薬<rt>やく</rt></ruby>の<ruby>開<rt>かい</rt></ruby><ruby>発<rt>はつ</rt></ruby>に<strong><ruby>日<rt>にち</rt></ruby><ruby>夜<rt>や</rt></ruby></strong><ruby>取<rt>と</rt></ruby>り<ruby>組<rt>く</rt></ruby>んでいます。",
+        "zh": "研究人员正夜以继日地投入新药研发。"
+      }
+    ],
+    "titleHtml": "<ruby>日<rt>にち</rt></ruby><ruby>夜<rt>や</rt></ruby>"
+  },
+  "lesson4_doshakuzure": {
+    "type": "vocab",
+    "key": "lesson4_doshakuzure",
+    "lesson": 4,
+    "order": 27,
+    "word": "土砂崩れ",
+    "reading": "どしゃくずれ",
+    "partOfSpeech": "名词",
+    "partOfSpeechGroup": "noun",
+    "pitch": "④型",
+    "needsExplanation": false,
+    "meaning": "山体滑坡、土方坍塌；因暴雨、地震等导致山坡或崖面的土石突然崩落。防灾信息中常用「土砂崩れが発生する」「土砂崩れのおそれ」。",
+    "usage": "",
+    "examples": [
+      {
+        "ja": "大雨により、山道の近くで土砂崩れが発生しました。",
+        "jaHtml": "<ruby>大<rt>おお</rt></ruby><ruby>雨<rt>あめ</rt></ruby>により、<ruby>山<rt>やま</rt></ruby><ruby>道<rt>みち</rt></ruby>の<ruby>近<rt>ちか</rt></ruby>くで<strong><ruby>土<rt>ど</rt></ruby><ruby>砂<rt>しゃ</rt></ruby><ruby>崩<rt>くず</rt></ruby>れ</strong>が<ruby>発<rt>はっ</rt></ruby><ruby>生<rt>せい</rt></ruby>しました。",
+        "zh": "受暴雨影响，山路附近发生了山体滑坡。"
+      }
+    ],
+    "titleHtml": "<ruby>土<rt>ど</rt></ruby><ruby>砂<rt>しゃ</rt></ruby><ruby>崩<rt>くず</rt></ruby>れ"
+  },
+  "lesson4_miawaseru": {
+    "type": "vocab",
+    "key": "lesson4_miawaseru",
+    "lesson": 4,
+    "order": 28,
+    "word": "見合わせる",
+    "reading": "みあわせる",
+    "partOfSpeech": "动词・一段・他动词",
+    "partOfSpeechGroup": "verb",
+    "pitch": "⓪型",
+    "needsExplanation": false,
+    "meaning": "暂缓、暂停；根据天气、安全或其他条件，暂时不实施原定行动。常用「運転を見合わせる」「開催を見合わせる」。此外也可表示彼此对视。",
+    "usage": "",
+    "examples": [
+      {
+        "ja": "強風のため、列車の運転を見合わせています。",
+        "jaHtml": "<ruby>強<rt>きょう</rt></ruby><ruby>風<rt>ふう</rt></ruby>のため、<ruby>列<rt>れっ</rt></ruby><ruby>車<rt>しゃ</rt></ruby>の<ruby>運<rt>うん</rt></ruby><ruby>転<rt>てん</rt></ruby>を<strong><ruby>見<rt>み</rt></ruby><ruby>合<rt>あ</rt></ruby>わせています</strong>。",
+        "zh": "受强风影响，列车目前暂停运行。"
+      }
+    ],
+    "titleHtml": "<ruby>見<rt>み</rt></ruby><ruby>合<rt>あ</rt></ruby>わせる"
+  },
+  "lesson4_genchi": {
+    "type": "vocab",
+    "key": "lesson4_genchi",
+    "lesson": 4,
+    "order": 30,
+    "word": "現地",
+    "reading": "げんち",
+    "partOfSpeech": "名词",
+    "partOfSpeechGroup": "noun",
+    "pitch": "①型",
+    "needsExplanation": false,
+    "meaning": "现场、当地；指事件实际发生、工作实际开展或人将要前往的地点。常用「現地に到着する」「現地調査」「現地の人」。",
+    "usage": "",
+    "examples": [
+      {
+        "ja": "調査チームは現地に到着し、被害の状況を確認しました。",
+        "jaHtml": "<ruby>調<rt>ちょう</rt></ruby><ruby>査<rt>さ</rt></ruby>チームは<strong><ruby>現<rt>げん</rt></ruby><ruby>地<rt>ち</rt></ruby></strong>に<ruby>到<rt>とう</rt></ruby><ruby>着<rt>ちゃく</rt></ruby>し、<ruby>被<rt>ひ</rt></ruby><ruby>害<rt>がい</rt></ruby>の<ruby>状<rt>じょう</rt></ruby><ruby>況<rt>きょう</rt></ruby>を<ruby>確<rt>かく</rt></ruby><ruby>認<rt>にん</rt></ruby>しました。",
+        "zh": "调查组抵达现场后，确认了受灾情况。"
+      }
+    ],
+    "titleHtml": "<ruby>現<rt>げん</rt></ruby><ruby>地<rt>ち</rt></ruby>"
+  },
+  "lesson4_kabau": {
+    "type": "vocab",
+    "key": "lesson4_kabau",
+    "lesson": 4,
+    "order": 31,
+    "word": "かばう",
+    "reading": "かばう",
+    "partOfSpeech": "动词・五段・他动词",
+    "partOfSpeechGroup": "verb",
+    "pitch": "②型",
+    "needsExplanation": false,
+    "meaning": "保护、庇护；为了不让人受到攻击、责备或伤害而护着，也可表示顾及疼痛，避免让伤处承受力量。对象用「～を」，常见「子どもをかばう」「傷口をかばう」。汉字可写作「庇う」。",
+    "usage": "",
+    "examples": [
+      {
+        "ja": "けがをした足をかばいながら、ゆっくり歩きました。",
+        "jaHtml": "けがをした<ruby>足<rt>あし</rt></ruby>を<strong>かばいながら</strong>、ゆっくり<ruby>歩<rt>ある</rt></ruby>きました。",
+        "zh": "我护着受伤的腿，慢慢地走着。"
+      }
+    ],
+    "titleHtml": "かばう"
+  },
+  "lesson4_chihou": {
+    "type": "vocab",
+    "key": "lesson4_chihou",
+    "lesson": 4,
+    "order": 33,
+    "word": "地方",
+    "reading": "ちほう",
+    "partOfSpeech": "名词",
+    "partOfSpeechGroup": "noun",
+    "pitch": "②型",
+    "needsExplanation": false,
+    "meaning": "地区、地方；指一个国家或较大范围中的某一地域，常见「九州地方」「関東地方」「地方都市」。与「中央」相对时，也可指首都或中心城市以外的地区。",
+    "usage": "",
+    "examples": [
+      {
+        "ja": "この地方では、冬になると雪が多く降ります。",
+        "jaHtml": "この<strong><ruby>地<rt>ち</rt></ruby><ruby>方<rt>ほう</rt></ruby></strong>では、<ruby>冬<rt>ふゆ</rt></ruby>になると<ruby>雪<rt>ゆき</rt></ruby>が<ruby>多<rt>おお</rt></ruby>く<ruby>降<rt>ふ</rt></ruby>ります。",
+        "zh": "这个地区一到冬天就会下很多雪。"
+      }
+    ],
+    "titleHtml": "<ruby>地<rt>ち</rt></ruby><ruby>方<rt>ほう</rt></ruby>"
+  },
   "circle": {
     "type": "vocab",
     "key": "circle",
@@ -2317,6 +2633,596 @@ window.tryN2VocabData = Object.freeze({
       }
     ],
     "titleHtml": "とにかく"
+  },
+  "lesson5_sukkari": {
+    "type": "vocab",
+    "key": "lesson5_sukkari",
+    "lesson": 5,
+    "order": 13,
+    "word": "すっかり",
+    "reading": "すっかり",
+    "partOfSpeech": "副词",
+    "partOfSpeechGroup": "adverb",
+    "pitch": "③型",
+    "needsExplanation": false,
+    "meaning": "完全、彻底；表示变化或动作已经充分完成，当前状态与从前明显不同。常用「すっかり忘れる」「すっかり元気になる」，不能单纯替代表示数量全部的「全部」。",
+    "usage": "",
+    "examples": [
+      {
+        "ja": "うちの犬は体がすっかり弱って、毎日ほとんど寝たきりだ。",
+        "jaHtml": "うちの<ruby>犬<rt>いぬ</rt></ruby>は<ruby>体<rt>からだ</rt></ruby>が<strong>すっかり</strong><ruby>弱<rt>よわ</rt></ruby>って、<ruby>毎<rt>まい</rt></ruby><ruby>日<rt>にち</rt></ruby>ほとんど<ruby>寝<rt>ね</rt></ruby>たきりだ。",
+        "zh": "我家的狗身体已经完全衰弱了，每天几乎都躺着不动。"
+      }
+    ],
+    "titleHtml": "すっかり"
+  },
+  "lesson5_yowaru": {
+    "type": "vocab",
+    "key": "lesson5_yowaru",
+    "lesson": 5,
+    "order": 14,
+    "word": "弱る",
+    "reading": "よわる",
+    "partOfSpeech": "动词・五段・自动词",
+    "partOfSpeechGroup": "verb",
+    "pitch": "②型",
+    "needsExplanation": false,
+    "meaning": "衰弱、变弱；表示体力、能力或势头下降。也可用「〜に弱る」表示因难以处理的情况而为难，常见「体が弱る」「暑さで弱る」。",
+    "usage": "",
+    "examples": [
+      {
+        "ja": "うちの犬は体がすっかり弱って、毎日ほとんど寝たきりだ。",
+        "jaHtml": "うちの<ruby>犬<rt>いぬ</rt></ruby>は<ruby>体<rt>からだ</rt></ruby>がすっかり<strong><ruby>弱<rt>よわ</rt></ruby>って</strong>、<ruby>毎<rt>まい</rt></ruby><ruby>日<rt>にち</rt></ruby>ほとんど<ruby>寝<rt>ね</rt></ruby>たきりだ。",
+        "zh": "我家的狗身体已经完全衰弱了，每天几乎都躺着不动。"
+      }
+    ],
+    "titleHtml": "<ruby>弱<rt>よわ</rt></ruby>る"
+  },
+  "lesson5_kakaru": {
+    "type": "vocab",
+    "key": "lesson5_kakaru",
+    "lesson": 5,
+    "order": 15,
+    "word": "かかる",
+    "reading": "かかる",
+    "partOfSpeech": "动词・五段・自动词",
+    "partOfSpeechGroup": "verb",
+    "pitch": "②型",
+    "needsExplanation": false,
+    "meaning": "需要、花费；表示完成某事所需的时间、金钱或精力，所需内容用「時間／費用がかかる」，事项常用「〜に」。这里不表示悬挂或接电话等其他同音用法。",
+    "usage": "",
+    "examples": [
+      {
+        "ja": "新しい技術が開発されたとはいうものの、実用化にはまだ時間がかかるだろう。",
+        "jaHtml": "<ruby>新<rt>あたら</rt></ruby>しい<ruby>技<rt>ぎ</rt></ruby><ruby>術<rt>じゅつ</rt></ruby>が<ruby>開<rt>かい</rt></ruby><ruby>発<rt>はつ</rt></ruby>されたとはいうものの、<ruby>実<rt>じつ</rt></ruby><ruby>用<rt>よう</rt></ruby><ruby>化<rt>か</rt></ruby>にはまだ<ruby>時<rt>じ</rt></ruby><ruby>間<rt>かん</rt></ruby>が<strong>かかる</strong>だろう。",
+        "zh": "虽说新技术已经开发出来，但距离实用化恐怕还需要时间。"
+      }
+    ],
+    "titleHtml": "かかる"
+  },
+  "lesson5_kui": {
+    "type": "vocab",
+    "key": "lesson5_kui",
+    "lesson": 5,
+    "order": 16,
+    "word": "悔い",
+    "reading": "くい",
+    "partOfSpeech": "名词",
+    "partOfSpeechGroup": "noun",
+    "pitch": "①型",
+    "needsExplanation": false,
+    "meaning": "后悔、遗憾；指事后回想自己的行为或结果时留下的懊悔。常用「悔いが残る」「悔いはない」「悔いのないように」，比口语动词「後悔する」更常见于固定表达。",
+    "usage": "",
+    "examples": [
+      {
+        "ja": "最後まで全力を出したので、試合に負けても悔いはありません。",
+        "jaHtml": "<ruby>最<rt>さい</rt></ruby><ruby>後<rt>ご</rt></ruby>まで<ruby>全<rt>ぜん</rt></ruby><ruby>力<rt>りょく</rt></ruby>を<ruby>出<rt>だ</rt></ruby>したので、<ruby>試<rt>し</rt></ruby><ruby>合<rt>あい</rt></ruby>に<ruby>負<rt>ま</rt></ruby>けても<strong><ruby>悔<rt>く</rt></ruby>い</strong>はありません。",
+        "zh": "因为已经拼尽全力，所以即使输掉比赛也没有遗憾。"
+      }
+    ],
+    "titleHtml": "<ruby>悔<rt>く</rt></ruby>い"
+  },
+  "lesson5_shimekiri": {
+    "type": "vocab",
+    "key": "lesson5_shimekiri",
+    "lesson": 5,
+    "order": 17,
+    "word": "締め切り",
+    "reading": "しめきり",
+    "partOfSpeech": "名词",
+    "partOfSpeechGroup": "noun",
+    "pitch": "⓪型",
+    "needsExplanation": false,
+    "meaning": "截止期限；指申请、投稿、报告等停止受理或必须完成的最终时间。常用「締め切りに間に合う」「締め切りを守る」「締め切りが迫る」。",
+    "usage": "",
+    "examples": [
+      {
+        "ja": "レポートは明日が締め切りなので、遊んでいるどころではない。",
+        "jaHtml": "レポートは<ruby>明日<rt>あした</rt></ruby>が<strong><ruby>締<rt>し</rt></ruby>め<ruby>切<rt>き</rt></ruby>り</strong>なので、<ruby>遊<rt>あそ</rt></ruby>んでいるどころではない。",
+        "zh": "报告明天截止，所以现在根本不是玩的时候。"
+      }
+    ],
+    "titleHtml": "<ruby>締<rt>し</rt></ruby>め<ruby>切<rt>き</rt></ruby>り"
+  },
+  "lesson5_kiniiru": {
+    "type": "vocab",
+    "key": "lesson5_kiniiru",
+    "lesson": 5,
+    "order": 18,
+    "word": "気に入る",
+    "reading": "きにいる",
+    "partOfSpeech": "惯用表达",
+    "partOfSpeechGroup": "expression",
+    "pitch": "⓪型",
+    "needsExplanation": false,
+    "meaning": "喜欢、中意；表示看过或使用之后觉得某人、某物符合自己的喜好。常用「〜が気に入る」「気に入った〜」，与表示牵挂或介意的「気になる」不同。",
+    "usage": "",
+    "examples": [
+      {
+        "ja": "この靴はデザインが気に入って買ったものの、履く機会が全然ない。",
+        "jaHtml": "この<ruby>靴<rt>くつ</rt></ruby>はデザインが<strong><ruby>気<rt>き</rt></ruby>に<ruby>入<rt>い</rt></ruby>って</strong><ruby>買<rt>か</rt></ruby>ったものの、<ruby>履<rt>は</rt></ruby>く<ruby>機<rt>き</rt></ruby><ruby>会<rt>かい</rt></ruby>が<ruby>全<rt>ぜん</rt></ruby><ruby>然<rt>ぜん</rt></ruby>ない。",
+        "zh": "这双鞋虽然因为喜欢它的设计才买下，但完全没有机会穿。"
+      }
+    ],
+    "titleHtml": "<ruby>気<rt>き</rt></ruby>に<ruby>入<rt>い</rt></ruby>る"
+  },
+  "lesson5_imadani": {
+    "type": "vocab",
+    "key": "lesson5_imadani",
+    "lesson": 5,
+    "order": 19,
+    "word": "いまだに",
+    "reading": "いまだに",
+    "partOfSpeech": "副词",
+    "partOfSpeechGroup": "adverb",
+    "pitch": "⓪型",
+    "needsExplanation": false,
+    "meaning": "至今仍然、直到现在还；表示某种状态持续得比预想更久，常带有意外、不满或遗憾。多与否定、未完成状态搭配，汉字可写作「未だに」。",
+    "usage": "",
+    "examples": [
+      {
+        "ja": "水泳教室に通ってはいるものの、いまだに25メートルしか泳げない。",
+        "jaHtml": "<ruby>水<rt>すい</rt></ruby><ruby>泳<rt>えい</rt></ruby><ruby>教<rt>きょう</rt></ruby><ruby>室<rt>しつ</rt></ruby>に<ruby>通<rt>かよ</rt></ruby>ってはいるものの、<strong>いまだに</strong>25メートルしか<ruby>泳<rt>およ</rt></ruby>げない。",
+        "zh": "虽然一直在上游泳课，但到现在仍然只能游25米。"
+      }
+    ],
+    "titleHtml": "いまだに"
+  },
+  "lesson5_amu": {
+    "type": "vocab",
+    "key": "lesson5_amu",
+    "lesson": 5,
+    "order": 20,
+    "word": "編む",
+    "reading": "あむ",
+    "partOfSpeech": "动词・五段・他动词",
+    "partOfSpeechGroup": "verb",
+    "pitch": "①型",
+    "needsExplanation": false,
+    "meaning": "编织、编结；把线、草或头发等交叉编在一起。也可表示选取文章等编成书刊，常用「セーターを編む」「髪を編む」「詩集を編む」。",
+    "usage": "",
+    "examples": [
+      {
+        "ja": "祖母は孫のために毛糸でセーターを編んでいます。",
+        "jaHtml": "<ruby>祖<rt>そ</rt></ruby><ruby>母<rt>ぼ</rt></ruby>は<ruby>孫<rt>まご</rt></ruby>のために<ruby>毛<rt>け</rt></ruby><ruby>糸<rt>いと</rt></ruby>でセーターを<strong><ruby>編<rt>あ</rt></ruby>んでいます</strong>。",
+        "zh": "祖母正在用毛线为孙辈织毛衣。"
+      }
+    ],
+    "titleHtml": "<ruby>編<rt>あ</rt></ruby>む"
+  },
+  "lesson5_ageru_suffix": {
+    "type": "vocab",
+    "key": "lesson5_ageru_suffix",
+    "lesson": 5,
+    "order": 21,
+    "word": "あげる",
+    "reading": "あげる",
+    "partOfSpeech": "复合动词后项・构词成分",
+    "partOfSpeechGroup": "word-forming",
+    "pitch": "复合词型",
+    "needsExplanation": false,
+    "meaning": "接在动词「ます形」词干后，表示经过努力把动作彻底完成并形成成果。常见「作り上げる」「書き上げる」「編み上げる」；这里不同于表示抬高或给予的独立动词「あげる」。",
+    "usage": "",
+    "examples": [
+      {
+        "ja": "職人が一か月かけて、この作品を作り上げました。",
+        "jaHtml": "<ruby>職<rt>しょく</rt></ruby><ruby>人<rt>にん</rt></ruby>が<ruby>一<rt>いっ</rt></ruby>か<ruby>月<rt>げつ</rt></ruby>かけて、この<ruby>作<rt>さく</rt></ruby><ruby>品<rt>ひん</rt></ruby>を<ruby>作<rt>つく</rt></ruby>り<strong><ruby>上<rt>あ</rt></ruby>げました</strong>。",
+        "zh": "工匠花了一个月完成了这件作品。"
+      }
+    ],
+    "titleHtml": "あげる"
+  },
+  "lesson5_bara": {
+    "type": "vocab",
+    "key": "lesson5_bara",
+    "lesson": 5,
+    "order": 23,
+    "word": "バラ",
+    "reading": "バラ",
+    "partOfSpeech": "名词",
+    "partOfSpeechGroup": "noun",
+    "pitch": "⓪型",
+    "needsExplanation": false,
+    "meaning": "玫瑰、蔷薇；日语通常写作片假名「バラ」，汉字写作「薔薇」。常见「バラの花」「バラの花束」「バラ園」。",
+    "usage": "",
+    "examples": [
+      {
+        "ja": "ホテルの部屋には、バラの花束が置いてありました。",
+        "jaHtml": "ホテルの<ruby>部<rt>へ</rt></ruby><ruby>屋<rt>や</rt></ruby>には、<strong>バラ</strong>の<ruby>花<rt>はな</rt></ruby><ruby>束<rt>たば</rt></ruby>が<ruby>置<rt>お</rt></ruby>いてありました。",
+        "zh": "酒店房间里放着一束玫瑰花。"
+      }
+    ],
+    "titleHtml": "バラ"
+  },
+  "lesson5_concours": {
+    "type": "vocab",
+    "key": "lesson5_concours",
+    "lesson": 5,
+    "order": 24,
+    "word": "コンクール",
+    "reading": "コンクール",
+    "partOfSpeech": "名词",
+    "partOfSpeechGroup": "noun",
+    "pitch": "③型",
+    "needsExplanation": false,
+    "meaning": "竞赛、评选会；主要指音乐、美术、演讲等由评委评定优劣的比赛。常见「合唱コンクール」「ピアノコンクール」「コンクールで優勝する」。",
+    "usage": "",
+    "examples": [
+      {
+        "ja": "うちの高校が合唱コンクールで優勝しました。",
+        "jaHtml": "うちの<ruby>高<rt>こう</rt></ruby><ruby>校<rt>こう</rt></ruby>が<ruby>合<rt>がっ</rt></ruby><ruby>唱<rt>しょう</rt></ruby><strong>コンクール</strong>で<ruby>優<rt>ゆう</rt></ruby><ruby>勝<rt>しょう</rt></ruby>しました。",
+        "zh": "我们高中在合唱比赛中获得了冠军。"
+      }
+    ],
+    "titleHtml": "コンクール"
+  },
+  "lesson5_ikitsuke": {
+    "type": "vocab",
+    "key": "lesson5_ikitsuke",
+    "lesson": 5,
+    "order": 25,
+    "word": "行きつけ",
+    "reading": "いきつけ",
+    "partOfSpeech": "名词",
+    "partOfSpeechGroup": "noun",
+    "pitch": "⓪型",
+    "needsExplanation": false,
+    "meaning": "常去、经常光顾；指因为反复前往而熟悉的店铺或场所，通常以「行きつけの＋场所」使用。常见「行きつけの店」「行きつけの美容院」。",
+    "usage": "",
+    "examples": [
+      {
+        "ja": "残念なことに、行きつけの美容院が閉店してしまった。",
+        "jaHtml": "<ruby>残<rt>ざん</rt></ruby><ruby>念<rt>ねん</rt></ruby>なことに、<strong><ruby>行<rt>い</rt></ruby>きつけ</strong>の<ruby>美<rt>び</rt></ruby><ruby>容<rt>よう</rt></ruby><ruby>院<rt>いん</rt></ruby>が<ruby>閉<rt>へい</rt></ruby><ruby>店<rt>てん</rt></ruby>してしまった。",
+        "zh": "遗憾的是，我常去的那家理发店关门了。"
+      }
+    ],
+    "focusParts": [
+      {
+        "word": "つけ",
+        "reading": "つけ",
+        "partOfSpeech": "复合动词后项・构词成分",
+        "partOfSpeechGroup": "word-forming",
+        "pitch": "复合词型",
+        "needsExplanation": false,
+        "meaning": "接在部分动词「ます形」词干后，表示反复做某事而形成习惯或熟悉的状态，主要见于「行きつけ」等固定表达，不宜随意与所有动词组合。",
+        "usage": "",
+        "examples": [
+          {
+            "ja": "ここは父の行きつけの店です。",
+            "jaHtml": "ここは<ruby>父<rt>ちち</rt></ruby>の<ruby>行<rt>い</rt></ruby>き<strong>つけ</strong>の<ruby>店<rt>みせ</rt></ruby>です。",
+            "zh": "这是父亲经常光顾的店。"
+          }
+        ],
+        "titleHtml": "つけ"
+      }
+    ],
+    "titleHtml": "<ruby>行<rt>い</rt></ruby>きつけ"
+  },
+  "lesson5_doredake": {
+    "type": "vocab",
+    "key": "lesson5_doredake",
+    "lesson": 5,
+    "order": 26,
+    "word": "どれだけ",
+    "reading": "どれだけ",
+    "partOfSpeech": "副词・疑问表达",
+    "partOfSpeechGroup": "adverb",
+    "pitch": "①型",
+    "needsExplanation": false,
+    "meaning": "多少、多么；询问数量或程度，也可用于感叹，强调程度之高。与「〜ことか」搭配时表示“究竟多么……”，并非真正要求对方回答。",
+    "usage": "",
+    "examples": [
+      {
+        "ja": "この試験に合格するために、どれだけ勉強したことか。",
+        "jaHtml": "この<ruby>試<rt>し</rt></ruby><ruby>験<rt>けん</rt></ruby>に<ruby>合<rt>ごう</rt></ruby><ruby>格<rt>かく</rt></ruby>するために、<strong>どれだけ</strong><ruby>勉<rt>べん</rt></ruby><ruby>強<rt>きょう</rt></ruby>したことか。",
+        "zh": "为了通过这场考试，我不知下了多少功夫。"
+      }
+    ],
+    "titleHtml": "どれだけ"
+  },
+  "lesson5_tsugou_ga_ii": {
+    "type": "vocab",
+    "key": "lesson5_tsugou_ga_ii",
+    "lesson": 5,
+    "order": 27,
+    "word": "都合がいい",
+    "reading": "つごうがいい",
+    "partOfSpeech": "惯用表达",
+    "partOfSpeechGroup": "expression",
+    "pitch": "⓪型",
+    "needsExplanation": false,
+    "meaning": "时间或条件方便、合适；也可表示只对某一方有利。询问日程时常用礼貌形式「ご都合がいい／よろしい」，语境不同也可能带有“只顾自己方便”的负面含义。",
+    "usage": "",
+    "examples": [
+      {
+        "ja": "ご都合がよければ、明日の午後に伺います。",
+        "jaHtml": "<strong>ご<ruby>都<rt>つ</rt></ruby><ruby>合<rt>ごう</rt></ruby>がよければ</strong>、<ruby>明日<rt>あした</rt></ruby>の<ruby>午<rt>ご</rt></ruby><ruby>後<rt>ご</rt></ruby>に<ruby>伺<rt>うかが</rt></ruby>います。",
+        "zh": "如果您方便的话，我明天下午前去拜访。"
+      }
+    ],
+    "titleHtml": "<ruby>都<rt>つ</rt></ruby><ruby>合<rt>ごう</rt></ruby>がいい"
+  },
+  "lesson5_norikireru": {
+    "type": "vocab",
+    "key": "lesson5_norikireru",
+    "lesson": 5,
+    "order": 28,
+    "word": "乗り切れる",
+    "reading": "のりきれる",
+    "partOfSpeech": "动词・一段・自动词（可能形）",
+    "partOfSpeechGroup": "verb",
+    "pitch": "④型",
+    "needsExplanation": false,
+    "meaning": "能够克服、能够渡过；是「乗り切る」的可能形，表示成功挺过困难、危机或艰苦时期。常用「困難を乗り切れる」「危機を乗り切る」。",
+    "usage": "",
+    "examples": [
+      {
+        "ja": "健康でさえあれば、どんな困難も乗り切れると信じています。",
+        "jaHtml": "<ruby>健<rt>けん</rt></ruby><ruby>康<rt>こう</rt></ruby>でさえあれば、どんな<ruby>困<rt>こん</rt></ruby><ruby>難<rt>なん</rt></ruby>も<strong><ruby>乗<rt>の</rt></ruby>り<ruby>切<rt>き</rt></ruby>れる</strong>と<ruby>信<rt>しん</rt></ruby>じています。",
+        "zh": "我相信只要身体健康，任何困难都能够克服。"
+      }
+    ],
+    "titleHtml": "<ruby>乗<rt>の</rt></ruby>り<ruby>切<rt>き</rt></ruby>れる"
+  },
+  "lesson5_kekkousuru": {
+    "type": "vocab",
+    "key": "lesson5_kekkousuru",
+    "lesson": 5,
+    "order": 29,
+    "word": "欠航する",
+    "reading": "けっこうする",
+    "partOfSpeech": "名词・サ变动词・自动词",
+    "partOfSpeechGroup": "noun-verb",
+    "pitch": "⓪型",
+    "needsExplanation": false,
+    "meaning": "停航、取消航班或船班；主语通常是飞机、航班或船，常因恶劣天气等原因停止运行。常用「便が欠航する」「欠航になる」。",
+    "usage": "",
+    "examples": [
+      {
+        "ja": "大雪で飛行機が欠航してしまい、出張に行けなかった。",
+        "jaHtml": "<ruby>大<rt>おお</rt></ruby><ruby>雪<rt>ゆき</rt></ruby>で<ruby>飛<rt>ひ</rt></ruby><ruby>行<rt>こう</rt></ruby><ruby>機<rt>き</rt></ruby>が<strong><ruby>欠<rt>けっ</rt></ruby><ruby>航<rt>こう</rt></ruby>して</strong>しまい、<ruby>出<rt>しゅっ</rt></ruby><ruby>張<rt>ちょう</rt></ruby>に<ruby>行<rt>い</rt></ruby>けなかった。",
+        "zh": "飞机因大雪停航，结果没能去出差。"
+      }
+    ],
+    "titleHtml": "<ruby>欠<rt>けっ</rt></ruby><ruby>航<rt>こう</rt></ruby>する"
+  },
+  "lesson5_shinsotsu": {
+    "type": "vocab",
+    "key": "lesson5_shinsotsu",
+    "lesson": 5,
+    "order": 30,
+    "word": "新卒",
+    "reading": "しんそつ",
+    "partOfSpeech": "名词",
+    "partOfSpeechGroup": "noun",
+    "pitch": "⓪型",
+    "needsExplanation": false,
+    "meaning": "应届毕业生、应届毕业；是「新規卒業者」的简称，主要用于日本求职与招聘语境。常见「新卒採用」「新卒で入社する」，与有工作经验后求职的「中途採用」相对。",
+    "usage": "",
+    "examples": [
+      {
+        "ja": "その会社は今年、新卒を十名採用する予定です。",
+        "jaHtml": "その<ruby>会<rt>かい</rt></ruby><ruby>社<rt>しゃ</rt></ruby>は<ruby>今<rt>こん</rt></ruby><ruby>年<rt>ねん</rt></ruby>、<strong><ruby>新<rt>しん</rt></ruby><ruby>卒<rt>そつ</rt></ruby></strong>を<ruby>十<rt>じゅう</rt></ruby><ruby>名<rt>めい</rt></ruby><ruby>採<rt>さい</rt></ruby><ruby>用<rt>よう</rt></ruby>する<ruby>予<rt>よ</rt></ruby><ruby>定<rt>てい</rt></ruby>です。",
+        "zh": "那家公司今年计划录用10名应届毕业生。"
+      }
+    ],
+    "titleHtml": "<ruby>新<rt>しん</rt></ruby><ruby>卒<rt>そつ</rt></ruby>"
+  },
+  "lesson5_tani": {
+    "type": "vocab",
+    "key": "lesson5_tani",
+    "lesson": 5,
+    "order": 31,
+    "word": "単位",
+    "reading": "たんい",
+    "partOfSpeech": "名词",
+    "partOfSpeechGroup": "noun",
+    "pitch": "①型",
+    "needsExplanation": false,
+    "meaning": "单位；在学校语境中指修完课程后取得的学分。常用「単位を取る／取得する」「単位を落とす」「卒業に必要な単位」，也可表示计量或计算单位。",
+    "usage": "",
+    "examples": [
+      {
+        "ja": "必修科目の単位を落として、留年することになりました。",
+        "jaHtml": "<ruby>必<rt>ひっ</rt></ruby><ruby>修<rt>しゅう</rt></ruby><ruby>科<rt>か</rt></ruby><ruby>目<rt>もく</rt></ruby>の<strong><ruby>単<rt>たん</rt></ruby><ruby>位<rt>い</rt></ruby></strong>を<ruby>落<rt>お</rt></ruby>として、<ruby>留<rt>りゅう</rt></ruby><ruby>年<rt>ねん</rt></ruby>することになりました。",
+        "zh": "因为必修课没拿到学分，我不得不留级。"
+      }
+    ],
+    "titleHtml": "<ruby>単<rt>たん</rt></ruby><ruby>位<rt>い</rt></ruby>"
+  },
+  "lesson5_asobimawaru": {
+    "type": "vocab",
+    "key": "lesson5_asobimawaru",
+    "lesson": 5,
+    "order": 32,
+    "word": "遊びまわる",
+    "reading": "あそびまわる",
+    "partOfSpeech": "动词・五段・自动词",
+    "partOfSpeechGroup": "verb",
+    "pitch": "⑤型",
+    "needsExplanation": false,
+    "meaning": "到处玩、四处游荡玩乐；表示在多个地方持续玩耍，常带有不认真做正事或放纵玩乐的负面语气。也写作「遊び回る」。",
+    "usage": "",
+    "examples": [
+      {
+        "ja": "遊びまわったあげくに単位を落とし、留年してしまった。",
+        "jaHtml": "<strong><ruby>遊<rt>あそ</rt></ruby>びまわった</strong>あげくに<ruby>単<rt>たん</rt></ruby><ruby>位<rt>い</rt></ruby>を<ruby>落<rt>お</rt></ruby>とし、<ruby>留<rt>りゅう</rt></ruby><ruby>年<rt>ねん</rt></ruby>してしまった。",
+        "zh": "到处玩乐的结果是丢了学分，最后留级了。"
+      }
+    ],
+    "focusParts": [
+      {
+        "word": "まわる",
+        "reading": "まわる",
+        "partOfSpeech": "复合动词后项・构词成分",
+        "partOfSpeechGroup": "word-forming",
+        "pitch": "复合词型",
+        "needsExplanation": false,
+        "meaning": "接在动词「ます形」词干后，表示在多处反复、持续进行前项动作。常见「歩き回る」「探し回る」「遊び回る」，强调动作范围广或次数多。",
+        "usage": "",
+        "examples": [
+          {
+            "ja": "なくした鍵を一日中探し回りました。",
+            "jaHtml": "なくした<ruby>鍵<rt>かぎ</rt></ruby>を<ruby>一<rt>いち</rt></ruby><ruby>日<rt>にち</rt></ruby><ruby>中<rt>じゅう</rt></ruby><ruby>探<rt>さが</rt></ruby>し<strong><ruby>回<rt>まわ</rt></ruby>りました</strong>。",
+            "zh": "我找了一整天丢失的钥匙。"
+          }
+        ],
+        "titleHtml": "<ruby>回<rt>まわ</rt></ruby>る"
+      }
+    ],
+    "titleHtml": "<ruby>遊<rt>あそ</rt></ruby>びまわる"
+  },
+  "lesson5_arekore": {
+    "type": "vocab",
+    "key": "lesson5_arekore",
+    "lesson": 5,
+    "order": 33,
+    "word": "あれこれ",
+    "reading": "あれこれ",
+    "partOfSpeech": "代词・副词",
+    "partOfSpeechGroup": "adverb",
+    "pitch": "②型",
+    "needsExplanation": false,
+    "meaning": "这个那个、各种各样；不逐一列举地概括多个事物、想法或动作。可作名词使用，也可直接修饰动词，常见「あれこれ考える」「あれこれ言う」。",
+    "usage": "",
+    "examples": [
+      {
+        "ja": "客はあれこれ試着したあげく、何も買わずに帰った。",
+        "jaHtml": "<ruby>客<rt>きゃく</rt></ruby>は<strong>あれこれ</strong><ruby>試<rt>し</rt></ruby><ruby>着<rt>ちゃく</rt></ruby>したあげく、<ruby>何<rt>なに</rt></ruby>も<ruby>買<rt>か</rt></ruby>わずに<ruby>帰<rt>かえ</rt></ruby>った。",
+        "zh": "客人试穿了这个那个，最后什么也没买就回去了。"
+      }
+    ],
+    "titleHtml": "あれこれ"
+  },
+  "lesson5_rakuwosuru": {
+    "type": "vocab",
+    "key": "lesson5_rakuwosuru",
+    "lesson": 5,
+    "order": 34,
+    "word": "楽をする",
+    "reading": "らくをする",
+    "partOfSpeech": "惯用表达",
+    "partOfSpeechGroup": "expression",
+    "pitch": "②型",
+    "needsExplanation": false,
+    "meaning": "图轻松、省力气；表示避免辛苦或选择更省事的做法。根据语境既可中性地表示休息，也可批评逃避努力；不能理解为单纯“感到快乐”。",
+    "usage": "",
+    "examples": [
+      {
+        "ja": "楽をしてお金を儲けようなんて考えるものではない。",
+        "jaHtml": "<strong><ruby>楽<rt>らく</rt></ruby>をして</strong>お<ruby>金<rt>かね</rt></ruby>を<ruby>儲<rt>もう</rt></ruby>けようなんて<ruby>考<rt>かんが</rt></ruby>えるものではない。",
+        "zh": "不应该想着不劳而获、轻轻松松赚钱。"
+      }
+    ],
+    "titleHtml": "<ruby>楽<rt>らく</rt></ruby>をする"
+  },
+  "lesson5_moukeru": {
+    "type": "vocab",
+    "key": "lesson5_moukeru",
+    "lesson": 5,
+    "order": 35,
+    "word": "儲ける",
+    "reading": "もうける",
+    "partOfSpeech": "动词・一段・他动词",
+    "partOfSpeechGroup": "verb",
+    "pitch": "③型",
+    "needsExplanation": false,
+    "meaning": "赚钱、获利；通过生意、工作或交易获得利润，常用「お金を儲ける」「商売で儲ける」。自动词「儲かる」则表示生意或项目有利润。",
+    "usage": "",
+    "examples": [
+      {
+        "ja": "楽をしてお金を儲けようなんて考えるものではない。",
+        "jaHtml": "<ruby>楽<rt>らく</rt></ruby>をしてお<ruby>金<rt>かね</rt></ruby>を<strong><ruby>儲<rt>もう</rt></ruby>けよう</strong>なんて<ruby>考<rt>かんが</rt></ruby>えるものではない。",
+        "zh": "不应该想着不劳而获、轻轻松松赚钱。"
+      }
+    ],
+    "titleHtml": "<ruby>儲<rt>もう</rt></ruby>ける"
+  },
+  "lesson5_bugaisha": {
+    "type": "vocab",
+    "key": "lesson5_bugaisha",
+    "lesson": 5,
+    "order": 36,
+    "word": "部外者",
+    "reading": "ぶがいしゃ",
+    "partOfSpeech": "名词",
+    "partOfSpeechGroup": "noun",
+    "pitch": "②型",
+    "needsExplanation": false,
+    "meaning": "局外人、外部人员；指不属于某个组织、部门或事件相关范围的人。常用「部外者に話す」「部外者の立ち入りを禁止する」。",
+    "usage": "",
+    "examples": [
+      {
+        "ja": "社内の情報を部外者に話してはいけません。",
+        "jaHtml": "<ruby>社<rt>しゃ</rt></ruby><ruby>内<rt>ない</rt></ruby>の<ruby>情<rt>じょう</rt></ruby><ruby>報<rt>ほう</rt></ruby>を<strong><ruby>部<rt>ぶ</rt></ruby><ruby>外<rt>がい</rt></ruby><ruby>者<rt>しゃ</rt></ruby></strong>に<ruby>話<rt>はな</rt></ruby>してはいけません。",
+        "zh": "不能把公司内部信息告诉外部人员。"
+      }
+    ],
+    "titleHtml": "<ruby>部<rt>ぶ</rt></ruby><ruby>外<rt>がい</rt></ruby><ruby>者<rt>しゃ</rt></ruby>"
+  },
+  "lesson5_herahera": {
+    "type": "vocab",
+    "key": "lesson5_herahera",
+    "lesson": 5,
+    "order": 37,
+    "word": "へらへら",
+    "reading": "へらへら",
+    "partOfSpeech": "副词・サ变动词",
+    "partOfSpeechGroup": "adverb",
+    "pitch": "①型",
+    "needsExplanation": false,
+    "meaning": "嬉皮笑脸、轻浮地笑；形容缺乏认真态度、没有明确理由地笑，常让人觉得不真诚或不可靠。常用「へらへら笑う」「へらへらする」。",
+    "usage": "",
+    "examples": [
+      {
+        "ja": "謝るときには、へらへら笑うものではない。",
+        "jaHtml": "<ruby>謝<rt>あやま</rt></ruby>るときには、<strong>へらへら</strong><ruby>笑<rt>わら</rt></ruby>うものではない。",
+        "zh": "道歉时不应该嬉皮笑脸。"
+      }
+    ],
+    "titleHtml": "へらへら"
+  },
+  "lesson5_kigen": {
+    "type": "vocab",
+    "key": "lesson5_kigen",
+    "lesson": 5,
+    "order": 38,
+    "word": "機嫌",
+    "reading": "きげん",
+    "partOfSpeech": "名词",
+    "partOfSpeechGroup": "noun",
+    "pitch": "⓪型",
+    "needsExplanation": false,
+    "meaning": "心情、情绪；主要指从言行和表情中表现出来的心情状态。常用「機嫌がいい／悪い」「機嫌を直す」「機嫌を取る」，不同于身体状况「具合」。",
+    "usage": "",
+    "examples": [
+      {
+        "ja": "今日、課長は機嫌がいいから、休暇を頼んでみたらどうですか。",
+        "jaHtml": "<ruby>今日<rt>きょう</rt></ruby>、<ruby>課<rt>か</rt></ruby><ruby>長<rt>ちょう</rt></ruby>は<strong><ruby>機<rt>き</rt></ruby><ruby>嫌<rt>げん</rt></ruby>がいい</strong>から、<ruby>休<rt>きゅう</rt></ruby><ruby>暇<rt>か</rt></ruby>を<ruby>頼<rt>たの</rt></ruby>んでみたらどうですか。",
+        "zh": "科长今天心情不错，要不要试着请个假？"
+      }
+    ],
+    "titleHtml": "<ruby>機<rt>き</rt></ruby><ruby>嫌<rt>げん</rt></ruby>"
   },
   "toutou": {
     "type": "vocab",
@@ -2924,7 +3830,15 @@ window.tryN2VocabData = Object.freeze({
     "type": "vocab",
     "key": "tsuini",
     "lesson": 7,
+    "lessons": [
+      7,
+      4
+    ],
     "order": 17,
+    "lessonOrders": {
+      "7": 17,
+      "4": 32
+    },
     "word": "ついに",
     "reading": "ついに",
     "partOfSpeech": "副词",
@@ -3034,7 +3948,15 @@ window.tryN2VocabData = Object.freeze({
     "type": "vocab",
     "key": "kentou",
     "lesson": 7,
+    "lessons": [
+      7,
+      4
+    ],
     "order": 22,
+    "lessonOrders": {
+      "7": 22,
+      "4": 19
+    },
     "word": "検討する",
     "reading": "けんとうする",
     "partOfSpeech": "名词・サ变动词・他动词",
@@ -4422,7 +5344,15 @@ window.tryN2VocabData = Object.freeze({
     "type": "vocab",
     "key": "hit",
     "lesson": 12,
+    "lessons": [
+      12,
+      5
+    ],
     "order": 8,
+    "lessonOrders": {
+      "12": 8,
+      "5": 22
+    },
     "word": "ヒット",
     "reading": "ヒット",
     "partOfSpeech": "名词・サ变动词・自动词",

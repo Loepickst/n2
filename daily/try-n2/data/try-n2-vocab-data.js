@@ -834,7 +834,15 @@ window.tryN2VocabData = Object.freeze({
     "type": "vocab",
     "key": "lesson2_endaka",
     "lesson": 2,
+    "lessons": [
+      2,
+      7
+    ],
     "order": 25,
+    "lessonOrders": {
+      "2": 25,
+      "7": 31
+    },
     "word": "円高",
     "reading": "えんだか",
     "partOfSpeech": "名词",
@@ -3466,6 +3474,488 @@ window.tryN2VocabData = Object.freeze({
     ],
     "titleHtml": "<ruby>最<rt>さい</rt></ruby><ruby>高<rt>こう</rt></ruby>"
   },
+  "lesson6_sagaru": {
+    "type": "vocab",
+    "key": "lesson6_sagaru",
+    "lesson": 6,
+    "order": 12,
+    "word": "下がる",
+    "reading": "さがる",
+    "partOfSpeech": "动词・五段・自动词",
+    "partOfSpeechGroup": "verb",
+    "pitch": "②型",
+    "needsExplanation": false,
+    "meaning": "下降、降低；表示位置、数值、价格、评价或程度等变低。主语用「〜が」，常见「値段が下がる」「気温が下がる」「価値が下がる」；他动词是「下げる」。",
+    "usage": "",
+    "examples": [
+      {
+        "ja": "今年のリンゴは台風で傷がついたばかりに、市場価値が下がってしまった。",
+        "jaHtml": "<ruby>今年<rt>ことし</rt></ruby>のリンゴは<ruby>台<rt>たい</rt></ruby><ruby>風<rt>ふう</rt></ruby>で<ruby>傷<rt>きず</rt></ruby>がついたばかりに、<ruby>市<rt>し</rt></ruby><ruby>場<rt>じょう</rt></ruby><ruby>価<rt>か</rt></ruby><ruby>値<rt>ち</rt></ruby>が<strong><ruby>下<rt>さ</rt></ruby>がって</strong>しまった。",
+        "zh": "今年的苹果正因为被台风刮伤，市场价值下降了。"
+      }
+    ],
+    "titleHtml": "<ruby>下<rt>さ</rt></ruby>がる"
+  },
+  "lesson6_karakau": {
+    "type": "vocab",
+    "key": "lesson6_karakau",
+    "lesson": 6,
+    "order": 13,
+    "word": "からかう",
+    "reading": "からかう",
+    "partOfSpeech": "动词・五段・他动词",
+    "partOfSpeechGroup": "verb",
+    "pitch": "③型",
+    "needsExplanation": false,
+    "meaning": "戏弄、取笑；故意说话或做事逗弄别人、看对方的反应，有时会让对方难堪。对象用「人をからかう」，不能等同于单纯开朗地开玩笑「冗談を言う」。",
+    "usage": "",
+    "examples": [
+      {
+        "ja": "彼は両親が有名人であるばかりに、いつもからかわれている。",
+        "jaHtml": "<ruby>彼<rt>かれ</rt></ruby>は<ruby>両<rt>りょう</rt></ruby><ruby>親<rt>しん</rt></ruby>が<ruby>有<rt>ゆう</rt></ruby><ruby>名<rt>めい</rt></ruby><ruby>人<rt>じん</rt></ruby>であるばかりに、いつも<strong>からかわれて</strong>いる。",
+        "zh": "就因为父母是名人，他总是被别人取笑。"
+      }
+    ],
+    "titleHtml": "からかう"
+  },
+  "lesson6_kawaisou": {
+    "type": "vocab",
+    "key": "lesson6_kawaisou",
+    "lesson": 6,
+    "order": 14,
+    "word": "かわいそう",
+    "reading": "かわいそう",
+    "partOfSpeech": "な形容词",
+    "partOfSpeechGroup": "na-adjective",
+    "pitch": "④型",
+    "needsExplanation": false,
+    "meaning": "可怜、令人同情；用于看到他人的不幸或困难而产生同情，常用「かわいそうだ」「かわいそうな人」。不要与表示可爱、讨人喜欢的「かわいい」混淆。",
+    "usage": "",
+    "examples": [
+      {
+        "ja": "彼はいつもからかわれていて、かわいそうだ。",
+        "jaHtml": "<ruby>彼<rt>かれ</rt></ruby>はいつもからかわれていて、<strong>かわいそうだ</strong>。",
+        "zh": "他总是被别人取笑，真可怜。"
+      }
+    ],
+    "titleHtml": "かわいそう"
+  },
+  "lesson6_shinpan": {
+    "type": "vocab",
+    "key": "lesson6_shinpan",
+    "lesson": 6,
+    "order": 15,
+    "word": "審判",
+    "reading": "しんぱん",
+    "partOfSpeech": "名词・サ变动词",
+    "partOfSpeechGroup": "noun-verb",
+    "pitch": "⓪型",
+    "needsExplanation": false,
+    "meaning": "裁判、判定；也指体育比赛中作出判定的裁判员。常见「審判を下す」「審判を務める」「審判の判定」，具体指法律程序时语气较正式。",
+    "usage": "",
+    "examples": [
+      {
+        "ja": "選手は審判の判定に抗議しました。",
+        "jaHtml": "<ruby>選<rt>せん</rt></ruby><ruby>手<rt>しゅ</rt></ruby>は<strong><ruby>審<rt>しん</rt></ruby><ruby>判<rt>ぱん</rt></ruby></strong>の<ruby>判<rt>はん</rt></ruby><ruby>定<rt>てい</rt></ruby>に<ruby>抗<rt>こう</rt></ruby><ruby>議<rt>ぎ</rt></ruby>しました。",
+        "zh": "选手对裁判的判罚提出了抗议。"
+      }
+    ],
+    "titleHtml": "<ruby>審<rt>しん</rt></ruby><ruby>判<rt>ぱん</rt></ruby>"
+  },
+  "lesson6_toriaezu": {
+    "type": "vocab",
+    "key": "lesson6_toriaezu",
+    "lesson": 6,
+    "order": 16,
+    "word": "とりあえず",
+    "reading": "とりあえず",
+    "partOfSpeech": "副词",
+    "partOfSpeechGroup": "adverb",
+    "pitch": "③型",
+    "needsExplanation": false,
+    "meaning": "暂且、先；表示其他事情稍后再考虑，当前先采取最低限度或最优先的行动。常用「とりあえず〜する」，带有临时处理的语感，不等于已经彻底解决。",
+    "usage": "",
+    "examples": [
+      {
+        "ja": "かばんは、とりあえずぼくのを使ったらどうですか。",
+        "jaHtml": "かばんは、<strong>とりあえず</strong>ぼくのを<ruby>使<rt>つか</rt></ruby>ったらどうですか。",
+        "zh": "包的话，要不暂时先用我的？"
+      }
+    ],
+    "titleHtml": "とりあえず"
+  },
+  "lesson6_sewazuki": {
+    "type": "vocab",
+    "key": "lesson6_sewazuki",
+    "lesson": 6,
+    "order": 17,
+    "word": "世話好き",
+    "reading": "せわずき",
+    "partOfSpeech": "名词・な形容词",
+    "partOfSpeechGroup": "na-adjective",
+    "pitch": "⓪型",
+    "needsExplanation": false,
+    "meaning": "热心照顾别人、爱帮助人；形容喜欢主动关照、操心他人事务的人。常用「世話好きな人」，通常是正面评价，但某些语境也可能暗含管得太多。",
+    "usage": "",
+    "examples": [
+      {
+        "ja": "田舎には、親切で世話好きな人が多いという印象があります。",
+        "jaHtml": "<ruby>田舎<rt>いなか</rt></ruby>には、<ruby>親<rt>しん</rt></ruby><ruby>切<rt>せつ</rt></ruby>で<strong><ruby>世<rt>せ</rt></ruby><ruby>話<rt>わ</rt></ruby><ruby>好<rt>ず</rt></ruby>きな</strong><ruby>人<rt>ひと</rt></ruby>が<ruby>多<rt>おお</rt></ruby>いという<ruby>印<rt>いん</rt></ruby><ruby>象<rt>しょう</rt></ruby>があります。",
+        "zh": "我印象中，乡下有很多亲切又热心照顾别人的人。"
+      }
+    ],
+    "focusParts": [
+      {
+        "word": "〜好き",
+        "reading": "〜ずき",
+        "partOfSpeech": "接尾语・构词成分",
+        "partOfSpeechGroup": "word-forming",
+        "pitch": "复合词型",
+        "needsExplanation": false,
+        "meaning": "接在名词后，表示喜欢前项事物，或喜欢从事与前项有关的行为，也可指具有这种倾向的人。常见「世話好き」「話し好き」「酒好き」；在复合词中通常读作「ずき」。",
+        "usage": "",
+        "examples": [
+          {
+            "ja": "姉は大の映画好きで、毎週映画館に通っています。",
+            "jaHtml": "<ruby>姉<rt>あね</rt></ruby>は<ruby>大<rt>だい</rt></ruby>の<ruby>映<rt>えい</rt></ruby><ruby>画<rt>が</rt></ruby><strong><ruby>好<rt>ず</rt></ruby>き</strong>で、<ruby>毎<rt>まい</rt></ruby><ruby>週<rt>しゅう</rt></ruby><ruby>映<rt>えい</rt></ruby><ruby>画<rt>が</rt></ruby><ruby>館<rt>かん</rt></ruby>に<ruby>通<rt>かよ</rt></ruby>っています。",
+            "zh": "姐姐是个十足的电影爱好者，每周都会去电影院。"
+          }
+        ],
+        "titleHtml": "〜<ruby>好<rt>ず</rt></ruby>き"
+      }
+    ],
+    "titleHtml": "<ruby>世<rt>せ</rt></ruby><ruby>話<rt>わ</rt></ruby><ruby>好<rt>ず</rt></ruby>き"
+  },
+  "lesson6_fushin": {
+    "type": "vocab",
+    "key": "lesson6_fushin",
+    "lesson": 6,
+    "order": 18,
+    "word": "不振",
+    "reading": "ふしん",
+    "partOfSpeech": "名词・な形容词",
+    "partOfSpeechGroup": "na-adjective",
+    "pitch": "⓪型",
+    "needsExplanation": false,
+    "meaning": "不振、低迷；表示业绩、成绩、销售或身体状态没有达到平时或预期水平。常用「業績不振」「販売不振」「成績が不振だ」，不表示单纯的一次失败。",
+    "usage": "",
+    "examples": [
+      {
+        "ja": "会社が業績不振で、給料が30パーセントカットされました。",
+        "jaHtml": "<ruby>会<rt>かい</rt></ruby><ruby>社<rt>しゃ</rt></ruby>が<ruby>業<rt>ぎょう</rt></ruby><ruby>績<rt>せき</rt></ruby><strong><ruby>不<rt>ふ</rt></ruby><ruby>振<rt>しん</rt></ruby></strong>で、<ruby>給<rt>きゅう</rt></ruby><ruby>料<rt>りょう</rt></ruby>が30パーセントカットされました。",
+        "zh": "公司业绩低迷，工资被削减了30%。"
+      }
+    ],
+    "titleHtml": "<ruby>不<rt>ふ</rt></ruby><ruby>振<rt>しん</rt></ruby>"
+  },
+  "lesson6_cut": {
+    "type": "vocab",
+    "key": "lesson6_cut",
+    "lesson": 6,
+    "order": 19,
+    "word": "カット",
+    "reading": "カット",
+    "partOfSpeech": "名词・サ变动词・他动词",
+    "partOfSpeechGroup": "noun-verb",
+    "pitch": "①型",
+    "needsExplanation": false,
+    "meaning": "削减、删减或剪切；可表示降低工资和预算、删去内容，也可指理发。常用「給料をカットする」「予算をカットする」「髪をカットする」。",
+    "usage": "",
+    "examples": [
+      {
+        "ja": "会社が業績不振で、給料が30パーセントカットされました。",
+        "jaHtml": "<ruby>会<rt>かい</rt></ruby><ruby>社<rt>しゃ</rt></ruby>が<ruby>業<rt>ぎょう</rt></ruby><ruby>績<rt>せき</rt></ruby><ruby>不<rt>ふ</rt></ruby><ruby>振<rt>しん</rt></ruby>で、<ruby>給<rt>きゅう</rt></ruby><ruby>料<rt>りょう</rt></ruby>が30パーセント<strong>カットされました</strong>。",
+        "zh": "公司业绩低迷，工资被削减了30%。"
+      }
+    ],
+    "titleHtml": "カット"
+  },
+  "lesson6_kotowaru": {
+    "type": "vocab",
+    "key": "lesson6_kotowaru",
+    "lesson": 6,
+    "order": 20,
+    "word": "断る",
+    "reading": "ことわる",
+    "partOfSpeech": "动词・五段・他动词",
+    "partOfSpeechGroup": "verb",
+    "pitch": "③型",
+    "needsExplanation": false,
+    "meaning": "拒绝、谢绝；明确表示不能接受请求、邀请或提议。也可表示事先说明并取得对方同意，常用「誘いを断る」「きっぱり断る」「前もって断る」。",
+    "usage": "",
+    "examples": [
+      {
+        "ja": "お金を貸してほしいと頼まれましたが、きっぱり断りました。",
+        "jaHtml": "お<ruby>金<rt>かね</rt></ruby>を<ruby>貸<rt>か</rt></ruby>してほしいと<ruby>頼<rt>たの</rt></ruby>まれましたが、きっぱり<strong><ruby>断<rt>ことわ</rt></ruby>りました</strong>。",
+        "zh": "对方请求我借钱，但我明确拒绝了。"
+      }
+    ],
+    "titleHtml": "<ruby>断<rt>ことわ</rt></ruby>る"
+  },
+  "lesson6_fukuro": {
+    "type": "vocab",
+    "key": "lesson6_fukuro",
+    "lesson": 6,
+    "order": 21,
+    "word": "袋",
+    "reading": "ふくろ",
+    "partOfSpeech": "名词",
+    "partOfSpeechGroup": "noun",
+    "pitch": "③型",
+    "needsExplanation": false,
+    "meaning": "袋子、口袋；指用纸、塑料或布等制成，用来装东西的容器。常见「袋に入れる」「紙袋」「ごみ袋」，作量词时可表示袋装物的数量。",
+    "usage": "",
+    "examples": [
+      {
+        "ja": "商品を一つずつ袋に入れてください。",
+        "jaHtml": "<ruby>商<rt>しょう</rt></ruby><ruby>品<rt>ひん</rt></ruby>を<ruby>一<rt>ひと</rt></ruby>つずつ<strong><ruby>袋<rt>ふくろ</rt></ruby></strong>に<ruby>入<rt>い</rt></ruby>れてください。",
+        "zh": "请把商品逐个装进袋子里。"
+      }
+    ],
+    "titleHtml": "<ruby>袋<rt>ふくろ</rt></ruby>"
+  },
+  "lesson6_tondemonai": {
+    "type": "vocab",
+    "key": "lesson6_tondemonai",
+    "lesson": 6,
+    "order": 22,
+    "word": "とんでもない",
+    "reading": "とんでもない",
+    "partOfSpeech": "い形容词・固定表达",
+    "partOfSpeechGroup": "i-adjective",
+    "pitch": "⑤型",
+    "needsExplanation": false,
+    "meaning": "荒唐、出乎意料、绝不可能；可强烈否定对方的说法，也可单独回应感谢或道歉，表示“哪里的话”。具体褒贬取决于语境，常见「とんでもない話」「とんでもない誤解」。",
+    "usage": "",
+    "examples": [
+      {
+        "ja": "私が社長を批判したなんて、とんでもない。それは誤解です。",
+        "jaHtml": "<ruby>私<rt>わたし</rt></ruby>が<ruby>社<rt>しゃ</rt></ruby><ruby>長<rt>ちょう</rt></ruby>を<ruby>批<rt>ひ</rt></ruby><ruby>判<rt>はん</rt></ruby>したなんて、<strong>とんでもない</strong>。それは<ruby>誤<rt>ご</rt></ruby><ruby>解<rt>かい</rt></ruby>です。",
+        "zh": "说我批评了社长，绝没有这回事。那是误会。"
+      }
+    ],
+    "titleHtml": "とんでもない"
+  },
+  "lesson6_mazushii": {
+    "type": "vocab",
+    "key": "lesson6_mazushii",
+    "lesson": 6,
+    "order": 23,
+    "word": "貧しい",
+    "reading": "まずしい",
+    "partOfSpeech": "い形容词",
+    "partOfSpeechGroup": "i-adjective",
+    "pitch": "③型",
+    "needsExplanation": false,
+    "meaning": "贫穷、贫乏；可表示经济上缺少钱和物资，也可形容知识、经验、想象力等不足。常见「貧しい生活」「資源が貧しい」「想像力が貧しい」。",
+    "usage": "",
+    "examples": [
+      {
+        "ja": "貧しくても、家族が仲よく暮らせるのが幸せというものです。",
+        "jaHtml": "<strong><ruby>貧<rt>まず</rt></ruby>しくても</strong>、<ruby>家<rt>か</rt></ruby><ruby>族<rt>ぞく</rt></ruby>が<ruby>仲<rt>なか</rt></ruby>よく<ruby>暮<rt>く</rt></ruby>らせるのが<ruby>幸<rt>しあわ</rt></ruby>せというものです。",
+        "zh": "即使贫穷，一家人能够和睦生活才称得上幸福。"
+      }
+    ],
+    "titleHtml": "<ruby>貧<rt>まず</rt></ruby>しい"
+  },
+  "lesson6_shikaru": {
+    "type": "vocab",
+    "key": "lesson6_shikaru",
+    "lesson": 6,
+    "order": 24,
+    "word": "叱る",
+    "reading": "しかる",
+    "partOfSpeech": "动词・五段・他动词",
+    "partOfSpeechGroup": "verb",
+    "pitch": "⓪型",
+    "needsExplanation": false,
+    "meaning": "训斥、责备；针对对方不当的行为严厉指出问题，通常带有教育或纠正的目的。对象用「人を叱る」；「怒る」更侧重说话人自身生气。",
+    "usage": "",
+    "examples": [
+      {
+        "ja": "先生は宿題を忘れた学生を厳しく叱りました。",
+        "jaHtml": "<ruby>先<rt>せん</rt></ruby><ruby>生<rt>せい</rt></ruby>は<ruby>宿<rt>しゅく</rt></ruby><ruby>題<rt>だい</rt></ruby>を<ruby>忘<rt>わす</rt></ruby>れた<ruby>学<rt>がく</rt></ruby><ruby>生<rt>せい</rt></ruby>を<ruby>厳<rt>きび</rt></ruby>しく<strong><ruby>叱<rt>しか</rt></ruby>りました</strong>。",
+        "zh": "老师严厉批评了忘记写作业的学生。"
+      }
+    ],
+    "titleHtml": "<ruby>叱<rt>しか</rt></ruby>る"
+  },
+  "lesson6_nasakenai": {
+    "type": "vocab",
+    "key": "lesson6_nasakenai",
+    "lesson": 6,
+    "order": 25,
+    "word": "情けない",
+    "reading": "なさけない",
+    "partOfSpeech": "い形容词",
+    "partOfSpeechGroup": "i-adjective",
+    "pitch": "④型",
+    "needsExplanation": false,
+    "meaning": "可悲、没出息、令人失望；表示某人的表现不争气或事情糟糕得让人羞愧、失望。既可评价别人，也常用于自责，如「自分が情けない」。",
+    "usage": "",
+    "examples": [
+      {
+        "ja": "自分の失敗を人のせいにするなんて、情けない。",
+        "jaHtml": "<ruby>自<rt>じ</rt></ruby><ruby>分<rt>ぶん</rt></ruby>の<ruby>失<rt>しっ</rt></ruby><ruby>敗<rt>ぱい</rt></ruby>を<ruby>人<rt>ひと</rt></ruby>のせいにするなんて、<strong><ruby>情<rt>なさ</rt></ruby>けない</strong>。",
+        "zh": "把自己的失败归咎于别人，真没出息。"
+      }
+    ],
+    "titleHtml": "<ruby>情<rt>なさ</rt></ruby>けない"
+  },
+  "lesson6_shitekisuru": {
+    "type": "vocab",
+    "key": "lesson6_shitekisuru",
+    "lesson": 6,
+    "order": 26,
+    "word": "指摘する",
+    "reading": "してきする",
+    "partOfSpeech": "名词・サ变动词・他动词",
+    "partOfSpeechGroup": "noun-verb",
+    "pitch": "⓪型",
+    "needsExplanation": false,
+    "meaning": "指出、指摘；明确指出问题、错误或值得注意的地方。对象用「問題点／誤りを指摘する」，也常用「〜と指摘する」引出被指出的内容。",
+    "usage": "",
+    "examples": [
+      {
+        "ja": "親友であればこそ、お互いの欠点を指摘し合えるのです。",
+        "jaHtml": "<ruby>親<rt>しん</rt></ruby><ruby>友<rt>ゆう</rt></ruby>であればこそ、お<ruby>互<rt>たが</rt></ruby>いの<ruby>欠<rt>けっ</rt></ruby><ruby>点<rt>てん</rt></ruby>を<strong><ruby>指<rt>し</rt></ruby><ruby>摘<rt>てき</rt></ruby>し<ruby>合<rt>あ</rt></ruby>える</strong>のです。",
+        "zh": "正因为是挚友，才能互相指出对方的缺点。"
+      }
+    ],
+    "titleHtml": "<ruby>指<rt>し</rt></ruby><ruby>摘<rt>てき</rt></ruby>する"
+  },
+  "lesson6_hade": {
+    "type": "vocab",
+    "key": "lesson6_hade",
+    "lesson": 6,
+    "order": 27,
+    "word": "派手",
+    "reading": "はで",
+    "partOfSpeech": "名词・な形容词",
+    "partOfSpeechGroup": "na-adjective",
+    "pitch": "②型",
+    "needsExplanation": false,
+    "meaning": "华丽、显眼、夸张；形容颜色、服装、妆容或行为引人注目。常见「派手な服」「派手に宣伝する」，反义词是朴素低调的「地味」。",
+    "usage": "",
+    "examples": [
+      {
+        "ja": "このメイクは少し派手ですが、パーティーには合っています。",
+        "jaHtml": "このメイクは<ruby>少<rt>すこ</rt></ruby>し<strong><ruby>派<rt>は</rt></ruby><ruby>手<rt>で</rt></ruby></strong>ですが、パーティーには<ruby>合<rt>あ</rt></ruby>っています。",
+        "zh": "这个妆容虽然有点艳，但很适合派对。"
+      }
+    ],
+    "titleHtml": "<ruby>派<rt>は</rt></ruby><ruby>手<rt>で</rt></ruby>"
+  },
+  "lesson6_hayaru": {
+    "type": "vocab",
+    "key": "lesson6_hayaru",
+    "lesson": 6,
+    "order": 28,
+    "word": "流行る",
+    "reading": "はやる",
+    "partOfSpeech": "动词・五段・自动词",
+    "partOfSpeechGroup": "verb",
+    "pitch": "②型",
+    "needsExplanation": false,
+    "meaning": "流行、盛行；表示商品、时尚或表达方式在很多人之间受到欢迎，也可表示疾病传播。主语用「〜が」，常见「若者の間で流行る」「風邪が流行る」。",
+    "usage": "",
+    "examples": [
+      {
+        "ja": "この歌は若者の間で流行っています。",
+        "jaHtml": "この<ruby>歌<rt>うた</rt></ruby>は<ruby>若<rt>わか</rt></ruby><ruby>者<rt>もの</rt></ruby>の<ruby>間<rt>あいだ</rt></ruby>で<strong><ruby>流<rt>は</rt></ruby><ruby>行<rt>や</rt></ruby>っています</strong>。",
+        "zh": "这首歌正在年轻人中流行。"
+      }
+    ],
+    "titleHtml": "<ruby>流<rt>は</rt></ruby><ruby>行<rt>や</rt></ruby>る"
+  },
+  "lesson6_kaoiro": {
+    "type": "vocab",
+    "key": "lesson6_kaoiro",
+    "lesson": 6,
+    "order": 29,
+    "word": "顔色",
+    "reading": "かおいろ",
+    "partOfSpeech": "名词",
+    "partOfSpeechGroup": "noun",
+    "pitch": "⓪型",
+    "needsExplanation": false,
+    "meaning": "脸色、气色；可从面部颜色判断健康或情绪，常用「顔色がいい／悪い」。在「顔色をうかがう」中则表示观察他人的神情和态度。",
+    "usage": "",
+    "examples": [
+      {
+        "ja": "顔色が悪いですよ。今日は早退したらどうですか。",
+        "jaHtml": "<strong><ruby>顔<rt>かお</rt></ruby><ruby>色<rt>いろ</rt></ruby></strong>が<ruby>悪<rt>わる</rt></ruby>いですよ。<ruby>今日<rt>きょう</rt></ruby>は<ruby>早<rt>そう</rt></ruby><ruby>退<rt>たい</rt></ruby>したらどうですか。",
+        "zh": "你的脸色不太好，今天要不要早退？"
+      }
+    ],
+    "titleHtml": "<ruby>顔<rt>かお</rt></ruby><ruby>色<rt>いろ</rt></ruby>"
+  },
+  "lesson6_ogoru": {
+    "type": "vocab",
+    "key": "lesson6_ogoru",
+    "lesson": 6,
+    "order": 30,
+    "word": "おごる",
+    "reading": "おごる",
+    "partOfSpeech": "动词・五段・他动词",
+    "partOfSpeechGroup": "verb",
+    "pitch": "⓪型",
+    "needsExplanation": false,
+    "meaning": "请客、替别人付钱；常用于餐饮场景，对象用「人に」，所请的东西用「食事を」。汉字可写作「奢る」；不要与表示骄傲自大的同音词「驕る」混淆。",
+    "usage": "",
+    "examples": [
+      {
+        "ja": "今日は私がおごるよ。好きなものを注文してください。",
+        "jaHtml": "<ruby>今日<rt>きょう</rt></ruby>は<ruby>私<rt>わたし</rt></ruby>が<strong>おごる</strong>よ。<ruby>好<rt>す</rt></ruby>きなものを<ruby>注<rt>ちゅう</rt></ruby><ruby>文<rt>もん</rt></ruby>してください。",
+        "zh": "今天我请客，请点你喜欢的东西。"
+      }
+    ],
+    "titleHtml": "おごる"
+  },
+  "lesson6_futowaku": {
+    "type": "vocab",
+    "key": "lesson6_futowaku",
+    "lesson": 6,
+    "order": 31,
+    "word": "太枠",
+    "reading": "ふとわく",
+    "partOfSpeech": "名词",
+    "partOfSpeechGroup": "noun",
+    "pitch": "⓪型",
+    "needsExplanation": false,
+    "meaning": "粗线框、粗边框；指表格或申请表中用较粗线条围出的填写区域。常用于书面说明，如「太枠内に記入する」「太枠で囲む」。",
+    "usage": "",
+    "examples": [
+      {
+        "ja": "申込書の太枠内のみご記入ください。",
+        "jaHtml": "<ruby>申<rt>もうし</rt></ruby><ruby>込<rt>こみ</rt></ruby><ruby>書<rt>しょ</rt></ruby>の<strong><ruby>太<rt>ふと</rt></ruby><ruby>枠<rt>わく</rt></ruby></strong><ruby>内<rt>ない</rt></ruby>のみご<ruby>記<rt>き</rt></ruby><ruby>入<rt>にゅう</rt></ruby>ください。",
+        "zh": "请只填写申请表粗线框以内的部分。"
+      }
+    ],
+    "titleHtml": "<ruby>太<rt>ふと</rt></ruby><ruby>枠<rt>わく</rt></ruby>"
+  },
+  "lesson6_munewoharu": {
+    "type": "vocab",
+    "key": "lesson6_munewoharu",
+    "lesson": 6,
+    "order": 32,
+    "word": "胸を張る",
+    "reading": "むねをはる",
+    "partOfSpeech": "惯用表达",
+    "partOfSpeechGroup": "expression",
+    "pitch": "②型",
+    "needsExplanation": false,
+    "meaning": "挺起胸膛；既可指身体姿势，也常比喻充满自信或自豪、堂堂正正。常用「胸を張って言う」「胸を張れる仕事」，并不等同于傲慢自大。",
+    "usage": "",
+    "examples": [
+      {
+        "ja": "努力して合格したのだから、胸を張っていいですよ。",
+        "jaHtml": "<ruby>努<rt>ど</rt></ruby><ruby>力<rt>りょく</rt></ruby>して<ruby>合<rt>ごう</rt></ruby><ruby>格<rt>かく</rt></ruby>したのだから、<strong><ruby>胸<rt>むね</rt></ruby>を<ruby>張<rt>は</rt></ruby>って</strong>いいですよ。",
+        "zh": "你是靠努力通过的，可以自豪地挺起胸膛。"
+      }
+    ],
+    "titleHtml": "<ruby>胸<rt>むね</rt></ruby>を<ruby>張<rt>は</rt></ruby>る"
+  },
   "ookami": {
     "type": "vocab",
     "key": "ookami",
@@ -3995,6 +4485,715 @@ window.tryN2VocabData = Object.freeze({
       }
     ],
     "titleHtml": "<ruby>慎<rt>しん</rt></ruby><ruby>重<rt>ちょう</rt></ruby>"
+  },
+  "lesson7_kudaranai": {
+    "type": "vocab",
+    "key": "lesson7_kudaranai",
+    "lesson": 7,
+    "order": 24,
+    "word": "くだらない",
+    "reading": "くだらない",
+    "partOfSpeech": "い形容词",
+    "partOfSpeechGroup": "i-adjective",
+    "pitch": "④型",
+    "needsExplanation": false,
+    "meaning": "无聊、无价值、微不足道；用于评价话题、玩笑、争论或事情没有认真对待的价值，也可表示内容荒唐。语气较直接，对人使用时容易显得失礼。",
+    "usage": "",
+    "examples": [
+      {
+        "ja": "くだらないうわさに時間を使うより、事実を確認したほうがいい。",
+        "jaHtml": "<strong>くだらない</strong>うわさに<ruby>時間<rt>じかん</rt></ruby>を<ruby>使<rt>つか</rt></ruby>うより、<ruby>事実<rt>じじつ</rt></ruby>を<ruby>確認<rt>かくにん</rt></ruby>したほうがいい。",
+        "zh": "与其把时间浪费在无聊的传闻上，不如先确认事实。"
+      }
+    ],
+    "focusParts": [],
+    "titleHtml": "くだらない"
+  },
+  "lesson7_tekinin": {
+    "type": "vocab",
+    "key": "lesson7_tekinin",
+    "lesson": 7,
+    "order": 25,
+    "word": "適任",
+    "reading": "てきにん",
+    "partOfSpeech": "名词・な形容词",
+    "partOfSpeechGroup": "na-adjective",
+    "pitch": "⓪型",
+    "needsExplanation": false,
+    "meaning": "胜任、适合担任某项职务；强调某人的能力、经验或性格与职位要求相符。常用「〜に適任だ」「適任者を選ぶ」。",
+    "usage": "",
+    "examples": [
+      {
+        "ja": "新しい支店の責任者には、経験豊富な田中さんが適任だ。",
+        "jaHtml": "<ruby>新<rt>あたら</rt></ruby>しい<ruby>支店<rt>してん</rt></ruby>の<ruby>責任者<rt>せきにんしゃ</rt></ruby>には、<ruby>経験豊富<rt>けいけんほうふ</rt></ruby>な<ruby>田中<rt>たなか</rt></ruby>さんが<strong><ruby>適任<rt>てきにん</rt></ruby></strong>だ。",
+        "zh": "担任新分店的负责人，经验丰富的田中先生最合适。"
+      }
+    ],
+    "focusParts": [],
+    "titleHtml": "<ruby>適任<rt>てきにん</rt></ruby>"
+  },
+  "lesson7_sorenari": {
+    "type": "vocab",
+    "key": "lesson7_sorenari",
+    "lesson": 7,
+    "order": 26,
+    "word": "それなり",
+    "reading": "それなり",
+    "partOfSpeech": "名词・副词",
+    "partOfSpeechGroup": "adverb",
+    "pitch": "⓪型",
+    "needsExplanation": false,
+    "meaning": "与其情况相称、达到相应程度；表示虽未必十分出色，但按照现有条件也有一定成果。常用「それなりに」「それなりの理由／価値」。",
+    "usage": "",
+    "examples": [
+      {
+        "ja": "古い機種でも、それなりに工夫すれば十分使える。",
+        "jaHtml": "<ruby>古<rt>ふる</rt></ruby>い<ruby>機種<rt>きしゅ</rt></ruby>でも、<strong>それなりに</strong><ruby>工夫<rt>くふう</rt></ruby>すれば<ruby>十分<rt>じゅうぶん</rt></ruby><ruby>使<rt>つか</rt></ruby>える。",
+        "zh": "即使是旧机型，只要做些相应的改进，也完全可以使用。"
+      }
+    ],
+    "focusParts": [],
+    "titleHtml": "それなり"
+  },
+  "lesson7_reasonable": {
+    "type": "vocab",
+    "key": "lesson7_reasonable",
+    "lesson": 7,
+    "order": 27,
+    "word": "リーズナブル",
+    "reading": "リーズナブル",
+    "partOfSpeech": "な形容词",
+    "partOfSpeechGroup": "na-adjective",
+    "pitch": "①型",
+    "needsExplanation": false,
+    "meaning": "价格合理、划算；日语中主要评价价格与质量或服务相称，并非英语 reasonable 所有“合理”含义都能直接替换。常用「リーズナブルな価格」。",
+    "usage": "",
+    "examples": [
+      {
+        "ja": "駅に近いのに料金がリーズナブルなので、このホテルは人気がある。",
+        "jaHtml": "<ruby>駅<rt>えき</rt></ruby>に<ruby>近<rt>ちか</rt></ruby>いのに<ruby>料金<rt>りょうきん</rt></ruby>が<strong>リーズナブル</strong>なので、このホテルは<ruby>人気<rt>にんき</rt></ruby>がある。",
+        "zh": "这家酒店离车站很近，价格又合理，因此很受欢迎。"
+      }
+    ],
+    "focusParts": [],
+    "titleHtml": "リーズナブル"
+  },
+  "lesson7_taishita": {
+    "type": "vocab",
+    "key": "lesson7_taishita",
+    "lesson": 7,
+    "order": 28,
+    "word": "たいした",
+    "reading": "たいした",
+    "partOfSpeech": "连体词",
+    "partOfSpeechGroup": "adnominal",
+    "pitch": "①型",
+    "needsExplanation": false,
+    "meaning": "了不起的、重大的；直接用于肯定句时表示程度非同一般，更常与否定表达搭配成「たいした〜ではない」，表示“不是什么大不了的……”。只修饰名词。",
+    "usage": "",
+    "examples": [
+      {
+        "ja": "たいしたけがではありませんが、今日は安静にしてください。",
+        "jaHtml": "<strong>たいした</strong>けがではありませんが、<ruby>今日<rt>きょう</rt></ruby>は<ruby>安静<rt>あんせい</rt></ruby>にしてください。",
+        "zh": "伤得并不严重，不过今天请好好休息。"
+      }
+    ],
+    "focusParts": [],
+    "titleHtml": "たいした"
+  },
+  "lesson7_yoin": {
+    "type": "vocab",
+    "key": "lesson7_yoin",
+    "lesson": 7,
+    "order": 30,
+    "word": "要因",
+    "reading": "よういん",
+    "partOfSpeech": "名词",
+    "partOfSpeechGroup": "noun",
+    "pitch": "⓪型",
+    "needsExplanation": false,
+    "meaning": "主要因素、形成某种结果的原因之一；常用于分析问题或现象，语气比一般的「原因」更书面，常用「〜の要因」「要因を分析する」。",
+    "usage": "",
+    "examples": [
+      {
+        "ja": "睡眠不足は集中力が低下する大きな要因の一つだ。",
+        "jaHtml": "<ruby>睡眠不足<rt>すいみんぶそく</rt></ruby>は<ruby>集中力<rt>しゅうちゅうりょく</rt></ruby>が<ruby>低下<rt>ていか</rt></ruby>する<ruby>大<rt>おお</rt></ruby>きな<strong><ruby>要因<rt>よういん</rt></ruby></strong>の<ruby>一<rt>ひと</rt></ruby>つだ。",
+        "zh": "睡眠不足是导致注意力下降的重要因素之一。"
+      }
+    ],
+    "focusParts": [],
+    "titleHtml": "<ruby>要因<rt>よういん</rt></ruby>"
+  },
+  "lesson7_motarasu": {
+    "type": "vocab",
+    "key": "lesson7_motarasu",
+    "lesson": 7,
+    "order": 32,
+    "word": "もたらす",
+    "reading": "もたらす",
+    "partOfSpeech": "动词・五段・他动词",
+    "partOfSpeechGroup": "verb",
+    "pitch": "③型",
+    "needsExplanation": false,
+    "meaning": "带来、造成；表示某种事物、制度或变化产生结果与影响，既可用于正面结果，也可用于负面后果。常用「変化をもたらす」「利益をもたらす」。",
+    "usage": "",
+    "examples": [
+      {
+        "ja": "新しい制度が地域にどのような変化をもたらすか調べている。",
+        "jaHtml": "<ruby>新<rt>あたら</rt></ruby>しい<ruby>制度<rt>せいど</rt></ruby>が<ruby>地域<rt>ちいき</rt></ruby>にどのような<ruby>変化<rt>へんか</rt></ruby>を<strong>もたらす</strong>か<ruby>調<rt>しら</rt></ruby>べている。",
+        "zh": "我们正在调查新制度会给当地带来怎样的变化。"
+      }
+    ],
+    "focusParts": [],
+    "titleHtml": "もたらす"
+  },
+  "lesson7_ryushutsu": {
+    "type": "vocab",
+    "key": "lesson7_ryushutsu",
+    "lesson": 7,
+    "order": 33,
+    "word": "流出",
+    "reading": "りゅうしゅつ",
+    "partOfSpeech": "名词・サ变动词・自动词",
+    "partOfSpeechGroup": "noun-verb",
+    "pitch": "⓪型",
+    "needsExplanation": false,
+    "meaning": "流出、外泄；既可指液体或物质流到外部，也可指资金、人才、信息等离开原有范围。常用「情報が流出する」「人材の流出を防ぐ」。",
+    "usage": "",
+    "examples": [
+      {
+        "ja": "顧客情報の流出を防ぐため、管理方法を見直した。",
+        "jaHtml": "<ruby>顧客情報<rt>こきゃくじょうほう</rt></ruby>の<strong><ruby>流出<rt>りゅうしゅつ</rt></ruby></strong>を<ruby>防<rt>ふせ</rt></ruby>ぐため、<ruby>管理方法<rt>かんりほうほう</rt></ruby>を<ruby>見直<rt>みなお</rt></ruby>した。",
+        "zh": "为了防止客户信息外泄，我们重新检查了管理方式。"
+      }
+    ],
+    "focusParts": [],
+    "titleHtml": "<ruby>流出<rt>りゅうしゅつ</rt></ruby>"
+  },
+  "lesson7_kuroji": {
+    "type": "vocab",
+    "key": "lesson7_kuroji",
+    "lesson": 7,
+    "order": 34,
+    "word": "黒字",
+    "reading": "くろじ",
+    "partOfSpeech": "名词",
+    "partOfSpeechGroup": "noun",
+    "pitch": "⓪型",
+    "needsExplanation": false,
+    "meaning": "盈利、收支为正；指收入超过支出，与「赤字」相对。常用「黒字になる」「黒字を出す」「黒字経営」。",
+    "usage": "",
+    "examples": [
+      {
+        "ja": "売り上げが伸び、会社は三年ぶりに黒字になった。",
+        "jaHtml": "<ruby>売<rt>う</rt></ruby>り<ruby>上<rt>あ</rt></ruby>げが<ruby>伸<rt>の</rt></ruby>び、<ruby>会社<rt>かいしゃ</rt></ruby>は<ruby>三年<rt>さんねん</rt></ruby>ぶりに<strong><ruby>黒字<rt>くろじ</rt></ruby></strong>になった。",
+        "zh": "销售额增长，公司时隔三年终于实现盈利。"
+      }
+    ],
+    "focusParts": [],
+    "titleHtml": "<ruby>黒字<rt>くろじ</rt></ruby>"
+  },
+  "lesson7_akaji": {
+    "type": "vocab",
+    "key": "lesson7_akaji",
+    "lesson": 7,
+    "order": 35,
+    "word": "赤字",
+    "reading": "あかじ",
+    "partOfSpeech": "名词",
+    "partOfSpeechGroup": "noun",
+    "pitch": "⓪型",
+    "needsExplanation": false,
+    "meaning": "亏损、收支为负；指支出超过收入，也可指预算不足。与「黒字」相对，常用「赤字になる」「赤字を出す」「赤字を解消する」。",
+    "usage": "",
+    "examples": [
+      {
+        "ja": "原材料費が上がり、この事業は赤字が続いている。",
+        "jaHtml": "<ruby>原材料費<rt>げんざいりょうひ</rt></ruby>が<ruby>上<rt>あ</rt></ruby>がり、この<ruby>事業<rt>じぎょう</rt></ruby>は<strong><ruby>赤字<rt>あかじ</rt></ruby></strong>が<ruby>続<rt>つづ</rt></ruby>いている。",
+        "zh": "原材料成本上涨，这项业务一直处于亏损状态。"
+      }
+    ],
+    "focusParts": [],
+    "titleHtml": "<ruby>赤字<rt>あかじ</rt></ruby>"
+  },
+  "lesson7_tekisuru": {
+    "type": "vocab",
+    "key": "lesson7_tekisuru",
+    "lesson": 7,
+    "order": 36,
+    "word": "適する",
+    "reading": "てきする",
+    "partOfSpeech": "サ变动词・自动词",
+    "partOfSpeechGroup": "verb",
+    "pitch": "③型",
+    "needsExplanation": false,
+    "meaning": "适合、适宜；表示事物的性质或条件符合某种用途、环境或对象。常用「〜に適する」「〜に適した＋名词」，比「向いている」更正式。",
+    "usage": "",
+    "examples": [
+      {
+        "ja": "この素材は熱に強く、屋外での使用に適している。",
+        "jaHtml": "この<ruby>素材<rt>そざい</rt></ruby>は<ruby>熱<rt>ねつ</rt></ruby>に<ruby>強<rt>つよ</rt></ruby>く、<ruby>屋外<rt>おくがい</rt></ruby>での<ruby>使用<rt>しよう</rt></ruby>に<strong><ruby>適<rt>てき</rt></ruby>している</strong>。",
+        "zh": "这种材料耐热，适合在室外使用。"
+      }
+    ],
+    "focusParts": [],
+    "titleHtml": "<ruby>適<rt>てき</rt></ruby>する"
+  },
+  "lesson7_sakan": {
+    "type": "vocab",
+    "key": "lesson7_sakan",
+    "lesson": 7,
+    "order": 37,
+    "word": "盛ん",
+    "reading": "さかん",
+    "partOfSpeech": "名词・な形容词",
+    "partOfSpeechGroup": "na-adjective",
+    "pitch": "⓪型",
+    "needsExplanation": false,
+    "meaning": "兴盛、活跃、频繁；可表示产业或活动发展旺盛，也可表示某种行为反复进行。常用「産業が盛んだ」「盛んに議論する」。",
+    "usage": "",
+    "examples": [
+      {
+        "ja": "この地域では昔から果物の栽培が盛んだ。",
+        "jaHtml": "この<ruby>地域<rt>ちいき</rt></ruby>では<ruby>昔<rt>むかし</rt></ruby>から<ruby>果物<rt>くだもの</rt></ruby>の<ruby>栽培<rt>さいばい</rt></ruby>が<strong><ruby>盛<rt>さか</rt></ruby>ん</strong>だ。",
+        "zh": "这个地区自古以来水果种植业就很兴盛。"
+      }
+    ],
+    "focusParts": [],
+    "titleHtml": "<ruby>盛<rt>さか</rt></ruby>ん"
+  },
+  "lesson7_oyobosu": {
+    "type": "vocab",
+    "key": "lesson7_oyobosu",
+    "lesson": 7,
+    "order": 38,
+    "word": "及ぼす",
+    "reading": "およぼす",
+    "partOfSpeech": "动词・五段・他动词",
+    "partOfSpeechGroup": "verb",
+    "pitch": "⓪型",
+    "needsExplanation": false,
+    "meaning": "造成、施加、波及；表示影响、损害或作用扩展到某个对象。通常以「〜に影響／被害を及ぼす」使用，侧重影响所到达的范围。",
+    "usage": "",
+    "examples": [
+      {
+        "ja": "睡眠不足は判断力にも悪い影響を及ぼす。",
+        "jaHtml": "<ruby>睡眠不足<rt>すいみんぶそく</rt></ruby>は<ruby>判断力<rt>はんだんりょく</rt></ruby>にも<ruby>悪<rt>わる</rt></ruby>い<ruby>影響<rt>えいきょう</rt></ruby>を<strong><ruby>及<rt>およ</rt></ruby>ぼす</strong>。",
+        "zh": "睡眠不足也会对判断力造成不良影响。"
+      }
+    ],
+    "focusParts": [],
+    "titleHtml": "<ruby>及<rt>およ</rt></ruby>ぼす"
+  },
+  "lesson7_brand": {
+    "type": "vocab",
+    "key": "lesson7_brand",
+    "lesson": 7,
+    "order": 39,
+    "word": "ブランド",
+    "reading": "ブランド",
+    "partOfSpeech": "名词",
+    "partOfSpeechGroup": "noun",
+    "pitch": "⓪型",
+    "needsExplanation": false,
+    "meaning": "品牌、商标；指用名称、标志和形象与其他商品或企业区分开来的体系，也可指具有知名度和信誉的商品系列。常用「ブランド力」「有名ブランド」。",
+    "usage": "",
+    "examples": [
+      {
+        "ja": "品質への信頼が、そのブランドの価値を支えている。",
+        "jaHtml": "<ruby>品質<rt>ひんしつ</rt></ruby>への<ruby>信頼<rt>しんらい</rt></ruby>が、その<strong>ブランド</strong>の<ruby>価値<rt>かち</rt></ruby>を<ruby>支<rt>ささ</rt></ruby>えている。",
+        "zh": "消费者对品质的信任支撑着这个品牌的价值。"
+      }
+    ],
+    "focusParts": [],
+    "titleHtml": "ブランド"
+  },
+  "lesson7_hikitoru": {
+    "type": "vocab",
+    "key": "lesson7_hikitoru",
+    "lesson": 7,
+    "order": 40,
+    "word": "引き取る",
+    "reading": "ひきとる",
+    "partOfSpeech": "动词・五段・他动词",
+    "partOfSpeechGroup": "verb",
+    "pitch": "③型",
+    "needsExplanation": false,
+    "meaning": "领回、接收、收养或买下；指把人或物从对方处接到自己一方并承担后续处理。常用「荷物を引き取る」「子どもを引き取る」「不用品を引き取る」。",
+    "usage": "",
+    "examples": [
+      {
+        "ja": "修理が終わった自転車を店から引き取った。",
+        "jaHtml": "<ruby>修理<rt>しゅうり</rt></ruby>が<ruby>終<rt>お</rt></ruby>わった<ruby>自転車<rt>じてんしゃ</rt></ruby>を<ruby>店<rt>みせ</rt></ruby>から<strong><ruby>引<rt>ひ</rt></ruby>き<ruby>取<rt>と</rt></ruby>った</strong>。",
+        "zh": "我从店里取回了修好的自行车。"
+      }
+    ],
+    "focusParts": [],
+    "titleHtml": "<ruby>引<rt>ひ</rt></ruby>き<ruby>取<rt>と</rt></ruby>る"
+  },
+  "lesson7_kanyosuru": {
+    "type": "vocab",
+    "key": "lesson7_kanyosuru",
+    "lesson": 7,
+    "order": 41,
+    "word": "関与する",
+    "reading": "かんよする",
+    "partOfSpeech": "名词・サ变动词・自动词",
+    "partOfSpeechGroup": "noun-verb",
+    "pitch": "①型",
+    "needsExplanation": false,
+    "meaning": "参与、介入、与某事有关；多用于组织、决策、事件等正式语境，表示在其中发挥作用或负有关系。对象用「〜に関与する」。",
+    "usage": "",
+    "examples": [
+      {
+        "ja": "この計画には複数の企業が関与している。",
+        "jaHtml": "この<ruby>計画<rt>けいかく</rt></ruby>には<ruby>複数<rt>ふくすう</rt></ruby>の<ruby>企業<rt>きぎょう</rt></ruby>が<strong><ruby>関与<rt>かんよ</rt></ruby>している</strong>。",
+        "zh": "有多家企业参与了这项计划。"
+      }
+    ],
+    "focusParts": [],
+    "titleHtml": "<ruby>関与<rt>かんよ</rt></ruby>する"
+  },
+  "lesson7_share": {
+    "type": "vocab",
+    "key": "lesson7_share",
+    "lesson": 7,
+    "order": 42,
+    "word": "シェア",
+    "reading": "シェア",
+    "partOfSpeech": "名词・サ变动词・他动词",
+    "partOfSpeechGroup": "noun-verb",
+    "pitch": "①型",
+    "needsExplanation": false,
+    "meaning": "份额、占有率；也可表示与他人共享物品、空间或信息。商务语境中的「市場シェア」指某企业或商品在市场中所占的比例。",
+    "usage": "",
+    "examples": [
+      {
+        "ja": "新製品は国内市場で高いシェアを獲得した。",
+        "jaHtml": "<ruby>新製品<rt>しんせいひん</rt></ruby>は<ruby>国内市場<rt>こくないしじょう</rt></ruby>で<ruby>高<rt>たか</rt></ruby>い<strong>シェア</strong>を<ruby>獲得<rt>かくとく</rt></ruby>した。",
+        "zh": "新产品在国内市场取得了较高的市场份额。"
+      }
+    ],
+    "focusParts": [],
+    "titleHtml": "シェア"
+  },
+  "lesson7_tegakari": {
+    "type": "vocab",
+    "key": "lesson7_tegakari",
+    "lesson": 7,
+    "order": 43,
+    "word": "手がかり",
+    "reading": "てがかり",
+    "partOfSpeech": "名词",
+    "partOfSpeechGroup": "noun",
+    "pitch": "②型",
+    "needsExplanation": false,
+    "meaning": "线索、头绪；指解决问题、查明事实或推进调查时可利用的信息。常用「手がかりを得る／つかむ」「〜を手がかりにする」。",
+    "usage": "",
+    "examples": [
+      {
+        "ja": "警察は防犯カメラの映像を手がかりに捜査を進めた。",
+        "jaHtml": "<ruby>警察<rt>けいさつ</rt></ruby>は<ruby>防犯<rt>ぼうはん</rt></ruby>カメラの<ruby>映像<rt>えいぞう</rt></ruby>を<strong><ruby>手<rt>て</rt></ruby>がかり</strong>に<ruby>捜査<rt>そうさ</rt></ruby>を<ruby>進<rt>すす</rt></ruby>めた。",
+        "zh": "警方以监控录像为线索展开了调查。"
+      }
+    ],
+    "focusParts": [],
+    "titleHtml": "<ruby>手<rt>て</rt></ruby>がかり"
+  },
+  "lesson7_torikesu": {
+    "type": "vocab",
+    "key": "lesson7_torikesu",
+    "lesson": 7,
+    "order": 44,
+    "word": "取り消す",
+    "reading": "とりけす",
+    "partOfSpeech": "动词・五段・他动词",
+    "partOfSpeechGroup": "verb",
+    "pitch": "⓪型",
+    "needsExplanation": false,
+    "meaning": "取消、撤销；使已经作出的预约、决定、申请或发言失效。常用「予約を取り消す」「命令を取り消す」「発言を取り消す」。",
+    "usage": "",
+    "examples": [
+      {
+        "ja": "予定が変わったので、ホテルの予約を取り消した。",
+        "jaHtml": "<ruby>予定<rt>よてい</rt></ruby>が<ruby>変<rt>か</rt></ruby>わったので、ホテルの<ruby>予約<rt>よやく</rt></ruby>を<strong><ruby>取<rt>と</rt></ruby>り<ruby>消<rt>け</rt></ruby>した</strong>。",
+        "zh": "因为计划有变，我取消了酒店预订。"
+      }
+    ],
+    "focusParts": [],
+    "titleHtml": "<ruby>取<rt>と</rt></ruby>り<ruby>消<rt>け</rt></ruby>す"
+  },
+  "lesson7_ikou": {
+    "type": "vocab",
+    "key": "lesson7_ikou",
+    "lesson": 7,
+    "order": 45,
+    "word": "意向",
+    "reading": "いこう",
+    "partOfSpeech": "名词",
+    "partOfSpeechGroup": "noun",
+    "pitch": "⓪型",
+    "needsExplanation": false,
+    "meaning": "意向、打算；指某人或组织对今后行动方向所持的想法，常用于正式场合。常用「本人の意向」「意向を確認する」「意向に沿う」。",
+    "usage": "",
+    "examples": [
+      {
+        "ja": "市は住民の意向を確認してから計画を決定する。",
+        "jaHtml": "<ruby>市<rt>し</rt></ruby>は<ruby>住民<rt>じゅうみん</rt></ruby>の<strong><ruby>意向<rt>いこう</rt></ruby></strong>を<ruby>確認<rt>かくにん</rt></ruby>してから<ruby>計画<rt>けいかく</rt></ruby>を<ruby>決定<rt>けってい</rt></ruby>する。",
+        "zh": "市政府将在确认居民意向后再决定计划。"
+      }
+    ],
+    "focusParts": [],
+    "titleHtml": "<ruby>意向<rt>いこう</rt></ruby>"
+  },
+  "lesson7_gakkarisuru": {
+    "type": "vocab",
+    "key": "lesson7_gakkarisuru",
+    "lesson": 7,
+    "order": 46,
+    "word": "がっかりする",
+    "reading": "がっかりする",
+    "partOfSpeech": "副词・サ变动词",
+    "partOfSpeechGroup": "verb",
+    "pitch": "③型",
+    "needsExplanation": false,
+    "meaning": "失望、泄气；表示期待落空或结果不如预想时情绪低落。常用「結果にがっかりする」「がっかりした様子」，程度通常比「絶望する」轻。",
+    "usage": "",
+    "examples": [
+      {
+        "ja": "楽しみにしていた試合が中止になり、みんながっかりした。",
+        "jaHtml": "<ruby>楽<rt>たの</rt></ruby>しみにしていた<ruby>試合<rt>しあい</rt></ruby>が<ruby>中止<rt>ちゅうし</rt></ruby>になり、みんな<strong>がっかりした</strong>。",
+        "zh": "期待已久的比赛取消了，大家都很失望。"
+      }
+    ],
+    "focusParts": [],
+    "titleHtml": "がっかりする"
+  },
+  "lesson7_ishi": {
+    "type": "vocab",
+    "key": "lesson7_ishi",
+    "lesson": 7,
+    "order": 47,
+    "word": "意思",
+    "reading": "いし",
+    "partOfSpeech": "名词",
+    "partOfSpeechGroup": "noun",
+    "pitch": "①型",
+    "needsExplanation": false,
+    "meaning": "意思、意愿；指个人对于是否采取某项行动所作的判断或选择。常用「本人の意思」「意思を確認する／尊重する」。与强调坚定决心的「意志」有所不同。",
+    "usage": "",
+    "examples": [
+      {
+        "ja": "本人の意思を尊重して、進路は自分で決めてもらう。",
+        "jaHtml": "<ruby>本人<rt>ほんにん</rt></ruby>の<strong><ruby>意思<rt>いし</rt></ruby></strong>を<ruby>尊重<rt>そんちょう</rt></ruby>して、<ruby>進路<rt>しんろ</rt></ruby>は<ruby>自分<rt>じぶん</rt></ruby>で<ruby>決<rt>き</rt></ruby>めてもらう。",
+        "zh": "我们尊重本人意愿，让他自己决定今后的道路。"
+      }
+    ],
+    "focusParts": [],
+    "titleHtml": "<ruby>意思<rt>いし</rt></ruby>"
+  },
+  "lesson7_saishin": {
+    "type": "vocab",
+    "key": "lesson7_saishin",
+    "lesson": 7,
+    "order": 48,
+    "word": "細心",
+    "reading": "さいしん",
+    "partOfSpeech": "名词・な形容词",
+    "partOfSpeechGroup": "na-adjective",
+    "pitch": "⓪型",
+    "needsExplanation": false,
+    "meaning": "格外细心、谨慎周密；多用于固定搭配「細心の注意を払う」，表示为了避免事故或错误，对细节给予充分注意。",
+    "usage": "",
+    "examples": [
+      {
+        "ja": "精密機器の運搬には細心の注意が必要だ。",
+        "jaHtml": "<ruby>精密機器<rt>せいみつきき</rt></ruby>の<ruby>運搬<rt>うんぱん</rt></ruby>には<strong><ruby>細心<rt>さいしん</rt></ruby></strong>の<ruby>注意<rt>ちゅうい</rt></ruby>が<ruby>必要<rt>ひつよう</rt></ruby>だ。",
+        "zh": "搬运精密仪器时需要格外小心。"
+      }
+    ],
+    "focusParts": [],
+    "titleHtml": "<ruby>細心<rt>さいしん</rt></ruby>"
+  },
+  "lesson7_toriatsukai": {
+    "type": "vocab",
+    "key": "lesson7_toriatsukai",
+    "lesson": 7,
+    "order": 49,
+    "word": "取り扱い",
+    "reading": "とりあつかい",
+    "partOfSpeech": "名词",
+    "partOfSpeechGroup": "noun",
+    "pitch": "⓪型",
+    "needsExplanation": false,
+    "meaning": "处理、操作、经办；可指物品的使用和管理，也可指业务、数据或商品的办理方式。是「取り扱う」的名词形，常用「取り扱いに注意する」「取り扱い説明書」。",
+    "usage": "",
+    "examples": [
+      {
+        "ja": "個人情報の取り扱いについて、全社員に研修を行った。",
+        "jaHtml": "<ruby>個人情報<rt>こじんじょうほう</rt></ruby>の<strong><ruby>取<rt>と</rt></ruby>り<ruby>扱<rt>あつか</rt></ruby>い</strong>について、<ruby>全社員<rt>ぜんしゃいん</rt></ruby>に<ruby>研修<rt>けんしゅう</rt></ruby>を<ruby>行<rt>おこな</rt></ruby>った。",
+        "zh": "公司面向全体员工开展了个人信息处理方面的培训。"
+      }
+    ],
+    "focusParts": [],
+    "titleHtml": "<ruby>取<rt>と</rt></ruby>り<ruby>扱<rt>あつか</rt></ruby>い"
+  },
+  "lesson7_tsukaikonaseru": {
+    "type": "vocab",
+    "key": "lesson7_tsukaikonaseru",
+    "lesson": 7,
+    "order": 50,
+    "word": "使いこなせる",
+    "reading": "つかいこなせる",
+    "partOfSpeech": "复合动词・可能形",
+    "partOfSpeechGroup": "verb",
+    "pitch": "⑥型",
+    "needsExplanation": false,
+    "meaning": "能够熟练运用、能够驾驭；是「使いこなす」的可能形，不只是“会使用”，还包含充分理解功能并灵活使用的意思。对象用「〜を使いこなせる」。",
+    "usage": "",
+    "examples": [
+      {
+        "ja": "このソフトは機能が多いが、慣れれば誰でも使いこなせる。",
+        "jaHtml": "このソフトは<ruby>機能<rt>きのう</rt></ruby>が<ruby>多<rt>おお</rt></ruby>いが、<ruby>慣<rt>な</rt></ruby>れれば<ruby>誰<rt>だれ</rt></ruby>でも<strong><ruby>使<rt>つか</rt></ruby>いこなせる</strong>。",
+        "zh": "这款软件功能很多，但熟悉以后任何人都能熟练使用。"
+      }
+    ],
+    "focusParts": [
+      {
+        "word": "こなせる",
+        "reading": "こなせる",
+        "partOfSpeech": "复合动词后项・可能形式",
+        "partOfSpeechGroup": "word-forming",
+        "pitch": "复合词型",
+        "needsExplanation": false,
+        "meaning": "接在部分动词「ます形」词干后，以「〜こなす／〜こなせる」表示熟练而妥当地完成某种动作。常见「使いこなす」「読みこなす」「乗りこなす」，不能随意与所有动词组合。",
+        "usage": "",
+        "examples": [
+          {
+            "ja": "基礎知識があれば、専門的な資料でも読みこなせる。",
+            "jaHtml": "<ruby>基礎知識<rt>きそちしき</rt></ruby>があれば、<ruby>専門的<rt>せんもんてき</rt></ruby>な<ruby>資料<rt>しりょう</rt></ruby>でも<ruby>読<rt>よ</rt></ruby>み<strong>こなせる</strong>。",
+            "zh": "只要具备基础知识，即使是专业资料也能够读懂并掌握。"
+          }
+        ],
+        "titleHtml": "こなせる"
+      }
+    ],
+    "titleHtml": "<ruby>使<rt>つか</rt></ruby>いこなせる"
+  },
+  "lesson7_kaiteki": {
+    "type": "vocab",
+    "key": "lesson7_kaiteki",
+    "lesson": 7,
+    "order": 51,
+    "word": "快適",
+    "reading": "かいてき",
+    "partOfSpeech": "名词・な形容词",
+    "partOfSpeechGroup": "na-adjective",
+    "pitch": "⓪型",
+    "needsExplanation": false,
+    "meaning": "舒适、惬意；表示环境、设备或生活状态让人感到方便且没有不适。常用「快適な生活」「快適に過ごす」。",
+    "usage": "",
+    "examples": [
+      {
+        "ja": "窓を開けると風が通り、部屋がずっと快適になった。",
+        "jaHtml": "<ruby>窓<rt>まど</rt></ruby>を<ruby>開<rt>あ</rt></ruby>けると<ruby>風<rt>かぜ</rt></ruby>が<ruby>通<rt>とお</rt></ruby>り、<ruby>部屋<rt>へや</rt></ruby>がずっと<strong><ruby>快適<rt>かいてき</rt></ruby></strong>になった。",
+        "zh": "打开窗户后空气流通，房间舒适多了。"
+      }
+    ],
+    "focusParts": [],
+    "titleHtml": "<ruby>快適<rt>かいてき</rt></ruby>"
+  },
+  "lesson7_yorokobashii": {
+    "type": "vocab",
+    "key": "lesson7_yorokobashii",
+    "lesson": 7,
+    "order": 52,
+    "word": "喜ばしい",
+    "reading": "よろこばしい",
+    "partOfSpeech": "い形容词",
+    "partOfSpeechGroup": "i-adjective",
+    "pitch": "⑤型",
+    "needsExplanation": false,
+    "meaning": "令人高兴的、可喜的；用于客观评价值得欢迎的结果或变化，语气较正式。常用「喜ばしいことだ」「大変喜ばしい」。",
+    "usage": "",
+    "examples": [
+      {
+        "ja": "若い世代の参加者が増えたのは喜ばしいことだ。",
+        "jaHtml": "<ruby>若<rt>わか</rt></ruby>い<ruby>世代<rt>せだい</rt></ruby>の<ruby>参加者<rt>さんかしゃ</rt></ruby>が<ruby>増<rt>ふ</rt></ruby>えたのは<strong><ruby>喜<rt>よろこ</rt></ruby>ばしい</strong>ことだ。",
+        "zh": "年轻一代的参与者增加，是一件可喜的事。"
+      }
+    ],
+    "focusParts": [],
+    "titleHtml": "<ruby>喜<rt>よろこ</rt></ruby>ばしい"
+  },
+  "lesson7_ichizuke": {
+    "type": "vocab",
+    "key": "lesson7_ichizuke",
+    "lesson": 7,
+    "order": 53,
+    "word": "位置付け",
+    "reading": "いちづけ",
+    "partOfSpeech": "名词",
+    "partOfSpeechGroup": "noun",
+    "pitch": "⓪型",
+    "needsExplanation": false,
+    "meaning": "定位、所处地位；指明确某个人、事物或制度在整体中的角色、等级与意义。是「位置付ける」的名词形，常用「〜としての位置付け」「位置付けを明確にする」。",
+    "usage": "",
+    "examples": [
+      {
+        "ja": "この制度の位置付けを明確にする必要がある。",
+        "jaHtml": "この<ruby>制度<rt>せいど</rt></ruby>の<strong><ruby>位置付<rt>いちづ</rt></ruby>け</strong>を<ruby>明確<rt>めいかく</rt></ruby>にする<ruby>必要<rt>ひつよう</rt></ruby>がある。",
+        "zh": "有必要明确这项制度的定位。"
+      }
+    ],
+    "focusParts": [],
+    "titleHtml": "<ruby>位置付<rt>いちづ</rt></ruby>け"
+  },
+  "lesson7_yuruyaka": {
+    "type": "vocab",
+    "key": "lesson7_yuruyaka",
+    "lesson": 7,
+    "order": 54,
+    "word": "緩やか",
+    "reading": "ゆるやか",
+    "partOfSpeech": "な形容词",
+    "partOfSpeechGroup": "na-adjective",
+    "pitch": "②型",
+    "needsExplanation": false,
+    "meaning": "缓慢、平缓、宽松；可形容变化速度不急、坡度不陡，也可形容规则或联系不严格。常用「緩やかに変化する」「緩やかな坂」。",
+    "usage": "",
+    "examples": [
+      {
+        "ja": "売り上げは春から緩やかに回復し始めた。",
+        "jaHtml": "<ruby>売<rt>う</rt></ruby>り<ruby>上<rt>あ</rt></ruby>げは<ruby>春<rt>はる</rt></ruby>から<strong><ruby>緩<rt>ゆる</rt></ruby>やかに</strong><ruby>回復<rt>かいふく</rt></ruby>し<ruby>始<rt>はじ</rt></ruby>めた。",
+        "zh": "销售额从春季开始缓慢回升。"
+      }
+    ],
+    "focusParts": [],
+    "titleHtml": "<ruby>緩<rt>ゆる</rt></ruby>やか"
+  },
+  "lesson7_ikasu": {
+    "type": "vocab",
+    "key": "lesson7_ikasu",
+    "lesson": 7,
+    "order": 56,
+    "word": "生かす",
+    "reading": "いかす",
+    "partOfSpeech": "动词・五段・他动词",
+    "partOfSpeechGroup": "verb",
+    "pitch": "②型",
+    "needsExplanation": false,
+    "meaning": "发挥、有效利用；表示把知识、经验、特点或资源用于实际并产生价值。也写作「活かす」，抽象意义下两种写法都常见。常用「経験を生かす」「長所を生かす」。",
+    "usage": "",
+    "examples": [
+      {
+        "ja": "留学で身につけた経験を今の仕事に生かしたい。",
+        "jaHtml": "<ruby>留学<rt>りゅうがく</rt></ruby>で<ruby>身<rt>み</rt></ruby>につけた<ruby>経験<rt>けいけん</rt></ruby>を<ruby>今<rt>いま</rt></ruby>の<ruby>仕事<rt>しごと</rt></ruby>に<strong><ruby>生<rt>い</rt></ruby>かしたい</strong>。",
+        "zh": "我想把留学期间积累的经验运用到现在的工作中。"
+      }
+    ],
+    "focusParts": [],
+    "titleHtml": "<ruby>生<rt>い</rt></ruby>かす"
   },
   "irai": {
     "type": "vocab",
@@ -4580,7 +5779,15 @@ window.tryN2VocabData = Object.freeze({
     "type": "vocab",
     "key": "stress",
     "lesson": 10,
+    "lessons": [
+      10,
+      7
+    ],
     "order": 2,
+    "lessonOrders": {
+      "10": 2,
+      "7": 29
+    },
     "word": "ストレス",
     "reading": "ストレス",
     "partOfSpeech": "名词",
@@ -6495,11 +7702,13 @@ window.tryN2VocabData = Object.freeze({
     "key": "kokorogakeru",
     "lesson": 1,
     "lessons": [
-      1
+      1,
+      7
     ],
     "order": 25,
     "lessonOrders": {
-      "1": 25
+      "1": 25,
+      "7": 55
     },
     "word": "心がける",
     "reading": "こころがける",

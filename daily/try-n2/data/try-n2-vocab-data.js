@@ -5753,6 +5753,512 @@ window.tryN2VocabData = Object.freeze({
     ],
     "titleHtml": "<ruby>心<rt>こころ</rt></ruby><ruby>強<rt>づよ</rt></ruby>い"
   },
+  "lesson9_hareru": {
+    "type": "vocab",
+    "key": "lesson9_hareru",
+    "lesson": 9,
+    "order": 17,
+    "word": "腫れる",
+    "reading": "はれる",
+    "partOfSpeech": "动词・一段・自动词",
+    "partOfSpeechGroup": "verb",
+    "pitch": "⓪型",
+    "needsExplanation": false,
+    "meaning": "肿、肿胀；表示身体某个部位因受伤、发炎、过敏等原因鼓起或变大。肿胀部位作主语，常用「目が腫れる」「赤く腫れる」。",
+    "usage": "",
+    "examples": [
+      {
+        "ja": "虫に刺されたところが赤く腫れてきた。",
+        "jaHtml": "<ruby>虫<rt>むし</rt></ruby>に<ruby>刺<rt>さ</rt></ruby>されたところが<ruby>赤<rt>あか</rt></ruby>く<strong><ruby>腫<rt>は</rt></ruby>れて</strong>きた。",
+        "zh": "被虫咬的地方开始红肿起来了。"
+      }
+    ],
+    "focusParts": [],
+    "titleHtml": "<ruby>腫<rt>は</rt></ruby>れる"
+  },
+  "lesson9_miaisuru": {
+    "type": "vocab",
+    "key": "lesson9_miaisuru",
+    "lesson": 9,
+    "order": 18,
+    "word": "見合いする",
+    "reading": "みあいする",
+    "partOfSpeech": "名词・サ变表达",
+    "partOfSpeechGroup": "noun-verb",
+    "pitch": "⓪型",
+    "needsExplanation": false,
+    "meaning": "相亲；经由介绍与以结婚为目的的对象正式见面。实际使用中更常说「見合いをする」或礼貌形式「お見合いする」。",
+    "usage": "",
+    "examples": [
+      {
+        "ja": "姉は来月、知人の紹介で見合いをすることになった。",
+        "jaHtml": "<ruby>姉<rt>あね</rt></ruby>は<ruby>来月<rt>らいげつ</rt></ruby>、<ruby>知人<rt>ちじん</rt></ruby>の<ruby>紹介<rt>しょうかい</rt></ruby>で<strong><ruby>見合<rt>みあ</rt></ruby>いをする</strong>ことになった。",
+        "zh": "姐姐决定下个月通过熟人介绍去相亲。"
+      }
+    ],
+    "focusParts": [],
+    "titleHtml": "<ruby>見合<rt>みあ</rt></ruby>いする"
+  },
+  "lesson9_omoinohoka": {
+    "type": "vocab",
+    "key": "lesson9_omoinohoka",
+    "lesson": 9,
+    "order": 19,
+    "word": "思いの外",
+    "reading": "おもいのほか",
+    "partOfSpeech": "副词・惯用表达",
+    "partOfSpeechGroup": "adverb",
+    "pitch": "③型",
+    "needsExplanation": false,
+    "meaning": "出乎意料、没想到；表示实际结果与事前的预想不同，既可用于好结果，也可用于坏结果。书面写作「思いの外」，也常写作平假名「思いのほか」。",
+    "usage": "",
+    "examples": [
+      {
+        "ja": "古い機械だったが、修理は思いの外早く終わった。",
+        "jaHtml": "<ruby>古<rt>ふる</rt></ruby>い<ruby>機械<rt>きかい</rt></ruby>だったが、<ruby>修理<rt>しゅうり</rt></ruby>は<strong><ruby>思<rt>おも</rt></ruby>いの<ruby>外<rt>ほか</rt></ruby></strong><ruby>早<rt>はや</rt></ruby>く<ruby>終<rt>お</rt></ruby>わった。",
+        "zh": "虽然是台旧机器，但维修出乎意料地很快就结束了。"
+      }
+    ],
+    "focusParts": [],
+    "titleHtml": "<ruby>思<rt>おも</rt></ruby>いの<ruby>外<rt>ほか</rt></ruby>"
+  },
+  "lesson9_buttsuzuke": {
+    "type": "vocab",
+    "key": "lesson9_buttsuzuke",
+    "lesson": 9,
+    "order": 20,
+    "word": "ぶっ続け",
+    "reading": "ぶっつづけ",
+    "partOfSpeech": "名词・副词",
+    "partOfSpeechGroup": "adverb",
+    "pitch": "⓪型",
+    "needsExplanation": false,
+    "meaning": "连续不断、一口气；强调长时间不休息、不间断地持续做某事，语气较口语。常用「三時間ぶっ続けで働く」。",
+    "usage": "",
+    "examples": [
+      {
+        "ja": "彼は休憩も取らず、五時間ぶっ続けで作業した。",
+        "jaHtml": "<ruby>彼<rt>かれ</rt></ruby>は<ruby>休憩<rt>きゅうけい</rt></ruby>も<ruby>取<rt>と</rt></ruby>らず、<ruby>五時間<rt>ごじかん</rt></ruby><strong>ぶっ<ruby>続<rt>つづ</rt></ruby>け</strong>で<ruby>作業<rt>さぎょう</rt></ruby>した。",
+        "zh": "他连休息都没休息，连续工作了五个小时。"
+      }
+    ],
+    "focusParts": [],
+    "titleHtml": "ぶっ<ruby>続<rt>つづ</rt></ruby>け"
+  },
+  "lesson9_yoso": {
+    "type": "vocab",
+    "key": "lesson9_yoso",
+    "lesson": 9,
+    "order": 21,
+    "word": "よそ",
+    "reading": "よそ",
+    "partOfSpeech": "名词",
+    "partOfSpeechGroup": "noun",
+    "pitch": "①型",
+    "needsExplanation": false,
+    "meaning": "别处、别人家或与自己无关的一方；常用「よその家」「よそで聞く」「よそよそしい」。根据语境可指其他地方，也可指外人。",
+    "usage": "",
+    "examples": [
+      {
+        "ja": "よその家の事情に勝手に口を出すべきではない。",
+        "jaHtml": "<strong>よその</strong><ruby>家<rt>いえ</rt></ruby>の<ruby>事情<rt>じじょう</rt></ruby>に<ruby>勝手<rt>かって</rt></ruby>に<ruby>口<rt>くち</rt></ruby>を<ruby>出<rt>だ</rt></ruby>すべきではない。",
+        "zh": "不应该擅自插手别人家的事情。"
+      }
+    ],
+    "focusParts": [],
+    "titleHtml": "よそ"
+  },
+  "lesson9_shocchu": {
+    "type": "vocab",
+    "key": "lesson9_shocchu",
+    "lesson": 9,
+    "order": 22,
+    "word": "しょっちゅう",
+    "reading": "しょっちゅう",
+    "partOfSpeech": "副词",
+    "partOfSpeechGroup": "adverb",
+    "pitch": "①型",
+    "needsExplanation": false,
+    "meaning": "经常、老是；表示某件事发生得非常频繁，语气口语化，有时含轻微抱怨。比「よく」更强调次数多。",
+    "usage": "",
+    "examples": [
+      {
+        "ja": "彼はしょっちゅう鍵を忘れて、家族に電話している。",
+        "jaHtml": "<ruby>彼<rt>かれ</rt></ruby>は<strong>しょっちゅう</strong><ruby>鍵<rt>かぎ</rt></ruby>を<ruby>忘<rt>わす</rt></ruby>れて、<ruby>家族<rt>かぞく</rt></ruby>に<ruby>電話<rt>でんわ</rt></ruby>している。",
+        "zh": "他老是忘带钥匙，只好给家里人打电话。"
+      }
+    ],
+    "focusParts": [],
+    "titleHtml": "しょっちゅう"
+  },
+  "lesson9_katte": {
+    "type": "vocab",
+    "key": "lesson9_katte",
+    "lesson": 9,
+    "order": 23,
+    "word": "勝手",
+    "reading": "かって",
+    "partOfSpeech": "名词・な形容词",
+    "partOfSpeechGroup": "na-adjective",
+    "pitch": "⓪型",
+    "needsExplanation": false,
+    "meaning": "擅自、任意或只顾自己方便；「勝手に」表示未获允许便自行行动，「自分勝手」表示自私。此外也可表示使用上的方便程度，如「使い勝手」。",
+    "usage": "",
+    "examples": [
+      {
+        "ja": "人の机を勝手に開けないでください。",
+        "jaHtml": "<ruby>人<rt>ひと</rt></ruby>の<ruby>机<rt>つくえ</rt></ruby>を<strong><ruby>勝手<rt>かって</rt></ruby>に</strong><ruby>開<rt>あ</rt></ruby>けないでください。",
+        "zh": "请不要擅自打开别人的桌子。"
+      }
+    ],
+    "focusParts": [],
+    "titleHtml": "<ruby>勝手<rt>かって</rt></ruby>"
+  },
+  "lesson9_sensor": {
+    "type": "vocab",
+    "key": "lesson9_sensor",
+    "lesson": 9,
+    "order": 24,
+    "word": "センサ",
+    "reading": "センサ",
+    "partOfSpeech": "名词",
+    "partOfSpeechGroup": "noun",
+    "pitch": "①型",
+    "needsExplanation": false,
+    "meaning": "传感器；检测光、温度、压力、动作等变化并转换为信号的装置。技术资料中常写作「センサ」，日常商品说明中也常写作「センサー」。",
+    "usage": "",
+    "examples": [
+      {
+        "ja": "センサが人の動きを感知すると、照明が自動でつく。",
+        "jaHtml": "<strong>センサ</strong>が<ruby>人<rt>ひと</rt></ruby>の<ruby>動<rt>うご</rt></ruby>きを<ruby>感知<rt>かんち</rt></ruby>すると、<ruby>照明<rt>しょうめい</rt></ruby>が<ruby>自動<rt>じどう</rt></ruby>でつく。",
+        "zh": "传感器检测到人的动作后，照明会自动亮起。"
+      }
+    ],
+    "focusParts": [],
+    "titleHtml": "センサ"
+  },
+  "lesson9_itazurasuru": {
+    "type": "vocab",
+    "key": "lesson9_itazurasuru",
+    "lesson": 9,
+    "order": 25,
+    "word": "いたずらする",
+    "reading": "いたずらする",
+    "partOfSpeech": "名词・サ变动词",
+    "partOfSpeechGroup": "noun-verb",
+    "pitch": "⓪型",
+    "needsExplanation": false,
+    "meaning": "恶作剧、淘气或乱动；可指为了取乐捉弄别人，也可指未经允许摆弄物品。常用「人にいたずらする」「機械にいたずらする」。",
+    "usage": "",
+    "examples": [
+      {
+        "ja": "弟がテレビのリモコンにいたずらして、設定が変わってしまった。",
+        "jaHtml": "<ruby>弟<rt>おとうと</rt></ruby>がテレビのリモコンに<strong>いたずらして</strong>、<ruby>設定<rt>せってい</rt></ruby>が<ruby>変<rt>か</rt></ruby>わってしまった。",
+        "zh": "弟弟乱动了电视遥控器，结果设置被改掉了。"
+      }
+    ],
+    "focusParts": [],
+    "titleHtml": "いたずらする"
+  },
+  "lesson9_mitooshi": {
+    "type": "vocab",
+    "key": "lesson9_mitooshi",
+    "lesson": 9,
+    "order": 26,
+    "word": "見通し",
+    "reading": "みとおし",
+    "partOfSpeech": "名词",
+    "partOfSpeechGroup": "noun",
+    "pitch": "⓪型",
+    "needsExplanation": false,
+    "meaning": "预期、前景、预测；表示对事情今后发展或完成时间的判断，也可指视线通畅。常用「完成の見通しが立つ」「〜する見通しだ」。",
+    "usage": "",
+    "examples": [
+      {
+        "ja": "工事は来月末に完成する見通しだ。",
+        "jaHtml": "<ruby>工事<rt>こうじ</rt></ruby>は<ruby>来月末<rt>らいげつまつ</rt></ruby>に<ruby>完成<rt>かんせい</rt></ruby>する<strong><ruby>見通<rt>みとお</rt></ruby>し</strong>だ。",
+        "zh": "工程预计将在下个月底完工。"
+      }
+    ],
+    "focusParts": [],
+    "titleHtml": "<ruby>見通<rt>みとお</rt></ruby>し"
+  },
+  "lesson9_model": {
+    "type": "vocab",
+    "key": "lesson9_model",
+    "lesson": 9,
+    "order": 27,
+    "word": "モデル",
+    "reading": "モデル",
+    "partOfSpeech": "名词",
+    "partOfSpeechGroup": "noun",
+    "pitch": "①型",
+    "needsExplanation": false,
+    "meaning": "型号、样式、模型或模特；可指产品的特定版本，也可指作为参考的范例以及展示服装的人。具体含义需结合搭配判断，如「新モデル」「モデルケース」。",
+    "usage": "",
+    "examples": [
+      {
+        "ja": "この車の新しいモデルは、燃費が大幅に改善された。",
+        "jaHtml": "この<ruby>車<rt>くるま</rt></ruby>の<ruby>新<rt>あたら</rt></ruby>しい<strong>モデル</strong>は、<ruby>燃費<rt>ねんぴ</rt></ruby>が<ruby>大幅<rt>おおはば</rt></ruby>に<ruby>改善<rt>かいぜん</rt></ruby>された。",
+        "zh": "这款汽车的新型号大幅改善了燃油经济性。"
+      }
+    ],
+    "focusParts": [],
+    "titleHtml": "モデル"
+  },
+  "lesson9_tsunagu": {
+    "type": "vocab",
+    "key": "lesson9_tsunagu",
+    "lesson": 9,
+    "order": 28,
+    "word": "つなぐ",
+    "reading": "つなぐ",
+    "partOfSpeech": "动词・五段・他动词",
+    "partOfSpeechGroup": "verb",
+    "pitch": "⓪型",
+    "needsExplanation": false,
+    "meaning": "连接、系住、接通；可连接物体、线路与设备，也可表示把人或关系联系起来。对象用「〜をつなぐ」，连接目标常用「〜につなぐ」。",
+    "usage": "",
+    "examples": [
+      {
+        "ja": "会議室のパソコンを大型モニターにつないだ。",
+        "jaHtml": "<ruby>会議室<rt>かいぎしつ</rt></ruby>のパソコンを<ruby>大型<rt>おおがた</rt></ruby>モニターに<strong>つないだ</strong>。",
+        "zh": "我把会议室的电脑连接到了大屏幕上。"
+      }
+    ],
+    "focusParts": [],
+    "titleHtml": "つなぐ"
+  },
+  "lesson9_mazui": {
+    "type": "vocab",
+    "key": "lesson9_mazui",
+    "lesson": 9,
+    "order": 29,
+    "word": "まずい",
+    "reading": "まずい",
+    "partOfSpeech": "い形容词",
+    "partOfSpeechGroup": "i-adjective",
+    "pitch": "②型",
+    "needsExplanation": false,
+    "meaning": "难吃、不高明或情况不妙；除评价味道外，也可表示做法拙劣、局面不利。口语中「それはまずい」常意为“那可不妙”。",
+    "usage": "",
+    "examples": [
+      {
+        "ja": "このままでは締め切りに間に合わず、非常にまずい。",
+        "jaHtml": "このままでは<ruby>締<rt>し</rt></ruby>め<ruby>切<rt>き</rt></ruby>りに<ruby>間<rt>ま</rt></ruby>に<ruby>合<rt>あ</rt></ruby>わず、<ruby>非常<rt>ひじょう</rt></ruby>に<strong>まずい</strong>。",
+        "zh": "照这样下去会赶不上截止日期，情况非常不妙。"
+      }
+    ],
+    "focusParts": [],
+    "titleHtml": "まずい"
+  },
+  "lesson9_atamanikuru": {
+    "type": "vocab",
+    "key": "lesson9_atamanikuru",
+    "lesson": 9,
+    "order": 30,
+    "word": "頭にくる",
+    "reading": "あたまにくる",
+    "partOfSpeech": "惯用表达",
+    "partOfSpeechGroup": "expression",
+    "pitch": "惯用句型",
+    "needsExplanation": false,
+    "meaning": "生气、火大；表示因对方的言行或某种情况而感到强烈恼火，是较口语的表达。比「腹が立つ」更直接，正式场合应谨慎使用。",
+    "usage": "",
+    "examples": [
+      {
+        "ja": "約束を何度も破られて、さすがに頭にきた。",
+        "jaHtml": "<ruby>約束<rt>やくそく</rt></ruby>を<ruby>何度<rt>なんど</rt></ruby>も<ruby>破<rt>やぶ</rt></ruby>られて、さすがに<strong><ruby>頭<rt>あたま</rt></ruby>にきた</strong>。",
+        "zh": "他一次又一次违约，我实在是生气了。"
+      }
+    ],
+    "focusParts": [],
+    "titleHtml": "<ruby>頭<rt>あたま</rt></ruby>にくる"
+  },
+  "lesson9_saboru": {
+    "type": "vocab",
+    "key": "lesson9_saboru",
+    "lesson": 9,
+    "order": 31,
+    "word": "サボる",
+    "reading": "サボる",
+    "partOfSpeech": "动词・五段・他动词",
+    "partOfSpeechGroup": "verb",
+    "pitch": "②型",
+    "needsExplanation": false,
+    "meaning": "偷懒、旷课、逃避应做的工作；来自「サボタージュ」，常用「授業をサボる」「仕事をサボる」。属于口语表达。",
+    "usage": "",
+    "examples": [
+      {
+        "ja": "練習をサボると、すぐに体力が落ちてしまう。",
+        "jaHtml": "<ruby>練習<rt>れんしゅう</rt></ruby>を<strong>サボる</strong>と、すぐに<ruby>体力<rt>たいりょく</rt></ruby>が<ruby>落<rt>お</rt></ruby>ちてしまう。",
+        "zh": "一偷懒不训练，体力马上就会下降。"
+      }
+    ],
+    "focusParts": [],
+    "titleHtml": "サボる"
+  },
+  "lesson9_kechi": {
+    "type": "vocab",
+    "key": "lesson9_kechi",
+    "lesson": 9,
+    "order": 32,
+    "word": "けち",
+    "reading": "けち",
+    "partOfSpeech": "名词・な形容词",
+    "partOfSpeechGroup": "na-adjective",
+    "pitch": "①型",
+    "needsExplanation": false,
+    "meaning": "吝啬、小气；指过度舍不得花钱或给予他人，也可表示无价值、寒酸。形容人时语气负面，常用「けちな人」「金をけちる」。",
+    "usage": "",
+    "examples": [
+      {
+        "ja": "彼はけちで、必要なものにもお金を使わない。",
+        "jaHtml": "<ruby>彼<rt>かれ</rt></ruby>は<strong>けち</strong>で、<ruby>必要<rt>ひつよう</rt></ruby>なものにもお<ruby>金<rt>かね</rt></ruby>を<ruby>使<rt>つか</rt></ruby>わない。",
+        "zh": "他很小气，连必需品都舍不得花钱。"
+      }
+    ],
+    "focusParts": [],
+    "titleHtml": "けち"
+  },
+  "lesson9_kabi": {
+    "type": "vocab",
+    "key": "lesson9_kabi",
+    "lesson": 9,
+    "order": 33,
+    "word": "カビ",
+    "reading": "カビ",
+    "partOfSpeech": "名词",
+    "partOfSpeechGroup": "noun",
+    "pitch": "⓪型",
+    "needsExplanation": false,
+    "meaning": "霉、霉菌；容易在潮湿、通风不良的环境中生长。通常写作片假名，常用「カビが生える」「カビを取る」「カビ臭い」。",
+    "usage": "",
+    "examples": [
+      {
+        "ja": "浴室にカビが生えないよう、毎日換気している。",
+        "jaHtml": "<ruby>浴室<rt>よくしつ</rt></ruby>に<strong>カビ</strong>が<ruby>生<rt>は</rt></ruby>えないよう、<ruby>毎日<rt>まいにち</rt></ruby><ruby>換気<rt>かんき</rt></ruby>している。",
+        "zh": "为了不让浴室发霉，我每天都会通风。"
+      }
+    ],
+    "focusParts": [],
+    "titleHtml": "カビ"
+  },
+  "lesson9_moeru": {
+    "type": "vocab",
+    "key": "lesson9_moeru",
+    "lesson": 9,
+    "order": 34,
+    "word": "燃える",
+    "reading": "もえる",
+    "partOfSpeech": "动词・一段・自动词",
+    "partOfSpeechGroup": "verb",
+    "pitch": "⓪型",
+    "needsExplanation": false,
+    "meaning": "燃烧、着火；也可比喻热情高涨或强烈投入，如「闘志に燃える」。燃烧物作主语；使某物燃烧则用他动词「燃やす」。",
+    "usage": "",
+    "examples": [
+      {
+        "ja": "乾いた木はすぐに燃えるので、火の扱いに注意してください。",
+        "jaHtml": "<ruby>乾<rt>かわ</rt></ruby>いた<ruby>木<rt>き</rt></ruby>はすぐに<strong><ruby>燃<rt>も</rt></ruby>える</strong>ので、<ruby>火<rt>ひ</rt></ruby>の<ruby>扱<rt>あつか</rt></ruby>いに<ruby>注意<rt>ちゅうい</rt></ruby>してください。",
+        "zh": "干木头很容易燃烧，请注意用火安全。"
+      }
+    ],
+    "focusParts": [],
+    "titleHtml": "<ruby>燃<rt>も</rt></ruby>える"
+  },
+  "lesson9_afureru": {
+    "type": "vocab",
+    "key": "lesson9_afureru",
+    "lesson": 9,
+    "order": 35,
+    "word": "あふれる",
+    "reading": "あふれる",
+    "partOfSpeech": "动词・一段・自动词",
+    "partOfSpeechGroup": "verb",
+    "pitch": "③型",
+    "needsExplanation": false,
+    "meaning": "溢出、充满；表示液体超过容器，也可表示人、物或感情多到充满某处。常用「水があふれる」「人であふれる」「自信にあふれる」。",
+    "usage": "",
+    "examples": [
+      {
+        "ja": "大雨で川の水があふれ、近くの道路が通れなくなった。",
+        "jaHtml": "<ruby>大雨<rt>おおあめ</rt></ruby>で<ruby>川<rt>かわ</rt></ruby>の<ruby>水<rt>みず</rt></ruby>が<strong>あふれ</strong>、<ruby>近<rt>ちか</rt></ruby>くの<ruby>道路<rt>どうろ</rt></ruby>が<ruby>通<rt>とお</rt></ruby>れなくなった。",
+        "zh": "暴雨导致河水溢出，附近的道路无法通行了。"
+      }
+    ],
+    "focusParts": [],
+    "titleHtml": "あふれる"
+  },
+  "lesson9_teokure": {
+    "type": "vocab",
+    "key": "lesson9_teokure",
+    "lesson": 9,
+    "order": 36,
+    "word": "手遅れ",
+    "reading": "ておくれ",
+    "partOfSpeech": "名词・な形容词",
+    "partOfSpeechGroup": "na-adjective",
+    "pitch": "⓪型",
+    "needsExplanation": false,
+    "meaning": "为时已晚、错过处理时机；表示即使现在采取行动，也已经难以挽回。常用「手遅れになる」「手遅れになる前に」。",
+    "usage": "",
+    "examples": [
+      {
+        "ja": "症状が悪化してからでは手遅れになるかもしれない。",
+        "jaHtml": "<ruby>症状<rt>しょうじょう</rt></ruby>が<ruby>悪化<rt>あっか</rt></ruby>してからでは<strong><ruby>手遅<rt>ておく</rt></ruby>れ</strong>になるかもしれない。",
+        "zh": "等到症状恶化后再处理，可能就为时已晚了。"
+      }
+    ],
+    "focusParts": [],
+    "titleHtml": "<ruby>手遅<rt>ておく</rt></ruby>れ"
+  },
+  "lesson9_ayaui": {
+    "type": "vocab",
+    "key": "lesson9_ayaui",
+    "lesson": 9,
+    "order": 37,
+    "word": "危うい",
+    "reading": "あやうい",
+    "partOfSpeech": "い形容词",
+    "partOfSpeechGroup": "i-adjective",
+    "pitch": "⓪型",
+    "needsExplanation": false,
+    "meaning": "危险、岌岌可危；表示安全、地位、计划或存续处于可能失败或受损的状态。比「危ない」更书面，也常用于抽象事物。",
+    "usage": "",
+    "examples": [
+      {
+        "ja": "このまま赤字が続けば、会社の存続も危うい。",
+        "jaHtml": "このまま<ruby>赤字<rt>あかじ</rt></ruby>が<ruby>続<rt>つづ</rt></ruby>けば、<ruby>会社<rt>かいしゃ</rt></ruby>の<ruby>存続<rt>そんぞく</rt></ruby>も<strong><ruby>危<rt>あや</rt></ruby>うい</strong>。",
+        "zh": "如果继续这样亏损下去，公司能否继续经营也很危险。"
+      }
+    ],
+    "focusParts": [],
+    "titleHtml": "<ruby>危<rt>あや</rt></ruby>うい"
+  },
+  "lesson9_kimazui": {
+    "type": "vocab",
+    "key": "lesson9_kimazui",
+    "lesson": 9,
+    "order": 38,
+    "word": "気まずい",
+    "reading": "きまずい",
+    "partOfSpeech": "い形容词",
+    "partOfSpeechGroup": "i-adjective",
+    "pitch": "③型",
+    "needsExplanation": false,
+    "meaning": "尴尬、不自在；表示人际关系或现场气氛让人难以自然说话行动。常用「気まずい雰囲気」「人と気まずくなる」。",
+    "usage": "",
+    "examples": [
+      {
+        "ja": "友人と口論した翌日は、会っても少し気まずかった。",
+        "jaHtml": "<ruby>友人<rt>ゆうじん</rt></ruby>と<ruby>口論<rt>こうろん</rt></ruby>した<ruby>翌日<rt>よくじつ</rt></ruby>は、<ruby>会<rt>あ</rt></ruby>っても<ruby>少<rt>すこ</rt></ruby>し<strong><ruby>気<rt>き</rt></ruby>まずかった</strong>。",
+        "zh": "和朋友争吵后的第二天，即使见面也有点尴尬。"
+      }
+    ],
+    "focusParts": [],
+    "titleHtml": "<ruby>気<rt>き</rt></ruby>まずい"
+  },
   "konzatsu": {
     "type": "vocab",
     "key": "konzatsu",
